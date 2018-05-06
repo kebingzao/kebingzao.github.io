@@ -300,6 +300,179 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/05/07/mail-use-ga/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/07/mail-use-ga/" itemprop="url">在邮件模板里面增加ga统计来统计邮件的打开率</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-07T00:21:43+08:00">
+                2018-05-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/07/mail-use-ga/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/05/07/mail-use-ga/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/05/07/mail-use-ga/" class="leancloud_visitors" data-flag-title="在邮件模板里面增加ga统计来统计邮件的打开率">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>之前项目在做发送邮件模版的时候，有一个需求是要统计这封邮件有多少次被打开过。<br>而我们项目用的统计站点是google 统计， 即GA， 而且GA本身就有实时统计的功能。<br>那么接下来的问题就是怎么把GA统计放到邮件里面，要知道邮件里面可是不能执行js代码的。</p>
+<p>后面参照了这位大佬的文章终于找到了解决方案： <a href="http://www.lunametrics.com/blog/2013/06/17/email-tracking-google-analytics/" target="_blank" rel="noopener">传送门</a><br>这篇文章讲的还是很详细的，其方法就是用 image src 请求，抛送 ga 请求 </p>
+<p>当然ga请求的参数有很多，我这边大概列了，本次需要的字段的说明，其中 tid 就是GA统计的哪个id值<br><img src="/2018/05/07/mail-use-ga/1.png" alt="1"><br>接下来我们使用post man试下抛送<br>使用 postman 直接发送<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:<span class="comment">//www.google-analytics.com/collect?t=event&amp;ul=zh-cn&amp;ec=email&amp;ea=market_test&amp;el&amp;cid=1916417684.14176195597&amp;tid=UA-xxxxx-1&amp;v=1</span></span><br></pre></td></tr></table></figure><br>然后去GA后台实时统计那边查看一下,可以看到已经有数据了<br><img src="/2018/05/07/mail-use-ga/2.png" alt="2"></p>
+<p><img src="/2018/05/07/mail-use-ga/3.png" alt="3"></p>
+<p>然后接下来试一下，如果是直接用img标签来请求的话<br><img src="/2018/05/07/mail-use-ga/4.png" alt="4"></p>
+<p><img src="/2018/05/07/mail-use-ga/5.png" alt="5"></p>
+<p>发现也成功抛上去来</p>
+<hr>
+<p>因此这种方式是可行的，所以最后邮件模版这样写就可以了，其中cid作为 uniqueId, 可以传当前邮件发送的时间戳，反正只要不重复就行了</p>
+<p>在邮件模板的写法是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;img src=&quot;http://www.google-analytics.com/collect?t=event&amp;ul=zh-cn&amp;ec=market_email&amp;ea=open&amp;el=email_marketing1&amp;cid=&#123;&#123;.cid&#125;&#125;&amp;tid=UA-xxx-1&amp;v=1&quot; alt=&quot;stat&quot;&gt;</span><br></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/05/06/web-security/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1851,173 +2024,13 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/05/03/set-img-cannot-drag/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/03/set-img-cannot-drag/" itemprop="url">web 上设置图片不能拖拽</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-03T14:51:35+08:00">
-                2018-05-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/前端相关/" itemprop="url" rel="index">
-                    <span itemprop="name">前端相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/03/set-img-cannot-drag/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/05/03/set-img-cannot-drag/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/05/03/set-img-cannot-drag/" class="leancloud_visitors" data-flag-title="web 上设置图片不能拖拽">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="图片不能拖拽，有两种情况"><a href="#图片不能拖拽，有两种情况" class="headerlink" title="图片不能拖拽，有两种情况:"></a>图片不能拖拽，有两种情况:</h3><h4 id="一种是使用css，-让其不能选择"><a href="#一种是使用css，-让其不能选择" class="headerlink" title="一种是使用css， 让其不能选择"></a>一种是使用css， 让其不能选择</h4><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.i-user-select-none</span>&#123;</span><br><span class="line">  <span class="attribute">-webkit-user-select</span>:none;</span><br><span class="line">  <span class="attribute">-moz-user-select</span>:none;</span><br><span class="line">  <span class="attribute">-khtml-user-select</span>:none;</span><br><span class="line">  <span class="attribute">-o-user-select</span>:none;</span><br><span class="line">  <span class="attribute">user-select</span>:none;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="一种是js，将-onselectstart-，-ondragstart-方法return-false"><a href="#一种是js，将-onselectstart-，-ondragstart-方法return-false" class="headerlink" title="一种是js，将 onselectstart ， ondragstart 方法return false"></a>一种是js，将 onselectstart ， ondragstart 方法return false</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$(img).attr(&#123;</span><br><span class="line">    <span class="string">"onselectstart"</span>: <span class="string">"return false;"</span>,</span><br><span class="line">    <span class="string">"ondragstart"</span>: <span class="string">"return false;"</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -2065,7 +2078,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2087,7 +2100,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="mqtt," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="通过 webrtc 的 signal 服务器 VerneMQ 的搭建 我们已经安装了VerneMQ 服务，接下来就是设置校验了。vernemq 有三种权限校验的方式： 我们接下来一个一个用：https://vernemq.com/docs/configuration/file-auth.html 1 密码文件校验的方式：要开启密码校验的方式，就要修改 vernemq.conf 的配置文件， 将以下">
+<meta name="keywords" content="mqtt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="webrtc 的 signal 服务器 VerneMQ 的权限校验">
+<meta property="og:url" content="http://kebingzao.com/2018/06/03/vernemq-verify/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="通过 webrtc 的 signal 服务器 VerneMQ 的搭建 我们已经安装了VerneMQ 服务，接下来就是设置校验了。vernemq 有三种权限校验的方式： 我们接下来一个一个用：https://vernemq.com/docs/configuration/file-auth.html 1 密码文件校验的方式：要开启密码校验的方式，就要修改 vernemq.conf 的配置文件， 将以下">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/06/03/vernemq-verify/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/06/03/vernemq-verify/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/06/03/vernemq-verify/3.png">
+<meta property="og:updated_time" content="2018-06-02T19:04:28.485Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="webrtc 的 signal 服务器 VerneMQ 的权限校验">
+<meta name="twitter:description" content="通过 webrtc 的 signal 服务器 VerneMQ 的搭建 我们已经安装了VerneMQ 服务，接下来就是设置校验了。vernemq 有三种权限校验的方式： 我们接下来一个一个用：https://vernemq.com/docs/configuration/file-auth.html 1 密码文件校验的方式：要开启密码校验的方式，就要修改 vernemq.conf 的配置文件， 将以下">
+<meta name="twitter:image" content="http://kebingzao.com/2018/06/03/vernemq-verify/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'J235M6G0L1',
+      apiKey: 'a0a700b756e601762eb3467caacb17e8',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/06/03/vernemq-verify/"/>
+
+
+
+
+
+  <title>webrtc 的 signal 服务器 VerneMQ 的权限校验 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/03/vernemq-verify/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">webrtc 的 signal 服务器 VerneMQ 的权限校验</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-03T01:43:13+08:00">
+                2018-06-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
+                    <span itemprop="name">webrtc相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/03/vernemq-verify/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/06/03/vernemq-verify/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/03/vernemq-verify/" class="leancloud_visitors" data-flag-title="webrtc 的 signal 服务器 VerneMQ 的权限校验">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>通过 <a href="/2018/05/30/vernemq-install/" title="webrtc 的 signal 服务器 VerneMQ 的搭建">webrtc 的 signal 服务器 VerneMQ 的搭建</a> 我们已经安装了VerneMQ 服务，接下来就是设置校验了。vernemq 有三种权限校验的方式： 我们接下来一个一个用：<br><a href="https://vernemq.com/docs/configuration/file-auth.html" target="_blank" rel="noopener">https://vernemq.com/docs/configuration/file-auth.html</a></p>
+<h3 id="1-密码文件校验的方式："><a href="#1-密码文件校验的方式：" class="headerlink" title="1 密码文件校验的方式："></a>1 密码文件校验的方式：</h3><p>要开启密码校验的方式，就要修改 vernemq.conf 的配置文件， 将以下的配置改成：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">allow_anonymous = off</span><br><span class="line">plugins.vmq_passwd = on</span><br><span class="line">vmq_passwd.password_file = /etc/vernemq/vmq.passwd</span><br><span class="line">vmq_passwd.password_reload_interval = 10</span><br><span class="line">plugins.vmq_acl = on</span><br></pre></td></tr></table></figure><br>ps： 注意 <font color="red">plugins.vmq_acl = on</font> 这个也要开启，不然会处于一直连接中的状态,这个是因为 密码文件校验只能校验 auth，也就是能不能连接上。而 acl 校验是校验用户连上之后是否能sub 或者 pub, 所以这个也要开。其实就是关闭连接无校验方式，然后开启密码文件连接校验方式，同时将 密码校验的间隔设置为 10s,接下来我们就通过这个自带的 密码文件管理的 工具来生成一个密码校验<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vmq-passwd [-c | -D] passwordfile username</span><br><span class="line">vmq-passwd -U passwordfile</span><br></pre></td></tr></table></figure><br>具体的操作log如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos vernemq]# vmq-passwd -c vmq.passwd zach</span><br><span class="line">Password:</span><br><span class="line">Reenter password:</span><br><span class="line">[root@VM_156_200_centos vernemq]# ll</span><br><span class="line">total 72</span><br><span class="line">-rw-r--r-- 1 root root 30851 May  9 13:51 vernemq.conf</span><br><span class="line">-rw-r--r-- 1 root root 29837 May  9 11:41 vernemq.conf.test</span><br><span class="line">-rw-r--r-- 1 root root     8 Mar 21 00:06 vmq.acl</span><br><span class="line">-rw-r--r-- 1 root root   114 May  9 13:53 vmq.passwd</span><br><span class="line">[root@VM_156_200_centos vernemq]# cat vmq.passwd</span><br><span class="line">zach:$6$46DU/VjFrIykytcz$awMWQb7TT4m+SQ34ipXaDIjoTUTTeTLeFUCd7233MpTqE+633L7k8Xm3c52VhOJxaUtheFoZRBhZQlu9AG+/7g==</span><br></pre></td></tr></table></figure><br>从上面可以看到，我们往 vmq.passwd （这个就是上面配置项所指定的密码文件，第一次创建，如果不存在，执行会自动创建），然后指定用户名，本例就是zach，接下来就会让你输入密码，而且要确认一遍。然后就成功（本例的密码就是 123456）。<br>打开 vmq.passwd 来看，可以看到 zach 后面跟了一堆的密码串（这个就是刚才输入的密码的加密串）,然后重启了一下 vernemq：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos vernemq]# vernemq restart</span><br><span class="line">ok</span><br></pre></td></tr></table></figure><br>接下来我们用测试程序跑下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> mqtt = <span class="built_in">require</span>(<span class="string">'mqtt'</span>);</span><br><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>);</span><br><span class="line"></span><br><span class="line">client.on(<span class="string">'connect'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"connected"</span>);</span><br><span class="line">    client.subscribe(<span class="string">'presence'</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        client.publish(<span class="string">'presence'</span>, <span class="string">'Hello mqtt'</span>)</span><br><span class="line">    &#125;,<span class="number">10</span>)</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">client.on(<span class="string">'message'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">topic, message</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// message is Buffer</span></span><br><span class="line">    <span class="built_in">console</span>.log(topic);</span><br><span class="line">    <span class="built_in">console</span>.log(message.toString());</span><br><span class="line">    client.end()</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"start"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>本来如果是直接开启无校验模式的话， 是可以跑成功的：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">presence</span><br><span class="line">Hello mqtt</span><br></pre></td></tr></table></figure><br>一旦开启密码文件校验方式的话，那么就会报错了：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:141</span><br><span class="line">      throw er; // Unhandled &apos;error&apos; event</span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line">Error: Connection refused: Not authorized</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:893:15)</span><br><span class="line">    at MqttClient._handlePacket (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:329:12)</span><br><span class="line">    at work (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:271:12)</span><br><span class="line">    at Writable.writable._write (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:281:5)</span><br><span class="line">    at doWrite (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:428:64)</span><br><span class="line">    at writeOrBuffer (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:417:5)</span><br><span class="line">    at Writable.write (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:334:11)</span><br><span class="line">    at ondata (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_readable.js:619:20)</span><br><span class="line">    at emitOne (events.js:77:13)</span><br><span class="line">    at emit (events.js:169:7)</span><br></pre></td></tr></table></figure><br>报了一个没有权限的错误,如果加上用户名和密码的话：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    username: <span class="string">'zach'</span>,</span><br><span class="line">    password: <span class="string">"123456"</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>那么就可以连接上<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">presence</span><br><span class="line">Hello mqtt</span><br></pre></td></tr></table></figure><br>当然如果是密码错误，或者用户名错误的话，也都会报错：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    username: <span class="string">'zach'</span>,</span><br><span class="line">    password: <span class="string">"1234567"</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>执行结果如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:<span class="number">141</span></span><br><span class="line">      <span class="keyword">throw</span> er; <span class="comment">// Unhandled 'error' event</span></span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line"><span class="built_in">Error</span>: Connection refused: Bad username or password</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">893</span>:<span class="number">15</span>)</span><br><span class="line">    at MqttClient._handlePacket (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">329</span>:<span class="number">12</span>)</span><br><span class="line">    at work (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">271</span>:<span class="number">12</span>)</span><br><span class="line">    at Writable.writable._write (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">281</span>:<span class="number">5</span>)</span><br><span class="line">    at doWrite (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">428</span>:<span class="number">64</span>)</span><br><span class="line">    at writeOrBuffer (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">417</span>:<span class="number">5</span>)</span><br><span class="line">    at Writable.write (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">334</span>:<span class="number">11</span>)</span><br><span class="line">    at ondata (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_readable.js:<span class="number">619</span>:<span class="number">20</span>)</span><br><span class="line">    at emitOne (events.js:<span class="number">77</span>:<span class="number">13</span>)</span><br><span class="line">    at emit (events.js:<span class="number">169</span>:<span class="number">7</span>)</span><br></pre></td></tr></table></figure><br>如果是用户名错的话：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    username: <span class="string">'zach1'</span>,</span><br><span class="line">    password: <span class="string">"123456"</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:<span class="number">141</span></span><br><span class="line">      <span class="keyword">throw</span> er; <span class="comment">// Unhandled 'error' event</span></span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line"><span class="built_in">Error</span>: Connection refused: Not authorized</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">893</span>:<span class="number">15</span>)</span><br><span class="line">    at MqttClient._handlePacket (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">329</span>:<span class="number">12</span>)</span><br><span class="line">    at work (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">271</span>:<span class="number">12</span>)</span><br><span class="line">    at Writable.writable._write (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">281</span>:<span class="number">5</span>)</span><br><span class="line">    at doWrite (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">428</span>:<span class="number">64</span>)</span><br><span class="line">    at writeOrBuffer (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">417</span>:<span class="number">5</span>)</span><br><span class="line">    at Writable.write (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">334</span>:<span class="number">11</span>)</span><br><span class="line">    at ondata (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_readable.js:<span class="number">619</span>:<span class="number">20</span>)</span><br><span class="line">    at emitOne (events.js:<span class="number">77</span>:<span class="number">13</span>)</span><br><span class="line">    at emit (events.js:<span class="number">169</span>:<span class="number">7</span>)</span><br></pre></td></tr></table></figure><br>所以密码文件校验，就是这样了，而且这种方式只能适用于单个用户，因为我一旦创建了其他的用户，那么原本文件里面的内容就会被覆盖了<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos vernemq]# vmq-passwd -c vmq.passwd kbz</span><br><span class="line">Password:</span><br><span class="line">Reenter password:</span><br><span class="line">[root@VM_156_200_centos vernemq]# cat vmq.passwd</span><br><span class="line">kbz:$<span class="number">6</span>$sbh/s6diN2ZGA6kI$zWKPObfeLEu0L8EYveoEnC5GkfkgB1B73E/t1j7Uciz/evcGvyWgwoNoX36tHQOX6psOC3wga6LekQVFbQhMVA==</span><br></pre></td></tr></table></figure><br>之前的zach 马上被 kbz 覆盖了</p>
+<hr>
+<h3 id="2-acl-文件校验的方式："><a href="#2-acl-文件校验的方式：" class="headerlink" title="2 acl 文件校验的方式："></a>2 acl 文件校验的方式：</h3><p>一样修改原来的几个配置<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">allow_anonymous = off</span><br><span class="line">plugins.vmq_acl = on</span><br><span class="line">vmq_acl.acl_file = <span class="regexp">/etc/</span>vernemq/vmq.acl</span><br><span class="line">vmq_acl.acl_reload_interval = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">plugins.vmq_passwd = off</span><br><span class="line">#vmq_passwd.password_file = /etc/vernemq/vmq.passwd</span><br></pre></td></tr></table></figure><br>安装 vernemq 的时候，默认也有一个 vmq_acl.conf 不过打开是topic #，即默认所有主题，我们要自己配，但是我试着配置了一下 这个文件，但是好像还是连接不上：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos vernemq]# cat vmq.acl</span><br><span class="line">user kkk</span><br><span class="line">topic presence</span><br></pre></td></tr></table></figure><br>修改之前的测试代码：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    username: <span class="string">'kkk'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>运行结果：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:<span class="number">141</span></span><br><span class="line">      <span class="keyword">throw</span> er; <span class="comment">// Unhandled 'error' event</span></span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line"><span class="built_in">Error</span>: Connection refused: Not authorized</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">893</span>:<span class="number">15</span>)</span><br><span class="line">    at MqttClient._handlePacket (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">329</span>:<span class="number">12</span>)</span><br><span class="line">    at work (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">271</span>:<span class="number">12</span>)</span><br><span class="line">    at Writable.writable._write (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">281</span>:<span class="number">5</span>)</span><br><span class="line">    at doWrite (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">428</span>:<span class="number">64</span>)</span><br><span class="line">    at writeOrBuffer (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">417</span>:<span class="number">5</span>)</span><br><span class="line">    at Writable.write (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">334</span>:<span class="number">11</span>)</span><br><span class="line">    at ondata (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_readable.js:<span class="number">619</span>:<span class="number">20</span>)</span><br><span class="line">    at emitOne (events.js:<span class="number">77</span>:<span class="number">13</span>)</span><br><span class="line">    at emit (events.js:<span class="number">169</span>:<span class="number">7</span>)</span><br></pre></td></tr></table></figure><br>这个就蛋疼了，也不知道问题出现在哪里？？？<br>后面终于找到原因了，原来 allow_anonymous = on  一定要设置为 on， 因为这个要允许用户连上来才行，接下来才能进行权限的判断<br>对于本例来说，当用户连接上来，再进行 pub 和 sub 权限的判断<br>如果这样写的话：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    username: <span class="string">'kkk'</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">client.on(<span class="string">'connect'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"connected"</span>);</span><br><span class="line">    client.subscribe(<span class="string">'presence'</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        client.publish(<span class="string">'presence'</span>, <span class="string">'Hello mqtt'</span>)</span><br><span class="line">    &#125;,<span class="number">10</span>)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>那么 username 和 topic presenc 都在 acl 文件里面，所以可以成功。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">presence</span><br><span class="line">Hello mqtt</span><br></pre></td></tr></table></figure><br>但是如果用户名错的话，就会出现权限问题，表现就在能连接上，但是没有权限 pub<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    username: <span class="string">'kkk1'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>执行结果如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">connected</span><br><span class="line">connected</span><br><span class="line">connected</span><br></pre></td></tr></table></figure><br>查看服务器的log如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2018</span><span class="number">-05</span><span class="number">-10</span> <span class="number">20</span>:<span class="number">33</span>:<span class="number">53.404</span> [warning] &lt;<span class="number">0.657</span><span class="number">.0</span>&gt;@vmq_websocket:handle_fsm_return:<span class="number">131</span> ws session stopped abnormally due to <span class="string">'publish_not_authorized_3_1_1'</span></span><br><span class="line"><span class="number">2018</span><span class="number">-05</span><span class="number">-10</span> <span class="number">20</span>:<span class="number">33</span>:<span class="number">54.470</span> [debug] &lt;<span class="number">0.664</span><span class="number">.0</span>&gt;@vmq_queue:state_change:<span class="number">948</span> transition <span class="keyword">from</span> offline --&gt; online because <span class="keyword">of</span> add_session</span><br></pre></td></tr></table></figure><br>如果是用户名对，但是 topic 不对的话， 也是一样：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    username: <span class="string">'kkk'</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">client.on(<span class="string">'connect'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"connected"</span>);</span><br><span class="line">    client.subscribe(<span class="string">'presence1'</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        client.publish(<span class="string">'presence1'</span>, <span class="string">'Hello mqtt'</span>)</span><br><span class="line">    &#125;,<span class="number">10</span>)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">connected</span><br><span class="line">connected</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="number">2018</span><span class="number">-05</span><span class="number">-10</span> <span class="number">20</span>:<span class="number">34</span>:<span class="number">51.901</span> [error] &lt;<span class="number">0.694</span><span class="number">.0</span>&gt;@vmq_mqtt_fsm:auth_on_publish:<span class="number">662</span> can<span class="string">'t auth publish [&lt;&lt;"kkk"&gt;&gt;,&#123;[],&lt;&lt;"mqttjs_d4fab9a3"&gt;&gt;&#125;,0,[&lt;&lt;"presence1"&gt;&gt;],&lt;&lt;"Hello mqtt"&gt;&gt;,false] due to chain_exhausted</span></span><br><span class="line"><span class="string">2018-05-10 20:34:51.901 [warning] &lt;0.694.0&gt;@vmq_websocket:handle_fsm_return:131 ws session stopped abnormally due to '</span>publish_not_authorized_3_1_1<span class="string">'</span></span><br></pre></td></tr></table></figure><br>当然，这个 acl 文件还可以设置为 允许哪个topic 可以被订阅和被pub<br>ps： 注意，如果把 #vmq_acl.acl_file = /etc/vernemq/vmq.acl 注释掉，那么就会取/etc/vernemq/vmq.acl 这个默认地址的文件，而如果里面的内容是 topic #<br>那么就是所有的主题都可以被sub 和 pub了，这样就相当于打开空门了， 所以要谨慎。<br>而且这边有个很蛋疼的问题，如果要恢复原来的没有任何的校验的情况的话，那么就要设置为：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">allow_anonymous = on</span><br><span class="line">plugins.vmq_acl = on</span><br><span class="line">plugins.vmq_passwd = off</span><br><span class="line">(plugins.vmq-passwd 这个配置可以开，也可以关，然后对应的权限校验文件，也注释掉)</span><br><span class="line">#vmq_acl.acl_file = /etc/vernemq/vmq.acl</span><br><span class="line">#vmq_passwd.password_file = /etc/vernemq/vmq.passwd</span><br></pre></td></tr></table></figure><br>其实这种情况，不是没有任何校验，还是属于acl校验的方式，只不过默认的 vmq.acl 的内容的 topic #， 即允许所有的主题都可以被pub和sub。<br>所以仅仅只是开启 allow_anonymous = on 还不行， vmq_acl 也要开着，不然会出现可以连得上，但是却没有权限 publish 的情况，不然服务端会报以下错误：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2018</span><span class="number">-05</span><span class="number">-10</span> <span class="number">13</span>:<span class="number">49</span>:<span class="number">27.096</span> [error] &lt;<span class="number">0.433</span><span class="number">.0</span>&gt;@vmq_mqtt_fsm:auth_on_publish:<span class="number">662</span> can<span class="string">'t auth publish [undefined,&#123;[],&lt;&lt;"mqttjs_76284544"&gt;&gt;&#125;,0,[&lt;&lt;"presence"&gt;&gt;],&lt;&lt;"Hello mqtt"&gt;&gt;,false] due to no_matching_hook_found</span></span><br><span class="line"><span class="string">2018-05-10 13:49:27.096 [warning] &lt;0.433.0&gt;@vmq_websocket:handle_fsm_return:131 ws session stopped abnormally due to '</span>publish_not_authorized_3_1_1<span class="string">'</span></span><br></pre></td></tr></table></figure></p>
+<hr>
+<h3 id="3-数据库校验的方式："><a href="#3-数据库校验的方式：" class="headerlink" title="3 数据库校验的方式："></a>3 数据库校验的方式：</h3><p>有好几种，我们主要是使用 redis 来校验，同样要改几个配置：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">allow_anonymous =off</span><br><span class="line">plugins.vmq_diversity = on</span><br><span class="line">plugins.vmq_passwd = off</span><br><span class="line">plugins.vmq_acl = off</span><br><span class="line"></span><br><span class="line">vmq_diversity.auth_redis.enabled = on</span><br><span class="line">vmq_diversity.redis.host = <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">vmq_diversity.redis.port = <span class="number">6379</span></span><br><span class="line">vmq_diversity.redis.password = xxxx</span><br><span class="line">vmq_diversity.redis.database = <span class="number">0</span></span><br></pre></td></tr></table></figure><br>注意： allow_anonymous 这个设置要设置为 off，不然所有的用户都会被连接上<br>那么接下来往这个redis 插入一条<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET <span class="string">"[\"\",\"test-client\",\"test-user\"]"</span> <span class="string">"&#123;\"passhash\":\"$2a$12$WDzmynWSMRVzfszQkB2MsOWYQK9qGtfjVpO8iBdimTOjCK/u6CzJK\",\"subscribe_acl\":[&#123;\"pattern\":\"#\"&#125;]&#125;, \"publish_acl\":[&#123;\"pattern\":\"#\"&#125;]&#125; "</span></span><br></pre></td></tr></table></figure><br><img src="/2018/06/03/vernemq-verify/1.png" alt="1"><br>这样就有一条记录了 （subscribe_acl 和 publish_acl 都设置为 #， 那么就说明不限制 pub 和 sub 的权限）<br>从文档来看，这个 passhash 应该就是 123 加密过后的<br>最后我们的代码是：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> mqtt = <span class="built_in">require</span>(<span class="string">'mqtt'</span>);</span><br><span class="line"><span class="comment">// var client  = mqtt.connect('mqtt://test.mosquitto.org');</span></span><br><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    clientId: <span class="string">'test-client'</span>,</span><br><span class="line">    username: <span class="string">'test-user'</span>,</span><br><span class="line">    password: <span class="string">'123'</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">client.on(<span class="string">'connect'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"connected"</span>);</span><br><span class="line">    client.subscribe(<span class="string">'presence'</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        client.publish(<span class="string">'presence'</span>, <span class="string">'Hello mqtt'</span>)</span><br><span class="line">    &#125;,<span class="number">10</span>)</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">client.on(<span class="string">'message'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">topic, message</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// message is Buffer</span></span><br><span class="line">    <span class="built_in">console</span>.log(topic);</span><br><span class="line">    <span class="built_in">console</span>.log(message.toString());</span><br><span class="line">    client.end()</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">"start"</span>);</span><br></pre></td></tr></table></figure><br>结果发现报错了？？<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:<span class="number">141</span></span><br><span class="line">      <span class="keyword">throw</span> er; <span class="comment">// Unhandled 'error' event</span></span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line"><span class="built_in">Error</span>: Connection refused: Not authorized</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">893</span>:<span class="number">15</span>)</span><br><span class="line">    at MqttClient._handlePacket (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">329</span>:<span class="number">12</span>)</span><br><span class="line">    at work (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">271</span>:<span class="number">12</span>)</span><br><span class="line">    at Writable.writable._write (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">281</span>:<span class="number">5</span>)</span><br><span class="line">    at doWrite (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">428</span>:<span class="number">64</span>)</span><br><span class="line">    at writeOrBuffer (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">417</span>:<span class="number">5</span>)</span><br><span class="line">    at Writable.write (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">334</span>:<span class="number">11</span>)</span><br><span class="line">    at ondata (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_readable.js:<span class="number">619</span>:<span class="number">20</span>)</span><br><span class="line">    at emitOne (events.js:<span class="number">77</span>:<span class="number">13</span>)</span><br><span class="line">    at emit (events.js:<span class="number">169</span>:<span class="number">7</span>)</span><br></pre></td></tr></table></figure><br>权限校验失败， 那么问题来了， 这权限跑判断校验的逻辑从哪里来的。<br>查看 console.log 是这样：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2018</span><span class="number">-05</span><span class="number">-11</span> <span class="number">14</span>:<span class="number">05</span>:<span class="number">56.877</span> [warning] &lt;<span class="number">0.466</span><span class="number">.0</span>&gt;@vmq_mqtt_fsm:check_user:<span class="number">548</span> can<span class="string">'t authenticate client &#123;[],&lt;&lt;"test-client"&gt;&gt;&#125; due to error</span></span><br></pre></td></tr></table></figure><br>后面查了一下，发现每次开始运行的时候，都会加载这个脚本 <font color="red">/usr/share/vernemq/lua/auth/redis.lua</font><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2018</span><span class="number">-05</span><span class="number">-11</span> <span class="number">14</span>:<span class="number">05</span>:<span class="number">50.043</span> [debug] &lt;<span class="number">0.346</span><span class="number">.0</span>&gt; Supervisor vmq_diversity_script_sup started vmq_diversity_script_sup_sup:start_link(<span class="string">"/usr/share/vernemq/lua/auth/redis.lua"</span>) at pid &lt;<span class="number">0.354</span><span class="number">.0</span>&gt;</span><br></pre></td></tr></table></figure><br>后面看了一下，原来关于数据库权限校验的在在这个 redis.lua 脚本里面的， 看了一下这个脚本的信息：<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos auth]# cat redis.lua</span><br><span class="line"><span class="built_in">require</span> <span class="string">"auth/auth_commons"</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_register</span><span class="params">(reg)</span></span></span><br><span class="line">    <span class="keyword">if</span> reg.username ~= <span class="literal">nil</span> <span class="keyword">and</span> reg.password ~= <span class="literal">nil</span> <span class="keyword">then</span></span><br><span class="line">        key = json.encode(&#123;reg.mountpoint, reg.client_id, reg.username&#125;)</span><br><span class="line">        res = redis.cmd(pool, <span class="string">"get "</span> .. key)</span><br><span class="line">        <span class="keyword">if</span> res <span class="keyword">then</span></span><br><span class="line">            res = json.decode(res)</span><br><span class="line">            <span class="keyword">if</span> res.passhash == bcrypt.hashpw(reg.password, res.passhash) <span class="keyword">then</span></span><br><span class="line">                cache_insert(</span><br><span class="line">                    reg.mountpoint,</span><br><span class="line">                    reg.client_id,</span><br><span class="line">                    reg.username,</span><br><span class="line">                    res.publish_acl,</span><br><span class="line">                    res.subscribe_acl</span><br><span class="line">                    )</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">pool = <span class="string">"auth_redis"</span></span><br><span class="line"><span class="built_in">config</span> = &#123;</span><br><span class="line">    pool_id = pool</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">redis.ensure_pool(<span class="built_in">config</span>)</span><br><span class="line">hooks = &#123;</span><br><span class="line">    auth_on_register = auth_on_register,</span><br><span class="line">    auth_on_publish = auth_on_publish,</span><br><span class="line">    auth_on_subscribe = auth_on_subscribe,</span><br><span class="line">    on_unsubscribe = on_unsubscribe,</span><br><span class="line">    on_client_gone = on_client_gone,</span><br><span class="line">    on_client_offline = on_client_offline</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>虽然 lua 脚本看不太懂，但是大概的意思应该就是，如果auth_on_register 这个方法返回 false，那么应该就是校验失败了。为了校验，那么我们就粗暴的校验一下，直接返回 true 看看,改成这样子：<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_register</span><span class="params">(reg)</span></span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure><br>然后重新启动一下服务： vernemq restart<br>然后重新运行一下测试程序：<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">connected</span><br><span class="line">connected</span><br></pre></td></tr></table></figure><br>发现可以连接上了，但是没有publish的权限？？？<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2018</span><span class="number">-05</span><span class="number">-11</span> <span class="number">14</span>:<span class="number">13</span>:<span class="number">45.543</span> [<span class="built_in">error</span>] &lt;<span class="number">0.476</span><span class="number">.0</span>&gt;@vmq_mqtt_fsm:auth_on_publish:<span class="number">662</span> can<span class="string">'t auth publish [&lt;&lt;"test-user"&gt;&gt;,&#123;[],&lt;&lt;"test-client"&gt;&gt;&#125;,0,[&lt;&lt;"presence"&gt;&gt;],&lt;&lt;"Hello mqtt"&gt;&gt;,false] due to error</span></span><br><span class="line"><span class="string">2018-05-11 14:13:45.543 [warning] &lt;0.476.0&gt;@vmq_websocket:handle_fsm_return:131 ws session stopped abnormally due to '</span>publish_not_authorized_3_1_1<span class="string">'</span></span><br></pre></td></tr></table></figure><br>对比了 redis.lua 里面的webhook，那么是不是需要我们自己去实现 auth_on_publish 和 auth_on_subscribe 这两个方法吗？<br>那我们就自己实现这两个方法看看，也是直接返回 true<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_register</span><span class="params">(reg)</span></span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_publish</span><span class="params">(reg)</span></span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_subscribe</span><span class="params">(reg)</span></span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure><br>重启一下服务， 然后再试下<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">presence</span><br><span class="line">Hello mqtt</span><br></pre></td></tr></table></figure><br>终于又可以连接上，又可以 pub 和 sub了,但是这样子跟没有开启校验，根本没有什么差别，大家都可以连接。所以接下来还是 修改 auth_on_register  方法， 看看为什么会返回 false,这时候就涉及到调试了，如果我们能在这个lua文件进行调试，并且可以打印出来，那么就可以很快调试了。<br>举个例子比如我们修改成这样：<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_register</span><span class="params">(reg)</span></span></span><br><span class="line">   <span class="keyword">if</span> reg.username ~= <span class="literal">nil</span> <span class="keyword">and</span> reg.password ~= <span class="literal">nil</span> <span class="keyword">then</span></span><br><span class="line">        key = json.encode(&#123;reg.mountpoint, reg.client_id, reg.username&#125;)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"arg :"</span> .. <span class="string">"m: "</span> .. reg.mountpoint .. <span class="string">",c:"</span> .. reg.client_id .. <span class="string">",u:"</span> .. reg.username .. <span class="string">",p:"</span> .. reg.password)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"key:"</span> .. key)</span><br><span class="line">   <span class="keyword">end</span></span><br><span class="line">   <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure><br>看能不能把参数打出来， 执行一下 node 程序，发现在 console.log 里面都没有打出来？？？到底是会打在哪里呢？？？<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos lua_demo]# cd /var/<span class="built_in">log</span>/vernemq/</span><br><span class="line">[root@VM_156_200_centos vernemq]# ll</span><br><span class="line">total <span class="number">8308</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq 2150431 May 11 14:21 console.log</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq 3799473 May 10 23:59 console.log.0</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq 1178267 May  9 23:59 console.log.1</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq    1668 May  8 08:16 console.log.2</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq   19809 May  7 21:25 console.log.3</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq       0 May 11 11:09 crash.log</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq       0 May 10 10:17 crash.log.0</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq   47799 May  9 23:28 crash.log.1</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq    6426 May  8 08:16 crash.log.2</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq       0 May  7 21:25 crash.log.3</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq   99908 May 11 11:11 erlang.log.1</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq   47134 May 11 14:21 erlang.log.2</span></span><br><span class="line">-rw-r<span class="comment">----- 1 vernemq vernemq  938339 May  9 14:55 erl_crash.dump</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq   10798 May 11 14:13 error.log</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq  117772 May 10 21:19 error.log.0</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq   30641 May  9 23:28 error.log.1</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq    1668 May  8 08:16 error.log.2</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq       0 May  7 21:25 error.log.3</span></span><br><span class="line">-rw-rw-r<span class="comment">-- 1 vernemq vernemq     258 May 11 14:20 run_erl.log</span></span><br></pre></td></tr></table></figure><br>在这个log文件里面，有看到这个 erlang.log.2 的更新时间都很快，应该会打一些运行的信息，所以就打开一看，果然发现我们print 的信息，这样就好办了<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">=INFO REPORT==== <span class="number">11</span>-May<span class="number">-2018</span>::<span class="number">14</span>:<span class="number">20</span>:<span class="number">50</span> ===</span><br><span class="line">    alarm_handler: &#123;set,&#123;system_memory_high_watermark,[]&#125;&#125;</span><br><span class="line"> __      ____  __  ____         _____ _______      ________ _____   _____ _____ _________     __</span><br><span class="line"> \ \    / /  \/  |/ __ \       |  __ \_   _\ \    / /  ____|  __ \ / ____|_   _|__   __\ \   / /</span><br><span class="line">  \ \  / /| \  / | |  | |______| |  | || |  \ \  / /| |__  | |__) | (___   | |    | |   \ \_/ / </span><br><span class="line">   \ \/ / | |\/| | |  | |______| |  | || |   \ \/ / |  __| |  _  / \___ \  | |    | |    \   /   </span><br><span class="line">    \  /  | |  | | |__| |      | |__| || |_   \  /  | |____| | \ \ ____) |_| |_   | |     | |   </span><br><span class="line">     \/   |_|  |_|\___\_\      |_____/_____|   \/   |______|_|  \_\_____/|_____|  |_|     |_|   </span><br><span class="line"></span><br><span class="line">Eshell V8<span class="number">.3</span><span class="number">.5</span><span class="number">.3</span>  (abort with ^G)</span><br><span class="line">(VerneMQ@<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>)<span class="number">1</span>&gt; <span class="built_in">arg</span> :m: ,c:test-client,u:test-user,p:<span class="number">123</span></span><br><span class="line">key:[<span class="string">""</span>,<span class="string">"test-client"</span>,<span class="string">"test-user"</span>]</span><br></pre></td></tr></table></figure><br>既然是可以打印了，那么我看下，为什么默认自带的那个 redis.lua 会授权失败， 所以就再修改下<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_register</span><span class="params">(reg)</span></span></span><br><span class="line">    <span class="keyword">if</span> reg.username ~= <span class="literal">nil</span> <span class="keyword">and</span> reg.password ~= <span class="literal">nil</span> <span class="keyword">then</span></span><br><span class="line">        key = json.encode(&#123;reg.mountpoint, reg.client_id, reg.username&#125;)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"arg :"</span> .. <span class="string">"m: "</span> .. reg.mountpoint .. <span class="string">",c:"</span> .. reg.client_id .. <span class="string">",u:"</span> .. reg.username .. <span class="string">",p:"</span> .. reg.password)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"key:"</span> .. key)</span><br><span class="line">        res = redis.cmd(pool, <span class="string">"get "</span> .. key)</span><br><span class="line">        <span class="keyword">if</span> res <span class="keyword">then</span></span><br><span class="line">            <span class="built_in">print</span>(<span class="string">"res:"</span> .. res)</span><br><span class="line">            res = json.decode(res)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">"passhash:"</span> .. res.passhash)</span><br><span class="line">            str = bcrypt.hashpw(reg.password, res.passhash)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">"has:"</span> .. str)</span><br><span class="line">            <span class="keyword">if</span> res.passhash == bcrypt.hashpw(reg.password, res.passhash) <span class="keyword">then</span></span><br><span class="line">                cache_insert(</span><br><span class="line">                    reg.mountpoint,</span><br><span class="line">                    reg.client_id,</span><br><span class="line">                    reg.username,</span><br><span class="line">                    res.publish_acl,</span><br><span class="line">                    res.subscribe_acl</span><br><span class="line">                    )</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure><br>其实就是加一些log，逻辑都不变的，主要就是判断 有没有从redis 里面取到数据，以及密码的hash匹配正不正确，主要是两个逻辑.然后重启一下服务，然后再执行一下测试程序：<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:<span class="number">141</span></span><br><span class="line">      throw er; // Unhandled <span class="string">'error'</span> event</span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line">Error: Connection refused: Not authorized</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">893</span>:<span class="number">15</span>)</span><br><span class="line">    at MqttClient._handlePacket (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">329</span>:<span class="number">12</span>)</span><br><span class="line">    at work (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">271</span>:<span class="number">12</span>)</span><br><span class="line">    at Writable.writable._write (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">281</span>:<span class="number">5</span>)</span><br><span class="line">    at doWrite (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">428</span>:<span class="number">64</span>)</span><br><span class="line">    at writeOrBuffer (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">417</span>:<span class="number">5</span>)</span><br><span class="line">    at Writable.<span class="built_in">write</span> (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_writable.js:<span class="number">334</span>:<span class="number">11</span>)</span><br><span class="line">    at ondata (F:\airdroid_code\nodejs\mqtt\node_modules\readable-stream\lib\_stream_readable.js:<span class="number">619</span>:<span class="number">20</span>)</span><br><span class="line">    at emitOne (events.js:<span class="number">77</span>:<span class="number">13</span>)</span><br><span class="line">    at emit (events.js:<span class="number">169</span>:<span class="number">7</span>)</span><br></pre></td></tr></table></figure><br>报错了，然后看下log<br><figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(VerneMQ@<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>)<span class="number">1</span>&gt; <span class="built_in">arg</span> :m: ,c:test-client,u:test-user,p:<span class="number">123</span></span><br><span class="line">key:[<span class="string">""</span>,<span class="string">"test-client"</span>,<span class="string">"test-user"</span>]</span><br><span class="line">res:&#123;<span class="string">"passhash"</span>:<span class="string">"$2a$12$WDzmynWSMRVzfszQkB2MsOWYQK9qGtfjVpO8iBdimTOjCK/u6CzJK"</span>,<span class="string">"subscribe_acl"</span>:[&#123;<span class="string">"pattern"</span>:<span class="string">"#"</span>&#125;],<span class="string">"publish_acl"</span>:[&#123;<span class="string">"pattern"</span>:<span class="string">"#"</span>&#125;]&#125;</span><br><span class="line">passhash:$<span class="number">2</span>a$<span class="number">12</span>$WDzmynWSMRVzfszQkB2MsOWYQK9qGtfjVpO8iBdimTOjCK/u6CzJK</span><br><span class="line">has:$<span class="number">2</span>a$<span class="number">12</span>$WDzmynWSMRVzfszQkB2MsOcPkeckkI3JxqNuNrPe58v67eIRI8yua</span><br></pre></td></tr></table></figure><br>发现可以从 redis 中取到数据了，但是密码的hash计算校验却不匹配。这个说明我们输入的那个hash，根本就不是原密码123的hash值。为了得到123的hash加密之后，正确的hash值是多少，我这边就用go写了一个版本来计算：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">   <span class="string">"golang.org/x/crypto/bcrypt"</span></span><br><span class="line">   <span class="string">"fmt"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">   password := []<span class="keyword">byte</span>(<span class="string">"123"</span>)</span><br><span class="line"></span><br><span class="line">   <span class="comment">// Hashing the password with the default cost of 10</span></span><br><span class="line">   hashedPassword, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="built_in">panic</span>(err)</span><br><span class="line">   &#125;</span><br><span class="line">   fmt.Println(<span class="keyword">string</span>(hashedPassword))</span><br><span class="line"></span><br><span class="line">   <span class="comment">// Comparing the password with the hash</span></span><br><span class="line">   err = bcrypt.CompareHashAndPassword(hashedPassword, password)</span><br><span class="line">   fmt.Println(err) <span class="comment">// nil means it is a match</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>执行得到的结果是：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$<span class="number">2</span>a$<span class="number">10</span>$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK</span><br></pre></td></tr></table></figure><br>因此就将redis 里面的这个改成：<br><img src="/2018/06/03/vernemq-verify/2.png" alt="2"><br>然后再执行一下，测试程序看看，能不能匹配上：<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">presence</span><br><span class="line">Hello mqtt</span><br></pre></td></tr></table></figure><br>发现可以了，我们看看打出来log对不对:<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">arg :m: ,c:test-client,u:test-user,p:<span class="number">123</span></span><br><span class="line">key:[<span class="string">""</span>,<span class="string">"test-client"</span>,<span class="string">"test-user"</span>]</span><br><span class="line">res:&#123;<span class="string">"passhash"</span>:<span class="string">"$2a$10$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK"</span>,<span class="string">"subscribe_acl"</span>:[&#123;<span class="string">"pattern"</span>:<span class="string">"#"</span>&#125;],<span class="string">"publish_acl"</span>:[&#123;<span class="string">"pattern"</span>:<span class="string">"#"</span>&#125;]&#125;</span><br><span class="line">passhash:$<span class="number">2</span>a$<span class="number">10</span>$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK</span><br><span class="line">has:$<span class="number">2</span>a$<span class="number">10</span>$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK</span><br></pre></td></tr></table></figure><br>结果一模一样，所以匹配上了，所以就 auth 校验通过了。所以默认的 redis.lua 其实是没有问题。当然我们这边可以加点print log，会比较好。所以最后改成<br><figure class="highlight golang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos auth]# cat redis.lua</span><br><span class="line">require <span class="string">"auth/auth_commons"</span></span><br><span class="line"></span><br><span class="line">function auth_on_register(reg)</span><br><span class="line">    <span class="keyword">if</span> reg.username ~= <span class="literal">nil</span> and reg.password ~= <span class="literal">nil</span> then</span><br><span class="line">        key = json.encode(&#123;reg.mountpoint, reg.client_id, reg.username&#125;)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"arg :"</span> .. <span class="string">"m: "</span> .. reg.mountpoint .. <span class="string">",c:"</span> .. reg.client_id .. <span class="string">",u:"</span> .. reg.username .. <span class="string">",p:"</span> .. reg.password)</span><br><span class="line">        res = redis.cmd(pool, <span class="string">"get "</span> .. key)</span><br><span class="line">        <span class="keyword">if</span> res then</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">"res:"</span> .. res)</span><br><span class="line">            res = json.decode(res)</span><br><span class="line">            truehash = bcrypt.hashpw(reg.password, res.passhash)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">"ture hash:"</span> .. truehash)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">"redis hash:"</span> .. res.passhash)</span><br><span class="line">            <span class="keyword">if</span> res.passhash == truehash then</span><br><span class="line">                cache_insert(</span><br><span class="line">                    reg.mountpoint,</span><br><span class="line">                    reg.client_id,</span><br><span class="line">                    reg.username,</span><br><span class="line">                    res.publish_acl,</span><br><span class="line">                    res.subscribe_acl</span><br><span class="line">                    )</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">               <span class="built_in">print</span>(<span class="string">"pass hash not match"</span>)</span><br><span class="line">            end</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">           <span class="built_in">print</span>(<span class="string">"redis not found:"</span> .. key)</span><br><span class="line">        end</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">"param error, cannot find username or password"</span>)</span><br><span class="line">    end</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">function auth_on_publish(reg)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">function auth_on_subscribe(reg)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">end</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">pool = <span class="string">"auth_redis"</span></span><br><span class="line">config = &#123;</span><br><span class="line">    pool_id = pool</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">redis.ensure_pool(config)</span><br><span class="line">hooks = &#123;</span><br><span class="line">    auth_on_register = auth_on_register,</span><br><span class="line">    auth_on_publish = auth_on_publish,</span><br><span class="line">    auth_on_subscribe = auth_on_subscribe,</span><br><span class="line">    on_unsubscribe = on_unsubscribe,</span><br><span class="line">    on_client_gone = on_client_gone,</span><br><span class="line">    on_client_offline = on_client_offline</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>接下来就尝试几种情况的log：</p>
+<h4 id="1-首先是正常情况："><a href="#1-首先是正常情况：" class="headerlink" title="1 首先是正常情况："></a>1 首先是正常情况：</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    clientId: <span class="string">'test-client'</span>,</span><br><span class="line">    username: <span class="string">'test-user'</span>,</span><br><span class="line">    password: <span class="string">'123'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">presence</span><br><span class="line">Hello mqtt</span><br></pre></td></tr></table></figure>
+<p>log：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(VerneMQ@<span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>)<span class="number">1</span>&gt; arg :m: ,<span class="attr">c</span>:test-client,<span class="attr">u</span>:test-user,<span class="attr">p</span>:<span class="number">123</span></span><br><span class="line">res:&#123;<span class="string">"passhash"</span>:<span class="string">"$2a$10$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK"</span>,<span class="string">"subscribe_acl"</span>:[&#123;<span class="string">"pattern"</span>:<span class="string">"#"</span>&#125;],<span class="string">"publish_acl"</span>:[&#123;<span class="string">"pattern"</span>:<span class="string">"#"</span>&#125;]&#125;</span><br><span class="line">ture hash:$<span class="number">2</span>a$<span class="number">10</span>$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK</span><br><span class="line">redis hash:$<span class="number">2</span>a$<span class="number">10</span>$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-少参数的情况，比如少了-username-或者-password的情况："><a href="#2-少参数的情况，比如少了-username-或者-password的情况：" class="headerlink" title="2 少参数的情况，比如少了 username 或者 password的情况："></a>2 少参数的情况，比如少了 username 或者 password的情况：</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    clientId: <span class="string">'test-client'</span>,</span><br><span class="line">    username: <span class="string">'test-user'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>果然报错：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:<span class="number">141</span></span><br><span class="line">      <span class="keyword">throw</span> er; <span class="comment">// Unhandled 'error' event</span></span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line"><span class="built_in">Error</span>: Connection refused: Not authorized</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">893</span>:<span class="number">15</span>)</span><br><span class="line">    at MqttClient._handlePacket (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">329</span>:<span class="number">12</span>)</span><br><span class="line"></span><br></pre></td></tr></table></figure><br>log：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">param error, cannot find username or password</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-参数对，但是配起来找不到-redis-的情况："><a href="#3-参数对，但是配起来找不到-redis-的情况：" class="headerlink" title="3 参数对，但是配起来找不到 redis 的情况："></a>3 参数对，但是配起来找不到 redis 的情况：</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    clientId: <span class="string">'test-client'</span>,</span><br><span class="line">    username: <span class="string">'test-user1'</span>,</span><br><span class="line">    password: <span class="string">'123'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:<span class="number">141</span></span><br><span class="line">      <span class="keyword">throw</span> er; <span class="comment">// Unhandled 'error' event</span></span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line"><span class="built_in">Error</span>: Connection refused: Not authorized</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">893</span>:<span class="number">15</span>)</span><br><span class="line">    at MqttClient._handlePacket (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">329</span>:<span class="number">12</span>)</span><br></pre></td></tr></table></figure>
+<p>log：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">arg :m: ,<span class="attr">c</span>:test-client,<span class="attr">u</span>:test-user1,<span class="attr">p</span>:<span class="number">123</span></span><br><span class="line">redis not found:[<span class="string">""</span>,<span class="string">"test-client"</span>,<span class="string">"test-user1"</span>]</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-redis-找到记录了，但是-passhash-匹配不上-的情况："><a href="#4-redis-找到记录了，但是-passhash-匹配不上-的情况：" class="headerlink" title="4 redis 找到记录了，但是 passhash 匹配不上 的情况："></a>4 redis 找到记录了，但是 passhash 匹配不上 的情况：</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    clientId: <span class="string">'test-client'</span>,</span><br><span class="line">    username: <span class="string">'test-user'</span>,</span><br><span class="line">    password: <span class="string">'1234'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:<span class="number">141</span></span><br><span class="line">      <span class="keyword">throw</span> er; <span class="comment">// Unhandled 'error' event</span></span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line"><span class="built_in">Error</span>: Connection refused: Not authorized</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">893</span>:<span class="number">15</span>)</span><br></pre></td></tr></table></figure>
+<p>log：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">arg :m: ,<span class="attr">c</span>:test-client,<span class="attr">u</span>:test-user,<span class="attr">p</span>:<span class="number">1234</span></span><br><span class="line">res:&#123;<span class="string">"passhash"</span>:<span class="string">"$2a$10$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK"</span>,<span class="string">"subscribe_acl"</span>:[&#123;<span class="string">"pattern"</span>:<span class="string">"#"</span>&#125;],<span class="string">"publish_acl"</span>:[&#123;<span class="string">"pattern"</span>:<span class="string">"#"</span>&#125;]&#125;</span><br><span class="line">ture hash:$<span class="number">2</span>a$<span class="number">10</span>$AeIjpDhnumqDJEliQMBjCuaWll1mz888NoncepSReHHoilJfMDasW</span><br><span class="line">redis hash:$<span class="number">2</span>a$<span class="number">10</span>$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK</span><br><span class="line">pass hash not match</span><br></pre></td></tr></table></figure></p>
+<h4 id="5-还有最后一种情况，就是redis-找到了，并且校验成功了，但是在最后的-cache-insert-会失败-因为cache-insert-方法会对-redis-存放的格式进行校验的，-具体代码如下："><a href="#5-还有最后一种情况，就是redis-找到了，并且校验成功了，但是在最后的-cache-insert-会失败-因为cache-insert-方法会对-redis-存放的格式进行校验的，-具体代码如下：" class="headerlink" title="5 还有最后一种情况，就是redis 找到了，并且校验成功了，但是在最后的 cache_insert 会失败,因为cache_insert 方法会对 redis 存放的格式进行校验的， 具体代码如下："></a>5 还有最后一种情况，就是redis 找到了，并且校验成功了，但是在最后的 cache_insert 会失败,因为cache_insert 方法会对 redis 存放的格式进行校验的， 具体代码如下：</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">cache_insert</span>(<span class="params">mountpoint, client_id, username, publish_acl, subscribe_acl</span>)</span></span><br><span class="line"><span class="function">    <span class="title">type_assert</span>(<span class="params">mountpoint, <span class="string">"string"</span>, <span class="string">"mountpoint"</span></span>)</span></span><br><span class="line"><span class="function">    <span class="title">type_assert</span>(<span class="params">client_id, <span class="string">"string"</span>, <span class="string">"client_id"</span></span>)</span></span><br><span class="line"><span class="function">    <span class="title">type_assert</span>(<span class="params">username, <span class="string">"string"</span>, <span class="string">"username"</span></span>)</span></span><br><span class="line"><span class="function">    <span class="title">type_assert</span>(<span class="params">publish_acl, &#123;<span class="string">"table"</span>, <span class="string">"nil"</span>&#125;, <span class="string">"publish_acl"</span></span>)</span></span><br><span class="line"><span class="function">    <span class="title">type_assert</span>(<span class="params">subscribe_acl, &#123;<span class="string">"table"</span>, <span class="string">"nil"</span>&#125;, <span class="string">"subscribe_acl"</span></span>)</span></span><br><span class="line"><span class="function">    <span class="title">validate_acls</span>(<span class="params">publish_acl</span>)</span></span><br><span class="line"><span class="function">    <span class="title">validate_acls</span>(<span class="params">subscribe_acl</span>)</span></span><br><span class="line"><span class="function">    <span class="title">auth_cache</span>.<span class="title">insert</span>(<span class="params">mountpoint, client_id, username, publish_acl, subscribe_acl</span>)</span></span><br><span class="line"><span class="function"><span class="title">end</span></span></span><br></pre></td></tr></table></figure>
+<p>举个例子，比如校验 publish_acl 和 subscribe_acl 如果不是 数组格式的话，就会出错。<br>假设我们把 redis 存放发 publish_acl 变成一个 字符串：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">      <span class="string">"passhash"</span>: <span class="string">"$2a$10$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK"</span>,</span><br><span class="line">      <span class="string">"subscribe_acl"</span>: [</span><br><span class="line">       &#123;</span><br><span class="line">            <span class="string">"pattern"</span>: <span class="string">"#"</span></span><br><span class="line">       &#125;</span><br><span class="line">       ],</span><br><span class="line">       <span class="string">"publish_acl"</span>: <span class="string">""</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>那么在执行测试程序的时候，就会报错：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">events.js:<span class="number">141</span></span><br><span class="line">      <span class="keyword">throw</span> er; <span class="comment">// Unhandled 'error' event</span></span><br><span class="line">      ^</span><br><span class="line"></span><br><span class="line"><span class="built_in">Error</span>: Connection refused: Not authorized</span><br><span class="line">    at MqttClient._handleConnack (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">893</span>:<span class="number">15</span>)</span><br><span class="line">    at MqttClient._handlePacket (F:\airdroid_code\nodejs\mqtt\node_modules\mqtt\lib\client.js:<span class="number">329</span>:<span class="number">12</span>)</span><br></pre></td></tr></table></figure><br>这时候 console.log 就会报这个 格式的错误：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2018</span><span class="number">-05</span><span class="number">-11</span> <span class="number">15</span>:<span class="number">44</span>:<span class="number">54.969</span> [error] &lt;<span class="number">0.382</span><span class="number">.0</span>&gt;@vmq_diversity_script_state:handle_info:<span class="number">171</span> can<span class="string">'t call function auth_on_register with args [&#123;addr,&lt;&lt;"125.77.202.250"&gt;&gt;&#125;,&#123;port,56262&#125;,&#123;mountpoint,&lt;&lt;&gt;&gt;&#125;,&#123;client_id,&lt;&lt;"test-client"&gt;&gt;&#125;,&#123;username,&lt;&lt;"test-user"&gt;&gt;&#125;,&#123;password,&lt;&lt;"123"&gt;&gt;&#125;,&#123;clean_session,true&#125;] in "/usr/share/vernemq/lua/auth/redis.lua" due to &#123;assert_error,&lt;&lt;"publish_aclexpects one of ( table nil ), but was a string"&gt;&gt;&#125;</span></span><br><span class="line"><span class="string">2018-05-11 15:44:54.969 [warning] &lt;0.522.0&gt;@vmq_mqtt_fsm:check_user:548 can'</span>t authenticate client &#123;[],&lt;&lt;<span class="string">"test-client"</span>&gt;&gt;&#125; due to error</span><br></pre></td></tr></table></figure><br>总共就以上5种情况。</p>
+<hr>
+<p>虽然我们解决了redis auth 的问题。 但是 关于 sub 和 pub 的权限校验，我们其实还是大开空门的。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_publish</span>(<span class="params">reg</span>)</span></span><br><span class="line"><span class="function">    <span class="title">return</span> <span class="title">true</span></span></span><br><span class="line"><span class="function"><span class="title">end</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">function</span> <span class="title">auth_on_subscribe</span>(<span class="params">reg</span>)</span></span><br><span class="line"><span class="function">    <span class="title">return</span> <span class="title">true</span></span></span><br><span class="line"><span class="function"><span class="title">end</span></span></span><br></pre></td></tr></table></figure><br>是直接返回true的。如果我们后面要对 sub 和 pub 主题进行权限控制的话，肯定不能这样做的,后面试着看能不能打印这个参数，所以打印这个：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_publish</span>(<span class="params">reg</span>)</span></span><br><span class="line"><span class="function">    <span class="title">print</span>(<span class="params"><span class="string">"1111111111111111111"</span></span>)</span></span><br><span class="line"><span class="function">    <span class="title">return</span> <span class="title">true</span></span></span><br><span class="line"><span class="function"><span class="title">end</span></span></span><br></pre></td></tr></table></figure><br>但是发现其实并没有触发到， 难道这两个函数没有用， 后面我就试着去掉了一下：我擦，还真的可以去掉，也就是，我redis.lua 改成这样就可以了<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos auth]# cat redis.lua</span><br><span class="line"><span class="built_in">require</span> <span class="string">"auth/auth_commons"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_register</span>(<span class="params">reg</span>)</span></span><br><span class="line"><span class="function">    <span class="title">if</span> <span class="title">reg</span>.<span class="title">username</span> ~= <span class="title">nil</span> <span class="title">and</span> <span class="title">reg</span>.<span class="title">password</span> ~= <span class="title">nil</span> <span class="title">then</span></span></span><br><span class="line"><span class="function">        <span class="title">key</span> = <span class="title">json</span>.<span class="title">encode</span>(<span class="params">&#123;reg.mountpoint, reg.client_id, reg.username&#125;</span>)</span></span><br><span class="line"><span class="function">        <span class="title">print</span>(<span class="params"><span class="string">"arg :"</span> .. <span class="string">"m: "</span> .. reg.mountpoint .. <span class="string">",c:"</span> .. reg.client_id .. <span class="string">",u:"</span> .. reg.username .. <span class="string">",p:"</span> .. reg.password</span>)</span></span><br><span class="line"><span class="function">    <span class="title">res</span> = <span class="title">redis</span>.<span class="title">cmd</span>(<span class="params">pool, <span class="string">"get "</span> .. key</span>)</span></span><br><span class="line"><span class="function">        <span class="title">if</span> <span class="title">res</span> <span class="title">then</span></span></span><br><span class="line"><span class="function">            <span class="title">print</span>(<span class="params"><span class="string">"res:"</span> .. res</span>)</span></span><br><span class="line"><span class="function">            <span class="title">res</span> = <span class="title">json</span>.<span class="title">decode</span>(<span class="params">res</span>)</span></span><br><span class="line"><span class="function">            <span class="title">truehash</span> = <span class="title">bcrypt</span>.<span class="title">hashpw</span>(<span class="params">reg.password, res.passhash</span>)</span></span><br><span class="line"><span class="function">            <span class="title">print</span>(<span class="params"><span class="string">"ture hash:"</span> .. truehash</span>)</span></span><br><span class="line"><span class="function">            <span class="title">print</span>(<span class="params"><span class="string">"redis hash:"</span> .. res.passhash</span>)</span></span><br><span class="line"><span class="function">            <span class="title">if</span> <span class="title">res</span>.<span class="title">passhash</span> == <span class="title">truehash</span> <span class="title">then</span></span></span><br><span class="line"><span class="function">                <span class="title">cache_insert</span>(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">                    reg.mountpoint,</span></span></span><br><span class="line"><span class="function"><span class="params">                    reg.client_id,</span></span></span><br><span class="line"><span class="function"><span class="params">                    reg.username,</span></span></span><br><span class="line"><span class="function"><span class="params">                    res.publish_acl,</span></span></span><br><span class="line"><span class="function"><span class="params">                    res.subscribe_acl</span></span></span><br><span class="line"><span class="function"><span class="params">                    </span>)</span></span><br><span class="line"><span class="function">                <span class="title">return</span> <span class="title">true</span></span></span><br><span class="line"><span class="function">            <span class="title">else</span></span></span><br><span class="line"><span class="function">               <span class="title">print</span>(<span class="params"><span class="string">"pass hash not match"</span></span>)</span></span><br><span class="line"><span class="function">            <span class="title">end</span></span></span><br><span class="line"><span class="function">        <span class="title">else</span></span></span><br><span class="line"><span class="function">           <span class="title">print</span>(<span class="params"><span class="string">"redis not found:"</span> .. key</span>)</span></span><br><span class="line"><span class="function">        <span class="title">end</span></span></span><br><span class="line"><span class="function">    <span class="title">else</span></span></span><br><span class="line"><span class="function">        <span class="title">print</span>(<span class="params"><span class="string">"param error, cannot find username or password"</span></span>)</span></span><br><span class="line"><span class="function">    <span class="title">end</span></span></span><br><span class="line"><span class="function">    <span class="title">return</span> <span class="title">false</span></span></span><br><span class="line"><span class="function"><span class="title">end</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">pool</span> = "<span class="title">auth_redis</span>"</span></span><br><span class="line"><span class="function"><span class="title">config</span> = </span>&#123;</span><br><span class="line">    pool_id = pool</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">redis.ensure_pool(config)</span><br><span class="line">hooks = &#123;</span><br><span class="line">    auth_on_register = auth_on_register,</span><br><span class="line">    auth_on_publish = auth_on_publish,</span><br><span class="line">    auth_on_subscribe = auth_on_subscribe,</span><br><span class="line">    on_unsubscribe = on_unsubscribe,</span><br><span class="line">    on_client_gone = on_client_gone,</span><br><span class="line">    on_client_offline = on_client_offline</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>只要修改 auth_on_register 就可以了， 其他5个webhook 都不需要重新写。那么权限是怎么设置的呢？其实上例之所以可以，是因为我们把 subscribe_acl 和 publish_acl 都设置为 #， 这个就意味着所有主题都可以被 sub 和 pub,所以才不会出现权限的问题。<br><img src="/2018/06/03/vernemq-verify/3.png" alt="3"><br>假设我们只指定 presence 主题可以被sub 和 pub。那么对于本例来说，也是可以的<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"passhash"</span>: <span class="string">"$2a$10$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK"</span>,</span><br><span class="line">    <span class="string">"subscribe_acl"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">"pattern"</span>: <span class="string">"presence"</span></span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="string">"publish_acl"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">"pattern"</span>: <span class="string">"presence"</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">presence</span><br><span class="line">Hello mqtt</span><br></pre></td></tr></table></figure><br>但是如果我如果换成另外一个主题，比如 say<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">client.on(<span class="string">'connect'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"connected"</span>);</span><br><span class="line">    client.subscribe(<span class="string">'say'</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        client.publish(<span class="string">'say'</span>, <span class="string">'Hello mqtt'</span>)</span><br><span class="line">    &#125;,<span class="number">10</span>)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>那么就会出问题，就会报权限问题<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2018</span><span class="number">-05</span><span class="number">-11</span> <span class="number">18</span>:<span class="number">01</span>:<span class="number">29.686</span> [error] &lt;<span class="number">0.1434</span><span class="number">.0</span>&gt;@vmq_mqtt_fsm:auth_on_publish:<span class="number">662</span> can<span class="string">'t auth publish [&lt;&lt;"test-user"&gt;&gt;,&#123;[],&lt;&lt;"test-client"&gt;&gt;&#125;,0,[&lt;&lt;"say"&gt;&gt;],&lt;&lt;"Hello mqtt"&gt;&gt;,false] due to error</span></span><br></pre></td></tr></table></figure><br>当然，他这个 pattern 其实有好几个变量的：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The pattern is a MQTT topic string that can contain MQTT wildcards, but also the template variables %m (mountpoint), %u (username), and %c (client id) which are automatically substituted <span class="keyword">with</span> the auth data provided.</span><br></pre></td></tr></table></figure><br>比如如果是 %u 就代表用户，那么就是：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="string">"passhash"</span>: <span class="string">"$2a$10$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK"</span>,</span><br><span class="line">    <span class="string">"subscribe_acl"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">"pattern"</span>: <span class="string">"%u/presence"</span></span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    <span class="string">"publish_acl"</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="string">"pattern"</span>: <span class="string">"%u/presence"</span></span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>那么就要这样写：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">client.on(<span class="string">'connect'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"connected"</span>);</span><br><span class="line">    client.subscribe(<span class="string">'test-user/presence'</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        client.publish(<span class="string">'test-user/presence'</span>, <span class="string">'Hello mqtt'</span>)</span><br><span class="line">    &#125;,<span class="number">10</span>)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>这样就可以了<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\nodejs\mqtt&gt;node app.js</span><br><span class="line">start</span><br><span class="line">connected</span><br><span class="line">test-user/presence</span><br><span class="line">Hello mqtt</span><br></pre></td></tr></table></figure><br>如果用户名错误的话，那么就会报权限错误<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">client.on(<span class="string">'connect'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"connected"</span>);</span><br><span class="line">    client.subscribe(<span class="string">'test-user1/presence'</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        client.publish(<span class="string">'test-user1/presence'</span>, <span class="string">'Hello mqtt'</span>)</span><br><span class="line">    &#125;,<span class="number">10</span>)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>所以如果要允许开放所有的 sub 和 pub 权限的话，并且又是只能这个 clientid 的 这个用户才能用，那么就要设置成这个：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">key： [<span class="string">""</span>,<span class="string">"test-client"</span>,<span class="string">"test-user"</span>]</span><br><span class="line">value： </span><br><span class="line">&#123;</span><br><span class="line"><span class="string">"passhash"</span>: <span class="string">"$2a$10$AeIjpDhnumqDJEliQMBjCuC1Uls9cc8EvzzMt8La1af5xOA/l4HvK"</span>,</span><br><span class="line"><span class="string">"subscribe_acl"</span>: [</span><br><span class="line">     &#123;</span><br><span class="line">         <span class="string">"pattern"</span>: <span class="string">"%c/%u/presence"</span></span><br><span class="line">     &#125;</span><br><span class="line">],</span><br><span class="line"><span class="string">"publish_acl"</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="string">"pattern"</span>: <span class="string">"%c/%u/presence"</span></span><br><span class="line">    &#125;</span><br><span class="line">]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>当然程序就要这样写：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> client  = mqtt.connect(<span class="string">'ws://kebingzao.com:1889/mqtt'</span>,&#123;</span><br><span class="line">    clientId: <span class="string">'test-client'</span>,</span><br><span class="line">    username: <span class="string">'test-user'</span>,</span><br><span class="line">    password: <span class="string">'123'</span></span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">client.on(<span class="string">'connect'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"connected"</span>);</span><br><span class="line">    client.subscribe(<span class="string">'test-client/test-user/presence'</span>);</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        client.publish(<span class="string">'test-client/test-user/presence'</span>, <span class="string">'Hello mqtt'</span>)</span><br><span class="line">    &#125;,<span class="number">10</span>)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>也就是说，只要你不告诉 别人你的 clientid 和 username，那么别人即使知道你的 主题， 他也不能 sub 和 pub,所以最后如果要完成 redis 校验的话，就要改两个地方：<br>一个是 vernemq.conf: 相较于默认的配置，主要改变这几个配置：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">allow_anonymous = off</span><br><span class="line">plugins.vmq_passwd = off</span><br><span class="line">plugins.vmq_acl = off</span><br><span class="line">plugins.vmq_diversity = on</span><br><span class="line"></span><br><span class="line">#vmq_acl.acl_file = /etc/vernemq/vmq.acl</span><br><span class="line">#vmq_passwd.password_file = /etc/vernemq/vmq.passwd</span><br><span class="line"></span><br><span class="line">vmq_diversity.auth_redis.enabled = on              </span><br><span class="line">vmq_diversity.redis.port = <span class="number">6379</span>                     </span><br><span class="line">vmq_diversity.redis.password = xxxx             </span><br><span class="line">vmq_diversity.redis.database = <span class="number">0</span>   </span><br><span class="line"></span><br><span class="line">log.console.level = debug</span><br></pre></td></tr></table></figure><br>还有就是 redis.lua 文件：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos auth]# cat redis.lua</span><br><span class="line"><span class="built_in">require</span> <span class="string">"auth/auth_commons"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">auth_on_register</span>(<span class="params">reg</span>)</span></span><br><span class="line"><span class="function">    <span class="title">if</span> <span class="title">reg</span>.<span class="title">username</span> ~= <span class="title">nil</span> <span class="title">and</span> <span class="title">reg</span>.<span class="title">password</span> ~= <span class="title">nil</span> <span class="title">then</span></span></span><br><span class="line"><span class="function">        <span class="title">key</span> = <span class="title">json</span>.<span class="title">encode</span>(<span class="params">&#123;reg.mountpoint, reg.client_id, reg.username&#125;</span>)</span></span><br><span class="line"><span class="function">        <span class="title">print</span>(<span class="params"><span class="string">"arg :"</span> .. <span class="string">"m: "</span> .. reg.mountpoint .. <span class="string">",c:"</span> .. reg.client_id .. <span class="string">",u:"</span> .. reg.username .. <span class="string">",p:"</span> .. reg.password</span>)</span></span><br><span class="line"><span class="function">    <span class="title">res</span> = <span class="title">redis</span>.<span class="title">cmd</span>(<span class="params">pool, <span class="string">"get "</span> .. key</span>)</span></span><br><span class="line"><span class="function">        <span class="title">if</span> <span class="title">res</span> <span class="title">then</span></span></span><br><span class="line"><span class="function">            <span class="title">print</span>(<span class="params"><span class="string">"res:"</span> .. res</span>)</span></span><br><span class="line"><span class="function">            <span class="title">res</span> = <span class="title">json</span>.<span class="title">decode</span>(<span class="params">res</span>)</span></span><br><span class="line"><span class="function">            <span class="title">truehash</span> = <span class="title">bcrypt</span>.<span class="title">hashpw</span>(<span class="params">reg.password, res.passhash</span>)</span></span><br><span class="line"><span class="function">            <span class="title">print</span>(<span class="params"><span class="string">"ture hash:"</span> .. truehash</span>)</span></span><br><span class="line"><span class="function">            <span class="title">print</span>(<span class="params"><span class="string">"redis hash:"</span> .. res.passhash</span>)</span></span><br><span class="line"><span class="function">            <span class="title">if</span> <span class="title">res</span>.<span class="title">passhash</span> == <span class="title">truehash</span> <span class="title">then</span></span></span><br><span class="line"><span class="function">                <span class="title">cache_insert</span>(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">                    reg.mountpoint,</span></span></span><br><span class="line"><span class="function"><span class="params">                    reg.client_id,</span></span></span><br><span class="line"><span class="function"><span class="params">                    reg.username,</span></span></span><br><span class="line"><span class="function"><span class="params">                    res.publish_acl,</span></span></span><br><span class="line"><span class="function"><span class="params">                    res.subscribe_acl</span></span></span><br><span class="line"><span class="function"><span class="params">                    </span>)</span></span><br><span class="line"><span class="function">                <span class="title">return</span> <span class="title">true</span></span></span><br><span class="line"><span class="function">            <span class="title">else</span></span></span><br><span class="line"><span class="function">               <span class="title">print</span>(<span class="params"><span class="string">"pass hash not match"</span></span>)</span></span><br><span class="line"><span class="function">            <span class="title">end</span></span></span><br><span class="line"><span class="function">        <span class="title">else</span></span></span><br><span class="line"><span class="function">           <span class="title">print</span>(<span class="params"><span class="string">"redis not found:"</span> .. key</span>)</span></span><br><span class="line"><span class="function">        <span class="title">end</span></span></span><br><span class="line"><span class="function">    <span class="title">else</span></span></span><br><span class="line"><span class="function">        <span class="title">print</span>(<span class="params"><span class="string">"param error, cannot find username or password"</span></span>)</span></span><br><span class="line"><span class="function">    <span class="title">end</span></span></span><br><span class="line"><span class="function">    <span class="title">return</span> <span class="title">false</span></span></span><br><span class="line"><span class="function"><span class="title">end</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">pool</span> = "<span class="title">auth_redis</span>"</span></span><br><span class="line"><span class="function"><span class="title">config</span> = </span>&#123;</span><br><span class="line">    pool_id = pool</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">redis.ensure_pool(config)</span><br><span class="line">hooks = &#123;</span><br><span class="line">    auth_on_register = auth_on_register,</span><br><span class="line">    auth_on_publish = auth_on_publish,</span><br><span class="line">    auth_on_subscribe = auth_on_subscribe,</span><br><span class="line">    on_unsubscribe = on_unsubscribe,</span><br><span class="line">    on_client_gone = on_client_gone,</span><br><span class="line">    on_client_offline = on_client_offline</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>最后就是记录以下 redis 的插入操作的语法：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SET <span class="string">"[\"\",\"test-client\",\"test-user\"]"</span> <span class="string">"&#123;\"passhash\":\"$2a$12$WDzmynWSMRVzfszQkB2MsOWYQK9qGtfjVpO8iBdimTOjCK/u6CzJK\",\"subscribe_acl\":[&#123;\"pattern\":\"a/+/c\"&#125;]&#125;"</span></span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/06/03/vernemq-verify/" title="webrtc 的 signal 服务器 VerneMQ 的权限校验">http://kebingzao.com/2018/06/03/vernemq-verify/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mqtt/" rel="tag"># mqtt</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/30/vernemq-install/" rel="next" title="webrtc 的 signal 服务器 VerneMQ 的搭建">
+                <i class="fa fa-chevron-left"></i> webrtc 的 signal 服务器 VerneMQ 的搭建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-密码文件校验的方式："><span class="nav-number">1.</span> <span class="nav-text">1 密码文件校验的方式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-acl-文件校验的方式："><span class="nav-number">2.</span> <span class="nav-text">2 acl 文件校验的方式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-数据库校验的方式："><span class="nav-number">3.</span> <span class="nav-text">3 数据库校验的方式：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-首先是正常情况："><span class="nav-number">3.1.</span> <span class="nav-text">1 首先是正常情况：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-少参数的情况，比如少了-username-或者-password的情况："><span class="nav-number">3.2.</span> <span class="nav-text">2 少参数的情况，比如少了 username 或者 password的情况：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-参数对，但是配起来找不到-redis-的情况："><span class="nav-number">3.3.</span> <span class="nav-text">3 参数对，但是配起来找不到 redis 的情况：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-redis-找到记录了，但是-passhash-匹配不上-的情况："><span class="nav-number">3.4.</span> <span class="nav-text">4 redis 找到记录了，但是 passhash 匹配不上 的情况：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-还有最后一种情况，就是redis-找到了，并且校验成功了，但是在最后的-cache-insert-会失败-因为cache-insert-方法会对-redis-存放的格式进行校验的，-具体代码如下："><span class="nav-number">3.5.</span> <span class="nav-text">5 还有最后一种情况，就是redis 找到了，并且校验成功了，但是在最后的 cache_insert 会失败,因为cache_insert 方法会对 redis 存放的格式进行校验的， 具体代码如下：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/06/03/vernemq-verify/';
+          this.page.identifier = '2018/06/03/vernemq-verify/';
+          this.page.title = 'webrtc 的 signal 服务器 VerneMQ 的权限校验';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

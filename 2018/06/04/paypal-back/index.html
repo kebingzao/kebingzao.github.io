@@ -79,20 +79,20 @@
 
 
 
-<meta name="description" content="之前做的一个支付项目，里面有用到了paypal支付，线上支付和webhook回调都正常，但是问题就出在测试环境上，当时修改代码之后，部署到测试服，自己在沙盒测试的时候，发现支付成功之后，根本就没有webhook过来。而且查看了一下测试服对应的PayPal账号的 Sandbox Webhooks Events，发现竟然全部都发送失败了。这下就蛋疼了，如果测试服的 webhook 没有过来，那怎么测试">
+<meta name="description" content="通过 paypal支付在测试环境下webhook过不来的原因 为了解决测试环境下收不到paypal webhook的情况，我们将pay项目的测试环境放到国外的服务器，但是这个又引发了新的问题，就是接口请求速度太慢了。相当于跨区请求，而且测试库又在国内， 所以就导致， 请求从国内到国外，然后国外从国内连接数据库， 随后response从国外传回国内。 来来回回至少两趟， 因此接口会经常超时。导致测试">
 <meta name="keywords" content="paypal">
 <meta property="og:type" content="article">
-<meta property="og:title" content="paypal支付在测试环境下webhook过不来的原因">
-<meta property="og:url" content="http://kebingzao.com/2018/06/04/paypal-test/index.html">
+<meta property="og:title" content="paypal的webhook走转发代理">
+<meta property="og:url" content="http://kebingzao.com/2018/06/04/paypal-back/index.html">
 <meta property="og:site_name" content="Zach Ke&#39;s Notes">
-<meta property="og:description" content="之前做的一个支付项目，里面有用到了paypal支付，线上支付和webhook回调都正常，但是问题就出在测试环境上，当时修改代码之后，部署到测试服，自己在沙盒测试的时候，发现支付成功之后，根本就没有webhook过来。而且查看了一下测试服对应的PayPal账号的 Sandbox Webhooks Events，发现竟然全部都发送失败了。这下就蛋疼了，如果测试服的 webhook 没有过来，那怎么测试">
+<meta property="og:description" content="通过 paypal支付在测试环境下webhook过不来的原因 为了解决测试环境下收不到paypal webhook的情况，我们将pay项目的测试环境放到国外的服务器，但是这个又引发了新的问题，就是接口请求速度太慢了。相当于跨区请求，而且测试库又在国内， 所以就导致， 请求从国内到国外，然后国外从国内连接数据库， 随后response从国外传回国内。 来来回回至少两趟， 因此接口会经常超时。导致测试">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://kebingzao.com/2018/06/04/paypal-test/1.png">
-<meta property="og:updated_time" content="2018-06-03T17:27:40.644Z">
+<meta property="og:image" content="http://kebingzao.com/2018/06/04/paypal-back/1.png">
+<meta property="og:updated_time" content="2018-06-03T17:30:30.469Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="paypal支付在测试环境下webhook过不来的原因">
-<meta name="twitter:description" content="之前做的一个支付项目，里面有用到了paypal支付，线上支付和webhook回调都正常，但是问题就出在测试环境上，当时修改代码之后，部署到测试服，自己在沙盒测试的时候，发现支付成功之后，根本就没有webhook过来。而且查看了一下测试服对应的PayPal账号的 Sandbox Webhooks Events，发现竟然全部都发送失败了。这下就蛋疼了，如果测试服的 webhook 没有过来，那怎么测试">
-<meta name="twitter:image" content="http://kebingzao.com/2018/06/04/paypal-test/1.png">
+<meta name="twitter:title" content="paypal的webhook走转发代理">
+<meta name="twitter:description" content="通过 paypal支付在测试环境下webhook过不来的原因 为了解决测试环境下收不到paypal webhook的情况，我们将pay项目的测试环境放到国外的服务器，但是这个又引发了新的问题，就是接口请求速度太慢了。相当于跨区请求，而且测试库又在国内， 所以就导致， 请求从国内到国外，然后国外从国内连接数据库， 随后response从国外传回国内。 来来回回至少两趟， 因此接口会经常超时。导致测试">
+<meta name="twitter:image" content="http://kebingzao.com/2018/06/04/paypal-back/1.png">
 
 
 
@@ -122,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://kebingzao.com/2018/06/04/paypal-test/"/>
+  <link rel="canonical" href="http://kebingzao.com/2018/06/04/paypal-back/"/>
 
 
 
 
 
-  <title>paypal支付在测试环境下webhook过不来的原因 | Zach Ke's Notes</title>
+  <title>paypal的webhook走转发代理 | Zach Ke's Notes</title>
   
 
 
@@ -303,7 +303,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/04/paypal-test/">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/04/paypal-back/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Zach Ke">
@@ -320,7 +320,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">paypal支付在测试环境下webhook过不来的原因</h1>
+          <h1 class="post-title" itemprop="name headline">paypal的webhook走转发代理</h1>
         
 
         <div class="post-meta">
@@ -332,7 +332,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-04T00:42:24+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-04T01:00:12+08:00">
                 2018-06-04
               </time>
             
@@ -373,9 +373,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/06/04/paypal-test/#comments" itemprop="discussionUrl">
+                <a href="/2018/06/04/paypal-back/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/06/04/paypal-test/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2018/06/04/paypal-back/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -383,7 +383,7 @@
 
           
           
-             <span id="/2018/06/04/paypal-test/" class="leancloud_visitors" data-flag-title="paypal支付在测试环境下webhook过不来的原因">
+             <span id="/2018/06/04/paypal-back/" class="leancloud_visitors" data-flag-title="paypal的webhook走转发代理">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -414,9 +414,8 @@
       
 
       
-        <p>之前做的一个支付项目，里面有用到了paypal支付，线上支付和webhook回调都正常，但是问题就出在测试环境上，当时修改代码之后，部署到测试服，自己在沙盒测试的时候，发现支付成功之后，根本就没有webhook过来。而且查看了一下测试服对应的PayPal账号的 Sandbox Webhooks Events，发现竟然全部都发送失败了。<br><img src="/2018/06/04/paypal-test/1.png" alt="1"><br>这下就蛋疼了，如果测试服的 webhook 没有过来，那怎么测试啊， 总不可能，没有测试就放到线上啊。后面想到，可能有一种情况会导致PayPal的webhook过不了，就是pay的测试服环境是国内的服务器。有可能PayPal的webhook 通知请求被长城防火墙给拦了，导致没法到达我们的服务器。而我们的线上服务器是在国外的，因此没问题。<br><a id="more"></a><br>为了验证这个猜想，所以就打算换一个pay的测试服环境，把他换到国外去，也就是美西的预发布环境那一台，所以要请运维将测试服上面的pay项目搬到国外的那一台预发布服务器上，并修改aws的router53的域名指向。<br>接下来就开始测试了，试着用测试官网支付了一下，然后看了看log有没有webhook过来。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">2017</span><span class="number">-09</span><span class="number">-30</span> <span class="number">09</span>:<span class="number">10</span>:<span class="number">45</span>] Paypal.DEBUG: received a <span class="keyword">new</span> webhook <span class="number">1506762645</span> [] []</span><br><span class="line">[<span class="number">2017</span><span class="number">-09</span><span class="number">-30</span> <span class="number">09</span>:<span class="number">10</span>:<span class="number">45</span>] Paypal.DEBUG: paypal webhook headers debug: &#123;<span class="string">"content-type"</span>:[<span class="string">"application\/json"</span>],<span class="string">"content-length"</span>:[<span class="string">"1276"</span>],<span class="string">"accept"</span>:[<span class="string">"*\/*"</span>],<span class="string">"paypal-transmission-id"</span>:[<span class="string">"36ef79d0-a5bf-11e7-86d9-77339302725b"</span>],<span class="string">"paypal-transmission-time"</span>:[<span class="string">"2017-09-30T09:10:33Z"</span>],<span class="string">"paypal-transmission-sig"</span>:</span><br></pre></td></tr></table></figure></p>
-<p>这样就没问题了，通过将测试环境也部署到国外的服务器，就可以在沙盒模式下也可以收到webhook了。</p>
-<p>ps：但是这样不是最优的，因为服务器在国外，但是测试的库是在国内的，这样会导致线路往返，从而接口超时了，因此后面又进行了优化 <a href="/2018/06/04/paypal-back/" title="paypal的webhook走转发代理">paypal的webhook走转发代理</a> </p>
+        <p>通过 <a href="/2018/06/04/paypal-test/" title="paypal支付在测试环境下webhook过不来的原因">paypal支付在测试环境下webhook过不来的原因</a> 为了解决测试环境下收不到paypal webhook的情况，我们将pay项目的测试环境放到国外的服务器，但是这个又引发了新的问题，就是接口请求速度太慢了。相当于跨区请求，而且测试库又在国内， 所以就导致， 请求从国内到国外，然后国外从国内连接数据库， 随后response从国外传回国内。 来来回回至少两趟， 因此接口会经常超时。导致测试很不方便。<br>所以为了线路问题和测试的便利性，还得把pay项目的测试环境放到国内来，这么一来我们就得解决paypal webhook收不到的问题。<br>后面我们想出来的解决方案就是，将pay项目的测试域名分区，就是中国区还是走测试服那一台，而国外的请求就走预发布环境那一台的，然后再将这个请求转发到国内的测试服上来，这样子paypal的webhook就可以先到达预发布那一台，然后在经由预发布那一台将请求转发到国内的测试服上来，从而可以解决webhook的问题。<br><a id="more"></a><br>要进行域名分区的话，那么就要在aws的router53服务针对pay的测试域名进行分区配置：<br><img src="/2018/06/04/paypal-back/1.png" alt="1"><br>那么这样子我们是不是就要维护两份代码？<br>其实不用，因为预发布那一台所有的请求都会被转发到中国区那一台服务器，因此预发布那一台只需要配置nginx转发就行了，根本就不需要有代码。<br>预发布服务器具体的nginx的配置如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[xxx@VM_16_13_centos sites-available]$ cat test-pay.airdroid.com.conf</span><br><span class="line">upstream test-pay_server &#123;</span><br><span class="line">        # 中国区那一台的服务器</span><br><span class="line">        server xx.xx.xx.xx:<span class="number">80</span> fail_timeout=<span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">        server_name  test-pay.airdroid.com;</span><br><span class="line">        listen       <span class="number">80</span>;</span><br><span class="line">        listen       <span class="number">443</span> ssl http2;</span><br><span class="line">        include      ssl/ssl_airdroid.com.conf;</span><br><span class="line"></span><br><span class="line">        include      conf.d/limitip.conf;</span><br><span class="line"></span><br><span class="line">        access_log  /<span class="keyword">var</span>/log/nginx/test-pay.airdroid.com.access.log main;</span><br><span class="line">        access_log  /<span class="keyword">var</span>/log/nginx/test-pay.airdroid.com<span class="number">.4</span>xx5xx.log combined <span class="keyword">if</span>=$loggable;</span><br><span class="line">        error_log   /<span class="keyword">var</span>/log/nginx/test-pay.airdroid.com.error.log warn;</span><br><span class="line"></span><br><span class="line">        # default 60s</span><br><span class="line">        proxy_connect_timeout <span class="number">60</span>s;</span><br><span class="line">        proxy_read_timeout    <span class="number">60</span>s;</span><br><span class="line">        proxy_send_timeout    <span class="number">90</span>s;</span><br><span class="line">        # 这边直接转发所有的请求到中国区的那一台服务器</span><br><span class="line">        location / &#123;</span><br><span class="line">                proxy_pass http:<span class="comment">//test-pay_server/;</span></span><br><span class="line">                proxy_set_header  Host             $host;</span><br><span class="line">                proxy_set_header  X-Real-IP        $remote_addr;</span><br><span class="line">                proxy_set_header  X-Forwarded-For  $proxy_add_x_forwarded_for;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>注意，他这个没有执行root的文件，只是一个反向代理，将请求代理到中国区的服务器，然后接下来就测试支付一下， 然后看 paypal的 webhook 能不能过来。<br>事实证明，是可以支付成功的。 而且paypal的webhook 也有过来了。<br>首先是到预发布环境的那一台中，预发布的log如下：<br>test-pay.airdroid.com 173.0.82.126 “173.0.82.126” - - [25/Apr/2018:03:40:24 +0000] “POST /pay/webhook HTTP/1.1” “200” 32 “-“ “PayPal/AUHD-214.0-45842681” 9.116 509 2907 [9.116]<br>然后直接将请求反向到中国区的服务器中： 这时候来源的241就是预发布那一台的ip，中国区的log如下：<br>test-pay.airdroid.com <font color="red">49.51.38.241</font> “173.0.82.126” - - [25/Apr/2018:03:40:24 +0000] “POST /pay/webhook HTTP/1.0” “200” 21 “-“ “PayPal/AUHD-214.0-45842681” 8.948 418 2843 [8.780]<br>这样子就成功处理了, 成功实现了测试服务在国内，又可以收到国外第三方支付的webhook通知了。</p>
 
       
     </div>
@@ -437,7 +436,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://kebingzao.com/2018/06/04/paypal-test/" title="paypal支付在测试环境下webhook过不来的原因">http://kebingzao.com/2018/06/04/paypal-test/</a>
+    <a href="http://kebingzao.com/2018/06/04/paypal-back/" title="paypal的webhook走转发代理">http://kebingzao.com/2018/06/04/paypal-back/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -465,8 +464,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/06/03/vernemq-verify/" rel="next" title="webrtc 的 signal 服务器 VerneMQ 的权限校验">
-                <i class="fa fa-chevron-left"></i> webrtc 的 signal 服务器 VerneMQ 的权限校验
+              <a href="/2018/06/04/paypal-test/" rel="next" title="paypal支付在测试环境下webhook过不来的原因">
+                <i class="fa fa-chevron-left"></i> paypal支付在测试环境下webhook过不来的原因
               </a>
             
           </div>
@@ -474,10 +473,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/06/04/paypal-back/" rel="prev" title="paypal的webhook走转发代理">
-                paypal的webhook走转发代理 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -778,9 +773,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'http://kebingzao.com/2018/06/04/paypal-test/';
-          this.page.identifier = '2018/06/04/paypal-test/';
-          this.page.title = 'paypal支付在测试环境下webhook过不来的原因';
+          this.page.url = 'http://kebingzao.com/2018/06/04/paypal-back/';
+          this.page.identifier = '2018/06/04/paypal-back/';
+          this.page.title = 'paypal的webhook走转发代理';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://zach-2.disqus.com/embed.js';

@@ -300,6 +300,174 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/26/golang-too-many-file/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/26/golang-too-many-file/" itemprop="url">golang 踩坑之 - 服务的文件句柄超出系统限制(too many open files)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-26T00:29:40+08:00">
+                2018-06-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang相关/" itemprop="url" rel="index">
+                    <span itemprop="name">golang相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/26/golang-too-many-file/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/06/26/golang-too-many-file/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/26/golang-too-many-file/" class="leancloud_visitors" data-flag-title="golang 踩坑之 - 服务的文件句柄超出系统限制(too many open files)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>之前有发生一个情况。就是我们有两个go程序服务A和B，其中A服务会调用B服务的http接口，而B服务是一个对外的长链接服务。两个服务在同一台服务器，其中在A服务的log中，发现在调用B服务接口的时候，会报这个错误：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="built_in">Error</span>] [<span class="regexp">/data/</span>code/go/src/stream-forward/phone_conn_pool.go <span class="number">80</span>] [<span class="number">2018</span><span class="number">-06</span><span class="number">-24</span> <span class="number">21</span>:<span class="number">38</span>:<span class="number">29</span>] </span><br><span class="line">[request phone(<span class="number">9</span>a7b01445fd7ec85f122eadbdc07e084) create channel: Get https:<span class="comment">//xxx.airdroid.com:9088/create_channel?id=xxx&amp;token=xxx&amp;host=xx-bd.airdroid.com&amp;port=9991: dial tcp xxx.xxx.xxx.xxx:9088: i/o timeout]</span></span><br></pre></td></tr></table></figure><br>即请求B服务的接口出错了，而且这两个服务是在同一台服务器上的。后面直接在这一台机子上，试着curl 这个接口地址。发现也不行：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[kbz@ovm-orcobyj8 dataforwardsrv]$ curl <span class="string">'https://xxx.airdroid.com:9088/create_channel?id=xxx&amp;token=xxx&amp;host=xxx-bd.airdroid.com&amp;port=9991'</span></span><br><span class="line">curl: (<span class="number">7</span>) Failed connect to xxx.airdroid.com:<span class="number">9088</span>; Connection timed out</span><br></pre></td></tr></table></figure><br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/06/26/golang-too-many-file/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/22/golang-http2-safari/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1794,181 +1962,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/11/xhr/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/11/xhr/" itemprop="url">关于 XMLHttpRequest 对象需要注意的地方</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-11T00:46:09+08:00">
-                2018-06-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/前端相关/" itemprop="url" rel="index">
-                    <span itemprop="name">前端相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/06/11/xhr/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/06/11/xhr/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/06/11/xhr/" class="leancloud_visitors" data-flag-title="关于 XMLHttpRequest 对象需要注意的地方">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>这段时间重新理了一下ajax技术，并重新理了一下XMLHttpRequest 对象，发现还是有几个地方比较容易忘记或者是需要注意的几个地方。</p>
-<h3 id="Ajax和XMLHttpRequest不是同一个东西"><a href="#Ajax和XMLHttpRequest不是同一个东西" class="headerlink" title="Ajax和XMLHttpRequest不是同一个东西"></a>Ajax和XMLHttpRequest不是同一个东西</h3><p>Ajax不等同于XMLHttpRequest，细究起来它们两个是属于不同维度的2个概念。<br>ajax是一种技术方案。它依赖的是现有的CSS/HTML/Javascript，而其中最核心的依赖是浏览器提供的XMLHttpRequest对象，是这个对象使得浏览器可以发出HTTP请求与接收HTTP响应。<br><blockquote><p>AJAX stands for Asynchronous JavaScript and XML. AJAX is a new technique for creating better, faster, and more interactive web applications with the help of XML, HTML, CSS, and Java Script.</p>
-<footer><strong>What is AJAX?</strong><cite><a href="http://www.tutorialspoint.com/ajax/what_is_ajax.htm" target="_blank" rel="noopener">www.tutorialspoint.com/ajax/what_is_ajax.htm</a></cite></footer></blockquote><br>用一句话来总结两者的关系：我们使用XMLHttpRequest对象来发送一个Ajax请求。<br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/06/11/xhr/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2018,7 +2016,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">40</span>
+                  <span class="site-state-item-count">41</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

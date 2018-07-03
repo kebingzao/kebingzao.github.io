@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="之前项目有发生过一种情况，就是我们的测试服在中国区，然后有一个load balance 的服务，在使用lb服务去请求线上美区的另一个服务的时候，因为墙的关系，导致请求失败，因此 pc端登录的时候，经常会失败。我看了一下 lb 的log，全部是请求 海外这一台 服务器，然后超时 [Error] [/var/lib/jenkins/workspace/airdroid-dev-go-loadbalan">
+<meta name="keywords" content="golang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang服务使用代理端口来请求海外服务器的http接口">
+<meta property="og:url" content="http://kebingzao.com/2018/07/04/golang-proxy/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="之前项目有发生过一种情况，就是我们的测试服在中国区，然后有一个load balance 的服务，在使用lb服务去请求线上美区的另一个服务的时候，因为墙的关系，导致请求失败，因此 pc端登录的时候，经常会失败。我看了一下 lb 的log，全部是请求 海外这一台 服务器，然后超时 [Error] [/var/lib/jenkins/workspace/airdroid-dev-go-loadbalan">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/07/04/golang-proxy/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/07/04/golang-proxy/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/07/04/golang-proxy/3.png">
+<meta property="og:updated_time" content="2018-07-03T16:57:57.062Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang服务使用代理端口来请求海外服务器的http接口">
+<meta name="twitter:description" content="之前项目有发生过一种情况，就是我们的测试服在中国区，然后有一个load balance 的服务，在使用lb服务去请求线上美区的另一个服务的时候，因为墙的关系，导致请求失败，因此 pc端登录的时候，经常会失败。我看了一下 lb 的log，全部是请求 海外这一台 服务器，然后超时 [Error] [/var/lib/jenkins/workspace/airdroid-dev-go-loadbalan">
+<meta name="twitter:image" content="http://kebingzao.com/2018/07/04/golang-proxy/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'J235M6G0L1',
+      apiKey: 'a0a700b756e601762eb3467caacb17e8',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/07/04/golang-proxy/"/>
+
+
+
+
+
+  <title>golang服务使用代理端口来请求海外服务器的http接口 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/07/04/golang-proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">golang服务使用代理端口来请求海外服务器的http接口</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-04T00:15:40+08:00">
+                2018-07-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang相关/" itemprop="url" rel="index">
+                    <span itemprop="name">golang相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/04/golang-proxy/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/07/04/golang-proxy/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/07/04/golang-proxy/" class="leancloud_visitors" data-flag-title="golang服务使用代理端口来请求海外服务器的http接口">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>之前项目有发生过一种情况，就是我们的测试服在中国区，然后有一个load balance 的服务，在使用lb服务去请求线上美区的另一个服务的时候，因为墙的关系，导致请求失败，因此 pc端登录的时候，经常会失败。<br><img src="/2018/07/04/golang-proxy/1.png" alt="1"><br>我看了一下 lb 的log，全部是请求 海外这一台 服务器，然后超时</p>
+<p>[Error] [/var/lib/jenkins/workspace/airdroid-dev-go-loadbalance/utils.go 245] [2017-08-10 15:21:16] [GetGoPushSubUrl getWebContent(<a href="https://xxx.xxx.com/server/get?k=t-200-18152649&amp;p=3" target="_blank" rel="noopener">https://xxx.xxx.com/server/get?k=t-200-18152649&amp;p=3</a>) error: Get <a href="https://xxx.xxx.com/server/get?k=xxx" target="_blank" rel="noopener">https://xxx.xxx.com/server/get?k=xxx</a>: <font color="red">net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)]</font></p>
+<a id="more"></a>
+<p>然后想到之前测试服的 pay 项目也是因为很难连上 PayPal 和 google 服务器，有让运维的同学在测试服上 开了一个 1082 端口用来做代理。<br>因此lb也可以用这个端口做http 代理，这样就可以连上海外的服务器了，这个测下在测试服用curl 走这个代理端口能不能访问访问海外服务器的接口，而不会被墙掉：<br><img src="/2018/07/04/golang-proxy/2.png" alt="1"><br>因此 lb 的代码要改下， 改成在请求 海外服务器 地址的时候，要用http 代理，原代码：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">   <span class="string">"io/ioutil"</span></span><br><span class="line">   <span class="string">"net/http"</span></span><br><span class="line">   <span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// get web page content</span></span><br><span class="line">func getWebContent(urlStr string, disableKeepAlives bool) ([]byte, error) &#123;</span><br><span class="line">   timeout := time.Duration(<span class="number">5</span> * time.Second)</span><br><span class="line">   client := &amp;http.Client&#123;</span><br><span class="line">      Timeout: timeout,</span><br><span class="line">   &#125;</span><br><span class="line">   resp, <span class="attr">err</span> := client.Get(urlStr)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      <span class="keyword">return</span> nil, err</span><br><span class="line">   &#125;</span><br><span class="line">   defer resp.Body.Close()</span><br><span class="line"></span><br><span class="line">   <span class="comment">// read body content</span></span><br><span class="line">   body, <span class="attr">err</span> := ioutil.ReadAll(resp.Body)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      <span class="keyword">return</span> nil, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> body, nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>修改后的代码：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">   <span class="string">"io/ioutil"</span></span><br><span class="line">   <span class="string">"net/http"</span></span><br><span class="line">   <span class="string">"time"</span></span><br><span class="line">   <span class="string">"iGong/util/log"</span></span><br><span class="line">   <span class="string">"net/url"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// get web page content</span></span><br><span class="line">func getWebContent(urlStr string, disableKeepAlives bool) ([]byte, error) &#123;</span><br><span class="line">   timeout := time.Duration(<span class="number">5</span> * time.Second)</span><br><span class="line">   client := &amp;http.Client&#123;</span><br><span class="line">      Timeout: timeout,</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">// 判断是否要进行http 代理请求</span></span><br><span class="line">   <span class="keyword">if</span> config.HttpProxy != <span class="string">""</span> &#123;</span><br><span class="line">      log.Infof(<span class="string">"http proxy(%v): %v"</span>, config.HttpProxy, urlStr)</span><br><span class="line">      proxyUrl, <span class="attr">err</span> := url.Parse(config.HttpProxy)</span><br><span class="line">      <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">         log.Info(<span class="string">"Bad proxy URL"</span>, err)</span><br><span class="line">         <span class="keyword">return</span> nil, err</span><br><span class="line">      &#125;</span><br><span class="line">      client.Transport = &amp;http.Transport&#123;<span class="attr">Proxy</span>: http.ProxyURL(proxyUrl)&#125;</span><br><span class="line">   &#125;</span><br><span class="line">   resp, <span class="attr">err</span> := client.Get(urlStr)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      <span class="keyword">return</span> nil, err</span><br><span class="line">   &#125;</span><br><span class="line">   defer resp.Body.Close()</span><br><span class="line"></span><br><span class="line">   <span class="comment">// read body content</span></span><br><span class="line">   body, <span class="attr">err</span> := ioutil.ReadAll(resp.Body)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      <span class="keyword">return</span> nil, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> body, nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>其实就是加了一个判断，判断是否有代理的配置，如果有的话，就启用代理<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 判断是否要进行http 代理请求</span></span><br><span class="line"><span class="keyword">if</span> config.HttpProxy != <span class="string">""</span> &#123;</span><br><span class="line">   log.Infof(<span class="string">"http proxy(%v): %v"</span>, config.HttpProxy, urlStr)</span><br><span class="line">   proxyUrl, <span class="attr">err</span> := url.Parse(config.HttpProxy)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      log.Info(<span class="string">"Bad proxy URL"</span>, err)</span><br><span class="line">      <span class="keyword">return</span> nil, err</span><br><span class="line">   &#125;</span><br><span class="line">   client.Transport = &amp;http.Transport&#123;<span class="attr">Proxy</span>: http.ProxyURL(proxyUrl)&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>然后在config.go 里面还要再加上这个设置<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//设置是否需要进行http代理，一般就是测试环境需要，因为测试环境有时候会因为被墙的关系，导致连不上线上的海外服务器,本地调试和线上都不需要</span></span><br><span class="line">HttpProxy     string <span class="string">`toml:"http_proxy"`</span></span><br></pre></td></tr></table></figure><br>最后在 配置文件加上这个配置项 config.conf<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http_proxy = <span class="string">"http://127.0.0.1:1082"</span></span><br></pre></td></tr></table></figure><br>这样就可以了， 接下来测试一下<br><img src="/2018/07/04/golang-proxy/3.png" alt="1"><br>发现可以了，看了一下log：</p>
+<p>[Info] [/var/lib/jenkins/workspace/airdroid-dev-go-loadbalance/utils.go 28] [2017-08-10 15:21:53] <font color="red">[http proxy</font>(<a href="http://127.0.0.1:1082)" target="_blank" rel="noopener">http://127.0.0.1:1082)</a>: <a href="https://xxx.xxx.com/server/get?k=xxx]" target="_blank" rel="noopener">https://xxx.xxx.com/server/get?k=xxx]</a><br>可以就实现了 http 的代理请求了</p>
+<hr>
+<p>不过之前有遇到过一个问题，就是设置 http_proxy 的时候没有加上协议，那么就会报错：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http_proxy = <span class="string">"127.0.0.1:1082"</span></span><br></pre></td></tr></table></figure></p>
+<p>[Error] [/var/lib/jenkins/workspace/airdroid-dev-go-loadbalance/utils.go 241] [2017-08-10 15:10:55] [GetGoPushSubUrl getWebContent(<a href="https://xxx.xxx.com/server/get?k=xxx" target="_blank" rel="noopener">https://xxx.xxx.com/server/get?k=xxx</a>) error: Get <a href="https://xxx.xxx.com/server/get?k=xxx" target="_blank" rel="noopener">https://xxx.xxx.com/server/get?k=xxx</a>: <font color="red">http: error connecting to proxy 127.0.0.1:1082: dial tcp :0: getsockopt: connection refused]</font></p>
+<p>后面查了一下<a href="https://stackoverflow.com/questions/14669958/error-when-fetching-url-through-proxy-in-go" target="_blank" rel="noopener">这篇问答</a>才发现是要加上http协议才行的</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/07/04/golang-proxy/" title="golang服务使用代理端口来请求海外服务器的http接口">http://kebingzao.com/2018/07/04/golang-proxy/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/03/iframe-post/" rel="next" title="利用iframe post跨域的方式解决项目在firefox浏览器中下载zip包的bug">
+                <i class="fa fa-chevron-left"></i> 利用iframe post跨域的方式解决项目在firefox浏览器中下载zip包的bug
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/04/vernemq-auth-pub/" rel="prev" title="VerneMQ 出现pub没有权限的错误，但是redis的权限又是正常的bug">
+                VerneMQ 出现pub没有权限的错误，但是redis的权限又是正常的bug <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/07/04/golang-proxy/';
+          this.page.identifier = '2018/07/04/golang-proxy/';
+          this.page.title = 'golang服务使用代理端口来请求海外服务器的http接口';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

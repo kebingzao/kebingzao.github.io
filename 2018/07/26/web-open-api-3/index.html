@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,open api," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="通过 web站点 开放第三方API流程(2) - 详解 jschannel 我们知道了iframe和父页面通信的方式。那么接下来就要描述下 具体 web api 要怎么设计。 一个Iframe对应一个channel，并且具有唯一性首先肯定一个iframe要对应一条单独的channel，所以channel通道肯定是要唯一的。针对这一点，那就是在初始化模块的时候，就初始化一个新的channel给新的i">
+<meta name="keywords" content="js,open api">
+<meta property="og:type" content="article">
+<meta property="og:title" content="web站点 开放第三方API流程(3) - web api 的设计">
+<meta property="og:url" content="http://kebingzao.com/2018/07/26/web-open-api-3/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="通过 web站点 开放第三方API流程(2) - 详解 jschannel 我们知道了iframe和父页面通信的方式。那么接下来就要描述下 具体 web api 要怎么设计。 一个Iframe对应一个channel，并且具有唯一性首先肯定一个iframe要对应一条单独的channel，所以channel通道肯定是要唯一的。针对这一点，那就是在初始化模块的时候，就初始化一个新的channel给新的i">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/07/26/web-open-api-3/1.png">
+<meta property="og:updated_time" content="2018-08-01T16:39:58.939Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="web站点 开放第三方API流程(3) - web api 的设计">
+<meta name="twitter:description" content="通过 web站点 开放第三方API流程(2) - 详解 jschannel 我们知道了iframe和父页面通信的方式。那么接下来就要描述下 具体 web api 要怎么设计。 一个Iframe对应一个channel，并且具有唯一性首先肯定一个iframe要对应一条单独的channel，所以channel通道肯定是要唯一的。针对这一点，那就是在初始化模块的时候，就初始化一个新的channel给新的i">
+<meta name="twitter:image" content="http://kebingzao.com/2018/07/26/web-open-api-3/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'J235M6G0L1',
+      apiKey: 'a0a700b756e601762eb3467caacb17e8',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/07/26/web-open-api-3/"/>
+
+
+
+
+
+  <title>web站点 开放第三方API流程(3) - web api 的设计 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/07/26/web-open-api-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">web站点 开放第三方API流程(3) - web api 的设计</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-26T19:54:42+08:00">
+                2018-07-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/26/web-open-api-3/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/07/26/web-open-api-3/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/07/26/web-open-api-3/" class="leancloud_visitors" data-flag-title="web站点 开放第三方API流程(3) - web api 的设计">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>通过 <a href="/2018/07/25/web-open-api-2/" title="web站点 开放第三方API流程(2) - 详解 jschannel">web站点 开放第三方API流程(2) - 详解 jschannel</a> 我们知道了iframe和父页面通信的方式。那么接下来就要描述下 具体 web api 要怎么设计。</p>
+<h2 id="一个Iframe对应一个channel，并且具有唯一性"><a href="#一个Iframe对应一个channel，并且具有唯一性" class="headerlink" title="一个Iframe对应一个channel，并且具有唯一性"></a>一个Iframe对应一个channel，并且具有唯一性</h2><p>首先肯定一个iframe要对应一条单独的channel，所以channel通道肯定是要唯一的。针对这一点，那就是在初始化模块的时候，就初始化一个新的channel给新的iframe。<br>这时候在父web站点的加载iframe的代码如下， <strong>IframeApp.js</strong>:</p>
+<p><font color="red">ps： 下面有一些代码跟父站点有上下文关系，如果没有特意说明，说明无关紧要，可以直接无视</font><br><a id="more"></a><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">self.find(<span class="string">"iframe"</span>).load(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    self.find(<span class="string">"iframe"</span>).css(<span class="string">"visibility"</span>,<span class="string">"visible"</span>);</span><br><span class="line">    self.removeAppLoadMask();</span><br><span class="line">    <span class="comment">// 这里添加了 本地API HOOK</span></span><br><span class="line">    <span class="comment">// 启动通讯通道，提供RPC</span></span><br><span class="line">    <span class="keyword">var</span> appFrameId = _.uniqueId(<span class="string">'i_app_'</span>);</span><br><span class="line">    self.find(<span class="string">'iframe'</span>).attr(<span class="string">'id'</span>, appFrameId);</span><br><span class="line">    <span class="comment">// 数据 api</span></span><br><span class="line">    <span class="keyword">var</span> provider = <span class="keyword">new</span> ApiProvider(appFrameId,self);</span><br><span class="line">    self._refChan = provider.getChannelObj();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>然后是 <strong>apiprovider.js</strong> 这个文件主要是提供对 iframe 页面的访问和授权支持。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>.ApiProvider = <span class="function"><span class="keyword">function</span> (<span class="params">iframeId,winObj</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="comment">// 允许的token</span></span><br><span class="line">    self._accessToken = <span class="literal">null</span>;</span><br><span class="line">    <span class="comment">// 允许开放的方法</span></span><br><span class="line">    self._accessMothod = [<span class="string">'registerPushHandle'</span>];</span><br><span class="line">    self.chan = Channel.build(&#123;</span><br><span class="line">        <span class="built_in">window</span>: <span class="built_in">document</span>.getElementById(iframeId).contentWindow,</span><br><span class="line">        origin: <span class="string">"*"</span>,</span><br><span class="line">        scope: <span class="string">"AirDroid_Web_OpenAPI"</span>,</span><br><span class="line">        onReady: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            self.init();</span><br><span class="line">            <span class="comment">// 将通道绑定到具体的窗体对象,使得既可以让子窗体监听父窗体的窗体变化，也可以让子窗体调用父窗体的渲染形式</span></span><br><span class="line">            winObj &amp;&amp; winObj.hookChan(self.chan);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>其中可以看到在初始化通道的时候，会把新建的窗体对象 winObj 也传过去。这个也是为了后面要实现的 window 开发api的方法做的。通过这个winObj，就可以操作这个窗体的一些行为，比如放大，缩小，关闭等等。</p>
+<p>接下来就是子页面的初始化通道的代码，这边会提供一个sdk，让子页面来可以引入， <strong>airdroid.js</strong> :<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化通道</span></span><br><span class="line">self._chan = Channel.build(&#123;</span><br><span class="line">    <span class="built_in">window</span> : <span class="built_in">window</span>.parent,</span><br><span class="line">    origin : self.origin,</span><br><span class="line">    scope : <span class="string">"AirDroid_Web_OpenAPI"</span>,</span><br><span class="line">    onReady : <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.debug(<span class="string">"channel ready!!!!!"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><br>上面的 <strong>self.origin</strong> 在初始化的时候，是可以传的，如果没有传的话，就默认为 * </p>
+<h2 id="提供权限校验"><a href="#提供权限校验" class="headerlink" title="提供权限校验"></a>提供权限校验</h2><p>肯定不能允许所有的子iframe都能连上来，万一是一些有问题的iframe呢，因此要提供一个accessKey的功能。 也就是当iframe通道连上来的时候。还要再进行初始化，把合法的accessKey传上来。然后父对象检查这个accessKey是否合法，如果合法的话，就把对应的accessToken传回去。后面子页面的每一个call都要带上accessToken过来，只有这个accessToken是合法的，父页面才能正常执行。这样就能够防止非法的iframe连上来，即使连上来，也因为没有accessToken，导致没法执行方法。<br>具体父站点的代码如下， <strong>apiprovider.js</strong> :<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 允许开放的方法</span></span><br><span class="line">self._accessMothod = [<span class="string">'registerPushHandle'</span>];</span><br><span class="line"><span class="comment">// 获取权限初始化，要得到对应的tokenKey</span></span><br><span class="line">init: <span class="function"><span class="keyword">function</span>(<span class="params">trans,params</span>)</span>&#123;</span><br><span class="line">    trans.delayReturn(<span class="literal">true</span>);</span><br><span class="line">    <span class="comment">// 获取accessKey</span></span><br><span class="line">    <span class="keyword">var</span> accessKey = params.accessKey;</span><br><span class="line">    <span class="keyword">var</span> mapItem = self.controlMap[accessKey];</span><br><span class="line">    <span class="keyword">if</span>(mapItem)&#123;</span><br><span class="line">        self._accessToken = mapItem.token;</span><br><span class="line">        <span class="comment">// 所允许被调用的方法，目前只对服务方法和系统方法做限制，其他先不限制</span></span><br><span class="line">        self._accessMothod = self._accessMothod.concat(mapItem.openMap.SERVER_METHODS.concat(mapItem.openMap.SYSTEM_METHODS || []));</span><br><span class="line">        trans.complete(self.getAccessToken());</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">throw</span> &#123;<span class="attr">error</span>: <span class="string">"forbidden"</span>, <span class="attr">message</span>: <span class="string">"Illegal access key"</span>&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure><br>子iframe会再连接上通道之后，执行init事件，然后把accessKey传过来。然后父页面检查accessKey是否合法。如果不合法就返回错误。如果合法，就返回对应的accessToken，作为后面的通信凭证。<br>其中controlMap 这个变量存放的是所有的合法accessKey以及所允许调用的api列表，这个可以从服务端去取，比如之前的那个demo的的 controlMap就是：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// demo 接口</span></span><br><span class="line"><span class="string">"c81e728d9d4c2f636f067f89cc14862c"</span>: &#123;</span><br><span class="line">    token: <span class="string">"52e50a7fd932cba519f306c5b6faf246"</span>,</span><br><span class="line">    <span class="comment">// 所允许的方法</span></span><br><span class="line">    openMap: &#123;</span><br><span class="line">        <span class="comment">// 服务请求</span></span><br><span class="line">        SERVER_METHODS:[</span><br><span class="line">            <span class="string">"sayHello"</span>,</span><br><span class="line">            <span class="string">"getDeviceOpt"</span>,</span><br><span class="line">            <span class="string">"reconnectPhone"</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="comment">// 系统方法</span></span><br><span class="line">        SYSTEM_METHODS: [</span><br><span class="line">            <span class="string">"system.alert"</span>,</span><br><span class="line">            <span class="string">"system.confirm"</span></span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>不过有一个方法比较特殊，registerPushHandle 这个方法是用来注册push推送事件的，默认所有的子页面都有，不需要额外给。<br>对于父页面来说，针对子页面所有的call请求都要做校验，只有校验通过，才会执行其call请求，主要是以下两层校验：</p>
+<ul>
+<li>子页面过来的方法，父页面必须存在，并且在这个子iframe所允许调用的api列表里面。</li>
+<li>子页面过来的accessToken是否是正确的。</li>
+</ul>
+<p>具体指向的方法如下， <strong>apiprovider.js</strong> :<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">provide: <span class="function"><span class="keyword">function</span> (<span class="params">apis</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    apis = apis || [];</span><br><span class="line">    <span class="comment">// todo 这边不绑定window系列的方法，window系列的方法会在AppWindow里面绑定，这里只绑定 service 和 system 系列的方法</span></span><br><span class="line">    _.each(apis, <span class="function"><span class="keyword">function</span> (<span class="params">apiName</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> isSupportedApi = _.has(self.ALL_APIS, apiName);</span><br><span class="line">        <span class="keyword">if</span> (isSupportedApi) &#123;</span><br><span class="line">            self.chan.bind(apiName, <span class="function"><span class="keyword">function</span>(<span class="params">tran,params</span>)</span>&#123;</span><br><span class="line">                <span class="comment">// 除了init方法之后，每一次请求都会带accessToken</span></span><br><span class="line">                <span class="keyword">var</span> token = params.accessToken;</span><br><span class="line">                <span class="comment">// 如果token是对的，并且是在允许的方法之内，那么就允许</span></span><br><span class="line">                <span class="comment">// 如果是init 和 registerPushHandle 这两个方法，也允许</span></span><br><span class="line">                <span class="keyword">if</span>((token &amp;&amp; self.getAccessToken() === token &amp;&amp; self._accessMothod.indexOf(apiName) &gt; <span class="number">-1</span>)</span><br><span class="line">                    || apiName === <span class="string">"init"</span>)&#123;</span><br><span class="line">                    <span class="comment">// 是被允许开放的方法</span></span><br><span class="line">                    <span class="keyword">return</span> self.ALL_APIS[apiName].apply(<span class="keyword">this</span>,<span class="built_in">arguments</span>);</span><br><span class="line">                &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                    <span class="comment">// 返回禁止信息</span></span><br><span class="line">                    <span class="keyword">if</span>(self.getAccessToken() !== token)&#123;</span><br><span class="line">                        <span class="keyword">throw</span> &#123;<span class="attr">error</span>: <span class="string">"forbidden"</span>, <span class="attr">message</span>: <span class="string">'token error'</span>&#125;;</span><br><span class="line">                    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(self._accessMothod.indexOf(apiName) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">                        <span class="keyword">throw</span> &#123;<span class="attr">error</span>: <span class="string">"forbidden"</span>, <span class="attr">message</span>: apiName +<span class="string">' method forbidden'</span>&#125;;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure><br>之所以特殊判断init方法是因为init是初始化权限校验的方法，所以肯定是不能做限制的。<br>子页面 sdk <strong>airdroid.js</strong> :<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(methodName === <span class="string">'init'</span>)&#123;</span><br><span class="line">    <span class="keyword">var</span> oldsuccess = configs.success;</span><br><span class="line">    <span class="comment">// 判断是否有传deviceId</span></span><br><span class="line">    self._deviceId = configs.params.deviceId || <span class="string">""</span>;</span><br><span class="line">    configs.success = <span class="function"><span class="keyword">function</span>(<span class="params">result</span>)</span>&#123;</span><br><span class="line">        self._accessToken = result;</span><br><span class="line">        <span class="comment">// 绑定白名单监听</span></span><br><span class="line">        <span class="comment">// 这边要有一个延迟，不然AirDroidHelper还没有初始化</span></span><br><span class="line">        setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="comment">// 注册监听事件</span></span><br><span class="line">            <span class="keyword">if</span>(self.PUSH_LISTENS &amp;&amp; self.PUSH_LISTENS.length &gt; <span class="number">0</span> &amp;&amp; self._deviceId)&#123;</span><br><span class="line">                <span class="comment">// 注册推送监听事件</span></span><br><span class="line">                self.registerPushHandle(&#123;</span><br><span class="line">                    params: &#123;</span><br><span class="line">                        deviceId: self._deviceId,</span><br><span class="line">                        pushArr: self.PUSH_LISTENS</span><br><span class="line">                    &#125;,</span><br><span class="line">                    success: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                        <span class="built_in">console</span>.log(<span class="string">"register handle success"</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="number">500</span>);</span><br><span class="line">        self.isFunction(oldsuccess) &amp;&amp; oldsuccess(result);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="comment">// 不是的话，全部带上token值</span></span><br><span class="line">    configs.params.accessToken = self._accessToken;</span><br><span class="line">&#125;</span><br><span class="line">configs.success = configs.success || <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;&#125;;</span><br><span class="line">self._chan.call(configs);</span><br></pre></td></tr></table></figure><br>子页面在初始化所能调用方法的时候，就要先进行init的初始化，调用父页面的init方法，将accessKey，获取对应的token，然后把token保存起来，接下来的所有的方法调用全部都会加上这个token参数<br>configs 就是调用通道传过去的配置 option 对象，包括调用的方法名，参数，以及成功回调，和失败回调。</p>
+<h2 id="限制所能调用的API方法和类型"><a href="#限制所能调用的API方法和类型" class="headerlink" title="限制所能调用的API方法和类型"></a>限制所能调用的API方法和类型</h2><p>虽然accessToken校验通过了，但是针对不同的iframe页面，可能web父页面这边要授予不同的权限。有些页面只能调用一些基本的组件，比如alert，蒙层之类的。 而有的子页面却可以调用更深层次的api，比如获取当前连接手机的信息，获取当前登录用户的信息，甚至可以通过子页面的api，直接重连手机。所以对子页面所能调用的api方法也是有限制的。<br>因为该设计还不够完善。目前子页面的通信功能主要有两种类型：</p>
+<ol>
+<li><p>主动调用（分为三个类型）<br>  1.1  服务类型 service， 比如获取设备信息，连接设备之类的<br>  1.2  系统组件类型 system， 比如弹出alert框，出现蒙层之类的<br>  1.3  窗体类型 window， 比如放大，缩小，关闭之类的</p>
+</li>
+<li><p>事件监听（分为两个类型）<br>  2.1 服务推送事件 push 类型，比如设备断开，新增联系人之类的<br>  2.2 窗体监听事件类型，比如监听窗体的放大，缩小，关闭</p>
+</li>
+</ol>
+<p>以下的子页面 demo 模块所允许的方法列表： <strong>openMethodList.js</strong></p>
+<p><font color="red">注意： 这些方法肯定要在父页面所开放的所有api方法中，如果不在里面的话，肯定的调不到</font><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">AirdroidRuntime.getMethodList = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="comment">// 服务端增加接口，只需要在列表里添加接口名就行。</span></span><br><span class="line">        SERVER_METHODS : [</span><br><span class="line">            <span class="string">"sayHello"</span>,</span><br><span class="line">            <span class="string">"getDeviceOpt"</span>,</span><br><span class="line">            <span class="string">"reconnectPhone"</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="comment">// 对应窗体的触发事件, 注意，因为这一部分只跟窗体有关，所以方法的实现不在apiprovider.js 中，而是在 AppWindow.js 的 hookChan</span></span><br><span class="line">         WINDOW_METHODS : [</span><br><span class="line">            <span class="string">"window.close"</span>,</span><br><span class="line">            <span class="string">"window.max"</span>,</span><br><span class="line">            <span class="string">"window.min"</span>,</span><br><span class="line">            <span class="string">"window.restore"</span>,</span><br><span class="line">            <span class="string">"window.setBodySize"</span>,</span><br><span class="line">            <span class="string">"window.setDPosition"</span></span><br><span class="line">         ],</span><br><span class="line">        <span class="comment">// 对应系统层面的触发事件,一般是一些公告方法，比如alert之类的</span></span><br><span class="line">         SYSTEM_METHODS : [</span><br><span class="line">            <span class="string">"system.alert"</span>,</span><br><span class="line">            <span class="string">"system.confirm"</span></span><br><span class="line">         ],</span><br><span class="line">    <span class="comment">//====================上面都是调用事件，下面都是监听事件=======================//</span></span><br><span class="line">         <span class="comment">// 监听push事件</span></span><br><span class="line">         PUSH_LISTENS : [</span><br><span class="line">            <span class="comment">// camera 关闭</span></span><br><span class="line">             <span class="string">"camera_destroy"</span>,</span><br><span class="line">            <span class="comment">// 手机端服务挂掉</span></span><br><span class="line">             <span class="string">"access_offline"</span></span><br><span class="line">         ],</span><br><span class="line">        <span class="comment">// 监听系统和窗体事件</span></span><br><span class="line">         SYSTEM_LISTENS : [</span><br><span class="line">            <span class="comment">// 监听窗体的关闭事件</span></span><br><span class="line">             <span class="string">"window.close"</span>,</span><br><span class="line">            <span class="comment">// 监听窗体的最小化</span></span><br><span class="line">             <span class="string">"window.min"</span>,</span><br><span class="line">            <span class="comment">// 监听窗体恢复大小</span></span><br><span class="line">             <span class="string">"window.restore"</span>,</span><br><span class="line">            <span class="comment">// 监听窗体的最大化</span></span><br><span class="line">             <span class="string">"window.max"</span>,</span><br><span class="line">            <span class="comment">// 监听窗体的大小改变</span></span><br><span class="line">             <span class="string">"window.resize"</span></span><br><span class="line">         ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>虽然有5种类型，但其实调用的方式是有差的。前三种是属于 主动调用，即 call 的方式。后两种是监听，即 bind 方式。</p>
+<h3 id="先从主动调用说起。"><a href="#先从主动调用说起。" class="headerlink" title="先从主动调用说起。"></a>先从主动调用说起。</h3><p>主动调用的三种类型，其中前两种 SERVER_METHODS 和 SYSTEM_METHODS 类型的方法，是需要父页面那边授权的。也就是说，哪怕子页面这边已经在方法里面添加了这些方面，但是如果父页面没有授权该子页面这些方法。实际上是会返回forbidden的。<br>也就是刚才 demo 模块 controlMap 的 openMap：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// demo 接口</span></span><br><span class="line"><span class="string">"c81e728d9d4c2f636f067f89cc14862c"</span>: &#123;</span><br><span class="line">    token: <span class="string">"52e50a7fd932cba519f306c5b6faf246"</span>,</span><br><span class="line">    <span class="comment">// 所允许的方法</span></span><br><span class="line">    openMap: &#123;</span><br><span class="line">        <span class="comment">// 服务请求</span></span><br><span class="line">        SERVER_METHODS:[</span><br><span class="line">            <span class="string">"sayHello"</span>,</span><br><span class="line">            <span class="string">"getDeviceOpt"</span>,</span><br><span class="line">            <span class="string">"reconnectPhone"</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="comment">// 系统方法</span></span><br><span class="line">        SYSTEM_METHODS: [</span><br><span class="line">            <span class="string">"system.alert"</span>,</span><br><span class="line">            <span class="string">"system.confirm"</span></span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>也就是说， SERVER_METHODS 和 SYSTEM_METHODS 类型的方法需要父页面在该子页面的openMap里面授权，才能在子页面添加或者使用，如果调用不存在openMap里面的方法，就会返回forbidden。<br>如果把上面openMap里面的 sayHello 方法去掉，然后让子页面去调用这个方法的话，就会出现以下报错：<br><img src="/2018/07/26/web-open-api-3/1.png" alt="1"><br>具体代码 <strong>apiprovider.js</strong> :<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>((token &amp;&amp; self.getAccessToken() === token &amp;&amp; self._accessMothod.indexOf(apiName) &gt; <span class="number">-1</span>)</span><br><span class="line">    || apiName === <span class="string">"init"</span>)&#123;</span><br><span class="line">    <span class="comment">// 是被允许开放的方法</span></span><br><span class="line">    <span class="keyword">return</span> self.ALL_APIS[apiName].apply(<span class="keyword">this</span>,<span class="built_in">arguments</span>);</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="comment">// 返回禁止信息</span></span><br><span class="line">    <span class="keyword">if</span>(self.getAccessToken() !== token)&#123;</span><br><span class="line">        <span class="keyword">throw</span> &#123;<span class="attr">error</span>: <span class="string">"forbidden"</span>, <span class="attr">message</span>: <span class="string">'token error'</span>&#125;;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(self._accessMothod.indexOf(apiName) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="keyword">throw</span> &#123;<span class="attr">error</span>: <span class="string">"forbidden"</span>, <span class="attr">message</span>: apiName +<span class="string">' method forbidden'</span>&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>当父页面 throw 这个错误的时候，就会触发子页面的configs.error 方法， <strong>airdroid.js</strong>:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">configs.error = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    self.isFunction(originError) &amp;&amp; originError.apply(<span class="literal">null</span>, <span class="built_in">arguments</span>);</span><br><span class="line">    self.errorHandler.apply(<span class="literal">null</span>, <span class="built_in">arguments</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 默认的错误事件</span></span><br><span class="line">errorHandler: <span class="function"><span class="keyword">function</span> (<span class="params">errorType, msg</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.debug(<span class="string">"error："</span> + errorType + <span class="string">", msg："</span> + msg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>至于第三个主动调用的window系列的方法。并不要求父页面授权，只要父页面有绑定这些事件就行了。因此子页面只要添加在methodList里面就行了。<br>而且因为window系列的方法都涉及到对该窗体的操作，因此这部分代码是不在父对象的apiprovider.js里面绑定的。而是在window操作方法 AppWindow.js 绑定的。<br>通过在初始化通道的时候，将通道传到这个第三方页面的窗体事件<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将通道绑定到具体的窗体对象,使得既可以让子窗体监听父窗体的窗体变化，也可以让子窗体调用父窗体的渲染形式</span></span><br><span class="line">winObj &amp;&amp; winObj.hookChan(self.chan);</span><br></pre></td></tr></table></figure><br>可以看到，在初始化IframeApp的时候，会把该app对应的窗体对象传过来。因此就变成在AppWindow.js 绑定对应的window系列的对象， <strong>AppWindow.js</strong>:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">hookChan: <span class="function"><span class="keyword">function</span> (<span class="params">chan</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>._isIframeApp) &#123;</span><br><span class="line">        <span class="keyword">this</span>._chan = chan;</span><br><span class="line">        <span class="comment">// 窗体函数hook</span></span><br><span class="line">        chan.bind(<span class="string">"window.close"</span>, <span class="function"><span class="keyword">function</span> (<span class="params">m, param</span>) </span>&#123;</span><br><span class="line">            self._wDom.find(<span class="string">".window_close"</span>).trigger(<span class="string">'click'</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;).bind(<span class="string">"window.max"</span>, <span class="function"><span class="keyword">function</span> (<span class="params">m, param</span>) </span>&#123;</span><br><span class="line">            self._wDom.find(<span class="string">".window_max"</span>).trigger(<span class="string">'click'</span>);</span><br><span class="line">        &#125;).bind(<span class="string">"window.min"</span>, <span class="function"><span class="keyword">function</span> (<span class="params">m, param</span>) </span>&#123;</span><br><span class="line">            self._wDom.find(<span class="string">".window_min"</span>).trigger(<span class="string">'click'</span>);</span><br><span class="line">        &#125;).bind(<span class="string">"window.restore"</span>, <span class="function"><span class="keyword">function</span> (<span class="params">m, param</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (self._wDom.attr(<span class="string">"max"</span>) == <span class="string">"true"</span> &amp;&amp; self._wDom.is(<span class="string">":visible"</span>)) &#123;</span><br><span class="line">                self._wDom.find(<span class="string">".window_max"</span>).trigger(<span class="string">'click'</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!self._wDom.is(<span class="string">"visible"</span>) &amp;&amp; self._taskItem.is(<span class="string">":visible"</span>)) &#123;</span><br><span class="line">                self._taskItem.trigger(<span class="string">'click'</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;).bind(<span class="string">"window.setTitle"</span>, <span class="function"><span class="keyword">function</span> (<span class="params">m, param</span>) </span>&#123;</span><br><span class="line">            self.updateTitle(param.title);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure><br>所以会发现在 apiprovider.js 里面绑定所有接口的时候，是没有包含window系列的接口的。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">self.ALL_APIS = $.extend(<span class="literal">true</span>,&#123;&#125;, self.SERVER_APIS, self.SYSTEM_APIS);</span><br><span class="line"><span class="comment">// chan 绑定所有的事件</span></span><br><span class="line">self.provide(_.keys(self.ALL_APIS));</span><br></pre></td></tr></table></figure><br>他只有service 系列和system 系列的接口。<br>当然对于子页面来说，所有的调用系列的接口，都是一样的，只要调用call接口就行了。</p>
+<h3 id="被动监听接口"><a href="#被动监听接口" class="headerlink" title="被动监听接口"></a>被动监听接口</h3><p>既然调用系列的接口分析完了，接下来就是分析监听系列的接口了。<br>监听系列的接口，都不需要在父页面授权（当然，父页面本身要存在这个事件触发），子页面只要监听就行了。<br><strong>openApi.js</strong>:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 监听窗体和系统的变化，比如窗体的放大缩小等等，可以去 airdroid.js 里面的 SYSTEM_LISTENS 去添加</span></span><br><span class="line"><span class="comment">// 同时也监听推送事件，可以去airdroid.js 里面的 PUSH_LISTENS 去添加</span></span><br><span class="line">on: <span class="function"><span class="keyword">function</span>(<span class="params">eventName,callback</span>)</span>&#123;</span><br><span class="line">    airdroidApi.on(eventName,<span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.debug(<span class="string">"[API Rev]=&gt;"</span> + eventName);</span><br><span class="line">        <span class="built_in">console</span>.log(data);</span><br><span class="line">        callback(data);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>其中 airdroidApi 其实就是 airdroid.js 这个 sdk的对象， openApi.js 是对他的进行再封装，他们两个合起来才是完成的第三方SDK。<br>其中airdroid.js基本上是不变的，而 openApi.js 是含有一定定制化的，因为不同的第三方，我们要给他们分配的权限和方法是不一样的。<br><strong>airdriod.js</strong> 关于事件监听的代码，就是用bind方法：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 接下来绑定监听的系统和窗体事件和push推送事件</span></span><br><span class="line"><span class="keyword">var</span> API_LISTENS = self.SYSTEM_LISTENS.concat(self.PUSH_LISTENS);</span><br><span class="line"></span><br><span class="line">self.on = <span class="function"><span class="keyword">function</span>(<span class="params">eventType,callback</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(API_LISTENS.indexOf(eventType) == <span class="number">-1</span> || !<span class="keyword">this</span>.isFunction(callback))&#123;</span><br><span class="line">        <span class="built_in">console</span>.info(<span class="string">"[API Error]=&gt;Not support this event type["</span> + eventType + <span class="string">"] OR callback is not a function!"</span>);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">// 绑定监听事件，让父窗口来调用</span></span><br><span class="line">        self._chan.bind(eventType,<span class="function"><span class="keyword">function</span>(<span class="params">m,d</span>)</span>&#123;</span><br><span class="line">            callback(d);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>但是对于系统监听和窗体监听，这两种的实现还不一样。窗体监听只要上述那种处理就行了，直接通过on方法 bind 事件就行了。在父对象的窗体操作中，如果触发特定的操作，比如放大，关闭等等，就会触发这个事件，然后子页面就可以触发执行对应的方法了。<br>以下是父对象的窗体最大化事件 <strong>AppWindow.js</strong>：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// iframe程序，往通道激发信息</span></span><br><span class="line"><span class="keyword">if</span> (self._isIframeApp &amp;&amp; self._chan) &#123;</span><br><span class="line">    self._chan.call(&#123;</span><br><span class="line">        method: <span class="string">"window.max"</span>,</span><br><span class="line">        params: &#123;&#125;,</span><br><span class="line">        success: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;,</span><br><span class="line">        error: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>在执行父窗体的最大化事件的时候，会去检测该窗体是否是iframe窗体，并且是否有通道对象。如果都有的话，就触发这个window 事件。这时如果子页面有监听这个窗体事件的话，就可以触发到了。<br>而系统监听的事件，比如设备断开啊，相机打开，断开了，都跟具体的设备有关系。因此子页面这边除了用on方法bind知会，还需要再进行一层处理，就是去父页面注册（因为父页面用的是listener 观察者模式）。<br>这时候就需要调用一个子页面必须要调用的方法 registerPushHandle 来绑定具体的 系统监听的事件。<br>子页面 <strong>airdroid.js</strong>:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册监听事件</span></span><br><span class="line"><span class="keyword">if</span>(self.PUSH_LISTENS &amp;&amp; self.PUSH_LISTENS.length &gt; <span class="number">0</span> &amp;&amp; self._deviceId)&#123;</span><br><span class="line">    <span class="comment">// 注册推送监听事件</span></span><br><span class="line">    self.registerPushHandle(&#123;</span><br><span class="line">        params: &#123;</span><br><span class="line">            deviceId: self._deviceId,</span><br><span class="line">            pushArr: self.PUSH_LISTENS</span><br><span class="line">        &#125;,</span><br><span class="line">        success: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">"register handle success"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>要带上deviceId过去，并且是在init方法里面调用的, 父页面 <strong>apiprovider.js</strong>。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册推送事件(这个事件很重要，是第三方消息推送的基础)</span></span><br><span class="line">registerPushHandle: <span class="function"><span class="keyword">function</span>(<span class="params">trans,params</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> deviceId = params.deviceId;</span><br><span class="line">    <span class="keyword">var</span> pushArr = params.pushArr;</span><br><span class="line">    <span class="comment">// 加入到白名单中</span></span><br><span class="line">     Airdroid.MessageManage.addWhiteListListener(pushArr);</span><br><span class="line">    <span class="comment">// 监听事件</span></span><br><span class="line">     _.each(pushArr,<span class="function"><span class="keyword">function</span>(<span class="params">item</span>)</span>&#123;</span><br><span class="line">        <span class="comment">// 先去掉旧的，再绑定新的事件</span></span><br><span class="line">        Airdroid.MessageManage.removeListener(item,<span class="literal">undefined</span>,<span class="string">"open_api_"</span> + deviceId);</span><br><span class="line">        Airdroid.MessageManage.addListener(item,<span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">if</span>(!(data.data &amp;&amp; data.data.deviceId))&#123;</span><br><span class="line">                data.data = data.data || &#123;&#125;;</span><br><span class="line">                data.data.deviceId = Airdroid.DeviceManage.getCurrentDeviceId();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(data.data.deviceId == deviceId)&#123;</span><br><span class="line">                <span class="comment">// 如果是该设备，就call</span></span><br><span class="line">                self.chan.call(&#123;</span><br><span class="line">                    method: item,</span><br><span class="line">                    params: data.data,</span><br><span class="line">                    success: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">                    &#125;,</span><br><span class="line">                    error: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="string">"open_api_"</span> + deviceId);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure><br>这样子，如果出现设备断开等事件的话，就会用fireEvent触发，然后就到这边，最后执行call，到子页面触发执行, 这时候就会触发了。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (event_type == self.EventTypes.msg_access_offline) &#123;</span><br><span class="line">    self.fireEvent(event_type, &#123;&#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<hr>
+<p>完整系列：<br><a href="/2018/07/25/web-open-api-1/" title="web站点 开放第三方API流程(1) - 简介">web站点 开放第三方API流程(1) - 简介</a><br><a href="/2018/07/25/web-open-api-2/" title="web站点 开放第三方API流程(2) - 详解 jschannel">web站点 开放第三方API流程(2) - 详解 jschannel</a><br><a href="/2018/07/26/web-open-api-3/" title="web站点 开放第三方API流程(3) - web api 的设计">web站点 开放第三方API流程(3) - web api 的设计</a><br><a href="/2018/07/31/web-open-api-4/" title="web站点 开放第三方API流程(4) - demo的架构详解">web站点 开放第三方API流程(4) - demo的架构详解</a><br><a href="/2018/07/31/web-open-api-5/" title="web站点 开放第三方API流程(5) - demo的sdk详解">web站点 开放第三方API流程(5) - demo的sdk详解</a><br><a href="/2018/08/01/web-open-api-6/" title="web站点 开放第三方API流程(6) - 父页面的sdk详解">web站点 开放第三方API流程(6) - 父页面的sdk详解</a><br><a href="/2018/08/01/web-open-api-7/" title="web站点 开放第三方API流程(7) - 嵌入包含广告的第三方iframe">web站点 开放第三方API流程(7) - 嵌入包含广告的第三方iframe</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/07/26/web-open-api-3/" title="web站点 开放第三方API流程(3) - web api 的设计">http://kebingzao.com/2018/07/26/web-open-api-3/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/open-api/" rel="tag"># open api</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/25/web-open-api-2/" rel="next" title="web站点 开放第三方API流程(2) - 详解 jschannel">
+                <i class="fa fa-chevron-left"></i> web站点 开放第三方API流程(2) - 详解 jschannel
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/31/web-open-api-4/" rel="prev" title="web站点 开放第三方API流程(4) - demo的架构详解">
+                web站点 开放第三方API流程(4) - demo的架构详解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">56</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一个Iframe对应一个channel，并且具有唯一性"><span class="nav-number">1.</span> <span class="nav-text">一个Iframe对应一个channel，并且具有唯一性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#提供权限校验"><span class="nav-number">2.</span> <span class="nav-text">提供权限校验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#限制所能调用的API方法和类型"><span class="nav-number">3.</span> <span class="nav-text">限制所能调用的API方法和类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#先从主动调用说起。"><span class="nav-number">3.1.</span> <span class="nav-text">先从主动调用说起。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#被动监听接口"><span class="nav-number">3.2.</span> <span class="nav-text">被动监听接口</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/07/26/web-open-api-3/';
+          this.page.identifier = '2018/07/26/web-open-api-3/';
+          this.page.title = 'web站点 开放第三方API流程(3) - web api 的设计';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

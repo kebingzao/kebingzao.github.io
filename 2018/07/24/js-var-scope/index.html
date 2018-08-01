@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言最近有在面试前端的人，刚好经常有问了一下关于js的作用域和变量提升，结合网上的一些资料，我这边按照自己的理解总结了一下。 JS 的变量作用域引用术语，就是：作用域（Scope）即代码执行过程中的变量、函数或者对象的可访问区域，作用域决定了变量或者其他资源的可见性；计算机安全中一条基本原则即是用户只应该访问他们需要的资源，而作用域就是在编程中遵循该原则来保证代码的安全性。除此之外，作用域还能够帮">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈之-js的作用域和变量提升">
+<meta property="og:url" content="http://kebingzao.com/2018/07/24/js-var-scope/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言最近有在面试前端的人，刚好经常有问了一下关于js的作用域和变量提升，结合网上的一些资料，我这边按照自己的理解总结了一下。 JS 的变量作用域引用术语，就是：作用域（Scope）即代码执行过程中的变量、函数或者对象的可访问区域，作用域决定了变量或者其他资源的可见性；计算机安全中一条基本原则即是用户只应该访问他们需要的资源，而作用域就是在编程中遵循该原则来保证代码的安全性。除此之外，作用域还能够帮">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/07/24/js-var-scope/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/07/24/js-var-scope/2.png">
+<meta property="og:updated_time" content="2018-08-01T16:39:58.934Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅谈之-js的作用域和变量提升">
+<meta name="twitter:description" content="前言最近有在面试前端的人，刚好经常有问了一下关于js的作用域和变量提升，结合网上的一些资料，我这边按照自己的理解总结了一下。 JS 的变量作用域引用术语，就是：作用域（Scope）即代码执行过程中的变量、函数或者对象的可访问区域，作用域决定了变量或者其他资源的可见性；计算机安全中一条基本原则即是用户只应该访问他们需要的资源，而作用域就是在编程中遵循该原则来保证代码的安全性。除此之外，作用域还能够帮">
+<meta name="twitter:image" content="http://kebingzao.com/2018/07/24/js-var-scope/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'J235M6G0L1',
+      apiKey: 'a0a700b756e601762eb3467caacb17e8',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/07/24/js-var-scope/"/>
+
+
+
+
+
+  <title>浅谈之-js的作用域和变量提升 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/07/24/js-var-scope/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浅谈之-js的作用域和变量提升</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-24T21:15:01+08:00">
+                2018-07-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/07/24/js-var-scope/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/07/24/js-var-scope/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/07/24/js-var-scope/" class="leancloud_visitors" data-flag-title="浅谈之-js的作用域和变量提升">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近有在面试前端的人，刚好经常有问了一下关于js的作用域和变量提升，结合网上的一些资料，我这边按照自己的理解总结了一下。</p>
+<h2 id="JS-的变量作用域"><a href="#JS-的变量作用域" class="headerlink" title="JS 的变量作用域"></a>JS 的变量作用域</h2><p>引用术语，就是：<br><blockquote><p>作用域（Scope）即代码执行过程中的变量、函数或者对象的可访问区域，作用域决定了变量或者其他资源的可见性；计算机安全中一条基本原则即是用户只应该访问他们需要的资源，而作用域就是在编程中遵循该原则来保证代码的安全性。除此之外，作用域还能够帮助我们提升代码性能、追踪错误并且修复它们。</p>
+</blockquote><br>JavaScript 中的作用域主要分为<strong>全局作用域（Global Scope）</strong> 与 <strong>局部作用域（Local Scope）</strong> 两大类<br><a id="more"></a></p>
+<h3 id="ES5-的函数作用域"><a href="#ES5-的函数作用域" class="headerlink" title="ES5 的函数作用域"></a>ES5 的函数作用域</h3><p>在ES5中， 局部作用域只有函数作用域， 直到 ES6 中，才增加了另一个局部作用域，也就是块级作用域。<br>全局作用域其实是全局对象的作用域，任意地方都可以访问到（如果没有被函数作用域覆盖）。<br>函数对象作用域跟 <strong>c</strong> 的局部变量作用域是不同的，它的作用域是整个函数范围，不论他是在函数的任意位置申明的！这就是所谓的 <strong>hoisting</strong>，也就是变量提升的概念。<br>函数作用域的一个例子：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> name = <span class="string">"Global"</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">showName</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> name = <span class="string">"Local"</span>;    <span class="comment">// local variable; only accessible in this showName function</span></span><br><span class="line">  <span class="built_in">console</span>.log (name);    <span class="comment">// output Local</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">console</span>.log (name); <span class="comment">// the global variable, output Global</span></span><br></pre></td></tr></table></figure><br>用 <strong>var</strong> 证明没有块级作用域的一个例子：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">     <span class="keyword">var</span> name = <span class="string">"Global"</span>;  </span><br><span class="line">     <span class="keyword">if</span>(name)&#123;</span><br><span class="line">         <span class="keyword">var</span> name = <span class="string">"Local"</span>;</span><br><span class="line">         <span class="built_in">console</span>.log(name);</span><br><span class="line">     &#125; </span><br><span class="line">     <span class="built_in">console</span>.log(name)</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure><br>最后两个都输出 <strong>Local</strong>。 说明 if 大括号里面的作用域还是外层的那个函数作用域。<br>还有一个例子就是：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">  <span class="comment">// some code</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> i;</span><br></pre></td></tr></table></figure><br>这时候就会输出 <strong>10</strong></p>
+<h3 id="全局变量"><a href="#全局变量" class="headerlink" title="全局变量"></a>全局变量</h3><p>所有在函数外面声明的变量都处于全局作用域中。在浏览器环境中，这个全局作用域就是我们的<strong>Window</strong>对象（或者整个HTML文档）。<br>每一个在函数外部声明或者定义的变量都是一个全局对象，所以这个变量可以在任何地方被使用，例如：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> myName = <span class="string">"ke"</span>;</span><br><span class="line"><span class="keyword">var</span> sex = <span class="string">"male"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//他们都处在window对象中</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="built_in">window</span>.myName); <span class="comment">// ke</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'sex'</span> <span class="keyword">in</span> <span class="built_in">window</span>); <span class="comment">//true</span></span><br></pre></td></tr></table></figure><br>还有一种就是： 如果一个变量第一次初始化/声明的时候没有使用var关键字，那么他自动加入到全局作用域中。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">showAge</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="comment">//age初始化时没有使用var关键字，所以它是一个全局变量</span></span><br><span class="line">  age = <span class="number">20</span>;</span><br><span class="line">  <span class="built_in">console</span>.log(age);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">showAge();        <span class="comment">//20</span></span><br><span class="line"><span class="built_in">console</span>.log(age); <span class="comment">//因为age是全局变量，所以这里输出的也是20</span></span><br></pre></td></tr></table></figure><br><strong>setTimeout/setInterval</strong> 中的函数是在全局作用域中执行的。<br><strong>setTimeout/setInterval</strong> 中的函数所处在于全局作用域中，所以函数中使用this关键字时，这个this关键字指向的是全局对象（Window）:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Value1 = <span class="number">200</span>;</span><br><span class="line"><span class="keyword">var</span> Value2 = <span class="number">20</span>;</span><br><span class="line"><span class="keyword">var</span> myObj = &#123;</span><br><span class="line">  Value1 : <span class="number">10</span>,</span><br><span class="line">  Value2 : <span class="number">1</span>,</span><br><span class="line">  caleculatedIt: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="keyword">this</span>.Value1 * <span class="keyword">this</span>.Value2);</span><br><span class="line">    &#125;, <span class="number">1000</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">myObj.caleculatedIt(); <span class="comment">//4000</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="作用域链"><a href="#作用域链" class="headerlink" title="作用域链"></a>作用域链</h2><ul>
+<li>每一个函数都有一个与之相关的作用域链，当js在查找变量X时，它会从链的第一个对象开始查找，如果这个对象有一个名为X的属性值，则会直接使用这个 属性值，如果没有就继续下一个对象寻找…一直找到最后都没有的话则会输出ReferenceError引用错误！</li>
+<li>作用域链查找的顺序是：当前函数对象–&gt;上一层函数对象…–&gt;window全局对象！</li>
+</ul>
+<p>举个例子：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> name = <span class="string">'1'</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fun1</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> name = <span class="string">'2'</span>;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">fun2</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> name = <span class="string">'3'</span>;</span><br><span class="line">        <span class="built_in">console</span>.log(name);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">fun3</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(name);</span><br><span class="line">    &#125;</span><br><span class="line">    fun2()</span><br><span class="line">    fun3()</span><br><span class="line">&#125;</span><br><span class="line">fun1();</span><br></pre></td></tr></table></figure><br>最后会输出 <strong>3</strong>，<strong>2</strong>.<br>刚开始输出 <strong>3</strong> 很好理解，就是 fun2的函数作用域下的name是 <strong>3</strong>，他会覆盖所有上层作用域下的同名变量，所以输出<strong>3</strong>。而后面输出<strong>2</strong>是因为func3 找不到 name 变量，就到上一层函数作用域 fun1，这时候找到了，所以就为<strong>2</strong>， 当然如果这时候还找不到的话，那么就得到window 全局对象去找。</p>
+<p>还有一个例子就是：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript">    <span class="function"><span class="keyword">function</span> <span class="title">buttonInit</span>(<span class="params"></span>)</span>&#123;</span></span><br><span class="line"><span class="javascript">        <span class="keyword">for</span>(<span class="keyword">var</span> i=<span class="number">1</span>;i&lt;<span class="number">4</span>;i++)&#123;</span></span><br><span class="line"><span class="javascript">            <span class="keyword">var</span> b=<span class="built_in">document</span>.getElementById(<span class="string">"button"</span>+i);</span></span><br><span class="line"><span class="javascript">            b.addEventListener(<span class="string">"click"</span>,<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123; alert(<span class="string">"Button"</span>+i);&#125;,<span class="literal">false</span>);</span></span><br><span class="line"><span class="undefined">        &#125;</span></span><br><span class="line"><span class="undefined">    &#125;</span></span><br><span class="line"><span class="javascript">    <span class="built_in">window</span>.onload=buttonInit;</span></span><br><span class="line"><span class="undefined"> </span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"button1"</span>&gt;</span>Button1<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"button2"</span>&gt;</span>Button2<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"button3"</span>&gt;</span>Button3<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">body</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure><br>当文档加载完毕，给几个按钮注册点击事件，当我们点击按钮时，会弹出什么提示框呢？？<br>是的，三个按钮都是弹出：Button4。当注册事件结束后，i的值为4，当点击按钮时，事件函数即“function(){ alert(“Button”+i);}”这个匿名函数中没有i,根据作用域链，所以到buttonInit函数中找，此时i的值为4，所以弹出”button4“。</p>
+<h2 id="变量提升（hoisting）"><a href="#变量提升（hoisting）" class="headerlink" title="变量提升（hoisting）"></a>变量提升（hoisting）</h2><p>MDN中对变量hoisting的解释是这样的：<br><blockquote><p>var hoisting<br>Because variable declarations (and declarations in general) are processed before any code is executed, declaring a variable anywhere in the code is equivalent to declaring it at the top. This also means that a variable can appear to be used before it’s declared. This behavior is called “hoisting”, as it appears that the variable declaration is moved to the top of the function or global code.</p>
+</blockquote><br>这段话翻译下来就是：<br>因为变量声明是在任意代码执行前处理的，在代码区中任意地方声明 变量和在最开始（最上面）的地方声明 是一样的。也就是说，看起来一个变量可以在声明 之前被使用！这种行为就是所谓的“hoisting”，也就是变量提升，看起来就像变量的声明 被自动移动到了函数或全局代码的最顶上。<br><strong>注意：仅仅是声明提升了，定义并不会被提升。</strong><br>其实这里的 “<strong>变量提升</strong>” 名词是随大流叫法，“变量提升” 改为 “标识符提升” 更准确。因为变量一般指使用 var 声明的标识符，JS 里使用 function 声明的标识符也存在提升（Hoisting）。<br>JS 存在变量提升，这个的设计其实是低劣的，或者是语言实现时的一个副作用。它允许变量不声明就可以访问，或声明在后使用在前。新手对于此则很迷惑，甚至许多使用JS多年老手也比较迷惑。但在 ES6 加入 let/const 后，变量Hoisting 就不存在了， 虽然 let/const 的声明也会被提升，但是不允许在实际声明前使用。<br>为了更好的理解变量提升，先看几个例子：<br><strong>1.  变量未声明，直接使用</strong><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(notDefined);</span><br><span class="line">&#125;</span><br><span class="line">test();</span><br></pre></td></tr></table></figure><br>直接报错，很正常。<br><img src="/2018/07/24/js-var-scope/1.png" alt="1"><br><strong>2. 变量声明在末尾</strong><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(declaredButNotAssigned); <span class="comment">// undefined</span></span><br><span class="line">    <span class="keyword">var</span> declaredButNotAssigned;</span><br><span class="line">&#125;</span><br><span class="line">test();</span><br></pre></td></tr></table></figure><br>这时候会输出 <strong>undefined</strong><br><strong>3. 变量声明在末尾，同时给变量赋值</strong><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(declaredAndAssigned); <span class="comment">// undefined</span></span><br><span class="line">    <span class="keyword">var</span> declaredAndAssigned = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line">test();</span><br></pre></td></tr></table></figure><br>这时候也输出 <strong>undefined</strong></p>
+<p>2,3 都发生了变量提升（Hoisting）。这时候将 3 的声明和赋值拆开，也就是真正js执行的顺序是这样子的：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> declaredAndAssigned;</span><br><span class="line">  <span class="built_in">console</span>.log(declaredAndAssigned); <span class="comment">// undefined</span></span><br><span class="line">  declaredAndAssigned = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这里强调 “代码顺序” 和 “运行顺序”，是因为多数时候我们写的代码都是顺序执行的，即 “代码顺序” 和 “运行顺序” 是一致的。这也符合人的大脑的思维过程。比如有过 C语言 经验的程序员：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">int main() &#123;</span><br><span class="line">  int x = <span class="number">1</span>;</span><br><span class="line">  printf(<span class="string">"%d, "</span>, x); <span class="comment">// 1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>两句代码，先声明整数型 x， 再输出。代码顺序和运行顺序是一致的，即正常运行。<br>如果顺序反过来：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">int main() &#123;</span><br><span class="line">  printf(<span class="string">"%d, "</span>, x); <span class="comment">// error</span></span><br><span class="line">  int x = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>此时，编译都不能通过了。但JS里可以反过来写，见<strong>2</strong>、<strong>3</strong>。<br>因此，有类C语言经验的程序员，都很清楚变量需要先声明后使用，不然会报错。而到了JS里，有变量提升现象，可以先使用后声明，C 的经验用到JS里迷惑便出现了。<br><strong>4. 函数表达式也存在变量提升</strong><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  alert(func); <span class="comment">// undefined</span></span><br><span class="line">  <span class="keyword">var</span> func = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line">test();</span><br></pre></td></tr></table></figure><br>这时候会输出 <strong>undefined</strong><br>如果想使用这个函数，那么就会直接报错：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  alert(func); <span class="comment">// undefined</span></span><br><span class="line">  func(); <span class="comment">// 报异常</span></span><br><span class="line">  <span class="keyword">var</span> func = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line">test();</span><br></pre></td></tr></table></figure><br><img src="/2018/07/24/js-var-scope/2.png" alt="1"><br>结果func 是 undefined，调用 func 则会报异常。 在上面的定义中提到了 可访问性 和 可用性 对应如下语句。</p>
+<ul>
+<li>可访问性：alert(func)，输出 undefined，可以运行，可以访问 func。</li>
+<li>可用性： func()， 报异常，不能正常调用 func，表示无可用性。</li>
+</ul>
+<p>在js真正的执行的顺序如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> func;</span><br><span class="line">  alert(func); <span class="comment">// undefined</span></span><br><span class="line">  func(); <span class="comment">// 报异常</span></span><br><span class="line">  func = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line">test();</span><br></pre></td></tr></table></figure><br><strong>2</strong>、<strong>3</strong>、<strong>4</strong> 都是使用 var 声明的变量，JS 里函数声明也会存在提升，只是这个 “变量” 比较特殊，它是一个 function 类型（可以作为函数、方法或构造器）。它的名字（标识符）也会提升到当前作用域的顶部。<br><strong>5. 函数声明的名也会提升到当前作用域顶部</strong><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  alert(f1); <span class="comment">// function</span></span><br><span class="line">  f1(); <span class="comment">// "called"</span></span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">f1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    alert(<span class="string">'called'</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">test();</span><br></pre></td></tr></table></figure><br>整个函数声明提升上来了，其实在js的执行顺序就变成：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">test</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">f1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    alert(<span class="string">'called'</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  alert(f1); </span><br><span class="line">  f1(); </span><br><span class="line">&#125;</span><br><span class="line">test();</span><br></pre></td></tr></table></figure><br>我们看到，声明 f1 在代码最末，f1 使用在前，alert(f1) 和 f1() 都正常执行，表示 可访问性 和 可用性 都有了。<br>在作用域中，不管变量和函数写在什么位置，所有变量会被整体提升到作用域顶部，所有函数也会被整体提升到作用域顶部.<br>javascript中一个名字(name)以四种方式进入作用域(scope)，其优先级顺序如下：</p>
+<ul>
+<li>语言内置：所有的作用域中都有 this 和 arguments 关键字;</li>
+<li>形式参数：函数的参数在函数作用域中都是有效的;</li>
+<li>函数声明：形如function foo() {};</li>
+<li>变量声明：形如var bar;</li>
+</ul>
+<p>名字声明的优先级如上所示。也就是说如果一个变量的名字与函数的名字相同，那么函数的名字会覆盖变量的名字，无论其在代码中的顺序如何。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">typeof</span> foo); <span class="comment">//function</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>)</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">var</span> foo = <span class="string">"foo"</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">typeof</span> foo); <span class="comment">//string</span></span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure><br>虽然 var foo 是在 foo的函数声明之后， 但是优先级还是函数声明高，所以在第一个console的时候， foo 其实就是 foo 函数。其实执行顺序是这样的：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123; </span><br><span class="line">    <span class="keyword">var</span> foo;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>)</span>&#123;&#125;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">typeof</span> foo); <span class="comment">//function</span></span><br><span class="line">    foo = <span class="string">"foo"</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">typeof</span> foo); <span class="comment">//string</span></span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure><br>或者是：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123; </span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>)</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">var</span> foo;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">typeof</span> foo); <span class="comment">//function</span></span><br><span class="line">    foo = <span class="string">"foo"</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">typeof</span> foo); <span class="comment">//string</span></span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure><br>无论 foo 变量声明在 foo 函数声明的前面或者后面。最后都是 函数声明覆盖变量声明。 当然后面的重新赋值，那是另外的操作了。</p>
+<p><strong>命名函数表达式</strong>：<br>可以像函数声明一样为函数表达式指定一个名字，但这并不会使函数表达式成为函数声明。命名函数表达式的名字不会进入名字空间，也不会被提升。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">f();<span class="comment">//TypeError: f is not a function</span></span><br><span class="line">foo();<span class="comment">//ReferenceError: foo is not defined</span></span><br><span class="line"><span class="keyword">var</span> f = <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>)</span>&#123;<span class="built_in">console</span>.log(<span class="keyword">typeof</span> foo);&#125;;</span><br><span class="line">f();<span class="comment">//function</span></span><br><span class="line">foo();<span class="comment">//ReferenceError: foo is not defined</span></span><br></pre></td></tr></table></figure><br>命名函数表达式的名字只在该函数的作用域内部有效。</p>
+<h2 id="ES-6-的-let-const-和块级作用域"><a href="#ES-6-的-let-const-和块级作用域" class="headerlink" title="ES 6 的 let/const 和块级作用域"></a>ES 6 的 let/const 和块级作用域</h2><p>类似于 if、switch 条件选择或者 for、while 这样的循环体即是所谓的块级作用域；在 ES5 中，要实现块级作用域，即需要在原来的函数作用域上包裹一层，即在需要限制变量提升的地方手动设置一个变量来替代原来的全局变量，譬如：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> callbacks = [];</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt;= <span class="number">2</span>; i++) &#123;</span><br><span class="line">  (<span class="function"><span class="keyword">function</span> (<span class="params">i</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 这里的 i 仅归属于该函数作用域</span></span><br><span class="line">    callbacks[i] = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> i * <span class="number">2</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;)(i);</span><br><span class="line">&#125;</span><br><span class="line">callbacks[<span class="number">0</span>]() === <span class="number">0</span>;</span><br><span class="line">callbacks[<span class="number">1</span>]() === <span class="number">2</span>;</span><br><span class="line">callbacks[<span class="number">2</span>]() === <span class="number">4</span>;</span><br></pre></td></tr></table></figure><br>而在 ES6 中，可以直接利用 let 关键字达成这一点：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> callbacks = []</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt;= <span class="number">2</span>; i++) &#123;</span><br><span class="line">  <span class="comment">// 这里的 i 属于当前块作用域</span></span><br><span class="line">  callbacks[i] = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> i * <span class="number">2</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">callbacks[<span class="number">0</span>]() === <span class="number">0</span></span><br><span class="line">callbacks[<span class="number">1</span>]() === <span class="number">2</span></span><br><span class="line">callbacks[<span class="number">2</span>]() === <span class="number">4</span></span><br></pre></td></tr></table></figure><br>const定义的变量不可修改，const一般在require一个模块的时候用或者定义一些全局常量。<br>这边主要说说 let 和 var 的差别：</p>
+<ul>
+<li>声明后未赋值，表现相同<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> varTest;</span><br><span class="line">  <span class="keyword">let</span> letTest;</span><br><span class="line">  <span class="built_in">console</span>.log(varTest); <span class="comment">//输出undefined</span></span><br><span class="line">  <span class="built_in">console</span>.log(letTest); <span class="comment">//输出undefined</span></span><br><span class="line">  &#125;());</span><br></pre></td></tr></table></figure></li>
+<li>使用未声明的变量，表现不同:<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(varTest); <span class="comment">//输出undefined(注意要注释掉下面一行才能运行)</span></span><br><span class="line">  <span class="built_in">console</span>.log(letTest); <span class="comment">//直接报错：ReferenceError: letTest is not defined</span></span><br><span class="line">  <span class="keyword">var</span> varTest = <span class="string">'test var OK.'</span>;</span><br><span class="line">  <span class="keyword">let</span> letTest = <span class="string">'test let OK.'</span>;</span><br><span class="line">&#125;());</span><br></pre></td></tr></table></figure></li>
+<li>重复声明同一个变量时，表现不同：<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">var</span> varTest = <span class="string">'test var OK.'</span>;</span><br><span class="line">      <span class="keyword">let</span> letTest = <span class="string">'test let OK.'</span>;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">var</span> varTest = <span class="string">'varTest changed.'</span>;</span><br><span class="line">      <span class="keyword">let</span> letTest = <span class="string">'letTest changed.'</span>; <span class="comment">//直接报错：SyntaxError: Identifier 'letTest' has already been declared</span></span><br><span class="line"></span><br><span class="line">      <span class="built_in">console</span>.log(varTest); <span class="comment">//输出varTest changed.(注意要注释掉上面letTest变量的重复声明才能运行)</span></span><br><span class="line">      <span class="built_in">console</span>.log(letTest);  <span class="comment">// 同一个作用域下，let 不允许重复声明</span></span><br><span class="line">    &#125;());</span><br></pre></td></tr></table></figure></li>
+<li>变量作用范围，表现不同：<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> varTest = <span class="string">'test var OK.'</span>;</span><br><span class="line">  <span class="keyword">let</span> letTest = <span class="string">'test let OK.'</span>;</span><br><span class="line"></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">var</span> varTest = <span class="string">'varTest changed.'</span>;</span><br><span class="line">    <span class="keyword">let</span> letTest = <span class="string">'letTest changed.'</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">console</span>.log(varTest); <span class="comment">//输出"varTest changed."，内部"&#123;&#125;"中声明的varTest变量覆盖外部的letTest声明</span></span><br><span class="line">  <span class="built_in">console</span>.log(letTest); <span class="comment">//输出"test let OK."，内部"&#123;&#125;"中声明的letTest和外部的letTest不是同一个变量 , 因为已经在两个不同的作用域下，所以也不会有重复声明的问题</span></span><br><span class="line">&#125;());</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>总结就是：</p>
+<ul>
+<li>let 有块级作用域，只在let声明的代码块内有效，如果在代码块外调用会报错，这个就可以防止内层变量会覆盖外层变量。 var 没有</li>
+<li>var 有变量提升， let 没有</li>
+<li>同一个作用域中， var 可以重复声明，let 不行</li>
+</ul>
+<p>let 和 const 的差别：<br><strong>const声明一个只读的常量，常量值一旦声明，就不允许改变。一旦声明就必须初始化。不能留在以后再初始化，否则会报错。</strong></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>变量的生命周期包含了声明（Declaration phase）、初始化（Initialization phase）与赋值（Assignment phase）过程这三个过程。<br>传统的 var 关键字声明的变量允许在声明之前使用，此时该变量被赋值为 undefined；而函数作用域中声明的函数同样可以在声明前使用，其函数体也被提升到了头部。这种特性表现也就是所谓的提升（Hoisting）；虽然在 ES6 中以 let 与 const 关键字声明的变量同样会在作用域头部被初始化，不过这些变量仅允许在实际声明之后使用。在作用域头部与变量实际声明处之间的区域就称为所谓的暂时死域（Temporal Dead Zone），TDZ 能够避免传统的提升引发的潜在问题。另一方面，由于 ES6 引入了块级作用域，在块级作用域中声明的函数会被提升到该作用域头部，即允许在实际声明前使用；而在部分实现中该函数同时被提升到了所处函数作用域的头部，不过此时被赋值为 undefined。<br>举个例子：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(a);</span><br><span class="line">    <span class="keyword">if</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(a);</span><br><span class="line">        a();</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">a</span>(<span class="params"></span>)</span>&#123;<span class="built_in">console</span>.log(<span class="number">3</span>)&#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">foo()</span><br></pre></td></tr></table></figure><br>在浏览器中执行，因为是 ES6， 所以 a 的函数声明其实是提到if的块作用域的头部，而不会到 foo 函数的头部。所以执行是这样子：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span> (<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">console</span>.log(a);</span><br><span class="line">    <span class="keyword">if</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">a</span>(<span class="params"></span>)</span>&#123;<span class="built_in">console</span>.log(<span class="number">3</span>)&#125;</span><br><span class="line">        <span class="built_in">console</span>.log(a);</span><br><span class="line">        a();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">foo()</span><br></pre></td></tr></table></figure><br>所以是先输出 1， 再输出 ƒ a(){console.log(3)}， 最后输出 3.</p>
+<h2 id="练习题"><a href="#练习题" class="headerlink" title="练习题"></a>练习题</h2><h3 id="练习题1"><a href="#练习题1" class="headerlink" title="练习题1"></a>练习题1</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 写出以下代码的运行结果</span></span><br><span class="line"><span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fn</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!a) &#123;</span><br><span class="line">    <span class="keyword">var</span> a = <span class="number">2</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  alert(a); <span class="comment">// ?</span></span><br><span class="line">&#125;</span><br><span class="line">fn();</span><br></pre></td></tr></table></figure>
+<p>转换为js执行的顺序<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fn</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> a;</span><br><span class="line">  <span class="keyword">if</span> (!a) &#123;</span><br><span class="line">     a = <span class="number">2</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  alert(a); <span class="comment">// ?</span></span><br><span class="line">&#125;</span><br><span class="line">fn();</span><br></pre></td></tr></table></figure><br>所以应该是 if 里面的 a 是 undefined， 所以进入if，然后因为没有块级作用域，所以赋值后的a，其实就是这个函数作用域的a，所以 alert 的那个 a 就是 2</p>
+<h3 id="练习题2"><a href="#练习题2" class="headerlink" title="练习题2"></a>练习题2</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 写出以下代码的运行结果</span></span><br><span class="line"><span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fn</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  a = <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">a</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line">fn();</span><br><span class="line">alert(a); <span class="comment">// ?</span></span><br></pre></td></tr></table></figure>
+<p>转换为 js 执行的顺序：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fn</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">a</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line">  a = <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line">fn();</span><br><span class="line">alert(a);</span><br></pre></td></tr></table></figure><br>可以看到在fn函数里面，本来a是函数声明，并且是函数作用域，然后后面赋值为2，也是属于函数作用域。  一直都没有改动到全局作用域的a变量，所以 alert 的那个a 还是为 1</p>
+<h3 id="练习题3"><a href="#练习题3" class="headerlink" title="练习题3"></a>练习题3</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> tmp = <span class="keyword">new</span> <span class="built_in">Date</span>()</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(tmp);</span><br><span class="line">    <span class="keyword">if</span>(!tmp)&#123;</span><br><span class="line">        <span class="keyword">var</span> tmp = <span class="string">'hello'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">f();</span><br></pre></td></tr></table></figure>
+<p>这道题，转换为 js 执行顺序就是：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> tmp = <span class="keyword">new</span> <span class="built_in">Date</span>()</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> tmp;</span><br><span class="line">    <span class="built_in">console</span>.log(tmp);</span><br><span class="line">    <span class="keyword">if</span>(!tmp)&#123;</span><br><span class="line">        tmp = <span class="string">'hello'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">f();</span><br></pre></td></tr></table></figure><br>所以很简单，就是输出 undefined</p>
+<h3 id="练习题4"><a href="#练习题4" class="headerlink" title="练习题4"></a>练习题4</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> foo = &#123;<span class="attr">n</span>:<span class="number">1</span>&#125;;</span><br><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params">foo</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(foo.n);</span><br><span class="line">    foo.n=<span class="number">3</span>;</span><br><span class="line">    <span class="keyword">var</span> foo = &#123;<span class="attr">n</span>:<span class="number">2</span>&#125;;</span><br><span class="line">    <span class="built_in">console</span>.log(foo.n);</span><br><span class="line">&#125;)(foo);</span><br><span class="line"><span class="built_in">console</span>.log(foo.n);</span><br></pre></td></tr></table></figure>
+<p>可以写成：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> foo = &#123;<span class="attr">n</span>:<span class="number">1</span>&#125;;</span><br><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params">foo</span>) </span>&#123;</span><br><span class="line">   <span class="keyword">var</span> foo;</span><br><span class="line">   <span class="built_in">console</span>.log(foo.n);</span><br><span class="line">   foo.n=<span class="number">3</span>;</span><br><span class="line">   <span class="keyword">var</span> foo = &#123;<span class="attr">n</span>:<span class="number">2</span>&#125;;</span><br><span class="line">   <span class="built_in">console</span>.log(foo.n);</span><br><span class="line">&#125;)(foo);</span><br><span class="line"><span class="built_in">console</span>.log(foo.n);</span><br></pre></td></tr></table></figure><br>1、声明一个变量，为引用类型，然后接下来声明一个匿名函数，并立即执行，传递的参数是第1行中的foo。将一个对象类型赋值给一个新的变量，由于对象是引用类型，实质上是指将对象的地址赋值给该变量（也就是说这两个变量指向同一个地址空间），因此改变新的变量中的属性值或方法，对应的原来对象的值也会改变。<br>2、原题中的第5行，由于存在变量提升，因此会在函数开始就声明，此时为undefined；然而由于一个变量的声明优先级低于形参，所以这行没有任何效果，还是输出形参的 <strong>1</strong><br>3、改变第1行变量foo的属性n的值为3；<br>4、重新声明并定义了一个变量，开辟了新的内存空间，n为2<br>5、由于js中的代码是自上而下执行，所以此时输出 2<br>6、上面的函数调用结束后，局部变量被销毁，而之前的内存空间值已经变为3，所以输出3<br>所以最终的结果为：<strong>1 2 3</strong></p>
+<p>可以理解为这个匿名函数里面是有两个 foo， 一个是函数作用域， 一个是 外面传进来的形参，但是由于是对象的地址引用，所以其实就是外面的那个全局变量 foo。从作用域链来看就是   函数的 foo -&gt; 全局 foo  ， 函数的 foo 并不会覆盖 全局的 foo。 但是本例中 全局foo因为是对象，其实就是函数的形参，他会比只有声明没有定义的局部变量foo优先级高，所以先输出1，但是又比已经定义过的局域变量优先级低，所以输出的是 局部变量foo 的 2.</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/07/24/js-var-scope/" title="浅谈之-js的作用域和变量提升">http://kebingzao.com/2018/07/24/js-var-scope/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/23/vernemq-bridge/" rel="next" title="VerneMQ 搭建桥接尝试(尝试失败，官方bug，待修复)">
+                <i class="fa fa-chevron-left"></i> VerneMQ 搭建桥接尝试(尝试失败，官方bug，待修复)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/25/web-open-api-1/" rel="prev" title="web站点 开放第三方API流程(1) - 简介">
+                web站点 开放第三方API流程(1) - 简介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">56</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JS-的变量作用域"><span class="nav-number">2.</span> <span class="nav-text">JS 的变量作用域</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ES5-的函数作用域"><span class="nav-number">2.1.</span> <span class="nav-text">ES5 的函数作用域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#全局变量"><span class="nav-number">2.2.</span> <span class="nav-text">全局变量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#作用域链"><span class="nav-number">3.</span> <span class="nav-text">作用域链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#变量提升（hoisting）"><span class="nav-number">4.</span> <span class="nav-text">变量提升（hoisting）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ES-6-的-let-const-和块级作用域"><span class="nav-number">5.</span> <span class="nav-text">ES 6 的 let/const 和块级作用域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#练习题"><span class="nav-number">7.</span> <span class="nav-text">练习题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#练习题1"><span class="nav-number">7.1.</span> <span class="nav-text">练习题1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#练习题2"><span class="nav-number">7.2.</span> <span class="nav-text">练习题2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#练习题3"><span class="nav-number">7.3.</span> <span class="nav-text">练习题3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#练习题4"><span class="nav-number">7.4.</span> <span class="nav-text">练习题4</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/07/24/js-var-scope/';
+          this.page.identifier = '2018/07/24/js-var-scope/';
+          this.page.title = '浅谈之-js的作用域和变量提升';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

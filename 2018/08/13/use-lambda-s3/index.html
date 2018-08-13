@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="aws," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前因之前有一个go服务会经常重启，后面看了一下 error log：12345678goroutine 1355656 [IO wait, 594 minutes]:net.runtime_pollWait(0x7fb7417c3b78, 0x72, 0xf)    /usr/local/go1.7.6/src/runtime/netpoll.go:160 +0x59。。。uc.airdroid.">
+<meta name="keywords" content="aws">
+<meta property="og:type" content="article">
+<meta property="og:title" content="项目使用 aws 的 lambda服务来生成s3的缩略图">
+<meta property="og:url" content="http://kebingzao.com/2018/08/13/use-lambda-s3/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前因之前有一个go服务会经常重启，后面看了一下 error log：12345678goroutine 1355656 [IO wait, 594 minutes]:net.runtime_pollWait(0x7fb7417c3b78, 0x72, 0xf)    /usr/local/go1.7.6/src/runtime/netpoll.go:160 +0x59。。。uc.airdroid.">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/3.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/4.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/5.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/6.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/7.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/8.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/9.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/10.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/11.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/12.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/13.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/14.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/15.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/16.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/17.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/18.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/19.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/20.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/21.png">
+<meta property="og:updated_time" content="2018-08-13T16:34:05.671Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="项目使用 aws 的 lambda服务来生成s3的缩略图">
+<meta name="twitter:description" content="前因之前有一个go服务会经常重启，后面看了一下 error log：12345678goroutine 1355656 [IO wait, 594 minutes]:net.runtime_pollWait(0x7fb7417c3b78, 0x72, 0xf)    /usr/local/go1.7.6/src/runtime/netpoll.go:160 +0x59。。。uc.airdroid.">
+<meta name="twitter:image" content="http://kebingzao.com/2018/08/13/use-lambda-s3/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'J235M6G0L1',
+      apiKey: 'a0a700b756e601762eb3467caacb17e8',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/08/13/use-lambda-s3/"/>
+
+
+
+
+
+  <title>项目使用 aws 的 lambda服务来生成s3的缩略图 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/08/13/use-lambda-s3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">项目使用 aws 的 lambda服务来生成s3的缩略图</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-13T20:10:59+08:00">
+                2018-08-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">aws 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/13/use-lambda-s3/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/08/13/use-lambda-s3/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/08/13/use-lambda-s3/" class="leancloud_visitors" data-flag-title="项目使用 aws 的 lambda服务来生成s3的缩略图">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前因"><a href="#前因" class="headerlink" title="前因"></a>前因</h2><p>之前有一个go服务会经常重启，后面看了一下 error log：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">goroutine <span class="number">1355656</span> [IO wait, <span class="number">594</span> minutes]:</span><br><span class="line">net.runtime_pollWait(<span class="number">0x7fb7417c3b78</span>, <span class="number">0x72</span>, <span class="number">0xf</span>)</span><br><span class="line">    /usr/local/go1<span class="number">.7</span><span class="number">.6</span>/src/runtime/netpoll.go:<span class="number">160</span> +<span class="number">0x59</span></span><br><span class="line">。。。</span><br><span class="line">uc.airdroid.com/utils.GenS3Thumbnail(<span class="number">0xc42020124a</span>, <span class="number">0xc</span>, <span class="number">0xc42044f380</span>, <span class="number">0x2d</span>, <span class="number">0xc4218e8dc0</span>, <span class="number">0x159</span>, <span class="number">0xc4201e1ab4</span>, <span class="number">0xc</span>, <span class="number">0xc42021a000</span>, <span class="number">0x0</span>, ...)</span><br><span class="line">    /data/code/go/src/uc.airdroid.com/utils/thumbnail.go:<span class="number">52</span> +<span class="number">0x296</span></span><br><span class="line">created by main.getKeyDownloadUrl</span><br><span class="line">    /data/code/go/src/uc.airdroid.com/web/common.go:<span class="number">261</span> +<span class="number">0x76b</span></span><br></pre></td></tr></table></figure><br><a id="more"></a><br>发现竟然是因为 goroutine 太多了，竟然有 135w 个，然后程序就重启了。 而且竟然已经等待了将近 600 分钟了？？？<br>后面找了一下，到底是什么原因，导致 goroutine 这么多，原来是有一个 s3 缩略图的功能， 在  common.go 的 261 行：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">func getKeyDownloadUrl(cloud string, key string, filetype string, expireTime int64, realfilename string) (downloadUrl, thumbnailUrl string) &#123;</span><br><span class="line">   <span class="keyword">if</span> cloud == S3CloudShort &#123;</span><br><span class="line">      downloadUrl = S3Config.GenS3DownloadUrl(key)</span><br><span class="line">      S3Config.DownloadExpire = expireTime</span><br><span class="line">      <span class="keyword">if</span> utils.BoolGenThumbnail(filetype) &#123;</span><br><span class="line">         thumbName := fmt.Sprintf(<span class="string">"%s_50x50.%s"</span>, strings.Split(key, <span class="string">"."</span>)[<span class="number">0</span>], filetype)</span><br><span class="line">         <span class="comment">//thumbnailUrl = fmt.Sprintf("%s?key=%s", Conf.TbThumbnail, thumbName)</span></span><br><span class="line">         thumbnailUrl = fmt.Sprintf(<span class="string">"%s/%s"</span>, Conf.TbThumbnail, thumbName)</span><br><span class="line">         go utils.GenS3Thumbnail(Conf.BucketS3, thumbName, downloadUrl, Conf.ThumbnailPathPrefix, S3Config)</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">//七牛</span></span><br><span class="line">   &#125; <span class="keyword">else</span> <span class="keyword">if</span> cloud == QNCloudShort &#123;</span><br><span class="line">      downloadUrl = sdk.Gen7NiuDownloadUrl(Conf.QiNiuUrl, key, expireTime, realfilename)</span><br><span class="line">      <span class="keyword">if</span> utils.BoolGenThumbnail(filetype) &#123;</span><br><span class="line">         thumbnailUrl = fmt.Sprintf(<span class="string">"http://%s/%s%s"</span>, Conf.QiNiuUrl, key, Conf.QiThumbnailSuffix)</span><br><span class="line">      &#125;</span><br><span class="line">   &#125; </span><br><span class="line">   <span class="keyword">return</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这边有用一个 goroutine， <font color="red">go utils.GenS3Thumbnail</font>， 然后去生成 s3 的缩略图<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//产生缩略图</span></span><br><span class="line">func GenS3Thumbnail(bucket, thumbName, url, pathprefix string, config *sdk.S3Config) string &#123;</span><br><span class="line">   <span class="keyword">var</span> httpClient = &amp;http.Client&#123;</span><br><span class="line">      Transport: &amp;http.Transport&#123;</span><br><span class="line">         ResponseHeaderTimeout: time.Second * <span class="number">10</span>,</span><br><span class="line">         Dial: func(network, addr string) (net.Conn, error) &#123;</span><br><span class="line">            <span class="keyword">return</span> net.DialTimeout(network, addr, time.Second*<span class="number">30</span>)</span><br><span class="line">         &#125;,</span><br><span class="line">         DisableKeepAlives: <span class="literal">true</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">   &#125;</span><br><span class="line">   log.Debug(<span class="string">"s3 thumbnail gen source url:"</span> + url)</span><br><span class="line">   resp, <span class="attr">err</span> := httpClient.Get(url)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      log.Error(<span class="string">"NewRequest error! "</span>, err)</span><br><span class="line">      <span class="keyword">return</span> <span class="string">""</span></span><br><span class="line">   &#125;</span><br><span class="line">   defer resp.Body.Close()</span><br><span class="line">   outBytes, <span class="attr">err</span> := Thumbnail(resp.Body, <span class="number">50</span>, <span class="number">50</span>,<span class="number">20</span>)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      log.Error(err)</span><br><span class="line">      <span class="keyword">return</span> <span class="string">""</span></span><br><span class="line">   &#125;</span><br><span class="line">   filename := pathprefix + <span class="string">"/"</span> + thumbName</span><br><span class="line">   log.Debug(<span class="string">"Get Thumbnail name:"</span> + filename)</span><br><span class="line">   err = sdk.UploadDataFile(filename, outBytes, config)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      log.Error(err)</span><br><span class="line">      <span class="keyword">return</span> <span class="string">""</span></span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> filename</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>然后生成缩略图的这个方法也有问题，就是会先从存放原图的bucket先把原始图拉下来，然后在服务器上进行裁剪，裁剪成 50*50，最后再把他上传到这个bucket 的 thumbnailexp 目录下。这样其实非常的耗性能，和耗资源。<br>而且代码是直接先把缩略图的url先得到，然后再用 goroutine 去裁剪缩略图。 这样子如果请求比较多的情况下，就会导致goroutine 非常多，并且一直在等待中，最后就直接挂掉重启了。</p>
+<h2 id="七牛的缩略图"><a href="#七牛的缩略图" class="headerlink" title="七牛的缩略图"></a>七牛的缩略图</h2><p>我们的这个项目会根据用户的位置来判断是用传到七牛还是传到aws 的s3，如果是国内的用户，那么就是上传到七牛，如果是国外的用户，那么就是上传到aws 的s3 bucket<br>我们从上面的代码可以看到，如果上传方式是七牛的话，那么是可以直接通过配置url后缀的方式来获取这张图片的缩略图的，而不用再去对图片进行裁剪。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> cloud == QNCloudShort &#123;</span><br><span class="line">   downloadUrl = sdk.Gen7NiuDownloadUrl(Conf.QiNiuUrl, key, expireTime, realfilename)</span><br><span class="line">   <span class="keyword">if</span> utils.BoolGenThumbnail(filetype) &#123;</span><br><span class="line">      thumbnailUrl = fmt.Sprintf(<span class="string">"http://%s/%s%s"</span>, Conf.QiNiuUrl, key, Conf.QiThumbnailSuffix)</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure><br>这个是因为七牛的bucket，他是有自带缩略图的功能的。它不需要我们程序单独对图片进行处理，是由七牛的bucket服务去处理就行了，不过裁剪的图片还是会放在这个bucket里面，只不过会有一个我们所设置的一个后缀名。我们只要给它设置规则就行了。<br><img src="/2018/08/13/use-lambda-s3/1.png" alt="1"><br>具体设置页如下：<br><img src="/2018/08/13/use-lambda-s3/2.png" alt="1"><br>也就是，我们如果要使用这个bucket的缩略图功能，只需要将 原始图上传到 bucket上，然后只要在原图的url后面加上我们设置的后缀，就可以得到这一张缩略图了</p>
+<h2 id="使用lambda服务生成s3的缩略图"><a href="#使用lambda服务生成s3的缩略图" class="headerlink" title="使用lambda服务生成s3的缩略图"></a>使用lambda服务生成s3的缩略图</h2><p>那么我们有没有办法让 s3 上 bucket 的缩略图也跟七牛的服务一样，不需要我们去处理，而是让s3 的服务去处理。<br>后面有找了一种解决方法是可以处理的：<a href="https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/with-s3-example.html" target="_blank" rel="noopener">就是配合aws lambda 的服务</a>。<br>假设要为将上传到存储桶的每个图像（.jpg 和 .png 对象）创建一个缩略图。可以创建一个 Lambda 函数 (CreateThumbnail)，在创建对象后，Amazon S3 可调用该函数。然后，Lambda 函数可以从 source 存储桶中读取图像对象并创建缩略图目标存储桶（在本教程中，该存储桶称为 sourceresized 存储桶）。<br>流程如下：</p>
+<ol>
+<li>用户将对象上传到 Amazon S3 中的源存储桶（对象创建事件）。</li>
+<li>Amazon S3 检测到对象创建事件。</li>
+<li>Amazon S3 调用 Lambda 函数并将事件数据作为函数传递，由此将 s3:ObjectCreated:* 事件发布到 AWS Lambda。</li>
+<li>AWS Lambda 通过代入您在创建 Lambda 函数时指定的执行角色来执行 Lambda 函数。</li>
+<li>Lambda 函数通过收到的事件数据获得了源存储桶名称和对象键名称。Lambda 函数读取该对象，使用图形库创建缩略图，然后将其保存到目标存储桶。</li>
+</ol>
+<h2 id="具体实践"><a href="#具体实践" class="headerlink" title="具体实践"></a>具体实践</h2><h3 id="选中一个区，并创建两个lambda-函数"><a href="#选中一个区，并创建两个lambda-函数" class="headerlink" title="选中一个区，并创建两个lambda 函数"></a>选中一个区，并创建两个lambda 函数</h3><p>注意，这个区是s3 bucket所在的区，比如测试环境的bucket 和 线上环境的 bucket 都在弗吉尼亚北部，因此在 创建 lambda 函数的时候，也要选中 这一个区。 然后创建两个函数，一个用于 测试环境，一个用户线上的。<br><img src="/2018/08/13/use-lambda-s3/3.png" alt="1"><br>其中 <strong>test-CreateThumbnail</strong> 对应的是 测试环境， 运行语言的环境是 Python 3.6<br>而 <strong>CreateThumbnail</strong> 对应的是 线上环境， 运行语言的环境是 Python 3.6<br>这两个函数，基本上所有的设置都一样，所以我这边就以 test-CreateThumbnail 的配置项来说：</p>
+<h3 id="添加触发器"><a href="#添加触发器" class="headerlink" title="添加触发器"></a>添加触发器</h3><p>首先是添加一个触发器，因为是要S3上传图片的时候，会触发这个lambda 函数，所以要添加一个 s3 的触发器：<br><img src="/2018/08/13/use-lambda-s3/4.png" alt="1"></p>
+<h3 id="添加代码"><a href="#添加代码" class="headerlink" title="添加代码"></a>添加代码</h3><p><img src="/2018/08/13/use-lambda-s3/5.png" alt="1"><br>这时候我们就要上传 Python 代码的 zip 包上去，这个 zip 包含我们写的 Python 脚本 CreateThumbnail.py 以及依赖的一些库<br><img src="/2018/08/13/use-lambda-s3/6.png" alt="1"><br>这些文件夹都是 Python 的依赖包， 具体需要我们写的代码只有 CreateThumbnaill.py 这个文件。 代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> print_function</span><br><span class="line"><span class="keyword">import</span> boto3</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">import</span> PIL.Image</span><br><span class="line"></span><br><span class="line">s3_client = boto3.client(<span class="string">'s3'</span>)</span><br><span class="line">thn_bucket= os.environ[<span class="string">'THN_BUCKET'</span>]</span><br><span class="line"></span><br><span class="line">def resize_image(image_path, resized_path):</span><br><span class="line">    <span class="keyword">with</span> Image.open(image_path) <span class="keyword">as</span> image:</span><br><span class="line">        image.thumbnail(([<span class="number">50</span>,<span class="number">50</span>]),Image.LANCZOS)</span><br><span class="line">        image.save(resized_path)</span><br><span class="line"></span><br><span class="line">def handler(event, context):</span><br><span class="line">    <span class="keyword">for</span> record <span class="keyword">in</span> event[<span class="string">'Records'</span>]:</span><br><span class="line">        bucket = record[<span class="string">'s3'</span>][<span class="string">'bucket'</span>][<span class="string">'name'</span>]</span><br><span class="line">        key = record[<span class="string">'s3'</span>][<span class="string">'object'</span>][<span class="string">'key'</span>]</span><br><span class="line">        <span class="keyword">if</span> re.search(<span class="string">'_50x50'</span>, key):</span><br><span class="line">            pass</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            keySep = key.split(<span class="string">'.'</span>)</span><br><span class="line">            thnKey = <span class="string">'&#123;&#125;&#123;&#125;&#123;&#125;'</span>.format(keySep[<span class="number">0</span>], <span class="string">'_50x50.'</span>, keySep[<span class="number">1</span>])</span><br><span class="line">            download_path = <span class="string">'/tmp/&#123;&#125;&#123;&#125;'</span>.format(uuid.uuid4(), key)</span><br><span class="line">            upload_path = <span class="string">'/tmp/resized-&#123;&#125;'</span>.format(thnKey)</span><br><span class="line">            s3_client.download_file(bucket, key, download_path)</span><br><span class="line">            resize_image(download_path, upload_path)</span><br><span class="line">            s3_client.upload_file(upload_path, <span class="string">'&#123;&#125;'</span>.format(thn_bucket), thnKey, ExtraArgs=&#123;<span class="string">'ACL'</span>: <span class="string">'public-read'</span>&#125;)</span><br><span class="line">            os.remove(upload_path)</span><br><span class="line"></span><br></pre></td></tr></table></figure><br>逻辑很简单，通过获取环境变量，获取当前要监听的 bucket。然后在触发事件 handler 里面，去判断当前触发时间的记录条数。</p>
+<p><font color="red">如果当前的 key 有包含 “_50x50”, 那么我们认为他是 缩略图了，就跳过。这个逻辑之所以要是因为之前我们旧的服务的缩略图是代码生成的，然后传到这一个bucket。如果不做这个判断的话，当旧的服务还在跑的时候，一旦缩略图上传的时候，又会再裁剪一次缩略图，所以才会pass掉，当新服务上线一段时间之后，就可以把这个逻辑去掉了，因为不会有旧服务了。</font><br>如果不包含，说明是原始图，然后就把这个原始图下载下来，存放在一个临时目录，然后进行缩略图的裁剪，裁剪成功之后，也保存到这个临时目录里面，然后再把这个裁剪过的缩略图上传到对应的bucket中，这个bucket就是上面设置的环境变量 THN_BUCKET， 然后设置一个新的key（也就是新的文件名）。最后再把这个存放 tmp 的临时的文件删掉。<br>这就是整个流程，其中 handler 就是触发的入口函数，在这边设置：<br><img src="/2018/08/13/use-lambda-s3/7.png" alt="1"><br>上传的方式有两种，一种是直接在这边上传 zip包：<br><img src="/2018/08/13/use-lambda-s3/8.png" alt="1"><br>但是会比较慢，如果是比较大的文件，可以考虑选择 s3 上传， 也就是先通过s3 上传到某一个bucket，然后再把这个 zip 地址粘贴过来：<br><img src="/2018/08/13/use-lambda-s3/9.png" alt="1"></p>
+<h3 id="设置保存缩略图的bucket"><a href="#设置保存缩略图的bucket" class="headerlink" title="设置保存缩略图的bucket"></a>设置保存缩略图的bucket</h3><p>上面代码有说过，当裁剪完成之后，就要把这个裁剪的图片上传到裁剪图片的bucket里面，这个bucket是从 环境变量读取的，这边可以设置：<br><img src="/2018/08/13/use-lambda-s3/10.png" alt="1"><br>注意，这个 bucket 是有命名规范的，因为我们的原始图片的bucket是 <strong>test-demo</strong>，然后缩略图的bucket的命名规则就是 {原始bucket}resized， 所以就是 <strong>test-demoresized</strong> 这个。所以是不能随便命名的。<br>到正式环境就变成对应的bucket 加上 resized 后缀了，比如正式环境的 bucket是 demo，那么缩略图的bucket 就是 demoresized，如果这个bucket还没有存在，那就建一个。</p>
+<h3 id="设置执行角色"><a href="#设置执行角色" class="headerlink" title="设置执行角色"></a>设置执行角色</h3><p><img src="/2018/08/13/use-lambda-s3/11.png" alt="1"><br>这样子需要配置的都配完了。 接下来要配置原始图片 bucket 的配置，让其可以联动</p>
+<h3 id="设置原始图片的s3-bucket-触发事件"><a href="#设置原始图片的s3-bucket-触发事件" class="headerlink" title="设置原始图片的s3 bucket 触发事件"></a>设置原始图片的s3 bucket 触发事件</h3><p>还是以测试环境的 原始图片的 s3 bucket 为例，点击属性，然后点击事件：<br><img src="/2018/08/13/use-lambda-s3/12.png" alt="1"><br>这时候就可以创建事件通知：<br><img src="/2018/08/13/use-lambda-s3/13.png" alt="1"><br>这边针对 png， jpg， jpeg 这三种后缀名会去做事件监听。也就是如果是这三种后缀的图片上传到这个bucket的话，那么就会触发 <strong>ObjectCreate</strong> 事件，调用对应的 <strong>lambda</strong> 函数<br><img src="/2018/08/13/use-lambda-s3/14.png" alt="1"><br>这样就可以连起来了。当然这里面只有 jpg，jpeg，png 这三种图片，如果后面要加上 bmp 或者 gif 图片的话，也是在这边添加事件监听就可以了。<br>如果是线上的bucket，也是类似的设置。<br>当这些都配完之后，流程就是：<br>当用户上传图片到原始bucket的时候，比如是 test-demo，如果这个是一张图片（jpg，jpeg， png），那么就触发 lambda 函数， 然后就裁剪缩略图，裁剪完之后，就上传到 test-demoresized 的bucket 里面。<br><img src="/2018/08/13/use-lambda-s3/15.png" alt="1"></p>
+<h2 id="线上出问题"><a href="#线上出问题" class="headerlink" title="线上出问题"></a>线上出问题</h2><p>后面将项目更新到线上去， 然后过了一段时间之后，去看看 缩略图有没有成功， 从监控来看：<br><img src="/2018/08/13/use-lambda-s3/16.png" alt="1"><br>发现更新上去之后，没过多久就全部失败了。<br>赶紧查看了一下监控日志： 发现确实有报了一个错误：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[Errno <span class="number">28</span>] No space left on device: OSError</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">File <span class="string">"/var/task/CreateThumbnail.py"</span>, line <span class="number">30</span>, <span class="keyword">in</span> handler</span><br><span class="line">s3_client.download_file(bucket, key, download_path)</span><br><span class="line">File <span class="string">"/var/task/boto3/s3/inject.py"</span>, line <span class="number">172</span>, <span class="keyword">in</span> download_file</span><br><span class="line">extra_args=ExtraArgs, callback=Callback)</span><br><span class="line">File <span class="string">"/var/task/boto3/s3/transfer.py"</span>, line <span class="number">307</span>, <span class="keyword">in</span> download_file</span><br><span class="line">future.result()</span><br><span class="line">File <span class="string">"/var/task/s3transfer/futures.py"</span>, line <span class="number">73</span>, <span class="keyword">in</span> result</span><br><span class="line"><span class="keyword">return</span> self._coordinator.result()</span><br><span class="line">File <span class="string">"/var/task/s3transfer/futures.py"</span>, line <span class="number">233</span>, <span class="keyword">in</span> result</span><br><span class="line">raise self._exception</span><br><span class="line">File <span class="string">"/var/task/s3transfer/tasks.py"</span>, line <span class="number">126</span>, <span class="keyword">in</span> __call__</span><br><span class="line"><span class="keyword">return</span> self._execute_main(kwargs)</span><br><span class="line">File <span class="string">"/var/task/s3transfer/tasks.py"</span>, line <span class="number">150</span>, <span class="keyword">in</span> _execute_main</span><br><span class="line">return_value = self._main(**kwargs)</span><br><span class="line">File <span class="string">"/var/task/s3transfer/download.py"</span>, line <span class="number">583</span>, <span class="keyword">in</span> _main</span><br><span class="line">fileobj.write(data)</span><br><span class="line">File <span class="string">"/var/task/s3transfer/utils.py"</span>, line <span class="number">332</span>, <span class="keyword">in</span> write</span><br><span class="line">self._fileobj.write(data)</span><br><span class="line">OSError: [Errno <span class="number">28</span>] No space left on device</span><br></pre></td></tr></table></figure><br>原来是 tmp 的空间不足？？？<br>后面查了一下文档，发现 tmp 就 512M, <a href="https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/limits.html" target="_blank" rel="noopener">lambda limit</a><br><img src="/2018/08/13/use-lambda-s3/17.png" alt="1"><br>而我们就是把这个 tmp 空间都用满了，导致没办法再去写入了。查看了一下代码，果然发现了一个问题，<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">。。。</span><br><span class="line">    s3_client.download_file(bucket, key, download_path)</span><br><span class="line">    resize_image(download_path, upload_path)</span><br><span class="line">    s3_client.upload_file(upload_path, <span class="string">'&#123;&#125;'</span>.format(thn_bucket), thnKey, ExtraArgs=&#123;<span class="string">'ACL'</span>: <span class="string">'public-read'</span>&#125;)</span><br><span class="line">    os.remove(upload_path)</span><br></pre></td></tr></table></figure><br>在进行处理的时候，最后我们只把 <strong>upload_path</strong> 的临时文件删掉了， 但是还有一个 <strong>download_path</strong> 的临时文件还在，所以tmp空间就被这些 download_path 的临时文件给占满了。<br>然后接下来就没法写了。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">。。。</span><br><span class="line">    s3_client.download_file(bucket, key, download_path)</span><br><span class="line">    resize_image(download_path, upload_path)</span><br><span class="line">    s3_client.upload_file(upload_path, <span class="string">'&#123;&#125;'</span>.format(thn_bucket), thnKey, ExtraArgs=&#123;<span class="string">'ACL'</span>: <span class="string">'public-read'</span>&#125;)</span><br><span class="line">    os.remove(upload_path)</span><br><span class="line">    os.remove(download_path)</span><br></pre></td></tr></table></figure><br>所以我们再补上这一句 <strong>os.remove(download_path)</strong> 应该就可以了。<br>但是这边还有一个问题，就是现在的 <strong>tmp</strong> 已经满了，所以如果不把 <strong>tmp</strong> 目录清空的话， 就算这样修改也是不行的。<br>所以第一步就是要先把 tmp 目录清空，所以代码改成：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">。。。</span><br><span class="line">    def handler(event, context):</span><br><span class="line">        <span class="keyword">for</span> root, dirs, files <span class="keyword">in</span> os.walk(<span class="string">'/tmp'</span>):</span><br><span class="line">            <span class="keyword">for</span> name <span class="keyword">in</span> files:</span><br><span class="line">                os.remove(os.path.join(root, name))</span><br><span class="line">        <span class="keyword">for</span> record <span class="keyword">in</span> event[<span class="string">'Records'</span>]:</span><br><span class="line">            bucket = record[<span class="string">'s3'</span>][<span class="string">'bucket'</span>][<span class="string">'name'</span>]</span><br><span class="line">            key = record[<span class="string">'s3'</span>][<span class="string">'object'</span>][<span class="string">'key'</span>]</span><br><span class="line">            <span class="keyword">if</span> re.search(<span class="string">'_50x50'</span>, key):</span><br></pre></td></tr></table></figure><br>就是在进行操作的时候，先把 tmp 目录清空掉：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> root, dirs, files <span class="keyword">in</span> os.walk(<span class="string">'/tmp'</span>):</span><br><span class="line">    <span class="keyword">for</span> name <span class="keyword">in</span> files:</span><br><span class="line">        os.remove(os.path.join(root, name))</span><br></pre></td></tr></table></figure><br>然后重新打包成 zip 包，重新上传。<br>过了一会儿，已经没问题了，说明我们的思路是对的，而且这时候 tmp 空间已经清空了，没必要再执行这个了，所以就把刚才的那个 tmp 清空的代码注释掉，然后重新上传。<br>然后再观察一下，真的正常了。<br><img src="/2018/08/13/use-lambda-s3/18.png" alt="1"><br>而且 监控的log也正常了：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">START RequestId: e90ecab3<span class="number">-9</span>a28<span class="number">-11e8</span>-abaf<span class="number">-8</span>b72187356d7 Version: $LATEST</span><br><span class="line">END RequestId: e90ecab3<span class="number">-9</span>a28<span class="number">-11e8</span>-abaf<span class="number">-8</span>b72187356d7</span><br><span class="line">REPORT RequestId: e90ecab3<span class="number">-9</span>a28<span class="number">-11e8</span>-abaf<span class="number">-8</span>b72187356d7 Duration: <span class="number">148.36</span> ms Billed Duration: <span class="number">200</span> ms Memory Size: <span class="number">2048</span> MB Max Memory Used: <span class="number">50</span> MB</span><br></pre></td></tr></table></figure><br>后面还是要多注意一下， 内存的使用， 从目前的内存使用来看， 2048 M的内存应该是够的。 并发数最大是 1024， 这个也要注意一下。<br>而且看了一下这个缩略图bucket，已经可以看到有缩略图生成了。</p>
+<h2 id="零散的图片读取的失败问题"><a href="#零散的图片读取的失败问题" class="headerlink" title="零散的图片读取的失败问题"></a>零散的图片读取的失败问题</h2><p>隔了一天之后，看了一下曲线<br><img src="/2018/08/13/use-lambda-s3/19.png" alt="1"><br>虽然成功率还是很高，但是偶尔还是会有零零散散的错误，看了一下log，都是这个错误：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">broken data stream when reading image file: OSError</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">File <span class="string">"/var/task/CreateThumbnail.py"</span>, line <span class="number">36</span>, <span class="keyword">in</span> handler</span><br><span class="line">resize_image(download_path, upload_path)</span><br><span class="line">File <span class="string">"/var/task/CreateThumbnail.py"</span>, line <span class="number">16</span>, <span class="keyword">in</span> resize_image</span><br><span class="line">image.thumbnail(([<span class="number">50</span>, <span class="number">50</span>]), Image.LANCZOS)</span><br><span class="line">File <span class="string">"/var/task/PIL/Image.py"</span>, line <span class="number">2088</span>, <span class="keyword">in</span> thumbnail</span><br><span class="line">im = self.resize(size, resample)</span><br><span class="line">File <span class="string">"/var/task/PIL/Image.py"</span>, line <span class="number">1763</span>, <span class="keyword">in</span> resize</span><br><span class="line">self.load()</span><br><span class="line">File <span class="string">"/var/task/PIL/ImageFile.py"</span>, line <span class="number">254</span>, <span class="keyword">in</span> load</span><br><span class="line">raise_ioerror(err_code)</span><br><span class="line">File <span class="string">"/var/task/PIL/ImageFile.py"</span>, line <span class="number">59</span>, <span class="keyword">in</span> raise_ioerror</span><br><span class="line">raise IOError(message + <span class="string">" when reading image file"</span>)</span><br><span class="line">OSError: broken data stream when reading image file</span><br></pre></td></tr></table></figure><br>在读取图片的时候，报错了？？？ 一个是可能是 这张图片 有问题，是坏的。<br>还有一种情况，就是这个图片的库有问题， 而我们好像就是用的是 pillow 的 5.2.0 版本，这个是比较新的版本了（最新 5.3.0）<br>有看了一下，关于这个库的这个错误的 issues：<br><a href="https://github.com/python-pillow/Pillow/issues/1510" target="_blank" rel="noopener">https://github.com/python-pillow/Pillow/issues/1510</a><br><a href="https://github.com/python-pillow/Pillow/issues/3185" target="_blank" rel="noopener">https://github.com/python-pillow/Pillow/issues/3185</a><br>看了一下，可以通过设置：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageFile</span><br><span class="line">ImageFile.LOAD_TRUNCATED_IMAGES = True</span><br></pre></td></tr></table></figure><br>来避免这个情况， 但是好像会使得 图片 变成黑白。 这个得试下。<br>我这边做了一下本地测试，下载 pillow 5.2.0 的版本<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\python\resize_image&gt;pip install Pillow</span><br><span class="line">Collecting Pillow</span><br><span class="line">  Downloading https:<span class="comment">//files.pythonhosted.org/packages/21/5d/cbbcb2792e88acd2b6ea1af8c6e484dea0760124ee6a786d23f0522d061f/Pillow-5.2.0-cp36-cp36m-win32.whl (1.4MB)</span></span><br><span class="line">    <span class="number">100</span>% |████████████████████████████████| <span class="number">1.4</span>MB <span class="number">267</span>kB/s</span><br><span class="line">Installing collected packages: Pillow</span><br><span class="line">Successfully installed Pillow<span class="number">-5.2</span><span class="number">.0</span></span><br></pre></td></tr></table></figure><br>然后代码如下， <strong>main.py</strong>：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageFile</span><br><span class="line">ImageFile.LOAD_TRUNCATED_IMAGES = True</span><br><span class="line"></span><br><span class="line">def resize_image(image_path, resized_path):</span><br><span class="line">    <span class="keyword">with</span> Image.open(image_path) <span class="keyword">as</span> image:</span><br><span class="line">            image.thumbnail(([<span class="number">150</span>, <span class="number">150</span>]), Image.LANCZOS)</span><br><span class="line">            image.save(resized_path)</span><br><span class="line"></span><br><span class="line">def main():</span><br><span class="line">    resize_image(<span class="string">'./333.jpg'</span>, <span class="string">'./333_resize.jpg'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure><br>将这张图片，压缩为 150 *150， 然后看下会不会变成黑白？？<br>后面执行成功，发现是正常的。<br><img src="/2018/08/13/use-lambda-s3/20.png" alt="1"><br>发现是正常的，是可以正常缩略的<br><img src="/2018/08/13/use-lambda-s3/21.png" alt="1"><br>所以最后的代码是：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> print_function</span><br><span class="line"><span class="keyword">import</span> boto3</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image, ImageFile</span><br><span class="line"><span class="keyword">import</span> PIL.Image</span><br><span class="line">ImageFile.LOAD_TRUNCATED_IMAGES = True</span><br><span class="line"></span><br><span class="line">s3_client = boto3.client(<span class="string">'s3'</span>)</span><br><span class="line">thn_bucket = os.environ[<span class="string">'THN_BUCKET'</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def resize_image(image_path, resized_path):</span><br><span class="line">    <span class="keyword">with</span> Image.open(image_path) <span class="keyword">as</span> image:</span><br><span class="line">        image.thumbnail(([<span class="number">50</span>, <span class="number">50</span>]), Image.LANCZOS)</span><br><span class="line">        image.save(resized_path)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def handler(event, context):</span><br><span class="line">    # for root, dirs, files in os.walk('/tmp'):</span><br><span class="line">    #     for name in files:</span><br><span class="line">    #         os.remove(os.path.join(root, name))</span><br><span class="line">    <span class="keyword">for</span> record <span class="keyword">in</span> event[<span class="string">'Records'</span>]:</span><br><span class="line">        bucket = record[<span class="string">'s3'</span>][<span class="string">'bucket'</span>][<span class="string">'name'</span>]</span><br><span class="line">        key = record[<span class="string">'s3'</span>][<span class="string">'object'</span>][<span class="string">'key'</span>]</span><br><span class="line">        keySep = key.split(<span class="string">'.'</span>)</span><br><span class="line">        thnKey = <span class="string">'&#123;&#125;&#123;&#125;&#123;&#125;'</span>.format(keySep[<span class="number">0</span>], <span class="string">'_50x50.'</span>, keySep[<span class="number">1</span>])</span><br><span class="line">        download_path = <span class="string">'/tmp/&#123;&#125;&#123;&#125;'</span>.format(uuid.uuid4(), key)</span><br><span class="line">        upload_path = <span class="string">'/tmp/resized-&#123;&#125;'</span>.format(thnKey)</span><br><span class="line">        s3_client.download_file(bucket, key, download_path)</span><br><span class="line">        resize_image(download_path, upload_path)</span><br><span class="line">        s3_client.upload_file(upload_path, <span class="string">'&#123;&#125;'</span>.format(thn_bucket), thnKey, ExtraArgs=&#123;<span class="string">'ACL'</span>: <span class="string">'public-read'</span>&#125;)</span><br><span class="line">        os.remove(upload_path)</span><br><span class="line">        os.remove(download_path)</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/08/13/use-lambda-s3/" title="项目使用 aws 的 lambda服务来生成s3的缩略图">http://kebingzao.com/2018/08/13/use-lambda-s3/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/aws/" rel="tag"># aws</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/10/mongo-accident-by-disk-io/" rel="next" title="记一次因磁盘IO耗尽的mongo事故">
+                <i class="fa fa-chevron-left"></i> 记一次因磁盘IO耗尽的mongo事故
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">62</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前因"><span class="nav-number">1.</span> <span class="nav-text">前因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七牛的缩略图"><span class="nav-number">2.</span> <span class="nav-text">七牛的缩略图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用lambda服务生成s3的缩略图"><span class="nav-number">3.</span> <span class="nav-text">使用lambda服务生成s3的缩略图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体实践"><span class="nav-number">4.</span> <span class="nav-text">具体实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#选中一个区，并创建两个lambda-函数"><span class="nav-number">4.1.</span> <span class="nav-text">选中一个区，并创建两个lambda 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加触发器"><span class="nav-number">4.2.</span> <span class="nav-text">添加触发器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加代码"><span class="nav-number">4.3.</span> <span class="nav-text">添加代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置保存缩略图的bucket"><span class="nav-number">4.4.</span> <span class="nav-text">设置保存缩略图的bucket</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置执行角色"><span class="nav-number">4.5.</span> <span class="nav-text">设置执行角色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置原始图片的s3-bucket-触发事件"><span class="nav-number">4.6.</span> <span class="nav-text">设置原始图片的s3 bucket 触发事件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#线上出问题"><span class="nav-number">5.</span> <span class="nav-text">线上出问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#零散的图片读取的失败问题"><span class="nav-number">6.</span> <span class="nav-text">零散的图片读取的失败问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/08/13/use-lambda-s3/';
+          this.page.identifier = '2018/08/13/use-lambda-s3/';
+          this.page.title = '项目使用 aws 的 lambda服务来生成s3的缩略图';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

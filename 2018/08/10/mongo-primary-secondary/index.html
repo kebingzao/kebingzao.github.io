@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="mongo," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前有一个项目， mongo 存放的库非常大， 单单一个collection 就有 80G， 有几千万条数据。所以后面打算对 mongo 做优化。 刚开始是打算增加主从架构。">
+<meta name="keywords" content="mongo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="项目的mongo优化(一) -- 设置主从">
+<meta property="og:url" content="http://kebingzao.com/2018/08/10/mongo-primary-secondary/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前有一个项目， mongo 存放的库非常大， 单单一个collection 就有 80G， 有几千万条数据。所以后面打算对 mongo 做优化。 刚开始是打算增加主从架构。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/08/10/mongo-primary-secondary/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/10/mongo-primary-secondary/1.png">
+<meta property="og:updated_time" content="2018-08-13T16:34:05.668Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="项目的mongo优化(一) -- 设置主从">
+<meta name="twitter:description" content="前言之前有一个项目， mongo 存放的库非常大， 单单一个collection 就有 80G， 有几千万条数据。所以后面打算对 mongo 做优化。 刚开始是打算增加主从架构。">
+<meta name="twitter:image" content="http://kebingzao.com/2018/08/10/mongo-primary-secondary/2.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'J235M6G0L1',
+      apiKey: 'a0a700b756e601762eb3467caacb17e8',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/08/10/mongo-primary-secondary/"/>
+
+
+
+
+
+  <title>项目的mongo优化(一) -- 设置主从 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/08/10/mongo-primary-secondary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">项目的mongo优化(一) -- 设置主从</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-10T18:22:55+08:00">
+                2018-08-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mongo相关/" itemprop="url" rel="index">
+                    <span itemprop="name">mongo相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/10/mongo-primary-secondary/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/08/10/mongo-primary-secondary/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/08/10/mongo-primary-secondary/" class="leancloud_visitors" data-flag-title="项目的mongo优化(一) -- 设置主从">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有一个项目， mongo 存放的库非常大， 单单一个collection 就有 80G， 有几千万条数据。所以后面打算对 mongo 做优化。 刚开始是打算增加主从架构。<br><img src="/2018/08/10/mongo-primary-secondary/2.png" alt="1"><br><a id="more"></a></p>
+<h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><p>所以刚开始是增加了从库的配置：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MongoDbSlaveHost        string        <span class="string">`goconf:"mongodb_slave:host"`</span></span><br><span class="line">MongoDbSlaveUser        string        <span class="string">`goconf:"mongodb_slave:user"`</span></span><br><span class="line">MongoDbSlavePass        string        <span class="string">`goconf:"mongodb_slave:pass"`</span></span><br></pre></td></tr></table></figure><br>然后在初始化的时候，把从库也初始化<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mongoDb = NewMongoDB(Conf.MongoDbHost, Conf.MongoDbUser, Conf.MongoDbPass)</span><br><span class="line">mongoDbSlave = NewMongoDB(Conf.MongoDbSlaveHost, Conf.MongoDbSlaveUser, Conf.MongoDbSlavePass)</span><br></pre></td></tr></table></figure><br>接下来就是把一些查询操作，都改成用从库来操作， channel.go:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">func GetChannelByKey(key string) (Channel, error) &#123;</span><br><span class="line">   <span class="keyword">var</span> ch Channel</span><br><span class="line">   err := mongoDbSlave.M(<span class="string">"test"</span>, <span class="string">"channel"</span>, func(c *mgo.Collection) error &#123;</span><br><span class="line">      <span class="keyword">return</span> c.Find(bson.M&#123;<span class="string">"key"</span>: key&#125;).One(&amp;ch)</span><br><span class="line">   &#125;)</span><br><span class="line">   <span class="keyword">return</span> ch, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>但是放到线上去，发现从库一直连不上，一直报这个错误：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">no reachable servers</span><br></pre></td></tr></table></figure><br>但是主库是可以连上的，就是从库不行， 而且直接在那一台服务器上直接用 mongo shell 连接是可以的，说明连接上肯定是没问题的？？？<br>后面查了一下，发现 golang 的这个mongo 的库 <strong>gopkg.in/mgo.v2</strong>，本身是支持集群的, 但是如果是这样写的话，就会出现从库连不上的问题<br><img src="/2018/08/10/mongo-primary-secondary/1.png" alt="1"><br>如果换成端口不一样的话，还是会出现第一个可以连接，但是第二个还是 no reachable：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> ch interface&#123;&#125;</span><br><span class="line">host := <span class="string">"59.57.13.xxx"</span></span><br><span class="line">url := fmt.Sprintf(<span class="string">"mongodb://%s:27017,%s:27018"</span>, host, host)</span><br><span class="line">fmt.Println(<span class="string">"url=&gt;"</span>, url)</span><br><span class="line">session, <span class="attr">err</span> := mgo.Dial(url)</span><br><span class="line"><span class="keyword">if</span> err != nil &#123;</span><br><span class="line">   fmt.Printf(<span class="string">"can not connect to server %v\n"</span>, err)</span><br><span class="line">   panic(err)</span><br><span class="line">&#125;</span><br><span class="line">defer session.Close()</span><br><span class="line"></span><br><span class="line">collection := session.DB(<span class="string">"gopush"</span>).C(<span class="string">"channel"</span>)</span><br><span class="line">err = collection.Find(nil).One(&amp;ch)</span><br><span class="line">fmt.Println(ch)</span><br></pre></td></tr></table></figure><br>后面发现了少了一个连接的参数，也就是 options 参数<br><strong>mongodb://59.57.13.xxx:27017,59.57.13.xxx:27018</strong><font color="red"><b>?connect=direct</b></font><br>这个好像是可以连接上的，但是我发现连接的时候，还是用的是主库的地址，就是不会连到从库。<br>而如果我主动切换模式的话，确实可以切换为 从库模式， 测试模式如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">func main() &#123;</span><br><span class="line">   <span class="keyword">var</span> ch interface&#123;&#125;</span><br><span class="line">   host := <span class="string">"59.57.13.xxx"</span></span><br><span class="line">   url := fmt.Sprintf(<span class="string">"mongodb://%s:27017,%s:27018?connect=direct"</span>, host, host)</span><br><span class="line">   fmt.Println(<span class="string">"url=&gt;"</span>, url)</span><br><span class="line">   session, <span class="attr">err</span> := mgo.Dial(url)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      fmt.Printf(<span class="string">"can not connect to server %v\n"</span>, err)</span><br><span class="line">      panic(err)</span><br><span class="line">   &#125;</span><br><span class="line">   defer session.Close()</span><br><span class="line">   collection := session.DB(<span class="string">"gopush"</span>).C(<span class="string">"channel"</span>)</span><br><span class="line">   err = collection.Find(nil).One(&amp;ch)</span><br><span class="line">   fmt.Println(ch)</span><br><span class="line">   <span class="comment">// 切换为从库</span></span><br><span class="line">   session.SetMode(mgo.Secondary, <span class="literal">false</span>)</span><br><span class="line">   collection2 := session.DB(<span class="string">"gopush"</span>).C(<span class="string">"channel"</span>)</span><br><span class="line">   err = collection2.Find(nil).One(&amp;ch)</span><br><span class="line">   fmt.Println(ch)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>可以看到如果我切换为<strong>mgo.Secondary</strong>， 那么接下来的session就是从库的连接<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">session.SetMode(mgo.Secondary, <span class="literal">false</span>)</span><br></pre></td></tr></table></figure><br>默认是 mode 是 strong， 也就是强制主库<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">func DialWithInfo(info *DialInfo) (*Session, error) &#123;</span><br><span class="line">   addrs := make([]string, len(info.Addrs))</span><br><span class="line">   <span class="keyword">for</span> i, <span class="attr">addr</span> := range info.Addrs &#123;</span><br><span class="line">      p := strings.LastIndexAny(addr, <span class="string">"]:"</span>)</span><br><span class="line">      <span class="keyword">if</span> p == <span class="number">-1</span> || addr[p] != <span class="string">':'</span> &#123;</span><br><span class="line">         <span class="comment">// XXX This is untested. The test suite doesn't use the standard port.</span></span><br><span class="line">         addr += <span class="string">":27017"</span></span><br><span class="line">      &#125;</span><br><span class="line">      fmt.Println(<span class="string">"addr:"</span>, addr)</span><br><span class="line">      addrs[i] = addr</span><br><span class="line">   &#125;</span><br><span class="line">   cluster := newCluster(addrs, info.Direct, info.FailFast, dialer&#123;info.Dial, info.DialServer&#125;, info.ReplicaSetName)</span><br><span class="line">   session := newSession(Eventual, cluster, info.Timeout)</span><br><span class="line">   session.defaultdb = info.Database</span><br><span class="line">   <span class="keyword">if</span> session.defaultdb == <span class="string">""</span> &#123;</span><br><span class="line">      session.defaultdb = <span class="string">"test"</span></span><br><span class="line">   &#125;</span><br><span class="line">   session.sourcedb = info.Source</span><br><span class="line">   <span class="keyword">if</span> session.sourcedb == <span class="string">""</span> &#123;</span><br><span class="line">      session.sourcedb = info.Database</span><br><span class="line">      <span class="keyword">if</span> session.sourcedb == <span class="string">""</span> &#123;</span><br><span class="line">         session.sourcedb = <span class="string">"admin"</span></span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> info.Username != <span class="string">""</span> &#123;</span><br><span class="line">      source := session.sourcedb</span><br><span class="line">      <span class="keyword">if</span> info.Source == <span class="string">""</span> &amp;&amp;</span><br><span class="line">         (info.Mechanism == <span class="string">"GSSAPI"</span> || info.Mechanism == <span class="string">"PLAIN"</span> || info.Mechanism == <span class="string">"MONGODB-X509"</span>) &#123;</span><br><span class="line">         source = <span class="string">"$external"</span></span><br><span class="line">      &#125;</span><br><span class="line">      session.dialCred = &amp;Credential&#123;</span><br><span class="line">         Username:    info.Username,</span><br><span class="line">         Password:    info.Password,</span><br><span class="line">         Mechanism:   info.Mechanism,</span><br><span class="line">         Service:     info.Service,</span><br><span class="line">         ServiceHost: info.ServiceHost,</span><br><span class="line">         Source:      source,</span><br><span class="line">      &#125;</span><br><span class="line">      session.creds = []Credential&#123;*session.dialCred&#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">if</span> info.PoolLimit &gt; <span class="number">0</span> &#123;</span><br><span class="line">      session.poolLimit = info.PoolLimit</span><br><span class="line">   &#125;</span><br><span class="line">   cluster.Release()</span><br><span class="line"></span><br><span class="line">   <span class="comment">// People get confused when we return a session that is not actually</span></span><br><span class="line">   <span class="comment">// established to any servers yet (e.g. what if url was wrong). So,</span></span><br><span class="line">   <span class="comment">// ping the server to ensure there's someone there, and abort if it</span></span><br><span class="line">   <span class="comment">// fails.</span></span><br><span class="line">   <span class="keyword">if</span> err := session.Ping(); err != nil &#123;</span><br><span class="line">      session.Close()</span><br><span class="line">      <span class="keyword">return</span> nil, err</span><br><span class="line">   &#125;</span><br><span class="line">   session.SetMode(Strong, <span class="literal">true</span>)</span><br><span class="line">   <span class="keyword">return</span> session, nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>倒数第三行的 <strong>session.SetMode(Strong, true)</strong> 就是默认连接的是主库<br>这边有好几个mode：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Primary            Mode = <span class="number">2</span> <span class="comment">// Default mode. All operations read from the current replica set primary.</span></span><br><span class="line">PrimaryPreferred   Mode = <span class="number">3</span> <span class="comment">// Read from the primary if available. Read from the secondary otherwise.</span></span><br><span class="line">Secondary          Mode = <span class="number">4</span> <span class="comment">// Read from one of the nearest secondary members of the replica set.</span></span><br><span class="line">SecondaryPreferred Mode = <span class="number">5</span> <span class="comment">// Read from one of the nearest secondaries if available. Read from primary otherwise.</span></span><br><span class="line">Nearest            Mode = <span class="number">6</span> <span class="comment">// Read from one of the nearest members, irrespective of it being primary or secondary.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Read preference modes are specific to mgo:</span></span><br><span class="line">Eventual  Mode = <span class="number">0</span> <span class="comment">// Same as Nearest, but may change servers between reads.</span></span><br><span class="line">Monotonic Mode = <span class="number">1</span> <span class="comment">// Same as SecondaryPreferred before first write. Same as Primary after first write.</span></span><br><span class="line">Strong    Mode = <span class="number">2</span> <span class="comment">// Same as Primary.</span></span><br></pre></td></tr></table></figure><br>如果是<strong>secondary</strong>那么就是强制使用从库，如果是<strong>SecondaryPreferred</strong>那么就是优先使用从库，没有的话，就用主库。<br>本来是使用<strong>SecondaryPreferred</strong>这个模式的，因为这个模式，要求配置文件不需要强制设置从库，可以只设置一个主库。但是后面发现如果是这个模式的话，很多是明明可以用从库查询的，结果又跑到主库去，不知道是bug，还是哪里有问题？？？<br>所以后面就选择<strong>secondary</strong>这个模式，但是这个模式，要求一定要设置从库，<strong>如果只有主库的话，那么会报错</strong>，所以要特别注意一点。<br>并且<strong>如果主库和从库一样的话，也是不行的，也会报错的</strong>。所以后面我们的程序有对这一点进行兼容，如果没有设置从库，或者从库和主库一样的话，那么就不做从库的读取。<br>所以在初始化的时候，要判断有没有设置从库配置，并且这个配置有没有问题：<br>配置文件：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[mongodb]</span><br><span class="line">host <span class="number">59.57</span><span class="number">.13</span>.xxx:<span class="number">27017</span></span><br><span class="line">slave_host <span class="number">59.57</span><span class="number">.13</span>.xxx:<span class="number">27018</span></span><br></pre></td></tr></table></figure><br>修改的代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// init mongodb</span></span><br><span class="line"><span class="comment">// 设置从库</span></span><br><span class="line"><span class="keyword">if</span> Conf.MongoDbSlaveHost == <span class="string">""</span> || Conf.MongoDbSlaveHost == Conf.MongoDbHost&#123;</span><br><span class="line">   <span class="comment">// 如果没有设置从库，或者从库和主库一样，那么就不设置从库了</span></span><br><span class="line">   hasSlaveMongoDb = <span class="literal">false</span></span><br><span class="line">   mongoDb = NewMongoDB(Conf.MongoDbHost, Conf.MongoDbUser, Conf.MongoDbPass)</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">   <span class="comment">// 有从库，就设置从库</span></span><br><span class="line">   hasSlaveMongoDb = <span class="literal">true</span></span><br><span class="line">   host := fmt.Sprintf(<span class="string">"%s,%s/?connect=direct"</span>, Conf.MongoDbHost, Conf.MongoDbSlaveHost)</span><br><span class="line">   mongoDb = NewMongoDB(host, Conf.MongoDbUser, Conf.MongoDbPass)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>如果从库设置有问题的话，那么 <strong>hasSlaveMongoDb</strong> 这个参数要设置为 false， mongodb.go :<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> (</span><br><span class="line">   mongoDb         *MongoDB</span><br><span class="line">   hasSlaveMongoDb bool</span><br><span class="line">)</span><br></pre></td></tr></table></figure><br>接下来就是mongo在使用的时候，通过传入一个参数，来制定要不要用从库来查询：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">func (db *MongoDB) M(mode_type int, database, collection string, f func(*mgo.Collection) error) error &#123;</span><br><span class="line">   session, <span class="attr">err</span> := db.Session()</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      <span class="keyword">return</span> err</span><br><span class="line">   &#125;</span><br><span class="line">   defer session.Close()</span><br><span class="line">   <span class="keyword">if</span> hasSlaveMongoDb &amp;&amp; mode_type == MONGO_USE_SLAVE &#123;</span><br><span class="line">      <span class="comment">// 设置为使用从库</span></span><br><span class="line">      session.SetMode(mgo.Secondary, <span class="literal">false</span>)</span><br><span class="line">   &#125;</span><br><span class="line">   mdb, <span class="attr">err</span> := db.DB(session, database)</span><br><span class="line">   <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">      <span class="keyword">return</span> err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   c := mdb.C(collection)</span><br><span class="line">   <span class="keyword">return</span> f(c)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>新增一个参数 mode_type 来表示要不要用从库查询<br>如果 有设置从库，并且 mode_type 为 <strong>MONGO_USE_SLAVE</strong>， 那么就把session 设置为从库模式<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> (</span><br><span class="line">    MONGO_USE_SLAVE = <span class="number">1</span></span><br><span class="line">    MONGO_USE_PRIMARY = <span class="number">0</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure><br>接下来就是修改之前的mongo操作，并将要不要使用从库的参数填进去,如果是需要用主库的，比如 insert，或者 update 操作，那么就这样写：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">func SaveChannel(key, deviceType, appType string, tags []string, extraParams map[string]interface&#123;&#125;) error &#123;</span><br><span class="line">   unix := time.Now().Unix()</span><br><span class="line">   channel := &amp;Channel&#123;key, deviceType, appType, tags, extraParams, unix&#125;</span><br><span class="line">   <span class="keyword">return</span> mongoDb.M(MONGO_USE_PRIMARY,<span class="string">"test"</span>, <span class="string">"channel"</span>, func(c *mgo.Collection) error &#123;</span><br><span class="line">      err := c.Insert(channel)</span><br><span class="line">      <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">         <span class="keyword">if</span> strings.Contains(err.Error(), <span class="string">"duplicate"</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> AddTagsAndUpdateExtraParamsByKey(key, tags, extraParams)</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="keyword">return</span> err</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> nil</span><br><span class="line">   &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>如果是需要 select 查询的，那么就用从库：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">func GetChannelByKey(key string) (Channel, error) &#123;</span><br><span class="line">   <span class="keyword">var</span> ch Channel</span><br><span class="line">   err := mongoDb.M(MONGO_USE_SLAVE,<span class="string">"gopush"</span>, <span class="string">"channel"</span>, func(c *mgo.Collection) error &#123;</span><br><span class="line">      <span class="keyword">return</span> c.Find(bson.M&#123;<span class="string">"key"</span>: key&#125;).One(&amp;ch)</span><br><span class="line">   &#125;)</span><br><span class="line">   <span class="keyword">return</span> ch, err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样就可以实现mongo的主从了， 后面果然整个 mongo的压力减少了很多。</p>
+<hr>
+<font color="red">后面发现mongoDB官方已经不建议使用主从模式了，替代方案是采用副本集的模式，而且从 mongo4.0 开始，就移除主从的支持了： <a href="https://docs.mongodb.com/master/core/master-slave/" target="_blank" rel="noopener">传送门</a></font>
+
+<p>所以我们后面又换成副本集的方式: <a href="/2018/08/10/mongo-replica-sets/" title="项目的mongo优化(二) -- 设置副本集集群">项目的mongo优化(二) -- 设置副本集集群</a>。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/08/10/mongo-primary-secondary/" title="项目的mongo优化(一) -- 设置主从">http://kebingzao.com/2018/08/10/mongo-primary-secondary/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mongo/" rel="tag"># mongo</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/09/google-iap-gcp-webhook/" rel="next" title="google iap webhook 接入(2) - 项目接入GCP webhook">
+                <i class="fa fa-chevron-left"></i> google iap webhook 接入(2) - 项目接入GCP webhook
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/10/mongo-replica-sets/" rel="prev" title="项目的mongo优化(二) -- 设置副本集集群">
+                项目的mongo优化(二) -- 设置副本集集群 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">62</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实践"><span class="nav-number">2.</span> <span class="nav-text">实践</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/08/10/mongo-primary-secondary/';
+          this.page.identifier = '2018/08/10/mongo-primary-secondary/';
+          this.page.title = '项目的mongo优化(一) -- 设置主从';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

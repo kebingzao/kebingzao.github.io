@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言goworker是一个基于Go后台队列任务执行框架， 运行速度比基于Ruby的快10到100,000倍。 goworker 兼容 Resque，所以你可以用 Rails/PHP 和Resque推送你的作业，然后利用Go在后台执行。我们的很多项目都是用 goworker 来进行队列任务处理，即一些基于PHP的业务处理，然后将一些分支任务，比如 发送push，发送邮件， 通用统计 等等的任务，放到">
+<meta name="keywords" content="golang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang基于resque的作业队列 -- goworker">
+<meta property="og:url" content="http://kebingzao.com/2018/08/14/goworker/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言goworker是一个基于Go后台队列任务执行框架， 运行速度比基于Ruby的快10到100,000倍。 goworker 兼容 Resque，所以你可以用 Rails/PHP 和Resque推送你的作业，然后利用Go在后台执行。我们的很多项目都是用 goworker 来进行队列任务处理，即一些基于PHP的业务处理，然后将一些分支任务，比如 发送push，发送邮件， 通用统计 等等的任务，放到">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/3.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/4.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/5.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/6.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/7.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/8.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/9.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/10.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/11.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/12.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/13.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/14.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/15.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/16.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/17.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/18.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/19.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/20.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/21.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/22.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/23.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/24.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/25.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/26.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/27.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/14/goworker/28.png">
+<meta property="og:updated_time" content="2018-08-15T15:54:52.937Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang基于resque的作业队列 -- goworker">
+<meta name="twitter:description" content="前言goworker是一个基于Go后台队列任务执行框架， 运行速度比基于Ruby的快10到100,000倍。 goworker 兼容 Resque，所以你可以用 Rails/PHP 和Resque推送你的作业，然后利用Go在后台执行。我们的很多项目都是用 goworker 来进行队列任务处理，即一些基于PHP的业务处理，然后将一些分支任务，比如 发送push，发送邮件， 通用统计 等等的任务，放到">
+<meta name="twitter:image" content="http://kebingzao.com/2018/08/14/goworker/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/08/14/goworker/"/>
+
+
+
+
+
+  <title>golang基于resque的作业队列 -- goworker | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/08/14/goworker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">golang基于resque的作业队列 -- goworker</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-14T19:54:55+08:00">
+                2018-08-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang相关/" itemprop="url" rel="index">
+                    <span itemprop="name">golang相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/14/goworker/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/08/14/goworker/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/08/14/goworker/" class="leancloud_visitors" data-flag-title="golang基于resque的作业队列 -- goworker">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><strong>goworker</strong>是一个基于Go后台队列任务执行框架， 运行速度比基于Ruby的快10到100,000倍。 <strong>goworker</strong> 兼容 Resque，所以你可以用 Rails/PHP 和Resque推送你的作业，然后利用Go在后台执行。<br>我们的很多项目都是用 goworker 来进行队列任务处理，即一些基于PHP的业务处理，然后将一些分支任务，比如 发送push，发送邮件， 通用统计 等等的任务，放到worker中去处理，这样子可以让多个业务项目的一些通用任务处理全部放在一块。<br>goworker是基于resque的用golang语言封装的库，Resque 是使用Redis创建后台任务，存储进队列，并随后执行。它是rails下最常用的后台任务管理工具之一。<br>官方文档：<a href="https://github.com/benmanns/goworker" target="_blank" rel="noopener">传送门</a><br><a id="more"></a></p>
+<h2 id="简单实测"><a href="#简单实测" class="headerlink" title="简单实测"></a>简单实测</h2><p>按照官网的实例来看的话，就两个文件，一个是 <strong>worker.go</strong>(入口执行文件), 一个是 <strong>hello_worker.go</strong>,<br><strong>worker.go</strong>:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">       <span class="string">"fmt"</span></span><br><span class="line">       <span class="string">"github.com/benmanns/goworker"</span></span><br><span class="line">)</span><br><span class="line"><span class="comment">// run=====</span></span><br><span class="line"><span class="comment">// go build</span></span><br><span class="line"><span class="comment">// goworker.exe -queues=hello</span></span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">       fmt.Println(<span class="string">"===========start========="</span>)</span><br><span class="line">       <span class="keyword">if</span> err := goworker.Work(); err != nil &#123;</span><br><span class="line">              fmt.Println(<span class="string">"Error:"</span>, err)</span><br><span class="line">       &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><strong>hello_worker.go</strong>:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">       <span class="string">"fmt"</span></span><br><span class="line">       <span class="string">"github.com/benmanns/goworker"</span></span><br><span class="line">)</span><br><span class="line">func init() &#123;</span><br><span class="line">       settings := goworker.WorkerSettings&#123;</span><br><span class="line">              URI:            <span class="string">"redis://localhost:6379/"</span>,</span><br><span class="line">              Connections:    <span class="number">100</span>,</span><br><span class="line">              Queues:         []string&#123;<span class="string">"myqueue"</span>, <span class="string">"delimited"</span>, <span class="string">"queues"</span>&#125;,</span><br><span class="line">              UseNumber:      <span class="literal">true</span>,</span><br><span class="line">              ExitOnComplete: <span class="literal">false</span>,</span><br><span class="line">              Concurrency:    <span class="number">2</span>,</span><br><span class="line">              Namespace:      <span class="string">"resque:"</span>,</span><br><span class="line">              Interval:       <span class="number">5.0</span>,</span><br><span class="line">       &#125;</span><br><span class="line">       goworker.SetSettings(settings)</span><br><span class="line">       goworker.Register(<span class="string">"Hello"</span>, helloWorker)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func helloWorker(queue string, args ...interface&#123;&#125;) error &#123;</span><br><span class="line">       fmt.Printf(<span class="string">"Hello, world! --&gt; From %s, %v\n"</span>, queue, args)</span><br><span class="line">       <span class="keyword">return</span> nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这边要指定 redis 的url， 并指定queue。 接下来先跑起来， 指定要运行的任务是 hello。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">go build</span><br><span class="line">goworker.exe  （上面已经显示的指定要处理的queue了）</span><br></pre></td></tr></table></figure><br><img src="/2018/08/14/goworker/1.png" alt="1"><br>这时候redis还没有任务进来。所以这时候要往redis插入一条任务试试。 这时候指定queue是 myqueue， class 就是任务 hello， agrs 就是参数。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RPUSH resque:queue:myqueue <span class="string">'&#123;"class":"Hello","args":["hi","there11"]&#125;'</span></span><br></pre></td></tr></table></figure><br><img src="/2018/08/14/goworker/2.png" alt="1"><br>发现马上跑任务了<br><img src="/2018/08/14/goworker/3.png" alt="1"><br>接下来我往redis的这个队列再插5条<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">5</span> RPUSH resque:queue:myqueue <span class="string">'&#123;"class":"Hello","args":["hi","kbz"]&#125;'</span></span><br></pre></td></tr></table></figure><br><img src="/2018/08/14/goworker/4.png" alt="1"><br>5条任务马上就执行了<br><img src="/2018/08/14/goworker/5.png" alt="1"><br>原理就是这样，只要一往 redis 对应 queue 插入对应的class，那么就会触发。非常好用。假设这个服务没有开，往redis 队列发送任务<br><img src="/2018/08/14/goworker/6.png" alt="1"><br>从redis的桌面管理工具，可以看到<br><img src="/2018/08/14/goworker/7.png" alt="1"><br>堆积了5条。然后我们一启动这个worker服务，就会马上去redis里面取数据，并处理。<br><img src="/2018/08/14/goworker/8.png" alt="1"><br>马上执行5条 。接下来 reload 一下 db0<br><img src="/2018/08/14/goworker/9.png" alt="1"><br>发现 队列是没有了，还是有跑一个worker， 关闭这个队列服务，重新reload 一下。<br><img src="/2018/08/14/goworker/10.png" alt="1"><br>发现 worker 也没有了。</p>
+<h2 id="进阶测试"><a href="#进阶测试" class="headerlink" title="进阶测试"></a>进阶测试</h2><p>从 redis 的命名空间可以看到：<br><img src="/2018/08/14/goworker/11.png" alt="1"><br>这个空间的命名规则就是这种情况：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">settings := goworker.WorkerSettings&#123;</span><br><span class="line">       URI:            <span class="string">"redis://localhost:6379/"</span>,</span><br><span class="line">       Connections:    <span class="number">100</span>,</span><br><span class="line">       Queues:         []string&#123;<span class="string">"myqueue"</span>, <span class="string">"delimited"</span>, <span class="string">"queues"</span>&#125;,</span><br><span class="line">       UseNumber:      <span class="literal">true</span>,</span><br><span class="line">       ExitOnComplete: <span class="literal">false</span>,</span><br><span class="line">       Concurrency:    <span class="number">2</span>,</span><br><span class="line">       Namespace:      <span class="string">"resque:"</span>,</span><br><span class="line">       Interval:       <span class="number">5.0</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>也就是说，只要命名空间确定之后，我要注册几个class都可以， 也就是说，我可以注册不同的class worker：<br><img src="/2018/08/14/goworker/12.png" alt="1"><br>而且从 <strong>Queues: []string{“myqueue”, “delimited”, “queues”}</strong>, 可以看到我可以设置不同的queue，来入不一样的class work。<br><strong>hello_worker.go</strong>:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">       <span class="string">"fmt"</span></span><br><span class="line">       <span class="string">"github.com/benmanns/goworker"</span></span><br><span class="line">)</span><br><span class="line">func init() &#123;</span><br><span class="line">       settings := goworker.WorkerSettings&#123;</span><br><span class="line">              URI:            <span class="string">"redis://localhost:6379/"</span>,</span><br><span class="line">              Connections:    <span class="number">100</span>,</span><br><span class="line">              Queues:         []string&#123;<span class="string">"myqueue"</span>, <span class="string">"myqueue2"</span>, <span class="string">"myqueue3"</span>&#125;,</span><br><span class="line">              UseNumber:      <span class="literal">true</span>,</span><br><span class="line">              ExitOnComplete: <span class="literal">false</span>,</span><br><span class="line">              Concurrency:    <span class="number">2</span>,</span><br><span class="line">              Namespace:      <span class="string">"resque:"</span>,</span><br><span class="line">              Interval:       <span class="number">5.0</span>,</span><br><span class="line">       &#125;</span><br><span class="line">       goworker.SetSettings(settings)</span><br><span class="line">       goworker.Register(<span class="string">"worker_Hello"</span>, Worker_hello)</span><br><span class="line">       goworker.Register(<span class="string">"worker_World"</span>, Worker_world)</span><br><span class="line">&#125;</span><br><span class="line">func Worker_hello(queue string, args ...interface&#123;&#125;) error &#123;</span><br><span class="line">       fmt.Printf(<span class="string">"Hello,  --&gt; From %s, %v\n"</span>, queue, args)</span><br><span class="line">       <span class="keyword">return</span> nil</span><br><span class="line">&#125;</span><br><span class="line">func Worker_world(queue string, args ...interface&#123;&#125;) error &#123;</span><br><span class="line">       fmt.Printf(<span class="string">"world,  --&gt; From %s, %v\n"</span>, queue, args)</span><br><span class="line">       <span class="keyword">return</span> nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>从上面的代码来看：我们有三个不一样的队列，分别是 <strong>myqueue</strong>， <strong>myqueue2</strong>， <strong>myqueue3</strong><br>并且注册了两个worker， 分别是 <strong>worker_Hello</strong> 和 <strong>work_World</strong><br>接下来开始测试，假设我们服务先不开起来, 先往redis先插入任务。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2</span> RPUSH resque:queue:myqueue <span class="string">'&#123;"class":"worker_Hello","args":["hi","hello"]&#125;'</span></span><br><span class="line"><span class="number">2</span> RPUSH resque:queue:myqueue2 <span class="string">'&#123;"class":"worker_Hello","args":["hi","hello2"]&#125;'</span></span><br><span class="line"><span class="number">2</span> RPUSH resque:queue:myqueue3 <span class="string">'&#123;"class":"worker_Hello","args":["hi","hello3"]&#125;'</span></span><br><span class="line"><span class="number">2</span> RPUSH resque:queue:myqueue <span class="string">'&#123;"class":"worker_World","args":["hi","world"]&#125;'</span></span><br><span class="line"><span class="number">2</span> RPUSH resque:queue:myqueue2 <span class="string">'&#123;"class":"worker_World","args":["hi","world2"]&#125;'</span></span><br><span class="line"><span class="number">2</span> RPUSH resque:queue:myqueue3 <span class="string">'&#123;"class":"worker_World","args":["hi","world3"]&#125;'</span></span><br></pre></td></tr></table></figure><br><img src="/2018/08/14/goworker/13.png" alt="1"><br>往每个queue里面，各插了两个worker的数据，一个是两条。<br><img src="/2018/08/14/goworker/14.png" alt="1"><br><img src="/2018/08/14/goworker/15.png" alt="1"><br><img src="/2018/08/14/goworker/16.png" alt="1"><br>可以看到，每个queue里面都插了4条数据，这四条数据来自于两个worker，(<strong>worker_Hello</strong> 和 <strong>worker_World</strong>)<br>接下来开始跑这个队列任务，注意，因为已经在代码里面显示的写要处理的queues了，所以直接跑 <strong>goworker.exe</strong> 就行了<br><img src="/2018/08/14/goworker/17.png" alt="1"><br><img src="/2018/08/14/goworker/18.png" alt="1"><br>可以看到3个queue里面的条目都被取出来了。<br>刷新一下redis 的 db，会发现queue中，没有数据了<br><img src="/2018/08/14/goworker/19.png" alt="1"><br>这时候手动往<strong>myqueue3</strong> 插入一条任务，这时候就会执行。<br><img src="/2018/08/14/goworker/20.png" alt="1"><br><img src="/2018/08/14/goworker/21.png" alt="1"><br>接下来测试一种情况，就是我跑队列的时候，只跑两个队列，比如只跑 <strong>myqueue</strong> 和 <strong>myqueue2</strong>，不跑<strong>myqueue3</strong><br>首先把这个显示的指定queues的参数注释掉，用queues的指令参数来指定，然后重新跑一下go build<br><img src="/2018/08/14/goworker/22.png" alt="1"><br><img src="/2018/08/14/goworker/23.png" alt="1"><br>这时候，往<strong>myqueue</strong>插入一条hello的class数据。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RPUSH resque:queue:myqueue <span class="string">'&#123;"class":"worker_Hello","args":["hi","hello_xx"]&#125;'</span></span><br></pre></td></tr></table></figure><br><img src="/2018/08/14/goworker/24.png" alt="1"><br>可以看到马上处理了<br><img src="/2018/08/14/goworker/25.png" alt="1"><br>接下来往 <strong>myqueue2</strong> 插入一条 world的class数据。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RPUSH resque:queue:myqueue2 <span class="string">'&#123;"class":"worker_World","args":["hi","world2_zzz"]&#125;'</span></span><br></pre></td></tr></table></figure><br><img src="/2018/08/14/goworker/26.png" alt="1"><br>可以看到也处理了。<br><img src="/2018/08/14/goworker/27.png" alt="1"><br>接下来往<strong>myqueue3</strong> 插入一条hello的class数据。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RPUSH resque:queue:myqueue3 <span class="string">'&#123;"class":"worker_Hello","args":["hi","hello3_dddd"]&#125;'</span></span><br></pre></td></tr></table></figure><br>可以看到没有执行，而是堆积起来<br><img src="/2018/08/14/goworker/28.png" alt="1"><br>说明<strong>myqueue3</strong>不在处理的queue数组里面。</p>
+<h2 id="默认的配置项"><a href="#默认的配置项" class="headerlink" title="默认的配置项"></a>默认的配置项</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">func init() &#123;</span><br><span class="line">       flag.StringVar(&amp;workerSettings.QueuesString, <span class="string">"queues"</span>, <span class="string">""</span>, <span class="string">"a comma-separated list of Resque queues"</span>)</span><br><span class="line">       flag.Float64Var(&amp;workerSettings.IntervalFloat, <span class="string">"interval"</span>, <span class="number">5.0</span>, <span class="string">"sleep interval when no jobs are found"</span>)</span><br><span class="line">       flag.IntVar(&amp;workerSettings.Concurrency, <span class="string">"concurrency"</span>, <span class="number">25</span>, <span class="string">"the maximum number of concurrently executing jobs"</span>)</span><br><span class="line">       flag.IntVar(&amp;workerSettings.Connections, <span class="string">"connections"</span>, <span class="number">2</span>, <span class="string">"the maximum number of connections to the Redis database"</span>)</span><br><span class="line">       redisProvider := os.Getenv(<span class="string">"REDIS_PROVIDER"</span>)</span><br><span class="line">       <span class="keyword">var</span> redisEnvURI string</span><br><span class="line">       <span class="keyword">if</span> redisProvider != <span class="string">""</span> &#123;</span><br><span class="line">              redisEnvURI = os.Getenv(redisProvider)</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              redisEnvURI = os.Getenv(<span class="string">"REDIS_URL"</span>)</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">if</span> redisEnvURI == <span class="string">""</span> &#123;</span><br><span class="line">              redisEnvURI = <span class="string">"redis://localhost:6379/"</span></span><br><span class="line">       &#125;</span><br><span class="line">       flag.StringVar(&amp;workerSettings.URI, <span class="string">"uri"</span>, redisEnvURI, <span class="string">"the URI of the Redis server"</span>)</span><br><span class="line">       flag.StringVar(&amp;workerSettings.Namespace, <span class="string">"namespace"</span>, <span class="string">"resque:"</span>, <span class="string">"the Redis namespace"</span>)</span><br><span class="line">       flag.BoolVar(&amp;workerSettings.ExitOnComplete, <span class="string">"exit-on-complete"</span>, <span class="literal">false</span>, <span class="string">"exit when the queue is empty"</span>)</span><br><span class="line">       flag.BoolVar(&amp;workerSettings.UseNumber, <span class="string">"use-number"</span>, <span class="literal">false</span>, <span class="string">"use json.Number instead of float64 when decoding numbers in JSON. will default to true soon"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>因为是用flag包，因此可以在跑程序的时候，用命令行指定。<br>其中 redis url 如果没有指定，那么就是 redis://localhost:6379/<br>interval 轮询时间间隔默认5s<br>concurrency 并行数默认为 25<br>与redis的最大连接数 connections 默认为 2<br>默认的redis的命名空间为 <strong>resque:</strong></p>
+<h2 id="关于并行数concurrency"><a href="#关于并行数concurrency" class="headerlink" title="关于并行数concurrency"></a>关于并行数concurrency</h2><p>从上面的配置项来看，默认的并行数是25。 因为之前我们项目有个比较奇葩的需求是，需要将获取job的并行数设置为1，就是要串行，也就是一次只能取一个job，当这个job运行完之后，才取下一个job，所以就想知道，这个的实现的逻辑，以下涉及到到大量的原生代码分析：<br>主要设置就是在 goworker.go 的 <strong>Work</strong> 方法，也就是入口方法来判断：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> id := <span class="number">0</span>; id &lt; workerSettings.Concurrency; id++ &#123;</span><br><span class="line">	worker, <span class="attr">err</span> := newWorker(strconv.Itoa(id), workerSettings.Queues)</span><br><span class="line">	<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">		<span class="keyword">return</span> err</span><br><span class="line">	&#125;</span><br><span class="line">	worker.work(jobs, &amp;monitor)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>也就是如果<strong>Concurrency</strong>设置为 1 的话，那么只会初始化一个 worker。 注意这边的 <strong>jobs</strong> 很重要，<br>这边的 <strong>jobs</strong> 是由上面的代码得到的：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobs := poller.poll(time.Duration(workerSettings.Interval), quit)</span><br></pre></td></tr></table></figure><br>其实它是一个只读的channel： <strong>jobs := make(chan *Job)</strong>， poll 方法会去定时去取job： <strong>job, err := p.getJob(conn)</strong>：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">func (p *poller) getJob(conn *RedisConn) (*Job, error) &#123;</span><br><span class="line">	<span class="keyword">for</span> _, <span class="attr">queue</span> := range p.queues(p.isStrict) &#123;</span><br><span class="line">		logger.Debugf(<span class="string">"Checking %s"</span>, queue)</span><br><span class="line">		reply, <span class="attr">err</span> := conn.Do(<span class="string">"LPOP"</span>, fmt.Sprintf(<span class="string">"%squeue:%s"</span>, workerSettings.Namespace, queue))</span><br><span class="line">		<span class="keyword">if</span> err != nil &#123;</span><br><span class="line">			<span class="keyword">return</span> nil, err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> reply != nil &#123;</span><br><span class="line">			logger.Debugf(<span class="string">"Found job on %s"</span>, queue)</span><br><span class="line">			job := &amp;Job&#123;<span class="attr">Queue</span>: queue&#125;</span><br><span class="line">			decoder := json.NewDecoder(bytes.NewReader(reply.([]byte)))</span><br><span class="line">			<span class="keyword">if</span> workerSettings.UseNumber &#123;</span><br><span class="line">				decoder.UseNumber()</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">if</span> err := decoder.Decode(&amp;job.Payload); err != nil &#123;</span><br><span class="line">				<span class="keyword">return</span> nil, err</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">return</span> job, nil</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> nil, nil</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>每次从redis取出一条来，注意，这边一次只取一条，然后就把这一条给 channel jobs： <strong>jobs &lt;- job</strong>，因为这个 <strong>jobs</strong> 的channel，是一个同步channel，是没有设置缓冲区的，也就是说，当我第一个没有取出来之前，第二个是塞不进去的，也就是 redis 就不会再去取了。<br>而这些 worker 就是专门用来取 <strong>jobs</strong> 里面的 job 的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">for job := range jobs &#123;</span><br><span class="line">    if workerFunc, ok := workers[job.Payload.Class]; ok &#123;</span><br><span class="line">        w.run(job, workerFunc)</span><br><span class="line"></span><br><span class="line">        logger.Debugf(&quot;done: (Job&#123;%s&#125; | %s | %v)&quot;, job.Queue, job.Payload.Class, job.Payload.Args)</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        errorLog := fmt.Sprintf(&quot;No worker for %s in queue %s with args %v&quot;, job.Payload.Class, job.Queue, job.Payload.Args)</span><br><span class="line">        logger.Critical(errorLog)</span><br><span class="line"></span><br><span class="line">        conn, err := GetConn()</span><br><span class="line">        if err != nil &#123;</span><br><span class="line">            logger.Criticalf(&quot;Error on getting connection in worker %v&quot;, w)</span><br><span class="line">            return</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            w.finish(conn, job, errors.New(errorLog))</span><br><span class="line">            PutConn(conn)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>也就是当我设置并行数 <strong>Concurrency</strong> 为1的时候，也就是 <strong>worker</strong> 实例只有一个，也就是每次 jobs channel 有东西的时候，只能通过这个 worker 来取，然后等这个当下任务执行完之后， 这时候channel 就空了， 又可以再去redis读取下一个队列任务了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/08/14/goworker/" title="golang基于resque的作业队列 -- goworker">http://kebingzao.com/2018/08/14/goworker/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/14/superset-install/" rel="next" title="在windows下安装Superset">
+                <i class="fa fa-chevron-left"></i> 在windows下安装Superset
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/15/php-upload-size-limit/" rel="prev" title="php 上传包限制大小的问题">
+                php 上传包限制大小的问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">65</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单实测"><span class="nav-number">2.</span> <span class="nav-text">简单实测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进阶测试"><span class="nav-number">3.</span> <span class="nav-text">进阶测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#默认的配置项"><span class="nav-number">4.</span> <span class="nav-text">默认的配置项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于并行数concurrency"><span class="nav-number">5.</span> <span class="nav-text">关于并行数concurrency</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/08/14/goworker/';
+          this.page.identifier = '2018/08/14/goworker/';
+          this.page.title = 'golang基于resque的作业队列 -- goworker';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

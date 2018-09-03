@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="aws," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言事情是这样的，我们有一个在线的站点，这个站点支持多语言。 但是后面发现当这个站点的主页也要放到手机端上显示的时候，这时候就会有一个问题：因为这个站点的页面同时也是我们手机端APP的内嵌页，但是手机端的APP也有多语言，而且有三十几种多语言，所以就会出现手机端传过来的语言是网页端没有的，比如这时候手机端的语言是 ka， 这时候手机端显示首页的url就是： http://xx.xxx.com/ka">
+<meta name="keywords" content="aws">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS S3&#x2F;CloudFront 规则支持重定向">
+<meta property="og:url" content="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言事情是这样的，我们有一个在线的站点，这个站点支持多语言。 但是后面发现当这个站点的主页也要放到手机端上显示的时候，这时候就会有一个问题：因为这个站点的页面同时也是我们手机端APP的内嵌页，但是手机端的APP也有多语言，而且有三十几种多语言，所以就会出现手机端传过来的语言是网页端没有的，比如这时候手机端的语言是 ka， 这时候手机端显示首页的url就是： http://xx.xxx.com/ka">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/3.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/4.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/5.png">
+<meta property="og:updated_time" content="2018-09-03T16:51:33.991Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AWS S3&#x2F;CloudFront 规则支持重定向">
+<meta name="twitter:description" content="前言事情是这样的，我们有一个在线的站点，这个站点支持多语言。 但是后面发现当这个站点的主页也要放到手机端上显示的时候，这时候就会有一个问题：因为这个站点的页面同时也是我们手机端APP的内嵌页，但是手机端的APP也有多语言，而且有三十几种多语言，所以就会出现手机端传过来的语言是网页端没有的，比如这时候手机端的语言是 ka， 这时候手机端显示首页的url就是： http://xx.xxx.com/ka">
+<meta name="twitter:image" content="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/"/>
+
+
+
+
+
+  <title>AWS S3/CloudFront 规则支持重定向 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AWS S3/CloudFront 规则支持重定向</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-31T16:13:50+08:00">
+                2018-08-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">aws 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/31/aws-s3-cloudfront-rule-redirection/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/08/31/aws-s3-cloudfront-rule-redirection/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/08/31/aws-s3-cloudfront-rule-redirection/" class="leancloud_visitors" data-flag-title="AWS S3/CloudFront 规则支持重定向">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>事情是这样的，我们有一个在线的站点，这个站点支持多语言。 但是后面发现当这个站点的主页也要放到手机端上显示的时候，这时候就会有一个问题：<br>因为这个站点的页面同时也是我们手机端APP的内嵌页，但是手机端的APP也有多语言，而且有三十几种多语言，所以就会出现手机端传过来的语言是网页端没有的，比如这时候手机端的语言是 <strong>ka</strong>， 这时候手机端显示首页的url就是： <strong><a href="http://xx.xxx.com/ka/home.html" target="_blank" rel="noopener">http://xx.xxx.com/ka/home.html</a></strong>，但是因为 xx.xxx.com 所在的s3上并没有这种语言的页面，所以就会变成 404 页面：<br><a id="more"></a><br><img src="/2018/08/31/aws-s3-cloudfront-rule-redirection/1.png" alt="1"></p>
+<h2 id="设置S3重定向规则"><a href="#设置S3重定向规则" class="headerlink" title="设置S3重定向规则"></a>设置S3重定向规则</h2><p>因为我们的这个页面是放在AWS的S3 bucket的，因此如果要不显示404页面，而是要显示已存在的语种的对应相同页面的话，比如本来这个页面 ka/home.html 是 404 页面， 然后我们通过规则设置为，如果是这种情况的话，那么就重定向到 en/home.html 页面，这个页面刚才是存在的。<br>所以我们找到S3 对应bucket的 重定向规则配置页面：<br><img src="/2018/08/31/aws-s3-cloudfront-rule-redirection/2.png" alt="1"><br>可以看到我们目前的配置是，如果找不到的话，才会跳到 404 页面：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;RoutingRules&gt;</span><br><span class="line">  &lt;RoutingRule&gt;</span><br><span class="line">    &lt;Condition&gt;</span><br><span class="line">      &lt;HttpErrorCodeReturnedEquals&gt;404&lt;/HttpErrorCodeReturnedEquals&gt;</span><br><span class="line">    &lt;/Condition&gt;</span><br><span class="line">    &lt;Redirect&gt;</span><br><span class="line">      &lt;ReplaceKeyWith&gt;404.html&lt;/ReplaceKeyWith&gt;</span><br><span class="line">    &lt;/Redirect&gt;</span><br><span class="line">  &lt;/RoutingRule&gt;</span><br><span class="line">&lt;/RoutingRules&gt;</span><br></pre></td></tr></table></figure></p>
+<p>但是单单这个规则还不够，还要再加强，所以后面改成所有的语种全部做 rewrite的，但是会有一个条件，就是当为 404 的时候才会触发，并且跳转到对应的en语种对应的页面:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&lt;RoutingRules&gt;</span><br><span class="line">  &lt;RoutingRule&gt;</span><br><span class="line">    &lt;Condition&gt;</span><br><span class="line">      &lt;KeyPrefixEquals&gt;ar/&lt;/KeyPrefixEquals&gt;</span><br><span class="line">      &lt;HttpErrorCodeReturnedEquals&gt;404&lt;/HttpErrorCodeReturnedEquals&gt;</span><br><span class="line">    &lt;/Condition&gt;</span><br><span class="line">    &lt;Redirect&gt;</span><br><span class="line">      &lt;ReplaceKeyPrefixWith&gt;en/&lt;/ReplaceKeyPrefixWith&gt;</span><br><span class="line">    &lt;/Redirect&gt;</span><br><span class="line">  &lt;/RoutingRule&gt;</span><br><span class="line">  ... 以下省略N个类似语言的配置</span><br><span class="line">  &lt;RoutingRule&gt;</span><br><span class="line">    &lt;Condition&gt;</span><br><span class="line">      &lt;HttpErrorCodeReturnedEquals&gt;404&lt;/HttpErrorCodeReturnedEquals&gt;</span><br><span class="line">    &lt;/Condition&gt;</span><br><span class="line">    &lt;Redirect&gt;</span><br><span class="line">      &lt;ReplaceKeyWith&gt;404.html&lt;/ReplaceKeyWith&gt;</span><br><span class="line">    &lt;/Redirect&gt;</span><br><span class="line">  &lt;/RoutingRule&gt;</span><br><span class="line">&lt;/RoutingRules&gt;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到一个RoutingRule包含的，就是一条规则，每一个rule块都包含两个元素：</p>
+<ul>
+<li>Condition 块就是触发条件</li>
+<li>Redirect 块就是重定向操作</li>
+</ul>
+<p>以第一个rule块来说，就是当路径前缀为 <strong>ar/</strong> 字符串开头的页面，并且这个页面的返回值为404的时候(这个时候就说明这个页面找不到了)，刚好满足条件，这时候就触发Redirect块， 这时候就会重定向到以 <strong>en/</strong> 为前缀开头的相同页面。<br>也就是如果是 ar/home.html 这个页面找不到的话，就会重定向到 en/home.html, 其实就是针对这个页面先replace一下，然后再重定向：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rewrite path.replace(&quot;ar/&quot;,&quot;en/&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>如果是已经存在的页面请求的话，那么Condition块条件不符合，因为返回的是 200，而不是 404。<br>注意，最后我们还是加上了之前最早的那个 404 的跳转rule，这个还是要加的，因为 rule 规则是自上而下执行的， 也就是如果有一个语言前缀不在这里面，并且还是404 code 返回，那么最后还是会返回到 404页面。</p>
+<h2 id="设置cloudFront重定向规则"><a href="#设置cloudFront重定向规则" class="headerlink" title="设置cloudFront重定向规则"></a>设置cloudFront重定向规则</h2><p>我们已经通过设置S3的重定向规则来支持不存在的语种的情况了，但是后面我们的需求又变了，我们的页面后面要支持https了，为了支持https，我们就换成AWS的cloudFront,但是问题就出现了，换成cloudFront之后固然可以完美支持https，并且还可以用原来的自定义域名(s3 上的资源也可以用https访问，但是如果还是要用自定义域名访问的话，那么只能切换为cloudFront)，但是在测试的过程中，发现之前在s3上设置的 重定向规则全部都没有用了：<br><img src="/2018/08/31/aws-s3-cloudfront-rule-redirection/3.png" alt="1"><br>直接返回 404 错误，而且还不是出现了 404 页面？？？<br>后面查了一下网上的答案： <a href="https://serverfault.com/questions/450940/why-s3-website-redirect-location-is-not-followed-by-cloudfront" target="_blank" rel="noopener">传送门</a><br>发现如果在s3的重定向规则里面指定hostName的话，是可以解决的,比如这个：<br><img src="/2018/08/31/aws-s3-cloudfront-rule-redirection/4.png" alt="1"><br>但是我试了一下，发现还是有问题：<br><img src="/2018/08/31/aws-s3-cloudfront-rule-redirection/5.png" alt="1"><br>后面查了一下， 原来还是 <strong>host name</strong> 配置不对，如果这样配，就可以：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&lt;RoutingRules&gt;</span><br><span class="line">  &lt;RoutingRule&gt;</span><br><span class="line">    &lt;Condition&gt;</span><br><span class="line">      &lt;KeyPrefixEquals&gt;ar/&lt;/KeyPrefixEquals&gt;</span><br><span class="line">      &lt;HttpErrorCodeReturnedEquals&gt;404&lt;/HttpErrorCodeReturnedEquals&gt;</span><br><span class="line">    &lt;/Condition&gt;</span><br><span class="line">    &lt;Redirect&gt;</span><br><span class="line">      &lt;Protocol&gt;https&lt;/Protocol&gt;</span><br><span class="line">      &lt;HostName&gt;xx.xxx.com&lt;/HostName&gt;</span><br><span class="line">      &lt;ReplaceKeyPrefixWith&gt;en/&lt;/ReplaceKeyPrefixWith&gt;</span><br><span class="line">    &lt;/Redirect&gt;</span><br><span class="line">  &lt;/RoutingRule&gt;</span><br><span class="line">  ... 以下省略N个类似语言的配置</span><br><span class="line">  &lt;RoutingRule&gt;</span><br><span class="line">    &lt;Condition&gt;</span><br><span class="line">      &lt;HttpErrorCodeReturnedEquals&gt;404&lt;/HttpErrorCodeReturnedEquals&gt;</span><br><span class="line">    &lt;/Condition&gt;</span><br><span class="line">    &lt;Redirect&gt;</span><br><span class="line">      &lt;ReplaceKeyWith&gt;404.html&lt;/ReplaceKeyWith&gt;</span><br><span class="line">    &lt;/Redirect&gt;</span><br><span class="line">  &lt;/RoutingRule&gt;</span><br><span class="line">&lt;/RoutingRules&gt;</span><br></pre></td></tr></table></figure></p>
+<p>这样就可以了， 通过加上这两个规则<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;Protocol&gt;https&lt;/Protocol&gt;</span><br><span class="line">&lt;HostName&gt;xx.xxx.com&lt;/HostName&gt;</span><br><span class="line">&lt;ReplaceKeyPrefixWith&gt;en/&lt;/ReplaceKeyPrefixWith&gt;</span><br></pre></td></tr></table></figure></p>
+<p>当页面不存在的时候，就会重定向到  <a href="https://xx.xxx.com/en/xxx" target="_blank" rel="noopener">https://xx.xxx.com/en/xxx</a> 对应的页面，<br>这样就可以满足我们的需求了。</p>
+<h2 id="其他方式"><a href="#其他方式" class="headerlink" title="其他方式"></a>其他方式</h2><p>当然还有更好的方法，就是在构建的时候，将不支持的语言也静态化预编译一下， 只不过是用 英文的模板去跑：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">const allLang = [&quot;en&quot;, &quot;ar&quot;, &quot;bg&quot;, &quot;ca&quot;, &quot;cs&quot;, &quot;de&quot;, &quot;es-es&quot;, &quot;fr&quot;, &quot;hi&quot;, &quot;hu&quot;, &quot;id&quot;, &quot;it&quot;, &quot;ja&quot;, &quot;ko&quot;, &quot;ms&quot;, &quot;nl&quot;, &quot;pl&quot;, &quot;pt-br&quot;, &quot;pt-pt&quot;, &quot;ru&quot;, &quot;sk&quot;, &quot;sr&quot;, &quot;sv-se&quot;, &quot;tr&quot;, &quot;uk&quot;, &quot;zh-cn&quot;, &quot;zh-tw&quot;, &quot;no&quot;];</span><br><span class="line">const supportLangs = [&apos;en&apos;, &apos;ja&apos;, &apos;zh-cn&apos;, &apos;zh-tw&apos;, &apos;pt-br&apos;, &apos;es-es&apos;, &apos;de&apos;, &apos;fr&apos;, &apos;it&apos;, &apos;pt-pt&apos;, &apos;ru&apos;];</span><br><span class="line">const unsupportLang = [&quot;ar&quot;, &quot;bg&quot;, &quot;ca&quot;, &quot;cs&quot;, &quot;hi&quot;, &quot;hu&quot;, &quot;id&quot;, &quot;ko&quot;, &quot;ms&quot;, &quot;nl&quot;, &quot;pl&quot;, &quot;sk&quot;, &quot;sr&quot;, &quot;sv-se&quot;, &quot;tr&quot;, &quot;uk&quot;, &quot;no&quot;];</span><br><span class="line">。。。省略逻辑。。。</span><br><span class="line">const staticfyTasks = allLang.map(registerStaticfyTask);</span><br><span class="line"></span><br><span class="line">function appendLangScript(lang, version) &#123;</span><br><span class="line">    let scriptPath = &apos;./&apos;;</span><br><span class="line">    if (version) &#123;</span><br><span class="line">        scriptPath += version + &apos;/&apos;;</span><br><span class="line">    &#125;</span><br><span class="line">    if (unsupportLang.indexOf(lang) != -1) &#123;</span><br><span class="line">        scriptPath += &apos;lang/&apos; + getLangFileName(&apos;en&apos;) + &apos;.js&apos;;</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        scriptPath += &apos;lang/&apos; + getLangFileName(lang) + &apos;.js&apos;;</span><br><span class="line">    &#125;</span><br><span class="line">    return replace(/&lt;\/head&gt;/g, &apos;&lt;script src=&quot;&apos; + scriptPath + &apos;&quot;&gt;&lt;/script&gt;&lt;/head&gt;&apos;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样子虽然会导致文件变多，因为多了好多的html文件，但是就不需要在S3上配置重定向规则了，反而更省事。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/" title="AWS S3/CloudFront 规则支持重定向">http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/aws/" rel="tag"># aws</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/16/use-nsq/" rel="next" title="初试消息队列服务 -- NSQ">
+                <i class="fa fa-chevron-left"></i> 初试消息队列服务 -- NSQ
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/31/aws-s3-bucket-policy/" rel="prev" title="AWS S3 bucket policy 设置问题">
+                AWS S3 bucket policy 设置问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">69</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设置S3重定向规则"><span class="nav-number">2.</span> <span class="nav-text">设置S3重定向规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设置cloudFront重定向规则"><span class="nav-number">3.</span> <span class="nav-text">设置cloudFront重定向规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他方式"><span class="nav-number">4.</span> <span class="nav-text">其他方式</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/08/31/aws-s3-cloudfront-rule-redirection/';
+          this.page.identifier = '2018/08/31/aws-s3-cloudfront-rule-redirection/';
+          this.page.title = 'AWS S3/CloudFront 规则支持重定向';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

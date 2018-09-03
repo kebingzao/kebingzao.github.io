@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang,NSQ," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言最近打算想完善服务端的一些监控机制，并且将其图形化。也一直再找一个高性能，高可用的消息队列做内部服务之间的通讯。其实本身消息队列这种服务在我们的业务层上也用到了一些，比如很多任务队列处理，其实就是用的resque redis的队列的方式来做的： golang基于resque的作业队列 -- goworker， 然后我们的 webrtc 服务也用到了 VERNEMQ 这个服务来做 signal">
+<meta name="keywords" content="golang,NSQ">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初试消息队列服务 -- NSQ">
+<meta property="og:url" content="http://kebingzao.com/2018/08/16/use-nsq/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言最近打算想完善服务端的一些监控机制，并且将其图形化。也一直再找一个高性能，高可用的消息队列做内部服务之间的通讯。其实本身消息队列这种服务在我们的业务层上也用到了一些，比如很多任务队列处理，其实就是用的resque redis的队列的方式来做的： golang基于resque的作业队列 -- goworker， 然后我们的 webrtc 服务也用到了 VERNEMQ 这个服务来做 signal">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/08/16/use-nsq/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/16/use-nsq/6.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/16/use-nsq/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/16/use-nsq/5.gif">
+<meta property="og:image" content="http://kebingzao.com/2018/08/16/use-nsq/3.png">
+<meta property="og:image" content="http://kebingzao.com/2018/08/16/use-nsq/4.png">
+<meta property="og:updated_time" content="2018-09-03T16:51:33.996Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="初试消息队列服务 -- NSQ">
+<meta name="twitter:description" content="前言最近打算想完善服务端的一些监控机制，并且将其图形化。也一直再找一个高性能，高可用的消息队列做内部服务之间的通讯。其实本身消息队列这种服务在我们的业务层上也用到了一些，比如很多任务队列处理，其实就是用的resque redis的队列的方式来做的： golang基于resque的作业队列 -- goworker， 然后我们的 webrtc 服务也用到了 VERNEMQ 这个服务来做 signal">
+<meta name="twitter:image" content="http://kebingzao.com/2018/08/16/use-nsq/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/08/16/use-nsq/"/>
+
+
+
+
+
+  <title>初试消息队列服务 -- NSQ | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/08/16/use-nsq/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">初试消息队列服务 -- NSQ</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-08-16T17:40:31+08:00">
+                2018-08-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang相关/" itemprop="url" rel="index">
+                    <span itemprop="name">golang相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/08/16/use-nsq/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/08/16/use-nsq/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/08/16/use-nsq/" class="leancloud_visitors" data-flag-title="初试消息队列服务 -- NSQ">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近打算想完善服务端的一些监控机制，并且将其图形化。也一直再找一个高性能，高可用的消息队列做内部服务之间的通讯。其实本身消息队列这种服务在我们的业务层上也用到了一些，比如很多任务队列处理，其实就是用的resque redis的队列的方式来做的： <a href="/2018/08/14/goworker/" title="golang基于resque的作业队列 -- goworker">golang基于resque的作业队列 -- goworker</a>， 然后我们的 webrtc 服务也用到了 VERNEMQ 这个服务来做 signal 服务通信： <a href="/2018/05/30/vernemq-install/" title="webrtc 的 signal 服务器 VerneMQ 的搭建">webrtc 的 signal 服务器 VerneMQ 的搭建</a>, 当初之所以用这个服务也是因为他支持 mqtt 的协议，适合用在移动端设备上， 这次想找的消息队列服务主要是用来做我们内部服务直接的通信，所以可靠性和灵活性非常重要，考虑到我们的大部分服务都是Golang 写的，所以后面就选了 NSQ 来做服务内部之间的通信。<br><a id="more"></a></p>
+<h2 id="NSQ-简介"><a href="#NSQ-简介" class="headerlink" title="NSQ 简介"></a>NSQ 简介</h2><p>NSQ是Go语言编写的，开源的分布式消息队列中间件，其设计的目的是用来大规模地处理每天数以十亿计级别的消息。NSQ 具有分布式和去中心化拓扑结构，该结构具有无单点故障、故障容错、高可用性以及能够保证消息的可靠传递的特征，是一个成熟的、已在大规模生成环境下应用的产品。<br>整个NSQ服务包含三个主要部分:</p>
+<h3 id="nsqlookupd"><a href="#nsqlookupd" class="headerlink" title="nsqlookupd"></a>nsqlookupd</h3><p>nsqlookupd是守护进程负责管理拓扑信息。客户端通过查询 nsqlookupd 来发现指定话题（topic）的生产者，并且 nsqd 节点广播话题（topic）和通道（channel）信息。<br>简单的说nsqlookupd就是中心管理服务，它使用tcp(默认端口4160)管理nsqd服务，使用http(默认端口4161)管理nsqadmin服务。同时为客户端提供查询功能。<br>主要负责：</p>
+<ul>
+<li>服务发现 </li>
+<li>负责nsqd的心跳</li>
+<li>状态监测</li>
+<li>给客户端、nsqadmin提供nsqd地址与状态。</li>
+</ul>
+<p>总的来说，nsqlookupd具有以下功能或特性：</p>
+<ul>
+<li>唯一性，在一个Nsq服务中只有一个nsqlookupd服务。当然也可以在集群中部署多个nsqlookupd，但它们之间是没有关联的</li>
+<li>去中心化，即使nsqlookupd崩溃，也会不影响正在运行的nsqd服务</li>
+<li>充当nsqd和naqadmin信息交互的中间件</li>
+<li>提供一个http查询服务，给客户端定时更新nsqd的地址目录 </li>
+</ul>
+<h3 id="nsqadmin"><a href="#nsqadmin" class="headerlink" title="nsqadmin"></a>nsqadmin</h3><p>是一套 WEB UI，用来汇集集群的实时统计，并执行不同的管理任务<br>总的来说，nsqadmin具有以下功能或特性：</p>
+<ul>
+<li>提供一个对topic和channel统一管理的操作界面以及各种实时监控数据的展示，界面设计的很简洁，操作也很简单</li>
+<li>展示所有message的数量</li>
+<li>能够在后台创建topic和channel</li>
+<li>nsqadmin的所有功能都必须依赖于nsqlookupd，nsqadmin只是向nsqlookupd传递用户操作并展示来自nsqlookupd的数据</li>
+</ul>
+<h3 id="nsqd"><a href="#nsqd" class="headerlink" title="nsqd"></a>nsqd</h3><p>nsqd 是一个守护进程，负责接收，排队，投递消息给客户端。<br>简单的说，真正干活的就是这个服务，它主要负责message的收发，队列的维护。nsqd会默认监听一个tcp端口(4150)和一个http端口(4151)以及一个可选的https端口。<br>总的来说，nsqd 具有以下功能或特性：</p>
+<ul>
+<li>对订阅了同一个topic，同一个channel的消费者使用负载均衡策略（不是轮询）</li>
+<li>只要channel存在，即使没有该channel的消费者，也会将生产者的message缓存到队列中（注意消息的过期处理）</li>
+<li>保证队列中的message至少会被消费一次，即使nsqd退出，也会将队列中的消息暂存磁盘上(结束进程等意外情况除外)</li>
+<li>限定内存占用，能够配置nsqd中每个channel队列在内存中缓存的message数量，一旦超出，message将被缓存到磁盘中</li>
+<li>topic，channel一旦建立，将会一直存在，要及时在管理台或者用代码清除无效的topic和channel，避免资源的浪费</li>
+</ul>
+<h2 id="NSQ-docker-安装"><a href="#NSQ-docker-安装" class="headerlink" title="NSQ docker 安装"></a>NSQ docker 安装</h2><p>根据官网文档，直接用 docker-compose.yml 来安装：<a href="http://nsq.io/deployment/docker.html" target="_blank" rel="noopener">docker安装文档</a>。<br>因为 nsq 是基于 golang 开发的，因此装这个之前，要先安装golang环境（1.7+）<br>接下来开始实作：<br>首先先建一个 docker-compose.yml 文件，内容如上：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos nsq]# cat docker-compose.yml</span><br><span class="line">version: &apos;3&apos;</span><br><span class="line">services:</span><br><span class="line">  nsqlookupd:</span><br><span class="line">    image: nsqio/nsq</span><br><span class="line">    command: /nsqlookupd</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;4160&quot;</span><br><span class="line">      - &quot;4161&quot;</span><br><span class="line">  nsqd:</span><br><span class="line">    image: nsqio/nsq</span><br><span class="line">    command: /nsqd --lookupd-tcp-address=nsqlookupd:4160</span><br><span class="line">    depends_on:</span><br><span class="line">      - nsqlookupd</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;4150&quot;</span><br><span class="line">      - &quot;4151&quot;</span><br><span class="line">  nsqadmin:</span><br><span class="line">    image: nsqio/nsq</span><br><span class="line">    command: /nsqadmin --lookupd-http-address=nsqlookupd:4161</span><br><span class="line">    depends_on:</span><br><span class="line">      - nsqlookupd</span><br><span class="line">    ports:</span><br><span class="line">      - &quot;4171&quot;</span><br><span class="line">[root@VM_156_200_centos nsq]# ls</span><br><span class="line">docker-compose.yml</span><br></pre></td></tr></table></figure></p>
+<p>然后在当前所在目录下，执行：<strong>docker-compose up -d</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos nsq]# docker-compose up -d</span><br><span class="line">Creating network &quot;nsq_default&quot; with the default driver</span><br><span class="line">Pulling nsqlookupd (nsqio/nsq:latest)...</span><br><span class="line">Trying to pull repository docker.io/nsqio/nsq ...</span><br><span class="line">latest: Pulling from docker.io/nsqio/nsq</span><br><span class="line">709515475419: Pull complete</span><br><span class="line">efd1c5a69d15: Pull complete</span><br><span class="line">fa61d00bb52d: Pull complete</span><br><span class="line">Digest: sha256:fad1937a88fec5b66fb9f4837b72ad3b70012692826aed5c6435f93c5a23b690</span><br><span class="line">Status: Downloaded newer image for docker.io/nsqio/nsq:latest</span><br><span class="line">Creating nsq_nsqlookupd_1 ... done</span><br><span class="line">Creating nsq_nsqadmin_1   ... done</span><br><span class="line">Creating nsq_nsqd_1       ... done</span><br></pre></td></tr></table></figure></p>
+<p>这时候就会进行下载镜像，并运行在容器里面了<br>通过<strong>docker-compose ps</strong> 可以看到当前通过 docker-compose 允许的镜像程序<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos nsq]# docker-compose ps</span><br><span class="line">      Name                    Command               State                                            Ports                                         </span><br><span class="line">----------------------------------------------------------------------------------------------------------------------------------------------------</span><br><span class="line">nsq_nsqadmin_1     /nsqadmin --lookupd-http-a ...   Up      4150/tcp, 4151/tcp, 4160/tcp, 4161/tcp, 4170/tcp, 0.0.0.0:32770-&gt;4171/tcp               </span><br><span class="line">nsq_nsqd_1         /nsqd --lookupd-tcp-addres ...   Up      0.0.0.0:32772-&gt;4150/tcp, 0.0.0.0:32771-&gt;4151/tcp, 4160/tcp, 4161/tcp, 4170/tcp, 4171/tcp</span><br><span class="line">nsq_nsqlookupd_1   /nsqlookupd                      Up      4150/tcp, 4151/tcp, 0.0.0.0:32769-&gt;4160/tcp, 0.0.0.0:32768-&gt;4161/tcp, 4170/tcp, 4171/tcp</span><br></pre></td></tr></table></figure></p>
+<p>然后可以通过 <strong>docker-compose logs</strong> 查看 log:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos nsq]# docker-compose logs</span><br><span class="line">Attaching to nsq_nsqadmin_1, nsq_nsqd_1, nsq_nsqlookupd_1</span><br><span class="line">nsqadmin_1    | [nsqadmin] 2018/03/29 03:51:30.947487 nsqadmin v1.0.0-compat (built w/go1.8)</span><br><span class="line">nsqadmin_1    | [nsqadmin] 2018/03/29 03:51:30.947634 HTTP: listening on [::]:4171</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:51:30.077293 nsqlookupd v1.0.0-compat (built w/go1.8)</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:51:30.077538 TCP: listening on [::]:4160</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:51:30.077568 HTTP: listening on [::]:4161</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:51:31.127668 TCP: new client(172.18.0.4:44088)</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:51:31.127688 CLIENT(172.18.0.4:44088): desired protocol magic &apos;  V1&apos;</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:51:31.127812 CLIENT(172.18.0.4:44088): IDENTIFY Address:3612b4785be5 TCP:4150 HTTP:4151 Version:1.0.0-compat</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:51:31.127823 DB: client(172.18.0.4:44088) REGISTER category:client key: subkey:</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:51:46.125929 CLIENT(172.18.0.4:44088): pinged (last ping 14.998109614s)</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:52:01.125927 CLIENT(172.18.0.4:44088): pinged (last ping 15.000001549s)</span><br><span class="line">nsqlookupd_1  | [nsqlookupd] 2018/03/29 03:52:16.125918 CLIENT(172.18.0.4:44088): pinged (last ping 14.999990902s)</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:51:31.113651 nsqd v1.0.0-compat (built w/go1.8)</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:51:31.113690 ID: 814</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:51:31.113721 NSQ: persisting topic/channel metadata to nsqd.dat</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:51:31.125458 TCP: listening on [::]:4150</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:51:31.125550 HTTP: listening on [::]:4151</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:51:31.125632 LOOKUP(nsqlookupd:4160): adding peer</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:51:31.125636 LOOKUP connecting to nsqlookupd:4160</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:51:31.128004 LOOKUPD(nsqlookupd:4160): peer info &#123;TCPPort:4160 HTTPPort:4161 Version:1.0.0-compat BroadcastAddress:a24d5cc10d29&#125;</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:51:46.125732 LOOKUPD(nsqlookupd:4160): sending heartbeat</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:52:01.125733 LOOKUPD(nsqlookupd:4160): sending heartbeat</span><br><span class="line">nsqd_1        | [nsqd] 2018/03/29 03:52:16.125733 LOOKUPD(nsqlookupd:4160): sending heartbeat</span><br></pre></td></tr></table></figure></p>
+<p>这样子 nsq 就部署成功了。<br>因为 docker-compose 部署的，其实也是属于docker的一部分，所以通过 docker ps 和 docker images 都是可以看到的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos nsq]# docker ps</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                                                            NAMES</span><br><span class="line">a1228658c74b        nsqio/nsq           &quot;/nsqadmin --looku...&quot;   3 hours ago         Up 3 hours          4150-4151/tcp, 4160-4161/tcp, 4170/tcp, 0.0.0.0:32770-&gt;4171/tcp                  nsq_nsqadmin_1</span><br><span class="line">3612b4785be5        nsqio/nsq           &quot;/nsqd --lookupd-t...&quot;   3 hours ago         Up 3 hours          4160-4161/tcp, 4170-4171/tcp, 0.0.0.0:32772-&gt;4150/tcp, 0.0.0.0:32771-&gt;4151/tcp   nsq_nsqd_1</span><br><span class="line">a24d5cc10d29        nsqio/nsq           &quot;/nsqlookupd&quot;            3 hours ago         Up 3 hours          4150-4151/tcp, 4170-4171/tcp, 0.0.0.0:32769-&gt;4160/tcp, 0.0.0.0:32768-&gt;4161/tcp   nsq_nsqlookupd_1</span><br><span class="line">a9ee06d55082        nginx:v3            &quot;nginx -g &apos;daemon ...&quot;   18 hours ago        Up 18 hours         0.0.0.0:80-&gt;80/tcp                                                               webserver3</span><br><span class="line">89e76cdbfe98        nginx               &quot;nginx -g &apos;daemon ...&quot;   18 hours ago        Up 18 hours         0.0.0.0:8080-&gt;80/tcp                                                             webserver</span><br><span class="line">[root@VM_156_200_centos nsq]# docker images</span><br><span class="line">REPOSITORY              TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">nginx                   v3                  4ea14de329c4        18 hours ago        109 MB</span><br><span class="line">docker.io/nginx         latest              7f70b30f2cc6        7 days ago          109 MB</span><br><span class="line">docker.io/hello-world   latest              f2a91732366c        4 months ago        1.85 kB</span><br><span class="line">docker.io/nsqio/nsq     latest              2714222e1b39        12 months ago       55.8 MB</span><br></pre></td></tr></table></figure></p>
+<p>既然部署成功了，那么就可以通过查看 nsqadmin 来进行管理了<br>可以看到 端口是 32770,通过访问 <a href="http://119.xx.xx.28:32770/nodes" target="_blank" rel="noopener">http://119.xx.xx.28:32770/nodes</a> 可以看到 nodes<br><img src="/2018/08/16/use-nsq/1.png" alt="1"></p>
+<h2 id="pub-sub"><a href="#pub-sub" class="headerlink" title="pub/sub"></a>pub/sub</h2><p>接下来用golang实现一下 pub 和 sub： 这边用官网推荐的golang 的库来实作：<a href="https://nsq.io/clients/client_libraries.html" target="_blank" rel="noopener">地址</a><br><img src="/2018/08/16/use-nsq/6.png" alt="1"><br><strong>send.go</strong>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">//Nsq发送测试</span><br><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;bufio&quot;</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;github.com/nsqio/go-nsq&quot;</span><br><span class="line">	&quot;os&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">var producer *nsq.Producer</span><br><span class="line"></span><br><span class="line">// 主函数</span><br><span class="line">func main() &#123;</span><br><span class="line">	strIP1 := &quot;119.xx.xx.28:32772&quot;</span><br><span class="line">	strIP2 := &quot;119.xx.xx.28:32771&quot;</span><br><span class="line">	InitProducer(strIP1)</span><br><span class="line"></span><br><span class="line">	running := true</span><br><span class="line"></span><br><span class="line">	//读取控制台输入</span><br><span class="line">	reader := bufio.NewReader(os.Stdin)</span><br><span class="line">	for running &#123;</span><br><span class="line">		data, _, _ := reader.ReadLine()</span><br><span class="line">		command := string(data)</span><br><span class="line">		if command == &quot;stop&quot; &#123;</span><br><span class="line">			running = false</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		for err := Publish(&quot;test&quot;, command); err != nil; err = Publish(&quot;test&quot;, command) &#123;</span><br><span class="line">			//切换IP重连</span><br><span class="line">			strIP1, strIP2 = strIP2, strIP1</span><br><span class="line">			InitProducer(strIP1)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	//关闭</span><br><span class="line">	producer.Stop()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 初始化生产者</span><br><span class="line">func InitProducer(str string) &#123;</span><br><span class="line">	var err error</span><br><span class="line">	fmt.Println(&quot;address: &quot;, str)</span><br><span class="line">	producer, err = nsq.NewProducer(str, nsq.NewConfig())</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		panic(err)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//发布消息</span><br><span class="line">func Publish(topic string, message string) error &#123;</span><br><span class="line">	var err error</span><br><span class="line">	if producer != nil &#123;</span><br><span class="line">		if message == &quot;&quot; &#123; //不能发布空串，否则会导致error</span><br><span class="line">			return nil</span><br><span class="line">		&#125;</span><br><span class="line">		err = producer.Publish(topic, []byte(message)) // 发布消息</span><br><span class="line">		return err</span><br><span class="line">	&#125;</span><br><span class="line">	return fmt.Errorf(&quot;producer is nil&quot;, err)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>receive.go</strong>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">//Nsq接收测试</span><br><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	&quot;fmt&quot;</span><br><span class="line">	&quot;time&quot;</span><br><span class="line"></span><br><span class="line">	&quot;github.com/nsqio/go-nsq&quot;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">// 消费者</span><br><span class="line">type ConsumerT struct&#123;&#125;</span><br><span class="line"></span><br><span class="line">// 主函数</span><br><span class="line">func main() &#123;</span><br><span class="line">	InitConsumer(&quot;test&quot;, &quot;test-channel&quot;, &quot;119.xx.xx.28:32768&quot;)</span><br><span class="line">	for &#123;</span><br><span class="line">		time.Sleep(time.Second * 10)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//处理消息</span><br><span class="line">func (*ConsumerT) HandleMessage(msg *nsq.Message) error &#123;</span><br><span class="line">	fmt.Println(&quot;receive&quot;, msg.NSQDAddress, &quot;message:&quot;, string(msg.Body))</span><br><span class="line">	return nil</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//初始化消费者</span><br><span class="line">func InitConsumer(topic string, channel string, address string) &#123;</span><br><span class="line">	cfg := nsq.NewConfig()</span><br><span class="line">	cfg.LookupdPollInterval = time.Second          //设置重连时间</span><br><span class="line">	c, err := nsq.NewConsumer(topic, channel, cfg) // 新建一个消费者</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		panic(err)</span><br><span class="line">	&#125;</span><br><span class="line">	c.SetLogger(nil, 0)        //屏蔽系统日志</span><br><span class="line">	c.AddHandler(&amp;ConsumerT&#123;&#125;) // 添加消费者接口</span><br><span class="line"></span><br><span class="line">	//建立NSQLookupd连接</span><br><span class="line">	if err := c.ConnectToNSQLookupd(address); err != nil &#123;</span><br><span class="line">		panic(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	//建立多个nsqd连接</span><br><span class="line">	// if err := c.ConnectToNSQDs([]string&#123;&quot;127.0.0.1:4150&quot;, &quot;127.0.0.1:4152&quot;&#125;); err != nil &#123;</span><br><span class="line">	//  panic(err)</span><br><span class="line">	// &#125;</span><br><span class="line"></span><br><span class="line">	// 建立一个nsqd连接</span><br><span class="line">	 if err := c.ConnectToNSQD(&quot;119.xx.xx.28:32772&quot;); err != nil &#123;</span><br><span class="line">	  panic(err)</span><br><span class="line">	 &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这时候现在后台先建一个 topic： <strong>test</strong>， 并创建了两个channel： <strong>kk</strong> 和 <strong>test-channel</strong><br><img src="/2018/08/16/use-nsq/2.png" alt="1"><br>刚创建的时候，是没有激活的， <strong>send.go</strong> 跑起来：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">address:  119.xx.xx.28:32772</span><br><span class="line">hello</span><br><span class="line">2018/08/16 15:43:59 INF    1 (119.xx.xx.28:32772) connecting to nsqd</span><br><span class="line">999999</span><br><span class="line">88888888888</span><br><span class="line">9595959</span><br><span class="line">111111111111111111</span><br><span class="line">stop</span><br><span class="line">2018/08/16 18:24:25 INF    1 stopping</span><br><span class="line">2018/08/16 18:24:25 INF    1 exiting router</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br></pre></td></tr></table></figure></p>
+<p>每一行都是一次的message的 publish，最后输入 stop 的话，表示输入停止，结束程序。<br><strong>receive.go</strong>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">receive 119.xx.xx.28:32772 message: 999999</span><br><span class="line">receive 119.xx.xx.28:32772 message: 88888888888</span><br><span class="line">receive 119.xx.xx.28:32772 message: 9595959</span><br><span class="line">receive 119.xx.xx.28:32772 message: 111111111111111111</span><br><span class="line">receive 119.xx.xx.28:32772 message: stop</span><br></pre></td></tr></table></figure></p>
+<p>这时候就可以收到 pub 程序 publish 过来的 message了。这时候查看admin后台，注意，在pub的时候，是不能指定channel的，只能指定topic(sub 才可以指定 topic 和 channel)，所以这些pub的消息，就会往<strong>test</strong>这个topic下的所有channel都传一份，如果这个channel当下没有消费者，那么就会缓存在队列里面，直到消费者出现<br><img src="/2018/08/16/use-nsq/5.gif" alt="1"><br>所以看到 test-channel 这个 channel 因为有消费者，所以message 都传过去了， 而 kk 这个channel中的所有消息全部都被缓存着。<br><img src="/2018/08/16/use-nsq/3.png" alt="1"><br><img src="/2018/08/16/use-nsq/4.png" alt="1"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这个只是试用了一下，后面要结合到项目中去实践。</p>
+<hr>
+<p>参考：<br><a href="https://segmentfault.com/a/1190000012882466" target="_blank" rel="noopener">nsq 优秀的消息队列</a><br><a href="https://segmentfault.com/a/1190000009194607" target="_blank" rel="noopener">golang使用Nsq</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/08/16/use-nsq/" title="初试消息队列服务 -- NSQ">http://kebingzao.com/2018/08/16/use-nsq/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/NSQ/" rel="tag"># NSQ</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/15/php-upload-size-limit/" rel="next" title="php 上传包限制大小的问题">
+                <i class="fa fa-chevron-left"></i> php 上传包限制大小的问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/08/31/aws-s3-cloudfront-rule-redirection/" rel="prev" title="AWS S3/CloudFront 规则支持重定向">
+                AWS S3/CloudFront 规则支持重定向 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">69</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NSQ-简介"><span class="nav-number">2.</span> <span class="nav-text">NSQ 简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nsqlookupd"><span class="nav-number">2.1.</span> <span class="nav-text">nsqlookupd</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nsqadmin"><span class="nav-number">2.2.</span> <span class="nav-text">nsqadmin</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nsqd"><span class="nav-number">2.3.</span> <span class="nav-text">nsqd</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NSQ-docker-安装"><span class="nav-number">3.</span> <span class="nav-text">NSQ docker 安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pub-sub"><span class="nav-number">4.</span> <span class="nav-text">pub/sub</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/08/16/use-nsq/';
+          this.page.identifier = '2018/08/16/use-nsq/';
+          this.page.title = '初试消息队列服务 -- NSQ';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,gulp," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy 可以看到通过这个 grunt-staticfy 组件可以实现 模板静态化预编译，但是会有几个问题。后面决定采用gulp来重写这个组件：github 传送门 gulp-staticfynpm 组件传送门 gulp-staticfy用gulp 的几个好处就是：  gulp 是基于流的方式，不需要像grun">
+<meta name="keywords" content="js,gulp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">
+<meta property="og:url" content="http://kebingzao.com/2018/09/12/www-history-4/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy 可以看到通过这个 grunt-staticfy 组件可以实现 模板静态化预编译，但是会有几个问题。后面决定采用gulp来重写这个组件：github 传送门 gulp-staticfynpm 组件传送门 gulp-staticfy用gulp 的几个好处就是：  gulp 是基于流的方式，不需要像grun">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/www-history-4/1.png">
+<meta property="og:updated_time" content="2018-09-14T15:14:39.882Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">
+<meta name="twitter:description" content="前言通过 官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy 可以看到通过这个 grunt-staticfy 组件可以实现 模板静态化预编译，但是会有几个问题。后面决定采用gulp来重写这个组件：github 传送门 gulp-staticfynpm 组件传送门 gulp-staticfy用gulp 的几个好处就是：  gulp 是基于流的方式，不需要像grun">
+<meta name="twitter:image" content="http://kebingzao.com/2018/09/12/www-history-4/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/09/12/www-history-4/"/>
+
+
+
+
+
+  <title>官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/09/12/www-history-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-12T20:29:45+08:00">
+                2018-09-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/官网构建优化流程/" itemprop="url" rel="index">
+                    <span itemprop="name">官网构建优化流程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/12/www-history-4/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/12/www-history-4/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/12/www-history-4/" class="leancloud_visitors" data-flag-title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2018/09/12/www-history-3/" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy</a> 可以看到通过这个 grunt-staticfy 组件可以实现 模板静态化预编译，但是会有几个问题。<br>后面决定采用gulp来重写这个组件：<br><a href="https://github.com/AxesTeam/gulp-staticfy" target="_blank" rel="noopener">github 传送门 gulp-staticfy</a><br><a href="https://www.npmjs.com/package/gulp-staticfy" target="_blank" rel="noopener">npm 组件传送门 gulp-staticfy</a><br>用gulp 的几个好处就是：</p>
+<ol>
+<li>gulp 是基于流的方式，不需要像grunt那样进行那么多的io操作</li>
+<li>npm 有一个 phantom 的插件： <a href="https://github.com/amir20/phantomjs-node" target="_blank" rel="noopener">phantomjs-node</a>，在安装这个npm 插件的时候，不用单独再去安装phantomjs 客户端。而是插件在安装的时候，就会去下载<strong>phantomJS</strong>。而且整个调用非常方便。可以用 promise， 也可以用 co同步（还有最新的async  await语法), 而如果是之前grunt-staticfy 那种处理，就比较麻烦，还要用到 exec 去执行 phantom 的脚本， 非常不友好。<a id="more"></a>      
+</li>
+</ol>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p>新版gulp组件的原理跟旧版grunt差不多，但是会简洁很多。<br>文件目录如下：<br><img src="/2018/09/12/www-history-4/1.png" alt="1"><br>主要的文件就两个，都在src目录里面，其中<strong>index</strong> 是主要逻辑，<strong>server</strong>是创建简易http server的逻辑。<br><strong>src/index.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> gutil = <span class="built_in">require</span>(<span class="string">'gulp-util'</span>);</span><br><span class="line"><span class="keyword">var</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">var</span> phantom = <span class="built_in">require</span>(<span class="string">"phantom"</span>);</span><br><span class="line"><span class="keyword">var</span> SimpleServer = <span class="built_in">require</span>(<span class="string">'./server.js'</span>);</span><br><span class="line"><span class="keyword">var</span> map = <span class="built_in">require</span>(<span class="string">'map-stream'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">options</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> totalFileSize = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">var</span> finishFileSize = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">var</span> ph;</span><br><span class="line">    <span class="keyword">var</span> createPhPage = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(ph)&#123;</span><br><span class="line">            <span class="keyword">return</span> ph.createPage();</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> phantom.create().then(<span class="function"><span class="params">_ph</span> =&gt;</span> &#123;</span><br><span class="line">                ph = _ph;</span><br><span class="line">                <span class="keyword">return</span> ph.createPage();</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">// close all http server</span></span><br><span class="line">    <span class="keyword">var</span> doAllFinish = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        ph.exit();</span><br><span class="line">        SimpleServer.closeAll();</span><br><span class="line">        <span class="built_in">console</span>.log(gutil.colors.green(<span class="string">"staticfy success"</span>));</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">var</span> doFinish = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        finishFileSize += <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(finishFileSize === totalFileSize)&#123;</span><br><span class="line">            doAllFinish();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">return</span> map(<span class="function"><span class="keyword">function</span> (<span class="params">file, callback</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (file.isNull()) &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">"null"</span>);</span><br><span class="line">            <span class="keyword">return</span> callback(<span class="literal">null</span>, file);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (file.isStream()) &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">"stream"</span>);</span><br><span class="line">            <span class="keyword">return</span> callback(<span class="literal">null</span>, file);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (file.isBuffer()) &#123;</span><br><span class="line">            totalFileSize += <span class="number">1</span>;</span><br><span class="line">            <span class="comment">// custom server url</span></span><br><span class="line">            <span class="keyword">var</span> wwwDir = options.server_url || file.cwd;</span><br><span class="line">            <span class="keyword">var</span> baseName = path.relative(wwwDir, file.path);</span><br><span class="line">            <span class="keyword">var</span> url = <span class="string">'http://localhost:&#123;&#123;port&#125;&#125;/'</span>;</span><br><span class="line">            <span class="keyword">var</span> query_string = options.query_string ? <span class="string">`?<span class="subst">$&#123;options.query_string&#125;</span>`</span> : <span class="string">''</span>;</span><br><span class="line">            <span class="built_in">console</span>.log(gutil.colors.blue(<span class="string">`<span class="subst">$&#123;baseName&#125;</span> loading ...`</span>));</span><br><span class="line">            SimpleServer.start(wwwDir, server =&gt; &#123;</span><br><span class="line">                <span class="comment">// Replace &#123;&#123;port&#125;&#125; with server.port</span></span><br><span class="line">                url = url.replace(<span class="string">'&#123;&#123;port&#125;&#125;'</span>, server.port) + baseName + query_string;</span><br><span class="line">                <span class="keyword">var</span> ph_page;</span><br><span class="line">                createPhPage().then(<span class="function"><span class="params">page</span> =&gt;</span> &#123;</span><br><span class="line">                    ph_page = page;</span><br><span class="line">                    <span class="keyword">return</span> ph_page.open(url);</span><br><span class="line">                &#125;).then(<span class="function"><span class="params">status</span> =&gt;</span> &#123;</span><br><span class="line">                    <span class="comment">//console.log(status);</span></span><br><span class="line">                    <span class="keyword">return</span> ph_page.property(<span class="string">'content'</span>)</span><br><span class="line">                &#125;).then(<span class="function"><span class="params">content</span> =&gt;</span> &#123;</span><br><span class="line">                    <span class="built_in">console</span>.log(gutil.colors.blue(baseName) + gutil.colors.green(<span class="string">" load success"</span>));</span><br><span class="line">                    ph_page.close();</span><br><span class="line">                    doFinish();</span><br><span class="line">                    file.contents = <span class="keyword">new</span> Buffer(content);</span><br><span class="line">                    callback(<span class="literal">null</span>, file);</span><br><span class="line">                &#125;).catch(<span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">                    ph_page &amp;&amp; ph_page.close();</span><br><span class="line">                    doFinish();</span><br><span class="line">                    <span class="built_in">console</span>.log(e)</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>src/server.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>);</span><br><span class="line"><span class="keyword">var</span> nodeStatic = <span class="built_in">require</span>(<span class="string">'node-static'</span>);</span><br><span class="line"><span class="keyword">var</span> portfinder = <span class="built_in">require</span>(<span class="string">'portfinder'</span>);</span><br><span class="line"><span class="keyword">var</span> _ = <span class="built_in">require</span>(<span class="string">"lodash"</span>);</span><br><span class="line"><span class="keyword">var</span> fileServerList = [];</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">startServer</span>(<span class="params">wwwDir, callback</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(fileServerList[wwwDir])&#123;</span><br><span class="line">    callback(fileServerList[wwwDir]);</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> fileServer = <span class="keyword">new</span> nodeStatic.Server(wwwDir);</span><br><span class="line">    portfinder.getPort(<span class="function"><span class="keyword">function</span> (<span class="params">err, port</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">var</span> server = http.createServer(<span class="function"><span class="keyword">function</span> (<span class="params">request, response</span>) </span>&#123;</span><br><span class="line">        request.addListener(<span class="string">'end'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">          fileServer.serve(request, response);</span><br><span class="line">        &#125;).resume();</span><br><span class="line">      &#125;).listen(port);</span><br><span class="line">      server.port = port;</span><br><span class="line">      fileServerList[wwwDir] = server;</span><br><span class="line">      callback(server);</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">closeServer</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="comment">//console.log("close http server");</span></span><br><span class="line">  _.each(_.keys(fileServerList), <span class="function"><span class="keyword">function</span>(<span class="params">key</span>)</span>&#123;</span><br><span class="line">    fileServerList[key].close();</span><br><span class="line">    <span class="keyword">delete</span> fileServerList[key];</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  start: startServer,</span><br><span class="line">  closeAll: closeServer</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>这边要注意几个细节：</p>
+<ol>
+<li>当前任务的file都加载完成之后，http server 要记得关闭， 即调用 <strong>SimpleServer.closeAll()</strong> ，因为 gulp 进程不会主动退出，会导致资源浪费;</li>
+<li>phantom exe 程序调用的时候，只需要开启一次，当所有的file都预编译完之后，才关掉，即调用 <strong>ph.exit()</strong>，因为每一次开启都要耗时间，这样做重复利用才能省时间;</li>
+<li>虽然phantom 的主进程只需要开启一次，但是加载页面的每一个子线程，在加载结束的时候，都要关掉。 即调用 <strong>ph_page.close()</strong>;</li>
+</ol>
+<h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><p>example 的 gulpfile 实例：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> gulp  = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> staticfy  = <span class="built_in">require</span>(<span class="string">'../src/index'</span>);</span><br><span class="line"><span class="keyword">var</span> del    = <span class="built_in">require</span>(<span class="string">'del'</span>);</span><br><span class="line"><span class="keyword">var</span> _ = <span class="built_in">require</span>(<span class="string">'lodash'</span>);</span><br><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line"><span class="comment">// 多语言列表</span></span><br><span class="line"><span class="keyword">var</span> langArr = [<span class="string">''</span>, <span class="string">'zh-cn'</span>, <span class="string">'ja'</span>, <span class="string">'en'</span>];</span><br><span class="line"><span class="keyword">var</span> langTaskListMap = &#123;&#125;;</span><br><span class="line"><span class="keyword">var</span> fileArr = [</span><br><span class="line">    <span class="string">"src/simple.html"</span>,</span><br><span class="line">    <span class="string">"src/simple2.html"</span>,</span><br><span class="line">    <span class="string">"src/tmp/query_string.html"</span></span><br><span class="line">];</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'clean'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">cb</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> del([<span class="string">'build'</span>], cb);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 批量注册任务</span></span><br><span class="line">langArr.forEach(<span class="function"><span class="params">lang</span> =&gt;</span> &#123;</span><br><span class="line">    langTaskListMap[<span class="string">`<span class="subst">$&#123;lang&#125;</span>-staticfy`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;lang&#125;</span>-staticfy`</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 这边要指定路径，dest才会复制目录结构</span></span><br><span class="line">        <span class="comment">// 这边一定要return，不然就会变成异步，而不会同步</span></span><br><span class="line">        <span class="keyword">return</span> gulp.src(fileArr, &#123;<span class="attr">base</span>: <span class="string">'.'</span>&#125;)</span><br><span class="line">            .pipe(staticfy(&#123;</span><br><span class="line">                query_string: <span class="string">`lang=<span class="subst">$&#123;lang&#125;</span>`</span></span><br><span class="line">            &#125;))</span><br><span class="line">            .pipe(gulp.dest(<span class="string">`build/<span class="subst">$&#123;lang&#125;</span>`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'default'</span>, seq.apply(<span class="literal">null</span>,[<span class="string">'clean'</span>].concat( _.keys(langTaskListMap))));</span><br></pre></td></tr></table></figure></p>
+<h2 id="在官网新版gulp打包的应用"><a href="#在官网新版gulp打包的应用" class="headerlink" title="在官网新版gulp打包的应用"></a>在官网新版gulp打包的应用</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> langArr = _.keys(global.config.supportLangs);</span><br><span class="line">langArr.indexOf(<span class="string">"en"</span>) === <span class="number">0</span> &amp;&amp; langArr.push(<span class="string">"en"</span>);</span><br><span class="line"><span class="keyword">var</span> langTaskListMap = &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 批量注册任务</span></span><br><span class="line">langArr.forEach(<span class="function"><span class="params">lang</span> =&gt;</span> &#123;</span><br><span class="line">    langTaskListMap[<span class="string">`<span class="subst">$&#123;lang&#125;</span>-staticfy`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;lang&#125;</span>-staticfy`</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 这边要指定路径，dest才会复制目录结构</span></span><br><span class="line">        <span class="comment">// 这边一定要return，不然就会变成异步，而不会同步</span></span><br><span class="line">        <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.htmlDir&#125;</span>/**/*.html`</span>)</span><br><span class="line">            .pipe(staticfy(&#123;</span><br><span class="line">                server_url: path.resolve(global.config.buildDir),</span><br><span class="line">                query_string: <span class="string">`lang=<span class="subst">$&#123;lang&#125;</span>`</span></span><br><span class="line">            &#125;))</span><br><span class="line">            <span class="comment">// 接下来就是各种替换</span></span><br><span class="line">            <span class="comment">// 预编译要跟进对应的语言，对 a 标签的相对路径进行替换</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/(&lt;a.*?href=['"])(\/.*?)(['"])/gi</span>, <span class="string">`$1/<span class="subst">$&#123;lang&#125;</span>$2$3`</span>))</span><br><span class="line">            <span class="comment">// 消除 jsonp 请求产生的 script 标签</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;script.*async="".*?&lt;\/script&gt;/g</span>, <span class="string">''</span>))</span><br><span class="line">            <span class="comment">// 消除 首页加载Google字体请求产生的link标签</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;link.*http:\/\/fonts.googleapis.com.*?&gt;/</span>, <span class="string">''</span>))</span><br><span class="line">            <span class="comment">// 清理首页的图片，重设为隐藏</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/(&lt;img class="item-preload.*)style="display:\s*inline.*"(&gt;)/g</span>, <span class="string">'$1$2'</span>))</span><br><span class="line">            <span class="comment">// 清理邮件验证页，重设为隐藏</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/"(item-verify-send)"/</span>, <span class="string">'"$1 i-hide"'</span>))</span><br><span class="line">            <span class="comment">// signin 重置链接地址</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/(href=".*signin\/)\?.*(")/</span>, <span class="string">'$1$2'</span>))</span><br><span class="line">            <span class="comment">// 重置 header 右侧的 item-actions 和 item-profile 的状态</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/"(item-actions|item-profile)"/</span>, <span class="string">'"$1 i-hide"'</span>))</span><br><span class="line">            <span class="comment">// 去掉指定的要删除的脚本</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;script.*id="removeScript".*?&lt;\/script&gt;/g</span>, <span class="string">''</span>))</span><br><span class="line">            <span class="comment">// 去掉自动下载的iframe中的url</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/(&lt;iframe id="downloadFrame".*?)(src=")(\S+)(".*&gt;&lt;\/iframe&gt;)/g</span>, <span class="string">'$1$2$4'</span>))</span><br><span class="line">            <span class="comment">// 去掉首页 Facebook twitter g+ 的 addthis widget 中间代码</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;div.*id="_atssh".*?&lt;\/iframe&gt;&lt;\/div&gt;/g</span>, <span class="string">''</span>))</span><br><span class="line">            <span class="comment">// 这条规则要特别注意(用于首页清除addthis的样式)，很容易请到别的页面，所以尽量不要在页面内加上style标签</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;style.*type="text\/css".*?&lt;\/style&gt;&lt;\/head&gt;/g</span>, <span class="string">'&lt;/head&gt;'</span>))</span><br><span class="line">            <span class="comment">// 最后把对应的语言文件再加到里面去</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;\/head&gt;/</span>, <span class="string">`&lt;script src="/<span class="subst">$&#123;global.config.version&#125;</span>/lang/<span class="subst">$&#123;global.config.supportLangs[lang].code || lang&#125;</span>.js"&gt;&lt;/script&gt;&lt;/head&gt;`</span>))</span><br><span class="line">            .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/<span class="subst">$&#123;lang&#125;</span>`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'staticfy'</span>, seq.apply(<span class="literal">null</span>,_.keys(langTaskListMap)));</span><br></pre></td></tr></table></figure>
+<p>这时候就要把语言参数当做url参数传进去，这时候 html 页面的js就会得到这个语言参数，从而加载对应的语言json文件，然后进行语种渲染，最后得到该语种的html静态文件。<br>传server_url是为了指定开启静态web server的位置。<strong>它虽然是一个语种一个语种是同步串行的，但是一个语种里面有多个html文件，这时候是并行编译的，所以会开很多的web server，这个是为了更快的进行页面预编译。这也是为什么后面编译完之后，要记得关闭web server的原因，因为如果开那么多的web server，最后却没有关闭的话，会导致资源泄露</strong></p>
+<p>这边需要注意的一点是：在进行gulp构建的时候，如果是同步的话，最后一定要有return，不然任务就不能按顺序执行, 因为我们要同步按顺序将一门一门语言都预编译出来，如果异步的话，有时候会漏掉一些。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">langTaskListMap[<span class="string">`<span class="subst">$&#123;lang&#125;</span>-staticfy`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;lang&#125;</span>-staticfy`</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="comment">// 这边要指定路径，dest才会复制目录结构</span></span><br><span class="line">    <span class="comment">// 这边一定要return，不然就会变成异步，而不会同步</span></span><br><span class="line">    <span class="keyword">return</span> gulp.src(fileArr, &#123;<span class="attr">base</span>: <span class="string">'.'</span>&#125;)</span><br><span class="line">        .pipe(staticfy(&#123;</span><br><span class="line">            query_string: <span class="string">`lang=<span class="subst">$&#123;lang&#125;</span>`</span></span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`build/<span class="subst">$&#123;lang&#125;</span>`</span>));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>也就是说，在这个任务中，要让每一个语言都串行的执行，那么就要有这个return。不然就会全部走异步并行，导致出错。</p>
+<font color="red">ps：这地方当时在做的时候，踩过坑，当时搞了好久，所以这边也着重再提下</font>
+
+<hr>
+<p>系列文章<br><a href="/2018/09/12/www-history-1/" title="官网构建优化流程(1) - 简介">官网构建优化流程(1) - 简介</a><br><a href="/2018/09/12/www-history-2/" title="官网构建优化流程(2) - 旧版grunt打包构建流程">官网构建优化流程(2) - 旧版grunt打包构建流程</a><br><a href="/2018/09/12/www-history-3/" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy</a><br><a href="/2018/09/12/www-history-4/" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy</a><br><a href="/2018/09/12/www-history-5/" title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js</a><br><a href="/2018/09/12/www-history-6/" title="官网构建优化流程(6) - 把原先的grunt换成gulp构建">官网构建优化流程(6) - 把原先的grunt换成gulp构建</a><br><a href="/2018/09/13/www-history-7/" title="官网构建优化流程(7) - 官网的多语言跳转规则">官网构建优化流程(7) - 官网的多语言跳转规则</a><br><a href="/2018/09/13/www-history-8/" title="官网构建优化流程(8) - gulp打包构建在ie8会报错">官网构建优化流程(8) - gulp打包构建在ie8会报错</a><br><a href="/2018/09/13/www-history-9/" title="官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题">官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题</a><br><a href="/2018/09/13/www-history-10/" title="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码</a><br><a href="/2018/09/13/www-history-11/" title="官网构建优化流程(11) - 部署转为用Jenkins自动化部署">官网构建优化流程(11) - 部署转为用Jenkins自动化部署</a><br><a href="/2018/09/13/www-history-12/" title="官网构建优化流程(12) - 优化加载速度，资源分开存放">官网构建优化流程(12) - 优化加载速度，资源分开存放</a><br><a href="/2018/09/13/www-history-13/" title="官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS">官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/09/12/www-history-4/" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">http://kebingzao.com/2018/09/12/www-history-4/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/gulp/" rel="tag"># gulp</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/12/www-history-3/" rel="next" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">
+                <i class="fa fa-chevron-left"></i> 官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/12/www-history-5/" rel="prev" title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">
+                官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">84</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码分析"><span class="nav-number">2.</span> <span class="nav-text">代码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#举个栗子"><span class="nav-number">3.</span> <span class="nav-text">举个栗子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在官网新版gulp打包的应用"><span class="nav-number">4.</span> <span class="nav-text">在官网新版gulp打包的应用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/09/12/www-history-4/';
+          this.page.identifier = '2018/09/12/www-history-4/';
+          this.page.title = '官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

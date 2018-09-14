@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,gulp," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy 可以知道我们重新用gulp 做了一个静态页面预编译组件，并且效率提高了一大截。既然已经选择把官网的打包构建从 grunt 转为 gulp 了，那么还有一个组件还需要编写成gulp，那就是 grunt-jst-concat 组件：npm 组件传送门 grunt-jst-concat这个组件也是我们项目的人">
+<meta name="keywords" content="js,gulp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">
+<meta property="og:url" content="http://kebingzao.com/2018/09/12/www-history-5/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy 可以知道我们重新用gulp 做了一个静态页面预编译组件，并且效率提高了一大截。既然已经选择把官网的打包构建从 grunt 转为 gulp 了，那么还有一个组件还需要编写成gulp，那就是 grunt-jst-concat 组件：npm 组件传送门 grunt-jst-concat这个组件也是我们项目的人">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/www-history-5/1.png">
+<meta property="og:updated_time" content="2018-09-14T15:14:39.917Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">
+<meta name="twitter:description" content="前言通过 官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy 可以知道我们重新用gulp 做了一个静态页面预编译组件，并且效率提高了一大截。既然已经选择把官网的打包构建从 grunt 转为 gulp 了，那么还有一个组件还需要编写成gulp，那就是 grunt-jst-concat 组件：npm 组件传送门 grunt-jst-concat这个组件也是我们项目的人">
+<meta name="twitter:image" content="http://kebingzao.com/2018/09/12/www-history-5/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/09/12/www-history-5/"/>
+
+
+
+
+
+  <title>官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/09/12/www-history-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-12T21:15:57+08:00">
+                2018-09-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/官网构建优化流程/" itemprop="url" rel="index">
+                    <span itemprop="name">官网构建优化流程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/12/www-history-5/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/12/www-history-5/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/12/www-history-5/" class="leancloud_visitors" data-flag-title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2018/09/12/www-history-4/" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy</a> 可以知道我们重新用gulp 做了一个静态页面预编译组件，并且效率提高了一大截。既然已经选择把官网的打包构建从 grunt 转为 gulp 了，那么还有一个组件还需要编写成gulp，那就是 <strong>grunt-jst-concat</strong> 组件：<a href="https://www.npmjs.com/package/grunt-jst-concat" target="_blank" rel="noopener">npm 组件传送门 grunt-jst-concat</a><br>这个组件也是我们项目的人自己写的，其目的就是项目中有用到 <strong>underscore</strong> 模板的js文件，将模板html文件编译成jst（或者js后缀）后缀的模板编译文件，然后插入到其调用js的文件内容前面。<br>这样子就可以在js调用<strong>underscore</strong> 模板的时候，直接执行该js，而不需要再去请求模板，而从节省了一次http请求。<br><a id="more"></a><br><img src="/2018/09/12/www-history-5/1.png" alt="1"><br>然后在调用模板的时候，判断如果是publish方式的话，就直接执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">window[&quot;ajst&quot;][name + &apos;.html&apos;](obj)</span><br></pre></td></tr></table></figure></p>
+<p>来获取模板,调用模板的代码如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>.util.getTemplate = <span class="function"><span class="keyword">function</span> (<span class="params">name, obj</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> tpl, url, file_url;</span><br><span class="line">  url = <span class="keyword">this</span>.getTemplateBaseUrl() + <span class="string">'/tpl/'</span> + name;</span><br><span class="line">  file_url = url + <span class="string">'.js'</span>;</span><br><span class="line">  obj = obj || &#123;&#125;;</span><br><span class="line">  obj = $.extend(<span class="literal">true</span>, &#123;<span class="attr">lang</span>: Airdroid ? Airdroid.Lang : &#123;&#125;&#125;, obj);</span><br><span class="line">  <span class="comment">// 非debug模块，就用内联模板</span></span><br><span class="line">  <span class="keyword">if</span>(I18n &amp;&amp; !I18n.Airdroid_isDebug)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">window</span>[<span class="string">"ajst"</span>][name + <span class="string">'.html'</span>](obj);</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    tpl = <span class="keyword">this</span>.cacheTpls[file_url] || $.ajax(&#123; <span class="attr">url</span>: url + <span class="string">'.html'</span>, <span class="attr">async</span>: <span class="literal">false</span>, <span class="attr">cache</span>: <span class="literal">true</span> &#125;).responseText;</span><br><span class="line">    <span class="keyword">return</span> _.template(tpl, obj);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h2 id="旧版grunt代码分析"><a href="#旧版grunt代码分析" class="headerlink" title="旧版grunt代码分析"></a>旧版grunt代码分析</h2><p><strong>grunt-jst-concat</strong> 代码如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> (<span class="params">grunt</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">  grunt.registerMultiTask(<span class="string">'jst_concat'</span>, <span class="string">'Your task description goes here.'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> options = <span class="keyword">this</span>.options(&#123;</span><br><span class="line">      separator_start: <span class="string">''</span>,</span><br><span class="line">      separator_end: <span class="string">''</span>,</span><br><span class="line">      jst_path: <span class="string">'tmp/template/'</span>,</span><br><span class="line">      jst_ext: <span class="string">".jst"</span>,</span><br><span class="line">      namespace: <span class="string">'JST'</span>,</span><br><span class="line">      pattern: <span class="regexp">/CustomGetTemplateFn\s*\(\'(.*?).html\'\)/g</span>,</span><br><span class="line">      replace_text: <span class="string">"$1"</span>,</span><br><span class="line">      replace: <span class="literal">null</span></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Iterate over all specified file groups.</span></span><br><span class="line">    <span class="keyword">this</span>.files.forEach(<span class="function"><span class="keyword">function</span> (<span class="params">f</span>) </span>&#123;</span><br><span class="line">      f.src.filter(<span class="function"><span class="keyword">function</span> (<span class="params">filepath</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// Warn on and remove invalid source files (if nonull was set).</span></span><br><span class="line">        <span class="keyword">if</span> (!grunt.file.exists(filepath)) &#123;</span><br><span class="line">          grunt.log.warn(<span class="string">'Source file "'</span> + filepath + <span class="string">'" not found.'</span>);</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;).map(<span class="function"><span class="keyword">function</span> (<span class="params">filepath</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">          <span class="keyword">var</span> js_source = grunt.file.read(filepath);</span><br><span class="line"></span><br><span class="line">          <span class="comment">//通过正则找出所有的 GetTemplate() 方法，得到模版文件列表</span></span><br><span class="line">          <span class="keyword">var</span> myregexp = options.pattern;</span><br><span class="line">          <span class="keyword">var</span> group = js_source.match(myregexp);</span><br><span class="line"></span><br><span class="line">          <span class="keyword">if</span> (group) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> output = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">var</span> arr = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; group.length; i++) &#123;</span><br><span class="line"></span><br><span class="line">              <span class="keyword">var</span> file_name = group[i].replace(myregexp, options.replace_text);</span><br><span class="line"></span><br><span class="line">              <span class="comment">//当前JS文件中，此模版还未被合并</span></span><br><span class="line">              <span class="keyword">if</span> (!arr[file_name]) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">//标识此模版已经合并</span></span><br><span class="line">                arr[file_name] = <span class="literal">true</span>;</span><br><span class="line">                <span class="keyword">var</span> jst = grunt.file.read(options.jst_path + file_name + options.jst_ext);</span><br><span class="line"></span><br><span class="line">                <span class="comment">//运行自定义替换函数</span></span><br><span class="line">                <span class="keyword">if</span> (options.replace) &#123;</span><br><span class="line">                  jst = options.replace(jst);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                output = output + jst;</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            js_source = options.separator_start + output + options.separator_end + js_source;</span><br><span class="line"></span><br><span class="line">            grunt.log.writeln(<span class="string">'File "'</span> + filepath + <span class="string">'" contact jst.'</span>);</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          grunt.file.write(f.dest, js_source);</span><br><span class="line"></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>在 <strong>gruntfile.js</strong> 的调用方式如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 模板压缩</span></span><br><span class="line">jst: &#123;</span><br><span class="line">    compile: &#123;</span><br><span class="line">        options: &#123;</span><br><span class="line">            namespace: <span class="string">"ajst"</span>,</span><br><span class="line">            prettify: <span class="literal">true</span></span><br><span class="line">        &#125;,</span><br><span class="line">        files: [</span><br><span class="line">            &#123;</span><br><span class="line">                expand: <span class="literal">true</span>,</span><br><span class="line">                cwd: <span class="string">'&lt;%=dist %&gt;/tpl/'</span>,</span><br><span class="line">                src: [<span class="string">'**/*.html'</span>],</span><br><span class="line">                dest: <span class="string">'&lt;%=dist %&gt;/tpl2/'</span>,</span><br><span class="line">                ext: <span class="string">'.jst'</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//JST模版联合</span></span><br><span class="line">jst_concat: &#123;</span><br><span class="line">    custom_options: &#123;</span><br><span class="line">        options: &#123;</span><br><span class="line">            separator_start: <span class="string">''</span>,</span><br><span class="line">            separator_end: <span class="string">''</span>,</span><br><span class="line">            jst_path: <span class="string">'&lt;%=dist %&gt;/tpl2/'</span>,</span><br><span class="line">            jst_ext: <span class="string">".jst"</span>,</span><br><span class="line">            pattern: <span class="regexp">/getTemplate\s*\(\s*[\"']([\w/-]+)[\"']\s*\s*/g</span>,</span><br><span class="line">            replace_text: <span class="string">"$1"</span>,</span><br><span class="line">            replace: <span class="function"><span class="keyword">function</span> (<span class="params">jst</span>) </span>&#123;</span><br><span class="line">                jst = jst.replace(<span class="regexp">/(this\["ajst"\]\[")(.*)\/tpl\/(.*)("\])/g</span>, <span class="string">"$1$3$4"</span>);</span><br><span class="line">                jst = jst.replace(<span class="regexp">/\n|\r/g</span>, <span class="string">""</span>);</span><br><span class="line">                <span class="keyword">return</span> jst;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        files: [</span><br><span class="line">            &#123;</span><br><span class="line">                expand: <span class="literal">true</span>,</span><br><span class="line">                cwd: <span class="string">'&lt;%=dist %&gt;/js'</span>,</span><br><span class="line">                src: [<span class="string">'**/*.min.js'</span>],</span><br><span class="line">                dest: <span class="string">'&lt;%=dist %&gt;/js'</span>,</span><br><span class="line">                ext: <span class="string">'.min.js'</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br><span class="line">    &#125;&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>其具体逻辑如下：</p>
+<ol>
+<li>将 所有的模板编译成 jst 模板文件，即 jst 目录 （这个是另一个grunt任务 jst）</li>
+<li>遍历所传入的所有js文件，通过正则(即pattern参数 和 replace_text)找出所有调用文件模板的所有文件模板列表</li>
+<li>根据传入的jst_path 和 jst_ext 获取到该jst模板文件的内容，并运行自定义替换函数进行修改，最后塞到js文件的头部，最后返回这个修改过的js文件。</li>
+</ol>
+<h2 id="gulp-代码分析"><a href="#gulp-代码分析" class="headerlink" title="gulp 代码分析"></a>gulp 代码分析</h2><p>而重写后的gulp组件 gulp-conat-jst 逻辑基本不变，只不过换成用gulp的方式来写而已: <a href="https://www.npmjs.com/package/gulp-concat-jst" target="_blank" rel="noopener">npm 组件传送门 gulp-concat-jst</a><br><strong>gulp-concat-jst/index.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> gutil = <span class="built_in">require</span>(<span class="string">'gulp-util'</span>);</span><br><span class="line"><span class="keyword">var</span> fs = <span class="built_in">require</span>(<span class="string">'graceful-fs'</span>);</span><br><span class="line"><span class="keyword">var</span> map = <span class="built_in">require</span>(<span class="string">'map-stream'</span>);</span><br><span class="line"><span class="keyword">var</span> _ = <span class="built_in">require</span>(<span class="string">"lodash"</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">options</span>) </span>&#123;</span><br><span class="line">    options = _.extend(&#123;</span><br><span class="line">        separator_start: <span class="string">''</span>,</span><br><span class="line">        separator_end: <span class="string">''</span>,</span><br><span class="line">        jst_path: <span class="string">'tmp/template/'</span>,</span><br><span class="line">        jst_ext: <span class="string">".jst"</span>,</span><br><span class="line">        pattern: <span class="regexp">/CustomGetTemplateFn\s*\(\'(.*?).html\'\)/g</span>,</span><br><span class="line">        replace_text: <span class="string">"$1"</span>,</span><br><span class="line">        replace: <span class="literal">null</span></span><br><span class="line">    &#125;, options);</span><br><span class="line">    <span class="keyword">return</span> map(<span class="function"><span class="keyword">function</span> (<span class="params">file, cb</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">if</span> (file.isNull()) &#123;</span><br><span class="line">          <span class="built_in">console</span>.log(<span class="string">"null"</span>);</span><br><span class="line">          <span class="keyword">return</span> callback(<span class="literal">null</span>, file);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (file.isStream()) &#123;</span><br><span class="line">          <span class="built_in">console</span>.log(<span class="string">"stream"</span>);</span><br><span class="line">          <span class="keyword">return</span> callback(<span class="literal">null</span>, file);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> (file.isBuffer()) &#123;</span><br><span class="line">          <span class="keyword">var</span> js_source = fs.readFileSync(file.path,  &#123; <span class="attr">encoding</span> : <span class="string">'UTF-8'</span>&#125;);</span><br><span class="line">          <span class="comment">//通过正则找出所有的 GetTemplate() 方法，得到模版文件列表</span></span><br><span class="line">          <span class="keyword">var</span> myregexp = options.pattern;</span><br><span class="line">          <span class="keyword">var</span> group = js_source.match(myregexp);</span><br><span class="line">          <span class="keyword">if</span> (group) &#123;</span><br><span class="line">              <span class="keyword">var</span> output = <span class="string">""</span>;</span><br><span class="line">              <span class="keyword">var</span> arr = &#123;&#125;;</span><br><span class="line">              <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; group.length; i++) &#123;</span><br><span class="line">                  <span class="keyword">var</span> file_name = group[i].replace(myregexp, options.replace_text);</span><br><span class="line">                  <span class="comment">//当前JS文件中，此模版还未被合并</span></span><br><span class="line">                  <span class="keyword">if</span> (!arr[file_name]) &#123;</span><br><span class="line">                      <span class="comment">//标识此模版已经合并</span></span><br><span class="line">                      arr[file_name] = <span class="literal">true</span>;</span><br><span class="line">                      <span class="keyword">var</span> jst = fs.readFileSync(options.jst_path + file_name + options.jst_ext, &#123; <span class="attr">encoding</span> : <span class="string">'UTF-8'</span>&#125;);</span><br><span class="line">                      <span class="comment">// 这个jst的组件最后没有加上分号，这边要手动加下，免得后面合并的时候，有语法错误</span></span><br><span class="line">                      jst += <span class="string">";"</span>;</span><br><span class="line">                      <span class="comment">//运行自定义替换函数</span></span><br><span class="line">                      <span class="keyword">if</span> (options.replace) &#123;</span><br><span class="line">                          jst = options.replace(jst, file_name);</span><br><span class="line">                      &#125;</span><br><span class="line">                      output = output + jst;</span><br><span class="line">                  &#125;</span><br><span class="line">              &#125;</span><br><span class="line">              js_source = <span class="string">`<span class="subst">$&#123;options.separator_start&#125;</span><span class="subst">$&#123;output&#125;</span><span class="subst">$&#123;options.separator_end&#125;</span><span class="subst">$&#123;js_source&#125;</span>`</span>;</span><br><span class="line">              <span class="built_in">console</span>.log(gutil.colors.green(<span class="string">`File <span class="subst">$&#123;file.path&#125;</span> contact jst.`</span>));</span><br><span class="line">              file.contents = <span class="keyword">new</span> Buffer(js_source);</span><br><span class="line">              cb(<span class="literal">null</span>, file);</span><br><span class="line">          &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">              <span class="keyword">return</span> cb(<span class="literal">null</span>, file);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>最后在官网的新版的gulp的应用如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">gulp.task(<span class="string">'jst'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.workDir&#125;</span>/<span class="subst">$&#123;global.config.tplDir&#125;</span>/**/*.html`</span>)</span><br><span class="line">        .pipe(jst())</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/jst`</span>))</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 读取js文件，然后将需要的模板放置到js里面</span></span><br><span class="line">gulp.task(<span class="string">'concat_jst'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>/*.js`</span>)</span><br><span class="line">        .pipe(concat_jst(&#123;</span><br><span class="line">            jst_path: <span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/jst/`</span>,</span><br><span class="line">            jst_ext: <span class="string">".js"</span>,</span><br><span class="line">            pattern: <span class="regexp">/getTemplate\s*\(\s*[\"']([\w/-]+)[\"']\s*\s*/g</span>,</span><br><span class="line">            replace_text: <span class="string">"$1"</span>,</span><br><span class="line">            replace: <span class="function"><span class="keyword">function</span>(<span class="params">jst, tmpFile</span>)</span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="string">`this["ajst"] = this["ajst"] || &#123;&#125;;this["ajst"]["<span class="subst">$&#123;tmpFile&#125;</span>.html"] = <span class="subst">$&#123;jst&#125;</span>`</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(uglify())</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>`</span>))</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<hr>
+<p>系列文章<br><a href="/2018/09/12/www-history-1/" title="官网构建优化流程(1) - 简介">官网构建优化流程(1) - 简介</a><br><a href="/2018/09/12/www-history-2/" title="官网构建优化流程(2) - 旧版grunt打包构建流程">官网构建优化流程(2) - 旧版grunt打包构建流程</a><br><a href="/2018/09/12/www-history-3/" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy</a><br><a href="/2018/09/12/www-history-4/" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy</a><br><a href="/2018/09/12/www-history-5/" title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js</a><br><a href="/2018/09/12/www-history-6/" title="官网构建优化流程(6) - 把原先的grunt换成gulp构建">官网构建优化流程(6) - 把原先的grunt换成gulp构建</a><br><a href="/2018/09/13/www-history-7/" title="官网构建优化流程(7) - 官网的多语言跳转规则">官网构建优化流程(7) - 官网的多语言跳转规则</a><br><a href="/2018/09/13/www-history-8/" title="官网构建优化流程(8) - gulp打包构建在ie8会报错">官网构建优化流程(8) - gulp打包构建在ie8会报错</a><br><a href="/2018/09/13/www-history-9/" title="官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题">官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题</a><br><a href="/2018/09/13/www-history-10/" title="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码</a><br><a href="/2018/09/13/www-history-11/" title="官网构建优化流程(11) - 部署转为用Jenkins自动化部署">官网构建优化流程(11) - 部署转为用Jenkins自动化部署</a><br><a href="/2018/09/13/www-history-12/" title="官网构建优化流程(12) - 优化加载速度，资源分开存放">官网构建优化流程(12) - 优化加载速度，资源分开存放</a><br><a href="/2018/09/13/www-history-13/" title="官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS">官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/09/12/www-history-5/" title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">http://kebingzao.com/2018/09/12/www-history-5/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/gulp/" rel="tag"># gulp</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/12/www-history-4/" rel="next" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">
+                <i class="fa fa-chevron-left"></i> 官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/12/www-history-6/" rel="prev" title="官网构建优化流程(6) - 把原先的grunt换成gulp构建">
+                官网构建优化流程(6) - 把原先的grunt换成gulp构建 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">84</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#旧版grunt代码分析"><span class="nav-number">2.</span> <span class="nav-text">旧版grunt代码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gulp-代码分析"><span class="nav-number">3.</span> <span class="nav-text">gulp 代码分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/09/12/www-history-5/';
+          this.page.identifier = '2018/09/12/www-history-5/';
+          this.page.title = '官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

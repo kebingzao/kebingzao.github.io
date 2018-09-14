@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,grunt," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言这个主要是讲第一版的时候，用grunt来进行官网构建。 具体构建分析具体的构建流程是：Gruntfile.js (我知道你们根本不会看，但是我还是要贴代码 ʅ（´◔౪◔）ʃ)">
+<meta name="keywords" content="js,grunt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="官网构建优化流程(2) - 旧版grunt打包构建流程">
+<meta property="og:url" content="http://kebingzao.com/2018/09/12/www-history-2/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言这个主要是讲第一版的时候，用grunt来进行官网构建。 具体构建分析具体的构建流程是：Gruntfile.js (我知道你们根本不会看，但是我还是要贴代码 ʅ（´◔౪◔）ʃ)">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/www-history-2/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/www-history-2/2.png">
+<meta property="og:updated_time" content="2018-09-14T15:14:39.877Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="官网构建优化流程(2) - 旧版grunt打包构建流程">
+<meta name="twitter:description" content="前言这个主要是讲第一版的时候，用grunt来进行官网构建。 具体构建分析具体的构建流程是：Gruntfile.js (我知道你们根本不会看，但是我还是要贴代码 ʅ（´◔౪◔）ʃ)">
+<meta name="twitter:image" content="http://kebingzao.com/2018/09/12/www-history-2/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/09/12/www-history-2/"/>
+
+
+
+
+
+  <title>官网构建优化流程(2) - 旧版grunt打包构建流程 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/09/12/www-history-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">官网构建优化流程(2) - 旧版grunt打包构建流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-12T18:06:44+08:00">
+                2018-09-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/官网构建优化流程/" itemprop="url" rel="index">
+                    <span itemprop="name">官网构建优化流程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/12/www-history-2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/12/www-history-2/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/12/www-history-2/" class="leancloud_visitors" data-flag-title="官网构建优化流程(2) - 旧版grunt打包构建流程">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这个主要是讲第一版的时候，用grunt来进行官网构建。</p>
+<h2 id="具体构建分析"><a href="#具体构建分析" class="headerlink" title="具体构建分析"></a>具体构建分析</h2><p>具体的构建流程是：<strong>Gruntfile.js</strong> (我知道你们根本不会看，但是我还是要贴代码 ʅ（´◔౪◔）ʃ)<br><a id="more"></a><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br><span class="line">494</span><br><span class="line">495</span><br><span class="line">496</span><br><span class="line">497</span><br><span class="line">498</span><br><span class="line">499</span><br><span class="line">500</span><br><span class="line">501</span><br><span class="line">502</span><br><span class="line">503</span><br><span class="line">504</span><br><span class="line">505</span><br><span class="line">506</span><br><span class="line">507</span><br><span class="line">508</span><br><span class="line">509</span><br><span class="line">510</span><br><span class="line">511</span><br><span class="line">512</span><br><span class="line">513</span><br><span class="line">514</span><br><span class="line">515</span><br><span class="line">516</span><br><span class="line">517</span><br><span class="line">518</span><br><span class="line">519</span><br><span class="line">520</span><br><span class="line">521</span><br><span class="line">522</span><br><span class="line">523</span><br><span class="line">524</span><br><span class="line">525</span><br><span class="line">526</span><br><span class="line">527</span><br><span class="line">528</span><br><span class="line">529</span><br><span class="line">530</span><br><span class="line">531</span><br><span class="line">532</span><br><span class="line">533</span><br><span class="line">534</span><br><span class="line">535</span><br><span class="line">536</span><br><span class="line">537</span><br><span class="line">538</span><br><span class="line">539</span><br><span class="line">540</span><br><span class="line">541</span><br><span class="line">542</span><br><span class="line">543</span><br><span class="line">544</span><br><span class="line">545</span><br><span class="line">546</span><br><span class="line">547</span><br><span class="line">548</span><br><span class="line">549</span><br><span class="line">550</span><br><span class="line">551</span><br><span class="line">552</span><br><span class="line">553</span><br><span class="line">554</span><br><span class="line">555</span><br><span class="line">556</span><br><span class="line">557</span><br><span class="line">558</span><br><span class="line">559</span><br><span class="line">560</span><br><span class="line">561</span><br><span class="line">562</span><br><span class="line">563</span><br><span class="line">564</span><br><span class="line">565</span><br><span class="line">566</span><br><span class="line">567</span><br><span class="line">568</span><br><span class="line">569</span><br><span class="line">570</span><br><span class="line">571</span><br><span class="line">572</span><br><span class="line">573</span><br><span class="line">574</span><br><span class="line">575</span><br><span class="line">576</span><br><span class="line">577</span><br><span class="line">578</span><br><span class="line">579</span><br><span class="line">580</span><br><span class="line">581</span><br><span class="line">582</span><br><span class="line">583</span><br><span class="line">584</span><br><span class="line">585</span><br><span class="line">586</span><br><span class="line">587</span><br><span class="line">588</span><br><span class="line">589</span><br><span class="line">590</span><br><span class="line">591</span><br><span class="line">592</span><br><span class="line">593</span><br><span class="line">594</span><br><span class="line">595</span><br><span class="line">596</span><br><span class="line">597</span><br><span class="line">598</span><br><span class="line">599</span><br><span class="line">600</span><br><span class="line">601</span><br><span class="line">602</span><br><span class="line">603</span><br><span class="line">604</span><br><span class="line">605</span><br><span class="line">606</span><br><span class="line">607</span><br><span class="line">608</span><br><span class="line">609</span><br><span class="line">610</span><br><span class="line">611</span><br><span class="line">612</span><br><span class="line">613</span><br><span class="line">614</span><br><span class="line">615</span><br><span class="line">616</span><br><span class="line">617</span><br><span class="line">618</span><br><span class="line">619</span><br><span class="line">620</span><br><span class="line">621</span><br><span class="line">622</span><br><span class="line">623</span><br><span class="line">624</span><br><span class="line">625</span><br><span class="line">626</span><br><span class="line">627</span><br><span class="line">628</span><br><span class="line">629</span><br><span class="line">630</span><br><span class="line">631</span><br><span class="line">632</span><br><span class="line">633</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> _ = <span class="built_in">module</span>.require(<span class="string">'underscore'</span>);</span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> (<span class="params">grunt</span>) </span>&#123;</span><br><span class="line"><span class="meta">    'use strict'</span>;</span><br><span class="line">    <span class="keyword">var</span> taskName = grunt.cli.tasks[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">var</span> isRelease = taskName === <span class="string">'release'</span> || taskName === <span class="string">'r'</span>;</span><br><span class="line">    <span class="keyword">var</span> isDebug = taskName === <span class="string">'debug'</span> || taskName === <span class="string">'d'</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> pkg = grunt.file.readJSON(<span class="string">'package.json'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 构建目录</span></span><br><span class="line">    <span class="keyword">var</span> buildDir = <span class="string">'./build'</span>;</span><br><span class="line">    <span class="comment">// 工作目录</span></span><br><span class="line">    <span class="keyword">var</span> workDir = pkg.workDir || <span class="string">'workspace'</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 源码目录</span></span><br><span class="line">    <span class="keyword">var</span> jsDir = pkg.jsDir || <span class="string">'js'</span>;</span><br><span class="line">    <span class="keyword">var</span> cssDir = pkg.cssDir || <span class="string">'css'</span>;</span><br><span class="line">    <span class="keyword">var</span> imgDir = pkg.imgDir || <span class="string">'img'</span>;</span><br><span class="line">    <span class="keyword">var</span> langDir = pkg.langDir || <span class="string">'lang'</span>;</span><br><span class="line">    <span class="keyword">var</span> lessDir = pkg.lessDir || <span class="string">'less'</span>;</span><br><span class="line">    <span class="keyword">var</span> tplDir = pkg.tplDir || <span class="string">'tpl'</span>;</span><br><span class="line">    <span class="keyword">var</span> supportLangObj = pkg.supportLangs;</span><br><span class="line">    <span class="keyword">var</span> supportLangs = _.keys(supportLangObj) || [<span class="string">'en'</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> allDirs = [jsDir, cssDir, imgDir, langDir, tplDir];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 指定需要构建的 html 文件</span></span><br><span class="line">    <span class="keyword">var</span> htmlFiles = pkg.html_files || [<span class="string">'index.html'</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 自动版本号</span></span><br><span class="line">    <span class="keyword">var</span> version = grunt.template.today(<span class="string">"yymmddHHMM"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// api 版本</span></span><br><span class="line">    <span class="keyword">var</span> apiVersion = pkg.apiVersion;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果指定 static_base_url，那么所有链接最终会被换成带版本号的绝对路径</span></span><br><span class="line">    <span class="comment">// 以static_base_url = 'http://www.xxx.com' 为例，</span></span><br><span class="line">    <span class="comment">// &lt;script type="text/javascript" src="./js/all.js"&gt;&lt;/script&gt;</span></span><br><span class="line">    <span class="comment">// 构建结果如下</span></span><br><span class="line">    <span class="comment">// &lt;script type="text/javascript" src="http://www.xxx.com/1406191728/js/all.js"&gt;&lt;/script&gt;</span></span><br><span class="line">    <span class="keyword">var</span> staticBaseUrl = pkg.static_base_url || <span class="string">'.'</span>;</span><br><span class="line">    <span class="keyword">if</span> (isDebug) &#123;</span><br><span class="line">        staticBaseUrl = pkg.static_base_url.replace(<span class="string">'//'</span>, <span class="string">'//test-'</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> dist_no_version = <span class="string">'./build/no_gzip/'</span>;</span><br><span class="line">    <span class="keyword">var</span> dist_gzip_no_version = <span class="string">'./build/gzip/'</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> dist = dist_no_version + version;</span><br><span class="line">    <span class="keyword">var</span> dist_gzip = dist_gzip_no_version + version;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// TODO 把正则表达式都放到这里来。</span></span><br><span class="line">    <span class="keyword">var</span> REG_EXP_RESOURCE = <span class="keyword">new</span> <span class="built_in">RegExp</span>(<span class="string">"(url\\(|['\"])(\\.&#123;0,2&#125;\/)+.*?(("</span> + allDirs.join(<span class="string">"|"</span>) + <span class="string">")\/(.*?\\.(png|jpg|gif|css|js|ico|html|json)))(['\")])"</span>, <span class="string">'g'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Project configuration</span></span><br><span class="line">    grunt.initConfig(&#123;</span><br><span class="line">        pkg: pkg,</span><br><span class="line">        apiVersion: apiVersion,</span><br><span class="line">        version: version,</span><br><span class="line">        dist_no_version: dist_no_version,</span><br><span class="line">        dist_gzip_no_version: dist_gzip_no_version,</span><br><span class="line">        dist: dist,</span><br><span class="line">        dist_gzip: dist_gzip,</span><br><span class="line">        static_base_url: staticBaseUrl,</span><br><span class="line">        buildDir: buildDir,</span><br><span class="line">        workDir: workDir,</span><br><span class="line">        jsDir: jsDir,</span><br><span class="line">        cssDir: cssDir,</span><br><span class="line">        imgDir: imgDir,</span><br><span class="line">        langDir: langDir,</span><br><span class="line">        lessDir: lessDir,</span><br><span class="line">        tplDir: tplDir,</span><br><span class="line">        useminPrepare: &#123;</span><br><span class="line">            html: _.map(htmlFiles, <span class="function"><span class="keyword">function</span> (<span class="params">htmlFile</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="string">'&lt;%= dist %&gt;/'</span> + htmlFile;</span><br><span class="line">            &#125;),</span><br><span class="line">            options: &#123;</span><br><span class="line">                dest: <span class="string">'&lt;%= dist %&gt;'</span>,</span><br><span class="line">                root: <span class="string">'.'</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        usemin: &#123;</span><br><span class="line">            html: (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                <span class="keyword">var</span> result = [];</span><br><span class="line">                _.each(htmlFiles, <span class="function"><span class="keyword">function</span> (<span class="params">htmlFile</span>) </span>&#123;</span><br><span class="line">                    result.push(<span class="string">'&lt;%= dist %&gt;/'</span> + htmlFile);</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="keyword">return</span> result;</span><br><span class="line">            &#125;)()</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        copy: &#123;</span><br><span class="line">            <span class="comment">// 打包的时候，先把workDir 即，workspace 里面的文件，复制到build的version目录，接下来就直接操作build的version目录即可，不用管workspace目录</span></span><br><span class="line">            prepare: &#123;</span><br><span class="line">                cwd: <span class="string">'&lt;%=workDir%&gt;/'</span>,</span><br><span class="line">                expand: <span class="literal">true</span>,</span><br><span class="line">                src: [</span><br><span class="line">                    <span class="string">'**'</span>,</span><br><span class="line">                    <span class="string">'!&#123;Gruntfile.js,npm-debug.log&#125;'</span>,</span><br><span class="line">                    <span class="string">'!**/&#123;framework,slice,demos,doc,docs,inc,test,less&#125;/**'</span></span><br><span class="line">                    <span class="comment">//,</span></span><br><span class="line">                    <span class="comment">// css 和 js 是使用 usemin 构建的，不需要复制过去</span></span><br><span class="line">                    <span class="comment">//'!**/*.&#123;css,js&#125;',</span></span><br><span class="line">                    <span class="comment">// 语言目录要复制过来</span></span><br><span class="line">                    <span class="comment">//'**/&lt;%= langDir %&gt;/**'</span></span><br><span class="line">                ],</span><br><span class="line">                dest: <span class="string">'&lt;%= dist %&gt;'</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// 将 dist 目录下的 html 向上提取二级目录</span></span><br><span class="line">            movehtml: &#123;</span><br><span class="line">                cwd: <span class="string">'&lt;%=dist%&gt;/html'</span>,</span><br><span class="line">                expand: <span class="literal">true</span>,</span><br><span class="line">                src: [</span><br><span class="line">                    <span class="string">'**/*.html'</span>,</span><br><span class="line">                    <span class="string">'!**/&lt;%= tplDir %&gt;/**'</span>,</span><br><span class="line">                    <span class="string">'**/robots.txt'</span></span><br><span class="line">                ],</span><br><span class="line">                dest: <span class="string">'&lt;%= dist %&gt;/..'</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// 所有资源复制到 gzip 目录</span></span><br><span class="line">            gzip: &#123;</span><br><span class="line">                cwd: <span class="string">'&lt;%= dist_no_version %&gt;'</span>,</span><br><span class="line">                expand: <span class="literal">true</span>,</span><br><span class="line">                src: [</span><br><span class="line">                    <span class="string">'**'</span></span><br><span class="line">                ],</span><br><span class="line">                dest: <span class="string">'&lt;%= dist_gzip_no_version %&gt;'</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// 预编译完之后，要把en的文件复制到上一层</span></span><br><span class="line">            i18n: &#123;</span><br><span class="line">                cwd: <span class="string">'&lt;%= dist_no_version %&gt;/en/'</span>,</span><br><span class="line">                expand: <span class="literal">true</span>,</span><br><span class="line">                src: [</span><br><span class="line">                    <span class="string">'**'</span></span><br><span class="line">                ],</span><br><span class="line">                dest: <span class="string">'&lt;%= dist_no_version %&gt;'</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        clean: &#123;</span><br><span class="line">            <span class="comment">// 打包前，先清除前次打包的一些文件</span></span><br><span class="line">            prepare: [<span class="string">'build'</span>, <span class="string">'build_gzip'</span>, <span class="string">".tmp"</span>],</span><br><span class="line">            <span class="comment">// usemin 之后，删除之前旧的js和css，只保留打包压缩后的js和css</span></span><br><span class="line">            dist: [</span><br><span class="line">                <span class="string">"&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/module"</span>,</span><br><span class="line">                <span class="string">"&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/sys"</span>,</span><br><span class="line">                <span class="string">"&lt;%= dist %&gt;/&lt;%= cssDir %&gt;/**/*.css"</span>,</span><br><span class="line">                <span class="string">"&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/**/*.js"</span>,</span><br><span class="line">                <span class="string">"&lt;%= dist %&gt;/tpl2"</span>,</span><br><span class="line">                <span class="string">"!&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/**/*.min.js"</span>,</span><br><span class="line">                <span class="string">"!&lt;%= dist %&gt;/&lt;%= cssDir %&gt;/**/*.min.css"</span>,</span><br><span class="line">                <span class="string">".tmp"</span></span><br><span class="line">            ],</span><br><span class="line">            <span class="comment">// 最后去掉，版本目录里面的html目录(因为之前已经提到上两级目录去了)</span></span><br><span class="line">            movehtml: [</span><br><span class="line">                <span class="string">"&lt;%= dist %&gt;/html"</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 模板压缩</span></span><br><span class="line">        jst: &#123;</span><br><span class="line">            compile: &#123;</span><br><span class="line">                options: &#123;</span><br><span class="line">                    namespace: <span class="string">"ajst"</span>,</span><br><span class="line">                    prettify: <span class="literal">true</span></span><br><span class="line">                &#125;,</span><br><span class="line">                files: [</span><br><span class="line">                    &#123;</span><br><span class="line">                        expand: <span class="literal">true</span>,</span><br><span class="line">                        cwd: <span class="string">'&lt;%=dist %&gt;/tpl/'</span>,</span><br><span class="line">                        src: [<span class="string">'**/*.html'</span>],</span><br><span class="line">                        dest: <span class="string">'&lt;%=dist %&gt;/tpl2/'</span>,</span><br><span class="line">                        ext: <span class="string">'.jst'</span></span><br><span class="line">                    &#125;</span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//JST模版联合</span></span><br><span class="line">        jst_concat: &#123;</span><br><span class="line">            custom_options: &#123;</span><br><span class="line">                options: &#123;</span><br><span class="line">                    separator_start: <span class="string">''</span>,</span><br><span class="line">                    separator_end: <span class="string">''</span>,</span><br><span class="line">                    jst_path: <span class="string">'&lt;%=dist %&gt;/tpl2/'</span>,</span><br><span class="line">                    jst_ext: <span class="string">".jst"</span>,</span><br><span class="line">                    pattern: <span class="regexp">/getTemplate\s*\(\s*[\"']([\w/-]+)[\"']\s*\s*/g</span>,</span><br><span class="line">                    replace_text: <span class="string">"$1"</span>,</span><br><span class="line">                    replace: <span class="function"><span class="keyword">function</span> (<span class="params">jst</span>) </span>&#123;</span><br><span class="line">                        jst = jst.replace(<span class="regexp">/(this\["ajst"\]\[")(.*)\/tpl\/(.*)("\])/g</span>, <span class="string">"$1$3$4"</span>);</span><br><span class="line">                        jst = jst.replace(<span class="regexp">/\n|\r/g</span>, <span class="string">""</span>);</span><br><span class="line">                        <span class="keyword">return</span> jst;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;,</span><br><span class="line">                files: [</span><br><span class="line">                    &#123;</span><br><span class="line">                        expand: <span class="literal">true</span>,</span><br><span class="line">                        cwd: <span class="string">'&lt;%=dist %&gt;/js'</span>,</span><br><span class="line">                        src: [<span class="string">'**/*.min.js'</span>],</span><br><span class="line">                        dest: <span class="string">'&lt;%=dist %&gt;/js'</span>,</span><br><span class="line">                        ext: <span class="string">'.min.js'</span></span><br><span class="line">                    &#125;</span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        <span class="comment">//gzip压缩</span></span><br><span class="line">        compress: &#123;</span><br><span class="line">            main: &#123;</span><br><span class="line">                options: &#123;</span><br><span class="line">                    mode: <span class="string">'gzip'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                files: [</span><br><span class="line">                    &#123;</span><br><span class="line">                        expand: <span class="literal">true</span>,</span><br><span class="line">                        cwd: <span class="string">'&lt;%= dist %&gt;'</span>,</span><br><span class="line">                        <span class="comment">// 语言文件不加 min.js</span></span><br><span class="line">                        src: [<span class="string">'**/*.js'</span>, <span class="string">'!&lt;%= langDir %&gt;/*.js'</span>],</span><br><span class="line">                        dest: <span class="string">'&lt;%= dist_gzip %&gt;'</span>,</span><br><span class="line">                        ext: <span class="string">'.min.js'</span></span><br><span class="line">                    &#125;,</span><br><span class="line">                    &#123;</span><br><span class="line">                        expand: <span class="literal">true</span>,</span><br><span class="line">                        cwd: <span class="string">'&lt;%= dist %&gt;'</span>,</span><br><span class="line">                        src: [<span class="string">'&lt;%= langDir %&gt;/*.js'</span>],</span><br><span class="line">                        dest: <span class="string">'&lt;%= dist_gzip %&gt;'</span>,</span><br><span class="line">                        ext: <span class="string">'.js'</span></span><br><span class="line">                    &#125;,</span><br><span class="line">                    &#123;</span><br><span class="line">                        expand: <span class="literal">true</span>,</span><br><span class="line">                        cwd: <span class="string">'&lt;%= dist %&gt;'</span>,</span><br><span class="line">                        src: [<span class="string">'**/*.css'</span>],</span><br><span class="line">                        dest: <span class="string">'&lt;%= dist_gzip %&gt;'</span>,</span><br><span class="line">                        ext: <span class="string">'.min.css'</span></span><br><span class="line">                    &#125;</span><br><span class="line">                ]</span><br><span class="line">            &#125;,</span><br><span class="line"></span><br><span class="line">            zip_release: &#123;</span><br><span class="line">                options: &#123;</span><br><span class="line">                    archive: <span class="string">'&lt;%= buildDir %&gt;/../&lt;%= pkg.name %&gt;&lt;%= version %&gt;正式.zip'</span>,</span><br><span class="line">                    mode: <span class="string">'zip'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                files: [</span><br><span class="line">                    &#123;<span class="attr">src</span>: [<span class="string">'&lt;%= buildDir %&gt;/**'</span>]&#125;</span><br><span class="line">                ]</span><br><span class="line">            &#125;,</span><br><span class="line">            zip_debug: &#123;</span><br><span class="line">                options: &#123;</span><br><span class="line">                    archive: <span class="string">'&lt;%= buildDir %&gt;/../&lt;%= pkg.name %&gt;&lt;%= version %&gt;测试.zip'</span>,</span><br><span class="line">                    mode: <span class="string">'zip'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                files: [</span><br><span class="line">                    &#123;<span class="attr">src</span>: [<span class="string">'&lt;%= buildDir %&gt;/**'</span>]&#125;</span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        <span class="string">'string-replace'</span>: &#123;</span><br><span class="line">            <span class="comment">// 给提出来的html文件，加上版本号，并设置绝对地址(包括html文件里面的图片，url，等等都要)</span></span><br><span class="line">            movehtmlSrcUrl: &#123;</span><br><span class="line">                files: &#123;</span><br><span class="line">                    <span class="string">'&lt;%= dist %&gt;/../'</span>: <span class="string">'&lt;%= dist %&gt;/../**/*.html'</span>,</span><br><span class="line">                    <span class="string">'&lt;%= dist %&gt;/&lt;%= tplDir %&gt;/'</span>: <span class="string">'&lt;%= dist %&gt;/&lt;%= tplDir %&gt;/**/*.html'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                options: &#123;</span><br><span class="line">                    replacements: [</span><br><span class="line">                        &#123;</span><br><span class="line">                            pattern: REG_EXP_RESOURCE,</span><br><span class="line">                            <span class="comment">// $3 匹配的是资源路径</span></span><br><span class="line">                            replacement: <span class="string">'$1/&lt;%= version %&gt;/$3$7'</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// 修改打包后的模板地址，和语言包的路径</span></span><br><span class="line">            movehtmlTplBaseUrl: &#123;</span><br><span class="line">                files: &#123;</span><br><span class="line">                    <span class="string">'&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/framework.min.js'</span>: <span class="string">'&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/framework.min.js'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                options: &#123;</span><br><span class="line">                    replacements: [</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="comment">// 模版地址修改</span></span><br><span class="line">                            pattern: <span class="regexp">/(util\.setTemplateBaseUrl\(('|")).*?(('|")\))/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1/&lt;%= version %&gt;$3'</span></span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="comment">// 语言文件地址修改</span></span><br><span class="line">                            pattern: <span class="regexp">/(buildLangURl\s*:\s*)('|")(\S*?)('|"),/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1$2/&lt;%= version %&gt;/lang/$4,'</span></span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="comment">// 修改资源路径</span></span><br><span class="line">                            pattern: <span class="regexp">/(resourceUrl\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1/&lt;%= version %&gt;/$3'</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// 为资源添加完整的 静态地址，包括图片</span></span><br><span class="line">            releaseStaticUrl: &#123;</span><br><span class="line">                files: &#123;</span><br><span class="line">                    <span class="string">'&lt;%= dist %&gt;/../'</span>: <span class="string">'&lt;%= dist %&gt;/../**/*.html'</span>,</span><br><span class="line">                    <span class="string">'&lt;%= dist %&gt;/&lt;%= tplDir %&gt;/'</span>: <span class="string">'&lt;%= dist %&gt;/&lt;%= tplDir %&gt;/**/*.html'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                options: &#123;</span><br><span class="line">                    replacements: [</span><br><span class="line">                        &#123;</span><br><span class="line">                            pattern: REG_EXP_RESOURCE,</span><br><span class="line">                            <span class="comment">// $3 匹配的是资源路径</span></span><br><span class="line">                            replacement: <span class="string">'$1&lt;%= static_base_url %&gt;/&lt;%= version %&gt;/$3$7'</span></span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            pattern: <span class="keyword">new</span> <span class="built_in">RegExp</span>(<span class="string">"('|\")(\\.&#123;0,2&#125;\/)+(("</span> + langDir + <span class="string">")\/*.*)('|\")"</span>, <span class="string">'g'</span>),</span><br><span class="line">                            <span class="comment">// $1 匹配的是引号</span></span><br><span class="line">                            <span class="comment">// $3 匹配的是资源路径</span></span><br><span class="line">                            replacement: <span class="string">'$1&lt;%= static_base_url %&gt;/&lt;%= version %&gt;/$3$1'</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// 更新服务端接口地址和版本号</span></span><br><span class="line">            releaseServerUrl: &#123;</span><br><span class="line">                files: &#123;</span><br><span class="line">                    <span class="string">'&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/framework.min.js'</span>: <span class="string">'&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/framework.min.js'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                options: &#123;</span><br><span class="line">                    replacements: [</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="comment">// release url 修改</span></span><br><span class="line">                            pattern: <span class="regexp">/(idUrl\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1https://id4.xxx.com/$3'</span></span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="comment">// release url 修改</span></span><br><span class="line">                            pattern: <span class="regexp">/(payUrl\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1https://pay.xxx.com/$3'</span></span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="comment">// release url 修改</span></span><br><span class="line">                            pattern: <span class="regexp">/(serverUrl\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1https://srv3.xxx.com/$3'</span></span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="comment">// api 版本修改</span></span><br><span class="line">                            pattern: <span class="regexp">/(apiVersion\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1&lt;%= apiVersion %&gt;$3'</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// 预编译之后，把debug模式去掉</span></span><br><span class="line">            i18n: &#123;</span><br><span class="line">                files: &#123;</span><br><span class="line">                    <span class="string">'&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/framework.min.js'</span>: <span class="string">'&lt;%= dist %&gt;/&lt;%= jsDir %&gt;/framework.min.js'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                options: &#123;</span><br><span class="line">                    replacements: [</span><br><span class="line">                        &#123;</span><br><span class="line">                            <span class="comment">// debug 模式修改</span></span><br><span class="line">                            pattern: <span class="regexp">/(Airdroid_isDebug\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1false$3'</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 需要添加 css 或者 js 的时候，就编辑一下下面，的内容，然后执行</span></span><br><span class="line">            <span class="comment">// grunt string-replace:framework，一次性将所有文件都替换好。</span></span><br><span class="line">            framework: &#123;</span><br><span class="line">                files: &#123;</span><br><span class="line">                    <span class="string">'&lt;%= workDir %&gt;/'</span>: <span class="string">'&lt;%= workDir %&gt;/html/**/*.html'</span></span><br><span class="line">                &#125;,</span><br><span class="line">                options: &#123;</span><br><span class="line">                    replacements: [</span><br><span class="line">                        &#123;</span><br><span class="line">                            pattern: <span class="regexp">/( *&lt;!--\s*build:css.*main.min.css\s*--&gt;)[\w\W]*?(&lt;!-- endbuild --&gt;)/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;link rel="stylesheet" href="/workspace/css/base.css"/&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;link rel="stylesheet" href="/workspace/css/header.css"/&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;link rel="stylesheet" href="/workspace/css/footer.css"/&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    $2'</span></span><br><span class="line">                        &#125;,</span><br><span class="line">                        &#123;</span><br><span class="line">                            pattern: <span class="regexp">/( *&lt;!--\s*build:js.*framework.min.js\s*--&gt;)[\w\W]*?(&lt;!-- endbuild --&gt;)/</span>,</span><br><span class="line">                            replacement: <span class="string">'$1\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/bower_components/es5-shim/es5-shim.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/bower_components/base64/base64.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/bower_components/console-js/console.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/bower_components/underscore/underscore.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/bower_components/jquery/jquery.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/bower_components/jquery-cookie/jquery.cookie.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/bower_components/Placeholders.js/lib/utils.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/bower_components/Placeholders.js/lib/main.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/bower_components/Placeholders.js/lib/adapters/placeholders.jquery.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/lib/lib.jquery.jsonp.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/lib/lib.md5.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/util/util.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/util/valid/isValidEmail.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/util/url/getUrlParam.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/util/url/toUrlParam.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/util/tpl/getTpl.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/util/string/capitalize.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/util/browser/browser_os.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/framework/js/util/analytics/analytics.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/workspace/js/sys/server.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/workspace/js/sys/i18n.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/workspace/js/sys/util.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    &lt;script src="/workspace/js/module/base.js"&gt;&lt;/script&gt;\n'</span> +</span><br><span class="line">                            <span class="string">'    $2'</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    ]</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 给css文件，加浏览器前缀，只要写最标准的语言就行了，它会自动填上浏览器前缀</span></span><br><span class="line">        autoprefixer: &#123;</span><br><span class="line">            options: &#123;</span><br><span class="line">                <span class="comment">// 需要兼容的浏览器，默认兼容所有。</span></span><br><span class="line">                browsers: pkg.browsers || [<span class="string">'&gt; 1%'</span>, <span class="string">'last 2 versions'</span>, <span class="string">'Firefox ESR'</span>, <span class="string">'Opera 12.1'</span>, <span class="string">'Android 1'</span>, <span class="string">'ios 7'</span>]</span><br><span class="line">            &#125;,</span><br><span class="line">            dist: &#123;</span><br><span class="line">                src: <span class="string">'&lt;%= dist %&gt;/**/*.css'</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// html 压缩（连同模板） 等操作</span></span><br><span class="line">        htmlmin: &#123;</span><br><span class="line">            dist: &#123;</span><br><span class="line">                options: &#123;</span><br><span class="line">                    <span class="comment">// 去掉空格，压缩一行显示</span></span><br><span class="line"><span class="comment">//                    collapseWhitespace: true,</span></span><br><span class="line">                    <span class="comment">// 去掉注释</span></span><br><span class="line">                    removeComments: <span class="literal">true</span></span><br><span class="line">                &#125;,</span><br><span class="line">                files: [</span><br><span class="line">                    &#123;</span><br><span class="line">                        expand: <span class="literal">true</span>,</span><br><span class="line">                        cwd: <span class="string">'&lt;%= dist_no_version %&gt;'</span>,</span><br><span class="line">                        dest: <span class="string">'&lt;%= dist_no_version %&gt;'</span>,</span><br><span class="line">                        src: <span class="string">'**/*.html'</span></span><br><span class="line">                    &#125;</span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 多语言预编译处理</span></span><br><span class="line">        staticfy: (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> cfg = &#123;&#125;;</span><br><span class="line">            <span class="keyword">var</span> files;</span><br><span class="line">            _.each(supportLangs, <span class="function"><span class="keyword">function</span> (<span class="params">lang</span>) </span>&#123;</span><br><span class="line">                files = &#123;&#125;;</span><br><span class="line">                _.each(htmlFiles, <span class="function"><span class="keyword">function</span> (<span class="params">htmlFile</span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">var</span> file = htmlFile.replace(<span class="string">'html/'</span>, <span class="string">''</span>);</span><br><span class="line">                    files[<span class="string">'&lt;%= dist_no_version %&gt;/'</span> + lang + <span class="string">'/'</span> + file] = <span class="string">'&lt;%= dist_no_version %&gt;/'</span> + file;</span><br><span class="line">                &#125;);</span><br><span class="line">                cfg[lang] = &#123;</span><br><span class="line">                    options: &#123;</span><br><span class="line">                        cwd: <span class="string">'&lt;%= dist_no_version %&gt;'</span>,</span><br><span class="line">                        query_string: <span class="string">'lang='</span> + lang,</span><br><span class="line">                        onfinish: <span class="function"><span class="keyword">function</span> (<span class="params">str</span>) </span>&#123;</span><br><span class="line">                            <span class="keyword">return</span> str</span><br><span class="line">                                <span class="comment">// 预编译要跟进对应的语言，对 a 标签的相对路径进行替换</span></span><br><span class="line">                                .replace(<span class="regexp">/(&lt;a.*?href=['"])(\/.*?)(['"])/gi</span>, <span class="string">'$1/'</span> + lang + <span class="string">'$2$3'</span>)</span><br><span class="line">                                <span class="comment">// 删掉和重置一些页面访问时产生的内容</span></span><br><span class="line">                                <span class="comment">//.replace(/\n?&lt;iframe.*https:\/\/accounts.google.com.*?&lt;\/iframe&gt;/, '')</span></span><br><span class="line">                                <span class="comment">//.replace(/&lt;script.*google.*twitter.*?&lt;\/script&gt;/, '')</span></span><br><span class="line">                                <span class="comment">//.replace(/&lt;style.*fb_hidden[\w\W]*?&lt;\/style&gt;/, '')</span></span><br><span class="line">                                <span class="comment">//.replace(/ data-twttr-rendered="true"/, '')</span></span><br><span class="line">                                <span class="comment">//.replace(/&lt;iframe id="twitter-widget-0".*&lt;\/iframe&gt;/, '&lt;a href="https://twitter.com/share" class="twitter-share-button" data-lang="en"&gt;Tweet&lt;/a&gt;')</span></span><br><span class="line">                                <span class="comment">//.replace(/&lt;div.*plusone.*?\/div&gt;/, '&lt;g:plusone size="medium"&gt;&lt;/g:plusone&gt;')</span></span><br><span class="line">                                <span class="comment">//.replace(/&lt;div.*fb-like.*&lt;\/div&gt;/, '&lt;div class="fb-like item-social-buttons-fb-like" data-href="http://www.xxx.com" data-send="false" data-layout="button_count" data-width="450" data-show-faces="true"&gt;&lt;/div&gt;')</span></span><br><span class="line">                                <span class="comment">//.replace(/&lt;div.*fb-root.*&lt;\/div&gt;/, '&lt;div id="fb-root"&gt;&lt;/div&gt;')</span></span><br><span class="line"></span><br><span class="line">                                <span class="comment">// 消除 jsonp 请求产生的 script 标签</span></span><br><span class="line">                                .replace(<span class="regexp">/&lt;script.*async="".*?&lt;\/script&gt;/g</span>, <span class="string">''</span>)</span><br><span class="line">                                <span class="comment">// 消除 首页加载Google字体请求产生的link标签</span></span><br><span class="line">                                .replace(<span class="regexp">/&lt;link.*http:\/\/fonts.googleapis.com.*?&gt;/</span>, <span class="string">''</span>)</span><br><span class="line">                                <span class="comment">// 清理首页的图片，重设为隐藏</span></span><br><span class="line">                                .replace(<span class="regexp">/(&lt;img class="item-preload.*)style="display:\s*inline.*"(&gt;)/g</span>, <span class="string">'$1$2'</span>)</span><br><span class="line"></span><br><span class="line">                                <span class="comment">// 清理邮件验证页，重设为隐藏</span></span><br><span class="line">                                .replace(<span class="regexp">/"(item-verify-send)"/</span>, <span class="string">'"$1 i-hide"'</span>)</span><br><span class="line"></span><br><span class="line">                                <span class="comment">// signin 重置链接地址</span></span><br><span class="line">                                .replace(<span class="regexp">/(href=".*signin\/)\?.*(")/</span>, <span class="string">'$1$2'</span>)</span><br><span class="line"></span><br><span class="line">                                <span class="comment">// 重置 header 右侧的 item-actions 和 item-profile 的状态</span></span><br><span class="line">                                .replace(<span class="regexp">/"(item-actions|item-profile)"/</span>, <span class="string">'"$1 i-hide"'</span>)</span><br><span class="line">                                <span class="comment">// 去掉指定的要删除的脚本</span></span><br><span class="line">                                .replace(<span class="regexp">/&lt;script.*id="removeScript".*?&lt;\/script&gt;/g</span>, <span class="string">''</span>)</span><br><span class="line">                                <span class="comment">// 去掉自动下载的iframe中的url</span></span><br><span class="line">                                .replace(<span class="regexp">/(&lt;iframe id="downloadFrame".*?)(src=")(\S+)(".*&gt;&lt;\/iframe&gt;)/g</span>, <span class="string">'$1$2$4'</span>)</span><br><span class="line">                                <span class="comment">// 去掉首页 Facebook twitter g+ 的 addthis widget 中间代码</span></span><br><span class="line">                                .replace(<span class="regexp">/&lt;div.*id="_atssh".*?&lt;\/iframe&gt;&lt;\/div&gt;/g</span>, <span class="string">''</span>)</span><br><span class="line">                                <span class="comment">// 这条规则要特别注意(用于首页清除addthis的样式)，很容易请到别的页面，所以尽量不要在页面内加上style标签</span></span><br><span class="line">                                .replace(<span class="regexp">/&lt;style.*type="text\/css".*?&lt;\/style&gt;&lt;\/head&gt;/g</span>, <span class="string">'&lt;/head&gt;'</span>)</span><br><span class="line">                                <span class="comment">// 最后把对应的语言文件再加到里面去</span></span><br><span class="line">                                .replace(<span class="regexp">/&lt;\/head&gt;/</span>, <span class="string">'&lt;script src="/'</span> + version + <span class="string">'/lang/'</span> + supportLangObj[lang].code + <span class="string">'.js"&gt;&lt;/script&gt;&lt;/head&gt;'</span>);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;,</span><br><span class="line">                    files: files</span><br><span class="line">                &#125;;</span><br><span class="line">            &#125;);</span><br><span class="line">            <span class="keyword">return</span> cfg;</span><br><span class="line">        &#125;)(),</span><br><span class="line">        processhtml: &#123;</span><br><span class="line">            options: &#123;</span><br><span class="line">                includeBase: workDir,</span><br><span class="line">                data: &#123;</span><br><span class="line">                    apiVersion: apiVersion</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="comment">// 扩大usemin 功能，增加 remove include 等功能</span></span><br><span class="line">            dist: &#123;</span><br><span class="line">                files: (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">var</span> result = &#123;&#125;;</span><br><span class="line">                    _.map(htmlFiles, <span class="function"><span class="keyword">function</span> (<span class="params">htmlFile</span>) </span>&#123;</span><br><span class="line">                        result[<span class="string">'&lt;%= dist %&gt;/'</span> + htmlFile] = <span class="string">'&lt;%= dist %&gt;/'</span> + htmlFile;</span><br><span class="line">                    &#125;);</span><br><span class="line">                    <span class="keyword">return</span> result;</span><br><span class="line">                &#125;)()</span><br><span class="line">            &#125;,</span><br><span class="line">            release: &#123;</span><br><span class="line">                files: (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">var</span> result = &#123;&#125;;</span><br><span class="line">                    _.map(htmlFiles, <span class="function"><span class="keyword">function</span> (<span class="params">htmlFile</span>) </span>&#123;</span><br><span class="line">                        result[<span class="string">'&lt;%= dist %&gt;/'</span> + htmlFile] = <span class="string">'&lt;%= dist %&gt;/'</span> + htmlFile;</span><br><span class="line">                    &#125;);</span><br><span class="line">                    <span class="keyword">return</span> result;</span><br><span class="line">                &#125;)()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 使用less编译</span></span><br><span class="line">        <span class="comment">// 编译less文件</span></span><br><span class="line">        less: &#123;</span><br><span class="line">            update: &#123;</span><br><span class="line">                options: &#123;</span><br><span class="line">                    <span class="comment">// 设置为sourceMap，如果在chrome的workspace环境，并设置为可编辑路径的话，该属性会无效</span></span><br><span class="line">                    sourceMap: <span class="literal">true</span>,</span><br><span class="line">                    sourceMapRootpath: <span class="string">"../../"</span></span><br><span class="line">                &#125;,</span><br><span class="line">                files: [</span><br><span class="line">                    &#123;</span><br><span class="line">                        expand: <span class="literal">true</span>,</span><br><span class="line">                        cwd: <span class="string">'&lt;%=workDir%&gt;/&lt;%=lessDir%&gt;/'</span>,</span><br><span class="line">                        src: [<span class="string">'*.less'</span>],</span><br><span class="line">                        dest: <span class="string">'&lt;%=workDir%&gt;/&lt;%=cssDir%&gt;/'</span>,</span><br><span class="line">                        ext: <span class="string">'.css'</span></span><br><span class="line">                    &#125;</span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 监听less文件</span></span><br><span class="line">        watch: &#123;</span><br><span class="line">            less: &#123;</span><br><span class="line">                files: [<span class="string">'&lt;%= workDir %&gt;/&lt;%= lessDir %&gt;/*.less'</span>],</span><br><span class="line">                tasks: [<span class="string">'newer:less:update'</span>],</span><br><span class="line">                options: &#123;</span><br><span class="line">                    livereload: <span class="literal">true</span>,</span><br><span class="line">                    spawn: <span class="literal">false</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            livereload: &#123;</span><br><span class="line">                files: [<span class="string">'&lt;%= workDir %&gt;/&lt;%= lessDir %&gt;/**.less'</span>, <span class="string">'&lt;%= workDir %&gt;/**.html'</span>],</span><br><span class="line">                options: &#123;</span><br><span class="line">                    livereload: <span class="literal">true</span>,</span><br><span class="line">                    spawn: <span class="literal">false</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        unused: &#123;</span><br><span class="line">            options: &#123;</span><br><span class="line">                reference: <span class="string">'&lt;%= workDir %&gt;/&lt;%= imgDir %&gt;/'</span>,</span><br><span class="line">                directory: [</span><br><span class="line">                    <span class="string">'&lt;%= workDir %&gt;/**/*.&#123;css,html,js,less&#125;'</span></span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// These plugins provide necessary tasks</span></span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-clean'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-concat'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-uglify'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-cssmin'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-copy'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-autoprefixer'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-compress'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-string-replace'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-jst-concat'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-jst'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-usemin'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-staticfy'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-processhtml'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-newer'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-less'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-watch'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-contrib-htmlmin'</span>);</span><br><span class="line">    grunt.loadNpmTasks(<span class="string">'grunt-unused'</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 构建步骤 */</span></span><br><span class="line">    <span class="comment">// 准备工作</span></span><br><span class="line">    grunt.registerTask(<span class="string">'prepare'</span>, [<span class="string">'clean:prepare'</span>, <span class="string">'less:update'</span>, <span class="string">'copy:prepare'</span>, <span class="string">'autoprefixer'</span>]);</span><br><span class="line">    <span class="comment">// 压缩 js css 并更新相应的 html 文件</span></span><br><span class="line">    grunt.registerTask(<span class="string">'min'</span>, [<span class="string">'jst'</span>, <span class="string">'useminPrepare'</span>, <span class="string">'concat'</span>, <span class="string">'uglify'</span>, <span class="string">'jst_concat'</span>, <span class="string">'cssmin'</span>, <span class="string">'usemin'</span>, isRelease ? <span class="string">'processhtml:release'</span> : <span class="string">'processhtml:dist'</span>, <span class="string">'clean:dist'</span>]);</span><br><span class="line">    <span class="comment">// 把 html 文件从 html 文件夹移动出来</span></span><br><span class="line">    grunt.registerTask(<span class="string">'movehtml'</span>, [<span class="string">'copy:movehtml'</span>, <span class="string">'string-replace:movehtmlSrcUrl'</span>, <span class="string">'string-replace:movehtmlTplBaseUrl'</span>, <span class="string">'clean:movehtml'</span>]);</span><br><span class="line">    <span class="comment">// 多语言</span></span><br><span class="line">    grunt.registerTask(<span class="string">'i18n'</span>, [<span class="string">'staticfy'</span>, <span class="string">'htmlmin'</span>, <span class="string">'copy:i18n'</span>, <span class="string">'string-replace:i18n'</span>]);</span><br><span class="line">    <span class="comment">// 绝对地址 + 服务端正式接口地址</span></span><br><span class="line">    grunt.registerTask(<span class="string">'release'</span>, [<span class="string">'string-replace:releaseStaticUrl'</span>, <span class="string">'string-replace:releaseServerUrl'</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// gzip 压缩</span></span><br><span class="line">    grunt.registerTask(<span class="string">'gzip'</span>, [<span class="string">'copy:gzip'</span>, <span class="string">'compress:main'</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 完整的构建流程 */</span></span><br><span class="line">    <span class="comment">// 最基础的构建</span></span><br><span class="line">    grunt.registerTask(<span class="string">'build'</span>, [<span class="string">'prepare'</span>, <span class="string">'min'</span>, <span class="string">'movehtml'</span>]);</span><br><span class="line">    grunt.registerTask(<span class="string">'default'</span>, [<span class="string">'build'</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 多语言预编译</span></span><br><span class="line">    grunt.registerTask(<span class="string">'i'</span>, [<span class="string">'build'</span>, <span class="string">'i18n'</span>, <span class="string">'gzip'</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 正式地址</span></span><br><span class="line">    grunt.registerTask(<span class="string">'r'</span>, [<span class="string">'build'</span>, <span class="string">'i18n'</span>, <span class="string">'release'</span>, <span class="string">'gzip'</span>, <span class="string">'compress:zip_release'</span>]);</span><br><span class="line">    <span class="comment">// 测试地址</span></span><br><span class="line">    grunt.registerTask(<span class="string">'d'</span>, [<span class="string">'build'</span>, <span class="string">'i18n'</span>, <span class="string">'string-replace:releaseStaticUrl'</span>, <span class="string">'gzip'</span>, <span class="string">'compress:zip_debug'</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// less 编译</span></span><br><span class="line">    grunt.registerTask(<span class="string">'start'</span>, [<span class="string">'less:update'</span>, <span class="string">'watch'</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>假设以打正式地址为例：  <strong>grunt r</strong> 执行的流程如下：<br>即执行  <strong>‘build’, ‘i18n’, ‘release’, ‘gzip’, ‘compress:zip_release’</strong><br>同时 build 又分为 <strong>‘prepare’, ‘min’, ‘movehtml’</strong><br> 全部切换成单个执行任务就是：</p>
+<h3 id="step-1-prepare"><a href="#step-1-prepare" class="headerlink" title="step 1. prepare"></a>step 1. prepare</h3> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prepare =&gt; [&apos;clean:prepare&apos;, &apos;less:update&apos;, &apos;copy:prepare&apos;, &apos;autoprefixer&apos;]</span><br></pre></td></tr></table></figure>
+<p>即构建前的准备工作。即</p>
+<ol>
+<li><strong>clean:prepare</strong> 清除前次打包的一些文件</li>
+<li><strong>less:update</strong> 编译生成新的css文件</li>
+<li><strong>copy:prepare</strong> 打包的时候，先把workDir， 即workspace 里面的文件，复制到build的version目录，接下来就直接操作build的version目录即可，不用管workspace目录</li>
+</ol>
+<h3 id="step-2-min"><a href="#step-2-min" class="headerlink" title="step 2. min"></a>step 2. min</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">min =&gt; [&apos;jst&apos;, &apos;useminPrepare&apos;, &apos;concat&apos;, &apos;uglify&apos;, &apos;jst_concat&apos;, &apos;cssmin&apos;, &apos;usemin&apos;, isRelease ? &apos;processhtml:release&apos; : &apos;processhtml:dist&apos;, &apos;clean:dist&apos;]</span><br></pre></td></tr></table></figure>
+<p>即 压缩 js css 并更新相应的 html 文件， 即</p>
+<ol>
+<li><strong>jst</strong> =&gt;  html模板编译，将 &lt;%=dist %&gt;/tpl/ 目录里面的html模板编译成jst后缀的文件，并放在 &lt;%=dist %&gt;/tpl2/</li>
+<li><strong>useminPrepare</strong> =&gt; 进行usemin的准备操作， 生成一份 usemin 的grunt配置文件（即合并文件，压缩js，压缩css）（usemin 分为两个步骤，第一要先进行预构建， 即 useminPrepare , 生成 contat 和 uglify  配置, 以便第三步，第四步， 第六步操作 )<br><img src="/2018/09/12/www-history-2/1.png" alt="1"></li>
+<li><strong>concat</strong> =&gt; 文件合并，针对第二步的grunt配置</li>
+<li><strong>uglify</strong> =&gt; js 文件压缩，针对第二步的grunt配置</li>
+<li><strong>jst_concat</strong> =&gt; JST模版联合,  即遍历所有的js文件，如果里面有用到模板的地方，那么就将该模板的调用代码，并入到js文件头部。<br>以<strong>premium.min.js</strong> 为例。这个js用到了<strong>pay/confirm-dialog-content.html</strong> 这个模板，那么就把这个模板的编译js模板放到这个文件的头部。<br>（这样做的好处就是，请求模板的时候，不会再去进行一次http请求去请求模板，因为js文件本身已经自带了这个模板了，减少了网络请求）<br><img src="/2018/09/12/www-history-2/2.png" alt="1"><br>然后在调用模板的时候，判断如果是publish方式的话，就直接 执行 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">window[&quot;ajst&quot;][name + &apos;.html&apos;](obj)</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>来获取模板,调用模板的代码如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>.util.getTemplate = <span class="function"><span class="keyword">function</span> (<span class="params">name, obj</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> tpl, url, file_url;</span><br><span class="line">  url = <span class="keyword">this</span>.getTemplateBaseUrl() + <span class="string">'/tpl/'</span> + name;</span><br><span class="line">  file_url = url + <span class="string">'.js'</span>;</span><br><span class="line">  obj = obj || &#123;&#125;;</span><br><span class="line">  obj = $.extend(<span class="literal">true</span>, &#123;<span class="attr">lang</span>: Airdroid ? Airdroid.Lang : &#123;&#125;&#125;, obj);</span><br><span class="line">  <span class="comment">// 非debug模块，就用内联模板</span></span><br><span class="line">  <span class="keyword">if</span>(I18n &amp;&amp; !I18n.Airdroid_isDebug)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">window</span>[<span class="string">"ajst"</span>][name + <span class="string">'.html'</span>](obj);</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    tpl = <span class="keyword">this</span>.cacheTpls[file_url] || $.ajax(&#123; <span class="attr">url</span>: url + <span class="string">'.html'</span>, <span class="attr">async</span>: <span class="literal">false</span>, <span class="attr">cache</span>: <span class="literal">true</span> &#125;).responseText;</span><br><span class="line">    <span class="keyword">return</span> _.template(tpl, obj);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<ol start="6">
+<li><strong>cssmin</strong> =&gt; css 文件压缩，针对第二步的grunt配置</li>
+<li><strong>usemin</strong> =&gt; 进行 usemin 操作，并且对html文件进行路径调整</li>
+<li><strong>processhtml:release</strong> =&gt; 扩大usemin 功能，增加 remove include 等功能</li>
+<li><strong>clean:dist</strong> =&gt; usemin 之后，删除之前旧的js和css，只保留打包压缩后的js和css</li>
+</ol>
+<h3 id="step-3-movehtml"><a href="#step-3-movehtml" class="headerlink" title="step 3. movehtml"></a>step 3. movehtml</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">movehtml=&gt; [&apos;copy:movehtml&apos;, &apos;string-replace:movehtmlSrcUrl&apos;, &apos;string-replace:movehtmlTplBaseUrl&apos;, &apos;clean:movehtml&apos;]</span><br></pre></td></tr></table></figure>
+<p>主要功能就是 把 html 文件从 html 文件夹移动出来， 之前的html文件都是在workspace/html 这个目录里面的，现在要移到打包的根目录下。</p>
+<ol>
+<li><strong>copy:movehtml</strong> =&gt; 将 dist 目录下的 html 向上提取二级目录</li>
+<li><strong>string-replace:movehtmlSrcUrl</strong> =&gt;  给提出来的html文件，加上版本号，并设置绝对地址(包括html文件里面的图片，url，等等都要)</li>
+<li><strong>string-replace:movehtmlTplBaseUrl</strong> =&gt; 修改打包后的模板地址，和语言包的路径</li>
+<li><strong>clean:movehtml</strong> =&gt; 最后去掉，版本目录里面的html目录(因为之前已经提到上两级目录去了)</li>
+</ol>
+<h3 id="step-4-i18n"><a href="#step-4-i18n" class="headerlink" title="step 4. i18n"></a>step 4. i18n</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i18n=&gt; [&apos;staticfy&apos;, &apos;htmlmin&apos;, &apos;copy:i18n&apos;, &apos;string-replace:i18n&apos;]</span><br></pre></td></tr></table></figure>
+<p>主要功能就是进行多语言的静态文件编译</p>
+<ol>
+<li><strong>staticfy</strong> =&gt; 多语言预编译处理，即用<strong>phantom.js</strong>来加载不同语言下的所有页面，然后保存起来</li>
+<li><strong>htmlmin</strong> =&gt; html 压缩（连同模板） 等操作</li>
+<li><strong>copy:i18n</strong> =&gt; 预编译完之后，要把en的文件复制到上一层, 即默认没有加语音路径参数的，就是英文</li>
+<li><strong>string-replace:i18n</strong> =&gt; 预编译之后，把debug模式去掉, 即 Airdroid_isDebug 改为 false</li>
+</ol>
+<h3 id="step-5-release"><a href="#step-5-release" class="headerlink" title="step 5. release"></a>step 5. release</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">release=&gt;[&apos;string-replace:releaseStaticUrl&apos;, &apos;string-replace:releaseServerUrl&apos;]</span><br></pre></td></tr></table></figure>
+<p>主要就是打release包的时候，将静态资源修改成绝对地址，并修改成服务端的正式接口地址</p>
+<ol>
+<li><strong>string-replace:releaseStaticUrl</strong> =&gt; 为资源添加完整的 静态地址，包括图片</li>
+<li><strong>string-replace:releaseServerUrl</strong> =&gt; 更新服务端接口地址和版本号</li>
+</ol>
+<h3 id="step-6-gzip-（官网不放s3上，这一步可以不做）"><a href="#step-6-gzip-（官网不放s3上，这一步可以不做）" class="headerlink" title="step 6. gzip （官网不放s3上，这一步可以不做）"></a>step 6. gzip （官网不放s3上，这一步可以不做）</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gzip=&gt;[&apos;copy:gzip&apos;, &apos;compress:main&apos;]</span><br></pre></td></tr></table></figure>
+<p>将资源进行 <strong>gzip</strong> 压缩，主要是js和css</p>
+<ol>
+<li><strong>copy:gzip</strong> =&gt; 所有资源复制到 gzip 目录</li>
+<li><strong>compress:main</strong> =&gt; 对所有的js和css进行gzip压缩</li>
+</ol>
+<h3 id="step-7-compress-zip-release"><a href="#step-7-compress-zip-release" class="headerlink" title="step 7.compress:zip_release"></a>step 7.compress:zip_release</h3><p>将打的zip改名字</p>
+<h3 id="package-json-文件"><a href="#package-json-文件" class="headerlink" title="package.json 文件"></a>package.json 文件</h3><p>以上就是所有的详细步骤，其实还有没有说的一点就是，上面没有指定要构建哪些html文件，其实不是所有的html文件都要构建的，其实是要在setting文件指定的。<br><strong>package.json</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">"name"</span>: <span class="string">"xxx_web_www"</span>,</span><br><span class="line">  <span class="string">"version"</span>: <span class="string">"1.0.0"</span>,</span><br><span class="line">  <span class="string">"dependencies"</span>: &#123;&#125;,</span><br><span class="line">  <span class="string">"workDir"</span>: <span class="string">"workspace"</span>,</span><br><span class="line">  <span class="string">"jsDir"</span>: <span class="string">"js"</span>,</span><br><span class="line">  <span class="string">"cssDir"</span>: <span class="string">"css"</span>,</span><br><span class="line">  <span class="string">"imgDir"</span>: <span class="string">"img"</span>,</span><br><span class="line">  <span class="string">"langDir"</span>: <span class="string">"lang"</span>,</span><br><span class="line">  <span class="string">"tplDir"</span>: <span class="string">"tpl"</span>,</span><br><span class="line">  <span class="string">"scripts"</span>: &#123;</span><br><span class="line">    <span class="string">"dev"</span>: <span class="string">"supervisor server.js"</span>,</span><br><span class="line">    <span class="string">"buid_test"</span>: <span class="string">"grunt d"</span>,</span><br><span class="line">    <span class="string">"buid_release"</span>: <span class="string">"grunt r"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"supportLangs"</span>: &#123;</span><br><span class="line">    <span class="string">"en"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"en"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"ja"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"ja"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"it"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"it"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"de"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"de"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"pt-br"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"pt-BR"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"es-es"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"es-ES"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"fr"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"fr"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"zh-cn"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"zh-CN"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"pt-pt"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"pt-PT"</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">"ru"</span>: &#123;</span><br><span class="line">      <span class="string">"code"</span>: <span class="string">"ru"</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">"html_files"</span>: [</span><br><span class="line">    <span class="string">"html/legal/eula.html"</span>,</span><br><span class="line">    <span class="string">"html/download.html"</span>,</span><br><span class="line">    <span class="string">"html/index.html"</span>,</span><br><span class="line">    ... 省略一大堆的html 文件，只有在这个数组里面的html文件才会构建 ...</span><br><span class="line">    <span class="string">"html/attachment.html"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"apiVersion"</span>: <span class="string">"p14"</span>,</span><br><span class="line">  <span class="string">"static_base_url"</span>: <span class="string">"//www.xxx.com"</span>,</span><br><span class="line">  <span class="string">"devDependencies"</span>: &#123;</span><br><span class="line">    <span class="string">"grunt"</span>: <span class="string">"~0.4.2"</span>,</span><br><span class="line">    <span class="string">"grunt-autoprefixer"</span>: <span class="string">"~0.8.1"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-clean"</span>: <span class="string">"~0.5.0"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-compress"</span>: <span class="string">"~0.9.1"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-concat"</span>: <span class="string">"~0.4.0"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-copy"</span>: <span class="string">"~0.5.0"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-cssmin"</span>: <span class="string">"~0.9.0"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-htmlmin"</span>: <span class="string">"^0.3.0"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-jst"</span>: <span class="string">"~0.5.0"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-less"</span>: <span class="string">"~0.8.1"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-uglify"</span>: <span class="string">"~0.4.0"</span>,</span><br><span class="line">    <span class="string">"grunt-contrib-watch"</span>: <span class="string">"~0.5.3"</span>,</span><br><span class="line">    <span class="string">"grunt-jst-concat"</span>: <span class="string">"~0.1.0"</span>,</span><br><span class="line">    <span class="string">"grunt-newer"</span>: <span class="string">"~0.6.0"</span>,</span><br><span class="line">    <span class="string">"grunt-processhtml"</span>: <span class="string">"^0.3.3"</span>,</span><br><span class="line">    <span class="string">"grunt-staticfy"</span>: <span class="string">"^0.4.6"</span>,</span><br><span class="line">    <span class="string">"grunt-string-replace"</span>: <span class="string">"~0.2.7"</span>,</span><br><span class="line">    <span class="string">"grunt-unused"</span>: <span class="string">"^0.1.0"</span>,</span><br><span class="line">    <span class="string">"grunt-usemin"</span>: <span class="string">"~2.3.0"</span>,</span><br><span class="line">    <span class="string">"jquery"</span>: <span class="string">"^2.1.1"</span>,</span><br><span class="line">    <span class="string">"underscore"</span>: <span class="string">"~1.6.0"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<hr>
+<p>系列文章<br><a href="/2018/09/12/www-history-1/" title="官网构建优化流程(1) - 简介">官网构建优化流程(1) - 简介</a><br><a href="/2018/09/12/www-history-2/" title="官网构建优化流程(2) - 旧版grunt打包构建流程">官网构建优化流程(2) - 旧版grunt打包构建流程</a><br><a href="/2018/09/12/www-history-3/" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy</a><br><a href="/2018/09/12/www-history-4/" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy</a><br><a href="/2018/09/12/www-history-5/" title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js</a><br><a href="/2018/09/12/www-history-6/" title="官网构建优化流程(6) - 把原先的grunt换成gulp构建">官网构建优化流程(6) - 把原先的grunt换成gulp构建</a><br><a href="/2018/09/13/www-history-7/" title="官网构建优化流程(7) - 官网的多语言跳转规则">官网构建优化流程(7) - 官网的多语言跳转规则</a><br><a href="/2018/09/13/www-history-8/" title="官网构建优化流程(8) - gulp打包构建在ie8会报错">官网构建优化流程(8) - gulp打包构建在ie8会报错</a><br><a href="/2018/09/13/www-history-9/" title="官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题">官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题</a><br><a href="/2018/09/13/www-history-10/" title="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码</a><br><a href="/2018/09/13/www-history-11/" title="官网构建优化流程(11) - 部署转为用Jenkins自动化部署">官网构建优化流程(11) - 部署转为用Jenkins自动化部署</a><br><a href="/2018/09/13/www-history-12/" title="官网构建优化流程(12) - 优化加载速度，资源分开存放">官网构建优化流程(12) - 优化加载速度，资源分开存放</a><br><a href="/2018/09/13/www-history-13/" title="官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS">官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/09/12/www-history-2/" title="官网构建优化流程(2) - 旧版grunt打包构建流程">http://kebingzao.com/2018/09/12/www-history-2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/grunt/" rel="tag"># grunt</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/12/www-history-1/" rel="next" title="官网构建优化流程(1) - 简介">
+                <i class="fa fa-chevron-left"></i> 官网构建优化流程(1) - 简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/12/www-history-3/" rel="prev" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">
+                官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">84</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体构建分析"><span class="nav-number">2.</span> <span class="nav-text">具体构建分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#step-1-prepare"><span class="nav-number">2.1.</span> <span class="nav-text">step 1. prepare</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-2-min"><span class="nav-number">2.2.</span> <span class="nav-text">step 2. min</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-movehtml"><span class="nav-number">2.3.</span> <span class="nav-text">step 3. movehtml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-4-i18n"><span class="nav-number">2.4.</span> <span class="nav-text">step 4. i18n</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-5-release"><span class="nav-number">2.5.</span> <span class="nav-text">step 5. release</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-6-gzip-（官网不放s3上，这一步可以不做）"><span class="nav-number">2.6.</span> <span class="nav-text">step 6. gzip （官网不放s3上，这一步可以不做）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-7-compress-zip-release"><span class="nav-number">2.7.</span> <span class="nav-text">step 7.compress:zip_release</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#package-json-文件"><span class="nav-number">2.8.</span> <span class="nav-text">package.json 文件</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/09/12/www-history-2/';
+          this.page.identifier = '2018/09/12/www-history-2/';
+          this.page.title = '官网构建优化流程(2) - 旧版grunt打包构建流程';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,gulp," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 官网构建优化流程(2) - 旧版grunt打包构建流程 可以知道grunt打包构建的流程。本篇主要是把之前官网的grunt构建换成扩展更好，可读性更强，速度更快的gulp构建。目录结构如下：">
+<meta name="keywords" content="js,gulp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="官网构建优化流程(6) - 把原先的grunt换成gulp构建">
+<meta property="og:url" content="http://kebingzao.com/2018/09/12/www-history-6/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 官网构建优化流程(2) - 旧版grunt打包构建流程 可以知道grunt打包构建的流程。本篇主要是把之前官网的grunt构建换成扩展更好，可读性更强，速度更快的gulp构建。目录结构如下：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/www-history-6/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/www-history-6/2.png">
+<meta property="og:updated_time" content="2018-09-14T15:14:39.889Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="官网构建优化流程(6) - 把原先的grunt换成gulp构建">
+<meta name="twitter:description" content="前言通过 官网构建优化流程(2) - 旧版grunt打包构建流程 可以知道grunt打包构建的流程。本篇主要是把之前官网的grunt构建换成扩展更好，可读性更强，速度更快的gulp构建。目录结构如下：">
+<meta name="twitter:image" content="http://kebingzao.com/2018/09/12/www-history-6/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/09/12/www-history-6/"/>
+
+
+
+
+
+  <title>官网构建优化流程(6) - 把原先的grunt换成gulp构建 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/09/12/www-history-6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">官网构建优化流程(6) - 把原先的grunt换成gulp构建</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-12T21:42:25+08:00">
+                2018-09-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/官网构建优化流程/" itemprop="url" rel="index">
+                    <span itemprop="name">官网构建优化流程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/12/www-history-6/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/12/www-history-6/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/12/www-history-6/" class="leancloud_visitors" data-flag-title="官网构建优化流程(6) - 把原先的grunt换成gulp构建">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2018/09/12/www-history-2/" title="官网构建优化流程(2) - 旧版grunt打包构建流程">官网构建优化流程(2) - 旧版grunt打包构建流程</a> 可以知道grunt打包构建的流程。<br>本篇主要是把之前官网的grunt构建换成扩展更好，可读性更强，速度更快的gulp构建。<br>目录结构如下：<br><a id="more"></a><br><img src="/2018/09/12/www-history-6/1.png" alt="1"><br>当然还有一个就是 <strong>gulpfile.js</strong> 这边截图没有看到，其实这个文件很简单，就是引用上面的 gulp 目录, 其实就是 require  gulp/index.js 这个文件。<br>具体 <strong>gulpfile.js</strong> :<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="built_in">require</span>(<span class="string">'./gulp'</span>);</span><br></pre></td></tr></table></figure></p>
+<p>没错，就是这么简单，所以接下来就分析 gulp 目录下的 gulp/index.js。</p>
+<h2 id="分析任务"><a href="#分析任务" class="headerlink" title="分析任务"></a>分析任务</h2><h3 id="index-js"><a href="#index-js" class="headerlink" title="index.js"></a>index.js</h3><p>直接看头文件 <strong>gulp/index.js</strong>：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">var</span> config = <span class="built_in">require</span>(<span class="string">'./config'</span>);</span><br><span class="line"><span class="keyword">var</span> task = fs.readdirSync(<span class="string">'./gulp/tasks/'</span>);</span><br><span class="line"><span class="keyword">var</span> moment = <span class="built_in">require</span>(<span class="string">'moment'</span>);</span><br><span class="line"><span class="comment">// 初始化版本号和对应的配置文件</span></span><br><span class="line">global.buildVersion = moment().format(<span class="string">"YYYYMMDDHHmm"</span>);</span><br><span class="line">global.config = config(global.buildVersion);</span><br><span class="line">task.forEach(<span class="function"><span class="keyword">function</span> (<span class="params">task</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">require</span>(<span class="string">'./tasks/'</span> + task);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>主要确认了一个当前打包的版本号，一个是打包过程中，所用的一些配置文件，即 config.js</p>
+<h3 id="config-js"><a href="#config-js" class="headerlink" title="config.js"></a>config.js</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">version</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> config =  &#123;</span><br><span class="line">        <span class="string">"version"</span>: version,</span><br><span class="line">        <span class="string">"workDir"</span>: <span class="string">"workspace"</span>,</span><br><span class="line">        <span class="string">"jsDir"</span>: <span class="string">"js"</span>,</span><br><span class="line">        <span class="string">"cssDir"</span>: <span class="string">"css"</span>,</span><br><span class="line">        <span class="string">"lessDir"</span>: <span class="string">"less"</span>,</span><br><span class="line">        <span class="string">"imgDir"</span>: <span class="string">"img"</span>,</span><br><span class="line">        <span class="string">"langDir"</span>: <span class="string">"lang"</span>,</span><br><span class="line">        <span class="string">"tplDir"</span>: <span class="string">"tpl"</span>,</span><br><span class="line">        <span class="string">"htmlDir"</span>: <span class="string">"html"</span>,</span><br><span class="line">        <span class="string">"delFileList"</span>: [<span class="string">'build'</span>, <span class="string">'build_gzip'</span>, <span class="string">".tmp"</span>],</span><br><span class="line">        <span class="string">"supportLangs"</span>: &#123;</span><br><span class="line">            <span class="string">"en"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"en"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"ja"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"ja"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"it"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"it"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"de"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"de"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"pt-br"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"pt-BR"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"es-es"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"es-ES"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"fr"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"fr"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"zh-cn"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"zh-CN"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"pt-pt"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"pt-PT"</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">"ru"</span>: &#123;</span><br><span class="line">                <span class="string">"code"</span>: <span class="string">"ru"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="string">"htmlFiles"</span>: [</span><br><span class="line">            <span class="string">"html/legal/eula.html"</span>,</span><br><span class="line">            <span class="string">"html/index.html"</span>,</span><br><span class="line">            &lt;!-- .... 这边省略了一堆的 html 文件 ... --&gt;</span><br><span class="line">            <span class="string">"html/get.html"</span></span><br><span class="line">        ],</span><br><span class="line">        <span class="string">"apiVersion"</span>: <span class="string">"p14"</span>,</span><br><span class="line">        <span class="string">"static_base_url"</span>: <span class="string">"//www.xxx.com"</span></span><br><span class="line">    &#125;;</span><br><span class="line">    config.buildDir = <span class="string">'build/'</span>;</span><br><span class="line">    config.buildVersionDir = config.buildDir + version + <span class="string">"/"</span>;</span><br><span class="line">    <span class="comment">// 匹配正则</span></span><br><span class="line">    <span class="keyword">var</span> allDirs = [config.jsDir, config.cssDir, config.imgDir, config.langDir, config.tplDir];</span><br><span class="line">    config.REG_EXP_RESOURCE = <span class="keyword">new</span> <span class="built_in">RegExp</span>(<span class="string">"(url\\(|['\"])(\\.&#123;0,2&#125;\/)+.*?(("</span> + allDirs.join(<span class="string">"|"</span>) + <span class="string">")\/(.*?\\.(png|jpg|gif|css|js|ico|html|json)))(['\")])"</span>, <span class="string">'g'</span>);</span><br><span class="line">    <span class="keyword">return</span> config;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>主要是一些目录和文件的配置， 即各个目录的位置。 而接下来的 <strong>gulp/tasks</strong> 目录下的各个文件就是一些gulp的任务。<br>其中一般打包的执行任务就是下面几个：</p>
+<h3 id="不同环境打包任务"><a href="#不同环境打包任务" class="headerlink" title="不同环境打包任务"></a>不同环境打包任务</h3><h4 id="测试环境模式"><a href="#测试环境模式" class="headerlink" title="测试环境模式"></a>测试环境模式</h4><p><strong>test.js</strong> =&gt; <strong>gulp d</strong> 即测试环境模式<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> run_seq = <span class="built_in">require</span>(<span class="string">"run-sequence"</span>);</span><br><span class="line"><span class="comment">// 开发模式</span></span><br><span class="line">gulp.task(<span class="string">'d'</span>, cb =&gt; &#123;</span><br><span class="line">    global.config.static_base_url = global.config.static_base_url.replace(<span class="string">'//'</span>, <span class="string">'//test-'</span>);</span><br><span class="line">    run_seq(<span class="string">"build"</span>, <span class="string">"zip"</span>, cb);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h4 id="测试环境模式，并且上传到测试服务器并解压到对应目录"><a href="#测试环境模式，并且上传到测试服务器并解压到对应目录" class="headerlink" title="测试环境模式，并且上传到测试服务器并解压到对应目录"></a>测试环境模式，并且上传到测试服务器并解压到对应目录</h4><p><strong>test_upload.js</strong> =&gt; <strong>gulp du</strong> 即测试环境模式，并且上传到测试服务器并解压到对应目录<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line"><span class="comment">// 开发模式, 并上传到服务器并解压</span></span><br><span class="line">gulp.task(<span class="string">'du'</span>, seq(<span class="string">"d"</span>, <span class="string">"upload"</span>, <span class="string">"shell"</span>));</span><br></pre></td></tr></table></figure></p>
+<h4 id="正式环境模式"><a href="#正式环境模式" class="headerlink" title="正式环境模式"></a>正式环境模式</h4><p><strong>release.js</strong> =&gt; <strong>gulp r</strong> 即正式环境模式<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> replace = <span class="built_in">require</span>(<span class="string">"gulp-replace"</span>);</span><br><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line"><span class="comment">// release 版本， 更新服务端接口地址和版本号</span></span><br><span class="line">gulp.task(<span class="string">'release_server_url'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>/framework.min.js`</span>)</span><br><span class="line">    <span class="comment">// release url 修改</span></span><br><span class="line">    .pipe(replace(<span class="regexp">/(idUrl\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>, <span class="string">'$1https://id4.xxx.com/$3'</span>))</span><br><span class="line">    .pipe(replace(<span class="regexp">/(payUrl\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>, <span class="string">'$1https://pay.xxx.com/$3'</span>))</span><br><span class="line">    .pipe(replace(<span class="regexp">/(serverUrl\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>, <span class="string">'$1https://srv3.xxx.com/$3'</span>))</span><br><span class="line">    <span class="comment">// api 版本修改</span></span><br><span class="line">    .pipe(replace(<span class="regexp">/(apiVersion\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>, <span class="string">`$1<span class="subst">$&#123;global.config.apiVersion&#125;</span>$3`</span>))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>`</span>));</span><br><span class="line">&#125;);</span><br><span class="line">gulp.task(<span class="string">'r'</span>, seq(<span class="string">"build"</span>, <span class="string">"release_server_url"</span>, <span class="string">"zip"</span>));</span><br></pre></td></tr></table></figure></p>
+<h4 id="正式环境模式，但是域名有变，即预发布环境"><a href="#正式环境模式，但是域名有变，即预发布环境" class="headerlink" title="正式环境模式，但是域名有变，即预发布环境"></a>正式环境模式，但是域名有变，即预发布环境</h4><p><strong>test_release.js</strong> =&gt; <strong>gulp n</strong> 即正式环境模式，但是域名有变，即预发布环境（测试服务器上的域名<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> run_seq = <span class="built_in">require</span>(<span class="string">"run-sequence"</span>);</span><br><span class="line"><span class="comment">// 开发模式</span></span><br><span class="line">gulp.task(<span class="string">'n'</span>, cb =&gt; &#123;    </span><br><span class="line">    global.config.static_base_url = global.config.static_base_url.replace(<span class="string">'//'</span>, <span class="string">'//new-'</span>);    </span><br><span class="line">    run_seq(<span class="string">"r"</span>, cb);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h4 id="正式环境模式，即预发布环境-并上传到测试服务器并解压到对应目录"><a href="#正式环境模式，即预发布环境-并上传到测试服务器并解压到对应目录" class="headerlink" title="正式环境模式，即预发布环境, 并上传到测试服务器并解压到对应目录"></a>正式环境模式，即预发布环境, 并上传到测试服务器并解压到对应目录</h4><p><strong>test_release_upload.js</strong> =&gt; <strong>gulp nu</strong> 即正式环境模式，即预发布环境, 并上传到测试服务器并解压到对应目录<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line"><span class="comment">// 正式地址的预发布环境, 并上传到服务器并解压</span></span><br><span class="line">gulp.task(<span class="string">'nu'</span>, seq(<span class="string">"n"</span>, <span class="string">"upload"</span>, <span class="string">"shell"</span>));</span><br></pre></td></tr></table></figure></p>
+<h3 id="构建完之后的任务"><a href="#构建完之后的任务" class="headerlink" title="构建完之后的任务"></a>构建完之后的任务</h3><p>以上这5个任务，除了打包时的处理build任务，之外，还有3个任务是打包后的逻辑</p>
+<h4 id="打包目录打成zip包"><a href="#打包目录打成zip包" class="headerlink" title="打包目录打成zip包"></a>打包目录打成zip包</h4><p>将打包目录打成zip包， 即 <strong>gulp zip</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> zip = <span class="built_in">require</span>(<span class="string">'gulp-zip'</span>);</span><br><span class="line"><span class="comment">// 打成zip包</span></span><br><span class="line">gulp.task(<span class="string">'zip'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> task_name = <span class="keyword">this</span>.seq.slice(<span class="number">-1</span>)[<span class="number">0</span>] === <span class="string">"r"</span> ? <span class="string">"release"</span> : <span class="string">"test"</span>;</span><br><span class="line">    global.config.zipName = <span class="string">`<span class="subst">$&#123;global.config.static_base_url.replace(<span class="regexp">/\//g</span>,<span class="string">""</span>).replace(<span class="regexp">/\./g</span>,<span class="string">"_"</span>)&#125;</span>_<span class="subst">$&#123;global.config.version&#125;</span>_<span class="subst">$&#123;task_name&#125;</span>.zip`</span>;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/**`</span>)</span><br><span class="line">        .pipe(zip(global.config.zipName))</span><br><span class="line">        .pipe(gulp.dest(<span class="string">'.'</span>));&#125;);</span><br></pre></td></tr></table></figure></p>
+<h4 id="将zip上传到对应的服务器"><a href="#将zip上传到对应的服务器" class="headerlink" title="将zip上传到对应的服务器"></a>将zip上传到对应的服务器</h4><p>将打成的zip，上传到对应的服务器 <strong>gulp upload</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">var</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> scp = <span class="built_in">require</span>(<span class="string">'gulp-scp2'</span>);</span><br><span class="line"><span class="comment">// 上传到测试服务器 （支持 test-www 和 new-www）</span></span><br><span class="line">gulp.task(<span class="string">'upload'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">var</span> auth;</span><br><span class="line">    <span class="keyword">if</span> (fs.existsSync(path.join(__dirname, <span class="string">'../scp.auth.js'</span>))) &#123;</span><br><span class="line">        auth = <span class="built_in">require</span>(<span class="string">'../scp.auth.js'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!auth) &#123;</span><br><span class="line">        <span class="comment">// 要上传到服务器，需要提供 .ssh 文件做身份验证。</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'要上传到服务器，需要提供 .ssh 文件做身份验证。'</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    global.config.server_folder_path = <span class="string">`/data/server/wwwroot/<span class="subst">$&#123;global.config.static_base_url.replace(<span class="string">'//'</span>, <span class="string">''</span>)&#125;</span>/_history`</span>;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(global.config.zipName)</span><br><span class="line">        .pipe(scp(&#123;</span><br><span class="line">            host: <span class="string">'59.xx.13.xx'</span>,</span><br><span class="line">            username: auth.username,</span><br><span class="line">            privateKey: auth.privateKey,</span><br><span class="line">            dest: global.config.server_folder_path</span><br><span class="line">        &#125;)).on(<span class="string">'error'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">err</span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(err);</span><br><span class="line">        &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h4 id="将zip包解压缩到指定的目录-shell-任务"><a href="#将zip包解压缩到指定的目录-shell-任务" class="headerlink" title="将zip包解压缩到指定的目录 shell 任务"></a>将zip包解压缩到指定的目录 shell 任务</h4><p>最后是将上传到服务器的zip包进行解压缩到指定的目录 shell 任务 <strong>gulp shell</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">var</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">var</span> SSH2Shell = <span class="built_in">require</span> (<span class="string">'ssh2shell'</span>);</span><br><span class="line"><span class="comment">// 上传到测试服务器后，进行一些shell操作，解压这个上传的zip包</span></span><br><span class="line">gulp.task(<span class="string">'shell'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">var</span> auth;</span><br><span class="line">    <span class="keyword">if</span> (fs.existsSync(path.join(__dirname, <span class="string">'../scp.auth.js'</span>))) &#123;</span><br><span class="line">        auth = <span class="built_in">require</span>(<span class="string">'../scp.auth.js'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!auth) &#123;</span><br><span class="line">        <span class="comment">// 要上传到服务器，需要提供 .ssh 文件做身份验证。</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'要上传到服务器，需要提供 .ssh 文件做身份验证。'</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> host = &#123;</span><br><span class="line">        server: &#123;</span><br><span class="line">            host: <span class="string">'59.xx.13.xx'</span>,</span><br><span class="line">            userName: auth.username,</span><br><span class="line">            privateKey: auth.privateKey</span><br><span class="line">        &#125;,</span><br><span class="line">        commands: [<span class="string">`cd <span class="subst">$&#123;global.config.server_folder_path&#125;</span>`</span>, <span class="string">`unzip -o -d .. <span class="subst">$&#123;global.config.zipName&#125;</span>`</span>]</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">//Create a new instance passing in the host object</span></span><br><span class="line">    <span class="keyword">var</span> SSH = <span class="keyword">new</span> SSH2Shell(host);</span><br><span class="line">    <span class="comment">//Use a callback function to process the full session text</span></span><br><span class="line">    <span class="keyword">var</span> callback = <span class="function"><span class="keyword">function</span>(<span class="params">sessionText</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(sessionText);</span><br><span class="line">        cb();</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">//Start the process</span></span><br><span class="line">    SSH.connect(callback);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>就执行两个指令，一个是定位到对应目录的history目录，然后解压对应的zip包到上级目录。<br>其中-o指令是忽略提示直接覆盖文件， -d 是指定要解压后的目录，这里就是上级目录 ..<br>而且 <strong>scp.auth.js</strong> 是关于服务器权限的认证文件，大约长这样：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">    username: <span class="string">'foo'</span>,</span><br><span class="line">    privateKey: fs.readFileSync(<span class="string">'F:/xxx/id_rsa'</span>)</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h3 id="真正负责打包的build任务"><a href="#真正负责打包的build任务" class="headerlink" title="真正负责打包的build任务"></a>真正负责打包的build任务</h3><p>真正打包的处理任务是 build 任务： <strong>tasks/build.js</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line">gulp.task(<span class="string">'build'</span>, seq(<span class="string">"clean"</span>, <span class="string">"less"</span>, <span class="string">"lang"</span>, <span class="string">"img"</span>, <span class="string">"useref"</span>, <span class="string">"tpl"</span>, <span class="string">"html"</span>, <span class="string">"i18n"</span>));</span><br></pre></td></tr></table></figure></p>
+<p>上面有八个任务，即把打包分成8个步骤：</p>
+<h4 id="1-clean-任务，即先清理上次打包的残渣"><a href="#1-clean-任务，即先清理上次打包的残渣" class="headerlink" title="1 clean 任务，即先清理上次打包的残渣"></a>1 clean 任务，即先清理上次打包的残渣</h4><p><strong>tasks/clean.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> del = <span class="built_in">require</span>(<span class="string">'del'</span>);</span><br><span class="line"><span class="comment">// 清理</span></span><br><span class="line">gulp.task(<span class="string">'clean'</span>, cb =&gt; &#123;    </span><br><span class="line">    <span class="keyword">return</span> del(global.config.delFileList, cb);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-less-任务，即将workspace里面的less编译成css"><a href="#2-less-任务，即将workspace里面的less编译成css" class="headerlink" title="2 less 任务，即将workspace里面的less编译成css"></a>2 less 任务，即将workspace里面的less编译成css</h4><p><strong>tasks/less.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> less = <span class="built_in">require</span>(<span class="string">'gulp-less'</span>);</span><br><span class="line">gulp.task(<span class="string">'less'</span>, () =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.workDir&#125;</span>/<span class="subst">$&#123;global.config.lessDir&#125;</span>/*.less`</span>)</span><br><span class="line">        .pipe(less())</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.workDir&#125;</span>/<span class="subst">$&#123;global.config.cssDir&#125;</span>`</span>));&#125;);</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-lang-任务，语言文件处理"><a href="#3-lang-任务，语言文件处理" class="headerlink" title="3 lang 任务，语言文件处理"></a>3 lang 任务，语言文件处理</h4><p>即将workspace里面的lang目录放到build/<version>目录里面, <strong>tasks/lang.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> uglify = <span class="built_in">require</span>(<span class="string">'gulp-uglify'</span>);</span><br><span class="line"><span class="comment">// lang 处理, 主要是复制</span></span><br><span class="line">gulp.task(<span class="string">'lang'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.workDir&#125;</span>/<span class="subst">$&#123;global.config.langDir&#125;</span>/*.js`</span>)</span><br><span class="line">        .pipe(uglify(&#123;</span><br><span class="line">            compress: &#123; <span class="attr">drop_console</span>: <span class="literal">true</span> &#125;</span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.langDir&#125;</span>`</span>));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></version></p>
+<h4 id="4-img-任务，图片处理"><a href="#4-img-任务，图片处理" class="headerlink" title="4 img 任务，图片处理"></a>4 img 任务，图片处理</h4><p>即将workspace里面的img目录放到build/<version>目录里面, <strong>tasks/img.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="comment">// 针对图片进行处理，这边只进行文件迁移</span></span><br><span class="line">gulp.task(<span class="string">'img'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.workDir&#125;</span>/<span class="subst">$&#123;global.config.imgDir&#125;</span>/**/*`</span>)</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.imgDir&#125;</span>`</span>))</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></version></p>
+<h4 id="5-useref-任务，针对html进行处理"><a href="#5-useref-任务，针对html进行处理" class="headerlink" title="5 useref 任务，针对html进行处理"></a>5 useref 任务，针对html进行处理</h4><p>即对html文件引用的js和css进行压缩和合并(相当于grunt打包的usemin，不过更强大), <strong>tasks/useref.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> gulpIf = <span class="built_in">require</span>(<span class="string">'gulp-if'</span>);</span><br><span class="line"><span class="keyword">var</span> minifyCSS = <span class="built_in">require</span>(<span class="string">'gulp-minify-css'</span>);</span><br><span class="line"><span class="keyword">var</span> uglify = <span class="built_in">require</span>(<span class="string">'gulp-uglify'</span>);</span><br><span class="line"><span class="keyword">var</span> autoprefixer = <span class="built_in">require</span>(<span class="string">'gulp-autoprefixer'</span>);</span><br><span class="line"><span class="keyword">var</span> useref = <span class="built_in">require</span>(<span class="string">'gulp-useref'</span>);</span><br><span class="line"><span class="comment">// 针对html进行处理，即对html文件进行压缩和合并</span></span><br><span class="line">gulp.task(<span class="string">'useref'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(global.config.htmlFiles.map(<span class="function"><span class="params">item</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">`<span class="subst">$&#123;global.config.workDir&#125;</span>/<span class="subst">$&#123;item&#125;</span>`</span></span><br><span class="line">    &#125;), &#123;<span class="attr">base</span>: <span class="string">'./html'</span>&#125;)</span><br><span class="line">        .pipe(useref(&#123;<span class="attr">searchPath</span>: <span class="string">"."</span>&#125;))</span><br><span class="line">        <span class="comment">// Minifies only if it's a CSS file</span></span><br><span class="line">        .pipe(gulpIf(<span class="string">'*.css'</span>, minifyCSS()))</span><br><span class="line">        .pipe(gulpIf(<span class="string">'*.css'</span>, autoprefixer()))</span><br><span class="line">        <span class="comment">// Uglifies only if it's a Javascript file</span></span><br><span class="line">        .pipe(gulpIf(<span class="string">'*.js'</span>, uglify()))</span><br><span class="line">        <span class="comment">// 这时候生成的html文件会在 build/&lt;version&gt;/workspace/html 里面，这个是临时的，后面要去掉</span></span><br><span class="line">        .pipe(gulp.dest(global.config.buildVersionDir))</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h4 id="6-tpl-任务，针对模板处理"><a href="#6-tpl-任务，针对模板处理" class="headerlink" title="6 tpl 任务，针对模板处理"></a>6 tpl 任务，针对模板处理</h4><p>先把html模板编译成 jst 模板，然后读取js，将jst模板的内容合并到js文件的前面, <strong>tasks/tpl.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> jst = <span class="built_in">require</span>(<span class="string">"gulp-jst"</span>);</span><br><span class="line"><span class="keyword">var</span> uglify = <span class="built_in">require</span>(<span class="string">'gulp-uglify'</span>);</span><br><span class="line"><span class="keyword">var</span> concat_jst = <span class="built_in">require</span>(<span class="string">"gulp-concat-jst"</span>);</span><br><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line"><span class="keyword">var</span> del = <span class="built_in">require</span>(<span class="string">'del'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这边针对html 模板进行处理，总共分两步</span></span><br><span class="line"><span class="comment">// 第一是将html模板编译成 jst 模板</span></span><br><span class="line"><span class="comment">// 然后读取js，将jst模板的内容合并到js文件的前面</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 第一是将html模板编译成 jst 模板</span></span><br><span class="line">gulp.task(<span class="string">'jst'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.workDir&#125;</span>/<span class="subst">$&#123;global.config.tplDir&#125;</span>/**/*.html`</span>)</span><br><span class="line">        .pipe(jst())</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/jst`</span>))</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 读取js文件，然后将需要的模板放置到js里面</span></span><br><span class="line">gulp.task(<span class="string">'concat_jst'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>/*.js`</span>)</span><br><span class="line">        .pipe(concat_jst(&#123;</span><br><span class="line">            jst_path: <span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/jst/`</span>,</span><br><span class="line">            jst_ext: <span class="string">".js"</span>,</span><br><span class="line">            pattern: <span class="regexp">/getTemplate\s*\(\s*[\"']([\w/-]+)[\"']\s*\s*/g</span>,</span><br><span class="line">            replace_text: <span class="string">"$1"</span>,</span><br><span class="line">            replace: <span class="function"><span class="keyword">function</span>(<span class="params">jst, tmpFile</span>)</span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="string">`this["ajst"] = this["ajst"] || &#123;&#125;;this["ajst"]["<span class="subst">$&#123;tmpFile&#125;</span>.html"] = <span class="subst">$&#123;jst&#125;</span>`</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(uglify())</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>`</span>))</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 去掉生成的 jst 的临时文件夹</span></span><br><span class="line">gulp.task(<span class="string">'del_jst'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> del(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/jst/`</span>, cb);</span><br><span class="line">&#125;);</span><br><span class="line">gulp.task(<span class="string">'tpl'</span>, seq(<span class="string">"jst"</span>, <span class="string">"concat_jst"</span>, <span class="string">"del_jst"</span>));</span><br></pre></td></tr></table></figure></p>
+<h4 id="7-html-任务，针对html文件进行处理"><a href="#7-html-任务，针对html文件进行处理" class="headerlink" title="7 html 任务，针对html文件进行处理"></a>7 html 任务，针对html文件进行处理</h4><p>加上版本号和绝对地址，修改打包后的模板地址，和语言包的路径, <strong>tasks/html.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> uglify = <span class="built_in">require</span>(<span class="string">'gulp-uglify'</span>);</span><br><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line"><span class="keyword">var</span> del = <span class="built_in">require</span>(<span class="string">'del'</span>);</span><br><span class="line"><span class="keyword">var</span> replace = <span class="built_in">require</span>(<span class="string">"gulp-replace"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// html 处理</span></span><br><span class="line"><span class="comment">// 之前在执行 useref 任务的时候，有在 build 目录下，生成 build/workspace/html 目录， 第一步先把这个html目录提到 build/&lt;version&gt;</span></span><br><span class="line">gulp.task(<span class="string">'html_move'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/<span class="subst">$&#123;global.config.workDir&#125;</span>/<span class="subst">$&#123;global.config.htmlDir&#125;</span>/**/*.html`</span>)</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.htmlDir&#125;</span>`</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 去掉那个临时目录</span></span><br><span class="line">gulp.task(<span class="string">'del_tmp_html'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> del(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/<span class="subst">$&#123;global.config.workDir&#125;</span>`</span>, cb);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 给提出来的html文件，加上版本号，并设置绝对地址(包括html文件里面的图片，url，等等都要)</span></span><br><span class="line">gulp.task(<span class="string">'html_replace_src_url'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span>  gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.htmlDir&#125;</span>/**/*.html`</span>)</span><br><span class="line">        .pipe(replace(global.config.REG_EXP_RESOURCE, <span class="string">`$1/<span class="subst">$&#123;global.config.version&#125;</span>/$3$7`</span>))</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.htmlDir&#125;</span>`</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 修改打包后的模板地址，和语言包的路径</span></span><br><span class="line">gulp.task(<span class="string">'html_replace_base_url'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span>  gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>/framework.min.js`</span>)</span><br><span class="line">        <span class="comment">// 模版地址修改</span></span><br><span class="line">        .pipe(replace(<span class="regexp">/(util\.setTemplateBaseUrl\(('|")).*?(('|")\))/</span>, <span class="string">`$1/<span class="subst">$&#123;global.config.version&#125;</span>$3`</span>))</span><br><span class="line">        <span class="comment">// 语言文件地址修改</span></span><br><span class="line">        .pipe(replace(<span class="regexp">/(buildLangURl\s*:\s*)('|")(\S*?)('|"),/</span>, <span class="string">`$1$2/<span class="subst">$&#123;global.config.version&#125;</span>/lang/$4,`</span>))</span><br><span class="line">        <span class="comment">// 修改资源路径</span></span><br><span class="line">        .pipe(replace(<span class="regexp">/(resourceUrl\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>, <span class="string">`$1/<span class="subst">$&#123;global.config.version&#125;</span>/$3`</span>))</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>`</span>));</span><br><span class="line">&#125;);</span><br><span class="line">gulp.task(<span class="string">'html'</span>, seq(<span class="string">"html_move"</span>, <span class="string">"del_tmp_html"</span>, <span class="string">"html_replace_src_url"</span>, <span class="string">"html_replace_base_url"</span>));</span><br></pre></td></tr></table></figure></p>
+<h4 id="8-i18n任务，主要是多语言静态化页面编译"><a href="#8-i18n任务，主要是多语言静态化页面编译" class="headerlink" title="8 i18n任务，主要是多语言静态化页面编译"></a>8 i18n任务，主要是多语言静态化页面编译</h4><p><strong>tasks/i18n.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> gulp = <span class="built_in">require</span>(<span class="string">'gulp'</span>);</span><br><span class="line"><span class="keyword">var</span> path = <span class="built_in">require</span>(<span class="string">"path"</span>);</span><br><span class="line"><span class="keyword">var</span> staticfy = <span class="built_in">require</span>(<span class="string">'gulp-staticfy'</span>);</span><br><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line"><span class="keyword">var</span> _ = <span class="built_in">require</span>(<span class="string">"lodash"</span>);</span><br><span class="line"><span class="keyword">var</span> del = <span class="built_in">require</span>(<span class="string">'del'</span>);</span><br><span class="line"><span class="keyword">var</span> replace = <span class="built_in">require</span>(<span class="string">"gulp-replace"</span>);</span><br><span class="line"><span class="keyword">var</span> htmlmin = <span class="built_in">require</span>(<span class="string">"gulp-htmlmin"</span>);</span><br><span class="line"><span class="comment">// 这边还要有个默认的(默认都把英语加上去)</span></span><br><span class="line"><span class="keyword">var</span> langArr = _.keys(global.config.supportLangs);</span><br><span class="line">langArr.indexOf(<span class="string">"en"</span>) === <span class="number">0</span> &amp;&amp; langArr.push(<span class="string">"en"</span>);</span><br><span class="line"><span class="keyword">var</span> langTaskListMap = &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// i18n 处理，主要是多语言静态化页面编译</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 首先要把tpl模板拷贝过来</span></span><br><span class="line">gulp.task(<span class="string">'move_tpl'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.workDir&#125;</span>/<span class="subst">$&#123;global.config.tplDir&#125;</span>/**/*`</span>)</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.tplDir&#125;</span>`</span>))</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 批量注册任务</span></span><br><span class="line">langArr.forEach(<span class="function"><span class="params">lang</span> =&gt;</span> &#123;</span><br><span class="line">    langTaskListMap[<span class="string">`<span class="subst">$&#123;lang&#125;</span>-staticfy`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;lang&#125;</span>-staticfy`</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 这边要指定路径，dest才会复制目录结构</span></span><br><span class="line">        <span class="comment">// 这边一定要return，不然就会变成异步，而不会同步</span></span><br><span class="line">        <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.htmlDir&#125;</span>/**/*.html`</span>)</span><br><span class="line">            .pipe(staticfy(&#123;</span><br><span class="line">                server_url: path.resolve(global.config.buildDir),</span><br><span class="line">                query_string: <span class="string">`lang=<span class="subst">$&#123;lang&#125;</span>`</span></span><br><span class="line">            &#125;))</span><br><span class="line">            <span class="comment">// 接下来就是各种替换</span></span><br><span class="line">            <span class="comment">// 预编译要跟进对应的语言，对 a 标签的相对路径进行替换</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/(&lt;a.*?href=['"])(\/.*?)(['"])/gi</span>, <span class="string">`$1/<span class="subst">$&#123;lang&#125;</span>$2$3`</span>))</span><br><span class="line">            <span class="comment">// 消除 jsonp 请求产生的 script 标签</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;script.*async="".*?&lt;\/script&gt;/g</span>, <span class="string">''</span>))</span><br><span class="line">            <span class="comment">// 消除 首页加载Google字体请求产生的link标签</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;link.*http:\/\/fonts.googleapis.com.*?&gt;/</span>, <span class="string">''</span>))</span><br><span class="line">            <span class="comment">// 清理首页的图片，重设为隐藏</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/(&lt;img class="item-preload.*)style="display:\s*inline.*"(&gt;)/g</span>, <span class="string">'$1$2'</span>))</span><br><span class="line">            <span class="comment">// 清理邮件验证页，重设为隐藏</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/"(item-verify-send)"/</span>, <span class="string">'"$1 i-hide"'</span>))</span><br><span class="line">            <span class="comment">// signin 重置链接地址</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/(href=".*signin\/)\?.*(")/</span>, <span class="string">'$1$2'</span>))</span><br><span class="line">            <span class="comment">// 重置 header 右侧的 item-actions 和 item-profile 的状态</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/"(item-actions|item-profile)"/</span>, <span class="string">'"$1 i-hide"'</span>))</span><br><span class="line">            <span class="comment">// 去掉指定的要删除的脚本</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;script.*id="removeScript".*?&lt;\/script&gt;/g</span>, <span class="string">''</span>))</span><br><span class="line">            <span class="comment">// 去掉自动下载的iframe中的url</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/(&lt;iframe id="downloadFrame".*?)(src=")(\S+)(".*&gt;&lt;\/iframe&gt;)/g</span>, <span class="string">'$1$2$4'</span>))</span><br><span class="line">            <span class="comment">// 去掉首页 Facebook twitter g+ 的 addthis widget 中间代码</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;div.*id="_atssh".*?&lt;\/iframe&gt;&lt;\/div&gt;/g</span>, <span class="string">''</span>))</span><br><span class="line">            <span class="comment">// 这条规则要特别注意(用于首页清除addthis的样式)，很容易请到别的页面，所以尽量不要在页面内加上style标签</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;style.*type="text\/css".*?&lt;\/style&gt;&lt;\/head&gt;/g</span>, <span class="string">'&lt;/head&gt;'</span>))</span><br><span class="line">            <span class="comment">// 最后把对应的语言文件再加到里面去</span></span><br><span class="line">            .pipe(replace(<span class="regexp">/&lt;\/head&gt;/</span>, <span class="string">`&lt;script src="/<span class="subst">$&#123;global.config.version&#125;</span>/lang/<span class="subst">$&#123;global.config.supportLangs[lang].code || lang&#125;</span>.js"&gt;&lt;/script&gt;&lt;/head&gt;`</span>))</span><br><span class="line">            .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/<span class="subst">$&#123;lang&#125;</span>`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来把 英语 的文件复制一份，往上提一份，当做默认路径的语言</span></span><br><span class="line">gulp.task(<span class="string">'copy_and_move_en'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/en/**/*`</span>)</span><br><span class="line">        .pipe(gulp.dest(global.config.buildDir))</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 预编译之后，把debug模式去掉</span></span><br><span class="line">gulp.task(<span class="string">'change_debug_mode'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span>  gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>/framework.min.js`</span>)</span><br><span class="line">        <span class="comment">// 模版地址修改</span></span><br><span class="line">        .pipe(replace(<span class="regexp">/(Airdroid_isDebug\s*:\s*['"]*)(.*?)(['"]*[,;\s])/</span>, <span class="string">'$1false$3'</span>))</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.jsDir&#125;</span>`</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 如果都已经静态化编译成功了，那么就把原来的那一份html目录 和 tpl 目录去掉</span></span><br><span class="line">gulp.task(<span class="string">'del_staticfy_file'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> del([</span><br><span class="line">        <span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.htmlDir&#125;</span>`</span>,</span><br><span class="line">        <span class="string">`<span class="subst">$&#123;global.config.buildVersionDir&#125;</span>/<span class="subst">$&#123;global.config.tplDir&#125;</span>`</span></span><br><span class="line">    ], cb);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来把html进行一些压缩优化</span></span><br><span class="line">gulp.task(<span class="string">'htmlmin'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/**/*.html`</span>)</span><br><span class="line">        .pipe(htmlmin(&#123;</span><br><span class="line">            <span class="comment">// 去掉空格，压缩一行显示</span></span><br><span class="line">            <span class="comment">//collapseWhitespace: true,</span></span><br><span class="line">            <span class="comment">// 去掉注释</span></span><br><span class="line">            removeComments: <span class="literal">true</span></span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(gulp.dest(global.config.buildDir));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来遍历 html 文件，为资源添加完整的 静态地址，包括图片</span></span><br><span class="line">gulp.task(<span class="string">'release_static_url'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span>  gulp.src(<span class="string">`<span class="subst">$&#123;global.config.buildDir&#125;</span>/**/*.html`</span>)</span><br><span class="line">        <span class="comment">// $3 匹配的是资源路径</span></span><br><span class="line">        .pipe(replace(global.config.REG_EXP_RESOURCE, <span class="string">`$1<span class="subst">$&#123;global.config.static_base_url&#125;</span>/<span class="subst">$&#123;global.config.version&#125;</span>/$3$7`</span>))</span><br><span class="line">        <span class="comment">// $1 匹配的是引号</span></span><br><span class="line">        <span class="comment">// $3 匹配的是资源路径</span></span><br><span class="line">        .pipe(replace(<span class="keyword">new</span> <span class="built_in">RegExp</span>(<span class="string">`('|\")(\\.&#123;0,2&#125;\/)+((<span class="subst">$&#123;global.config.langDir&#125;</span>)\/*.*)('|\")`</span>, <span class="string">'g'</span>), <span class="string">`$1<span class="subst">$&#123;global.config.static_base_url&#125;</span>/<span class="subst">$&#123;global.config.version&#125;</span>/$3$1`</span>))</span><br><span class="line">        .pipe(gulp.dest(global.config.buildDir));</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'staticfy'</span>, seq.apply(<span class="literal">null</span>,_.keys(langTaskListMap)));</span><br><span class="line">gulp.task(<span class="string">'i18n'</span>, seq(<span class="string">"move_tpl"</span>, <span class="string">"staticfy"</span>, <span class="string">"copy_and_move_en"</span>, <span class="string">"change_debug_mode"</span>, <span class="string">"del_staticfy_file"</span>, <span class="string">"htmlmin"</span>, <span class="string">"release_static_url"</span>));</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>所以大概改成 gulp 构建之后就是这样了，后面测试了一下，无论是整个结构还是打包的速度，都比grunt构建还要快，而且更容易维护，因为他是一个一个任务分开的，不像grunt那样全部写在一块。每次看代码，都要找半天。<br>当然，这个虽然已经可以work了，并且测了一下，可以正常打包，并且会自动上传到服务器，并进行解压覆盖了，看起来非常完美 o(<em>￣︶￣</em>)o<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">[14:25:44] Starting &apos;d&apos;...</span><br><span class="line">[14:25:44] Starting &apos;build&apos;...</span><br><span class="line">[14:25:44] Starting &apos;clean&apos;...</span><br><span class="line">[14:25:45] Finished &apos;clean&apos; after 306 ms</span><br><span class="line">[14:25:45] Starting &apos;less&apos;...</span><br><span class="line">[14:25:47] Finished &apos;less&apos; after 2.5 s</span><br><span class="line">[14:25:47] Starting &apos;lang&apos;...</span><br><span class="line">[14:25:51] Finished &apos;lang&apos; after 4.07 s</span><br><span class="line">[14:25:51] Starting &apos;img&apos;...</span><br><span class="line">[14:25:51] Finished &apos;img&apos; after 236 ms</span><br><span class="line">[14:25:51] Starting &apos;font&apos;...</span><br><span class="line">[14:25:51] Finished &apos;font&apos; after 6.77 ms</span><br><span class="line">[14:25:51] Starting &apos;useref&apos;...</span><br><span class="line">[14:29:07] Finished &apos;useref&apos; after 3.25 min</span><br><span class="line">[14:29:07] Starting &apos;tpl&apos;...</span><br><span class="line">[14:29:07] Starting &apos;jst&apos;...</span><br><span class="line">[14:29:07] Finished &apos;jst&apos; after 223 ms</span><br><span class="line">[14:29:07] Starting &apos;concat_jst&apos;...</span><br><span class="line">[14:29:20] Finished &apos;concat_jst&apos; after 13 s</span><br><span class="line">[14:29:20] Starting &apos;del_jst&apos;...</span><br><span class="line">[14:29:20] Finished &apos;del_jst&apos; after 61 ms</span><br><span class="line">[14:29:20] Finished &apos;tpl&apos; after 13 s</span><br><span class="line">[14:29:20] Starting &apos;html&apos;...</span><br><span class="line">[14:29:20] Starting &apos;html_move&apos;...</span><br><span class="line">[14:29:20] Finished &apos;html_move&apos; after 54 ms</span><br><span class="line">[14:29:20] Starting &apos;del_tmp_html&apos;...</span><br><span class="line">[14:29:20] Finished &apos;del_tmp_html&apos; after 16 ms</span><br><span class="line">[14:29:20] Starting &apos;html_replace_src_url&apos;...</span><br><span class="line">[14:29:20] Finished &apos;html_replace_src_url&apos; after 53 ms</span><br><span class="line">[14:29:20] Starting &apos;html_replace_base_url&apos;...</span><br><span class="line">[14:29:20] Finished &apos;html_replace_base_url&apos; after 15 ms</span><br><span class="line">[14:29:20] Finished &apos;html&apos; after 141 ms</span><br><span class="line">[14:29:20] Starting &apos;i18n&apos;...</span><br><span class="line">[14:29:20] Starting &apos;move_tpl&apos;...</span><br><span class="line">[14:29:20] Finished &apos;move_tpl&apos; after 138 ms</span><br><span class="line">[14:29:20] Starting &apos;staticfy&apos;...</span><br><span class="line">[14:29:20] Starting &apos;en-staticfy&apos;...</span><br><span class="line">201809131425/html/404.html loading ...</span><br><span class="line">201809131425/html/aboutUs.html loading ...</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2018/09/12/www-history-6/2.png" alt="1"><br>但是这个其实不是最终版本，后面还会遇到一些问题。</p>
+<hr>
+<p>系列文章<br><a href="/2018/09/12/www-history-1/" title="官网构建优化流程(1) - 简介">官网构建优化流程(1) - 简介</a><br><a href="/2018/09/12/www-history-2/" title="官网构建优化流程(2) - 旧版grunt打包构建流程">官网构建优化流程(2) - 旧版grunt打包构建流程</a><br><a href="/2018/09/12/www-history-3/" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy</a><br><a href="/2018/09/12/www-history-4/" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy</a><br><a href="/2018/09/12/www-history-5/" title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js</a><br><a href="/2018/09/12/www-history-6/" title="官网构建优化流程(6) - 把原先的grunt换成gulp构建">官网构建优化流程(6) - 把原先的grunt换成gulp构建</a><br><a href="/2018/09/13/www-history-7/" title="官网构建优化流程(7) - 官网的多语言跳转规则">官网构建优化流程(7) - 官网的多语言跳转规则</a><br><a href="/2018/09/13/www-history-8/" title="官网构建优化流程(8) - gulp打包构建在ie8会报错">官网构建优化流程(8) - gulp打包构建在ie8会报错</a><br><a href="/2018/09/13/www-history-9/" title="官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题">官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题</a><br><a href="/2018/09/13/www-history-10/" title="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码</a><br><a href="/2018/09/13/www-history-11/" title="官网构建优化流程(11) - 部署转为用Jenkins自动化部署">官网构建优化流程(11) - 部署转为用Jenkins自动化部署</a><br><a href="/2018/09/13/www-history-12/" title="官网构建优化流程(12) - 优化加载速度，资源分开存放">官网构建优化流程(12) - 优化加载速度，资源分开存放</a><br><a href="/2018/09/13/www-history-13/" title="官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS">官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/09/12/www-history-6/" title="官网构建优化流程(6) - 把原先的grunt换成gulp构建">http://kebingzao.com/2018/09/12/www-history-6/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/gulp/" rel="tag"># gulp</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/12/www-history-5/" rel="next" title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">
+                <i class="fa fa-chevron-left"></i> 官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/13/www-history-7/" rel="prev" title="官网构建优化流程(7) - 官网的多语言跳转规则">
+                官网构建优化流程(7) - 官网的多语言跳转规则 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">84</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析任务"><span class="nav-number">2.</span> <span class="nav-text">分析任务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#index-js"><span class="nav-number">2.1.</span> <span class="nav-text">index.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#config-js"><span class="nav-number">2.2.</span> <span class="nav-text">config.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不同环境打包任务"><span class="nav-number">2.3.</span> <span class="nav-text">不同环境打包任务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#测试环境模式"><span class="nav-number">2.3.1.</span> <span class="nav-text">测试环境模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#测试环境模式，并且上传到测试服务器并解压到对应目录"><span class="nav-number">2.3.2.</span> <span class="nav-text">测试环境模式，并且上传到测试服务器并解压到对应目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#正式环境模式"><span class="nav-number">2.3.3.</span> <span class="nav-text">正式环境模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#正式环境模式，但是域名有变，即预发布环境"><span class="nav-number">2.3.4.</span> <span class="nav-text">正式环境模式，但是域名有变，即预发布环境</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#正式环境模式，即预发布环境-并上传到测试服务器并解压到对应目录"><span class="nav-number">2.3.5.</span> <span class="nav-text">正式环境模式，即预发布环境, 并上传到测试服务器并解压到对应目录</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构建完之后的任务"><span class="nav-number">2.4.</span> <span class="nav-text">构建完之后的任务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#打包目录打成zip包"><span class="nav-number">2.4.1.</span> <span class="nav-text">打包目录打成zip包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将zip上传到对应的服务器"><span class="nav-number">2.4.2.</span> <span class="nav-text">将zip上传到对应的服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#将zip包解压缩到指定的目录-shell-任务"><span class="nav-number">2.4.3.</span> <span class="nav-text">将zip包解压缩到指定的目录 shell 任务</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#真正负责打包的build任务"><span class="nav-number">2.5.</span> <span class="nav-text">真正负责打包的build任务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-clean-任务，即先清理上次打包的残渣"><span class="nav-number">2.5.1.</span> <span class="nav-text">1 clean 任务，即先清理上次打包的残渣</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-less-任务，即将workspace里面的less编译成css"><span class="nav-number">2.5.2.</span> <span class="nav-text">2 less 任务，即将workspace里面的less编译成css</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-lang-任务，语言文件处理"><span class="nav-number">2.5.3.</span> <span class="nav-text">3 lang 任务，语言文件处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-img-任务，图片处理"><span class="nav-number">2.5.4.</span> <span class="nav-text">4 img 任务，图片处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-useref-任务，针对html进行处理"><span class="nav-number">2.5.5.</span> <span class="nav-text">5 useref 任务，针对html进行处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-tpl-任务，针对模板处理"><span class="nav-number">2.5.6.</span> <span class="nav-text">6 tpl 任务，针对模板处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-html-任务，针对html文件进行处理"><span class="nav-number">2.5.7.</span> <span class="nav-text">7 html 任务，针对html文件进行处理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-i18n任务，主要是多语言静态化页面编译"><span class="nav-number">2.5.8.</span> <span class="nav-text">8 i18n任务，主要是多语言静态化页面编译</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/09/12/www-history-6/';
+          this.page.identifier = '2018/09/12/www-history-6/';
+          this.page.title = '官网构建优化流程(6) - 把原先的grunt换成gulp构建';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

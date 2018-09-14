@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,grunt," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 官网构建优化流程(2) - 旧版grunt打包构建流程 可以知道整个的grunt打包流程。其中最大的难点就是 静态页面预编译 这一块有用到了一个插件。这个插件是我们团队那时候自己写的一个grunt插件，专门用来静态页面预编译。github 传送门 grunt-staticfynpm 组件传送门 grunt-staticfy其原理就是先启用一个web server，然后将要静态化的页面，用">
+<meta name="keywords" content="js,grunt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">
+<meta property="og:url" content="http://kebingzao.com/2018/09/12/www-history-3/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 官网构建优化流程(2) - 旧版grunt打包构建流程 可以知道整个的grunt打包流程。其中最大的难点就是 静态页面预编译 这一块有用到了一个插件。这个插件是我们团队那时候自己写的一个grunt插件，专门用来静态页面预编译。github 传送门 grunt-staticfynpm 组件传送门 grunt-staticfy其原理就是先启用一个web server，然后将要静态化的页面，用">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-09-14T15:14:39.892Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">
+<meta name="twitter:description" content="前言通过 官网构建优化流程(2) - 旧版grunt打包构建流程 可以知道整个的grunt打包流程。其中最大的难点就是 静态页面预编译 这一块有用到了一个插件。这个插件是我们团队那时候自己写的一个grunt插件，专门用来静态页面预编译。github 传送门 grunt-staticfynpm 组件传送门 grunt-staticfy其原理就是先启用一个web server，然后将要静态化的页面，用">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/09/12/www-history-3/"/>
+
+
+
+
+
+  <title>官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/09/12/www-history-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-12T19:40:11+08:00">
+                2018-09-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/官网构建优化流程/" itemprop="url" rel="index">
+                    <span itemprop="name">官网构建优化流程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/12/www-history-3/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/12/www-history-3/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/12/www-history-3/" class="leancloud_visitors" data-flag-title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2018/09/12/www-history-2/" title="官网构建优化流程(2) - 旧版grunt打包构建流程">官网构建优化流程(2) - 旧版grunt打包构建流程</a> 可以知道整个的grunt打包流程。其中最大的难点就是 静态页面预编译 这一块有用到了一个插件。<br>这个插件是我们团队那时候自己写的一个grunt插件，专门用来静态页面预编译。<br><a href="https://github.com/AxesTeam/grunt-staticfy" target="_blank" rel="noopener">github 传送门 grunt-staticfy</a><br><a href="https://www.npmjs.com/package/grunt-staticfy" target="_blank" rel="noopener">npm 组件传送门 grunt-staticfy</a><br>其原理就是先启用一个web server，然后将要静态化的页面，用phantomJS 跑起来，最后再把 phantomJS 跑完新的页面保存起来。<br><a id="more"></a></p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><p><strong>staticfy.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">"use strict"</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> (<span class="params">grunt</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> SimpleServer = <span class="built_in">require</span>(<span class="string">'./lib/simpleServer.js'</span>);</span><br><span class="line">    <span class="keyword">var</span> exec = <span class="built_in">require</span>(<span class="string">'child_process'</span>).exec;</span><br><span class="line">    <span class="keyword">var</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line">    <span class="keyword">var</span> _ = <span class="built_in">require</span>(<span class="string">'underscore'</span>);</span><br><span class="line"></span><br><span class="line">    grunt.registerMultiTask(<span class="string">'staticfy'</span>, <span class="string">'Staticfy your website'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> injectScript, options, gruntDone, fakeFiles;</span><br><span class="line"></span><br><span class="line">        gruntDone = grunt.task.current.async();</span><br><span class="line">        <span class="comment">// Merge task-specific and/or target-specific options with these defaults.</span></span><br><span class="line">        options = <span class="keyword">this</span>.options(&#123;</span><br><span class="line">            query_string: <span class="string">''</span>,</span><br><span class="line">            cwd: <span class="string">''</span>,</span><br><span class="line">            inject_script: <span class="string">''</span>,</span><br><span class="line">            onfinish: <span class="function"><span class="keyword">function</span> (<span class="params">str</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> str;</span><br><span class="line">            &#125;,</span><br><span class="line">            wait_request: <span class="string">' '</span></span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Convert to string, it would be used by phantomjs later.</span></span><br><span class="line">        <span class="keyword">if</span> (grunt.util.kindOf(options.inject_script) === <span class="string">'function'</span>) &#123;</span><br><span class="line">            injectScript = options.inject_script</span><br><span class="line">                .toString()</span><br><span class="line">                .replace(<span class="regexp">/(function \(\) \&#123;([\w\W]*?)\&#125;)/</span>, <span class="string">"$2"</span>)</span><br><span class="line">                .trim();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            injectScript = options.inject_script;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        fakeFiles = _.map(<span class="keyword">this</span>.files, <span class="function"><span class="keyword">function</span> (<span class="params">file</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> src, wwwDir, basePath;</span><br><span class="line"></span><br><span class="line">            src = file.src[<span class="number">0</span>];</span><br><span class="line">            wwwDir = options.cwd || path.dirname(src);</span><br><span class="line">            basePath = src.replace(wwwDir, <span class="string">''</span>).replace(<span class="regexp">/(^\/|\/$)/g</span>, <span class="string">''</span>);</span><br><span class="line"></span><br><span class="line">            grunt.log.writeln(<span class="string">'File "'</span> + basePath + <span class="string">'" staticfying.'</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!grunt.file.exists(src)) &#123;</span><br><span class="line">                <span class="comment">// File not exist</span></span><br><span class="line">                grunt.log.warn(<span class="string">'Source file "'</span> + src + <span class="string">'" not found.'</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> url, queryString;</span><br><span class="line">            queryString = options.query_string;</span><br><span class="line">            url = <span class="string">'http://localhost:&#123;&#123;port&#125;&#125;/'</span> + basePath;</span><br><span class="line">            <span class="keyword">if</span> (queryString) url += <span class="string">'?'</span> + queryString;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> &#123;</span><br><span class="line">                src: src,</span><br><span class="line">                dest: file.dest,</span><br><span class="line">                wwwDir: wwwDir,</span><br><span class="line">                url: url</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> fileGroups = _.groupBy(fakeFiles, <span class="string">'wwwDir'</span>);</span><br><span class="line">        <span class="keyword">var</span> restGroupCount = _.size(fileGroups);</span><br><span class="line">        _.each(fileGroups, <span class="function"><span class="keyword">function</span> (<span class="params">files, wwwDir</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Run a server to serve html files, we need a static server so we</span></span><br><span class="line">            <span class="comment">// wouldn't got a crossdomain error if the page use ajax or etc.</span></span><br><span class="line">            SimpleServer.start(wwwDir, <span class="function"><span class="keyword">function</span> (<span class="params">server</span>) </span>&#123;</span><br><span class="line">                <span class="comment">// Replace &#123;&#123;port&#125;&#125; with server.port</span></span><br><span class="line">                files = _.each(files, <span class="function"><span class="keyword">function</span> (<span class="params">opt</span>) </span>&#123;</span><br><span class="line">                    opt.url = opt.url.replace(<span class="string">'&#123;&#123;port&#125;&#125;'</span>, server.port);</span><br><span class="line">                &#125;);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// Call phantom/savePage.js</span></span><br><span class="line">                phantom(files, injectScript, options.wait_request, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                    _.each(files, <span class="function"><span class="keyword">function</span> (<span class="params">file</span>) </span>&#123;</span><br><span class="line">                        <span class="comment">// After phantom, read the dest html file then normalizelf() and apply onfinish() callback.</span></span><br><span class="line">                        <span class="keyword">var</span> str = grunt.file.read(file.dest);</span><br><span class="line">                        str = grunt.util.normalizelf(str);</span><br><span class="line">                        str = options.onfinish(str);</span><br><span class="line">                        grunt.file.write(file.dest, str);</span><br><span class="line">                        grunt.log.writeln(<span class="string">'File "'</span> + file.dest + <span class="string">'" created.'</span>);</span><br><span class="line">                    &#125;);</span><br><span class="line">                    restGroupCount--;</span><br><span class="line">                    <span class="keyword">if</span> (restGroupCount === <span class="number">0</span>) &#123;</span><br><span class="line">                        gruntDone();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">phantom</span>(<span class="params">files, injectScript, waitRequest, callback</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> phantomProgram, cmd;</span><br><span class="line"></span><br><span class="line">        phantomProgram = path.join(__dirname, <span class="string">'/lib/phantom/savePage.js'</span>);</span><br><span class="line"></span><br><span class="line">        cmd = <span class="string">'phantomjs "'</span></span><br><span class="line">        + phantomProgram + <span class="string">'" "'</span></span><br><span class="line">        + <span class="built_in">escape</span>(<span class="built_in">JSON</span>.stringify(files)) + <span class="string">'" "'</span></span><br><span class="line">        + injectScript + <span class="string">'" '</span></span><br><span class="line">        + waitRequest;</span><br><span class="line">        exec(cmd, callback);</span><br><span class="line">        <span class="comment">// grunt.log.writeln(cmd);</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>当用 phantomJS 跑出来之后，再用 <strong>lib/phantom/savePage.js</strong> 去保存这个新的html页面：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> page = <span class="built_in">require</span>(<span class="string">'webpage'</span>).create();</span><br><span class="line"><span class="keyword">var</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">var</span> system = <span class="built_in">require</span>(<span class="string">'system'</span>);</span><br><span class="line"><span class="keyword">var</span> args = system.args;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> file, url, dest;</span><br><span class="line"><span class="keyword">var</span> files = <span class="built_in">unescape</span>(args[<span class="number">1</span>]);</span><br><span class="line"><span class="keyword">var</span> inject_script = args[<span class="number">2</span>] || <span class="string">'no'</span>;</span><br><span class="line"><span class="keyword">var</span> wait_request = args[<span class="number">3</span>] || <span class="string">'no'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'files:'</span>, files);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'eval:'</span>, inject_script);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'wait_request:'</span>, wait_request);</span><br><span class="line"></span><br><span class="line">files = <span class="built_in">JSON</span>.parse(files);</span><br><span class="line"></span><br><span class="line">run();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">run</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    file = files.pop();</span><br><span class="line">    url = file.url;</span><br><span class="line">    dest = file.dest;</span><br><span class="line"></span><br><span class="line">    page.open(url, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (inject_script !== <span class="string">'no'</span>) &#123;</span><br><span class="line">            page.evaluate(<span class="function"><span class="keyword">function</span> (<span class="params">evalStr</span>) </span>&#123;</span><br><span class="line">                <span class="built_in">eval</span>(evalStr);</span><br><span class="line">            &#125;, inject_script);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (wait_request == <span class="string">'no'</span>) writeFile();</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Show page console</span></span><br><span class="line">    page.onConsoleMessage = <span class="function"><span class="keyword">function</span> (<span class="params">msg</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(msg);</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    page.onResourceReceived = <span class="function"><span class="keyword">function</span> (<span class="params">response</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (response.stage === <span class="string">'end'</span> &amp;&amp; wait_request != <span class="string">'no'</span> &amp;&amp; response.url.indexOf(wait_request) &gt; <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="comment">// Timeout 0 for execute page script.</span></span><br><span class="line">            <span class="built_in">console</span>.log(page.content);</span><br><span class="line">            setTimeout(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                writeFile();</span><br><span class="line">            &#125;, <span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">writeFile</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'file created:'</span>, dest);</span><br><span class="line">    fs.write(dest, page.content, <span class="string">'w'</span>);</span><br><span class="line">    <span class="keyword">if</span> (files.length === <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'phantom.exit'</span>);</span><br><span class="line">        phantom.exit();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>而要类似于静态化的页面就类似于 index.html：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="comment">&lt;!--[if lt IE 7]&gt;</span></span><br><span class="line"><span class="comment">&lt;html class="lt-ie9 lt-ie8 lt-ie7"&gt; &lt;![endif]--&gt;</span><span class="comment">&lt;!--[if IE 7]&gt;</span></span><br><span class="line"><span class="comment">&lt;html class="lt-ie9 lt-ie8"&gt; &lt;![endif]--&gt;</span><span class="comment">&lt;!--[if IE 8]&gt;</span></span><br><span class="line"><span class="comment">&lt;html class="lt-ie9"&gt; &lt;![endif]--&gt;</span><span class="comment">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span> <span class="comment">&lt;!--&lt;![endif]--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span><span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"shortcut icon"</span> <span class="attr">type</span>=<span class="string">"image/x-icon"</span> <span class="attr">href</span>=<span class="string">"/workspace/img/favicon.ico"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- build:css ./css/main.min.css --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"/workspace/css/base.css"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"/workspace/css/header.css"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"/workspace/css/footer.css"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- endbuild --&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- build:css ./css/home.min.css --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">href</span>=<span class="string">"/workspace/css/home.css"</span>/&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- endbuild --&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">&lt;!-- build:js ./js/framework.min.js --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/bower_components/es5-shim/es5-shim.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/bower_components/base64/base64.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/bower_components/console-js/console.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/bower_components/underscore/underscore.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/bower_components/jquery/jquery.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/bower_components/jquery-cookie/jquery.cookie.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/bower_components/Placeholders.js/lib/utils.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/bower_components/Placeholders.js/lib/main.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/bower_components/Placeholders.js/lib/adapters/placeholders.jquery.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/lib/lib.jquery.jsonp.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/lib/lib.md5.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/util/util.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/util/valid/isValidEmail.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/util/url/getUrlParam.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/util/url/toUrlParam.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/util/tpl/getTpl.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/util/string/capitalize.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/util/browser/browser_os.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/framework/js/util/analytics/analytics.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/workspace/js/sys/server.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/workspace/js/sys/i18n.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/workspace/js/sys/util.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/workspace/js/module/base.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- endbuild --&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">id</span>=<span class="string">"index-header"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript">    <span class="built_in">document</span>.getElementById(<span class="string">"index-header"</span>).outerHTML = util.getTemplate(<span class="string">'common/header'</span>);</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">id</span>=<span class="string">"index-body"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript">    <span class="built_in">document</span>.getElementById(<span class="string">"index-body"</span>).outerHTML = util.getTemplate(<span class="string">'home/index'</span>);</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">id</span>=<span class="string">"index-footer"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript">    <span class="built_in">document</span>.getElementById(<span class="string">"index-footer"</span>).outerHTML = util.getTemplate(<span class="string">'common/footer'</span>);</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 这里是该页面独有的 js 文件 --&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- build:js ./js/home.min.js --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/workspace/js/module/home.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- endbuild --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript">    <span class="keyword">if</span> (navigator.userAgent.indexOf(<span class="string">"PhantomJS"</span>) &lt; <span class="number">0</span>) &#123;</span></span><br><span class="line"><span class="javascript">        <span class="keyword">var</span> at = <span class="built_in">document</span>.createElement(<span class="string">'script'</span>);</span></span><br><span class="line"><span class="javascript">        at.src = (<span class="string">'https:'</span> == <span class="built_in">document</span>.location.protocol ? <span class="string">'https'</span> : <span class="string">'http'</span>) +</span></span><br><span class="line"><span class="javascript">                <span class="string">'://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-xxx'</span>;</span></span><br><span class="line"><span class="javascript">        at.type = <span class="string">'text/javascript'</span>;</span></span><br><span class="line"><span class="javascript">        at.async = <span class="string">'true'</span>;</span></span><br><span class="line"><span class="javascript">        <span class="keyword">var</span> s = <span class="built_in">document</span>.getElementsByTagName(<span class="string">'script'</span>)[<span class="number">0</span>];</span></span><br><span class="line"><span class="undefined">        s.parentNode.insertBefore(at, s);</span></span><br><span class="line"><span class="undefined">    &#125;</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- build:remove --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"//localhost:35729/livereload.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"/workspace/js/debug.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- endbuild --&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure><br>可以看到 body 里面都是用 ajax 去加载模板的。而且要注意一点的是，有些资源是不用在phantom 阶段请求的，比如上述请求第三方分享的组件，这个在静态化编译的时候，不会用到。所以要去判断当前是否是phantom打包，如果是的话，就跳过。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">navigator.userAgent.indexOf(&quot;PhantomJS&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>同时在进行静态化编译的时候，也会生成一些不在预期的代码，这些都要在 finish 的时候去掉, 所以后面grunt的任务就会这么写：<br>循环对html文件进行一一预编译，并在最后结束的时候，删掉一些不用的代码，或者是状态变化的代码，并且填上一些代码，比如对应的语言包js文件<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">staticfy: (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> cfg = &#123;&#125;;</span><br><span class="line">    <span class="keyword">var</span> files;</span><br><span class="line">    _.each(supportLangs, <span class="function"><span class="keyword">function</span> (<span class="params">lang</span>) </span>&#123;</span><br><span class="line">        files = &#123;&#125;;</span><br><span class="line">        _.each(htmlFiles, <span class="function"><span class="keyword">function</span> (<span class="params">htmlFile</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> file = htmlFile.replace(<span class="string">'html/'</span>, <span class="string">''</span>);</span><br><span class="line">            files[<span class="string">'&lt;%= dist_no_version %&gt;/'</span> + lang + <span class="string">'/'</span> + file] = <span class="string">'&lt;%= dist_no_version %&gt;/'</span> + file;</span><br><span class="line">        &#125;);</span><br><span class="line">        cfg[lang] = &#123;</span><br><span class="line">            options: &#123;</span><br><span class="line">                cwd: <span class="string">'&lt;%= dist_no_version %&gt;'</span>,</span><br><span class="line">                query_string: <span class="string">'lang='</span> + lang,</span><br><span class="line">                onfinish: <span class="function"><span class="keyword">function</span> (<span class="params">str</span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">return</span> str</span><br><span class="line">                        <span class="comment">// 预编译要跟进对应的语言，对 a 标签的相对路径进行替换</span></span><br><span class="line">                        .replace(<span class="regexp">/(&lt;a.*?href=['"])(\/.*?)(['"])/gi</span>, <span class="string">'$1/'</span> + lang + <span class="string">'$2$3'</span>)</span><br><span class="line">                        <span class="comment">// 消除 jsonp 请求产生的 script 标签</span></span><br><span class="line">                        .replace(<span class="regexp">/&lt;script.*async="".*?&lt;\/script&gt;/g</span>, <span class="string">''</span>)</span><br><span class="line">                        <span class="comment">// 消除 首页加载Google字体请求产生的link标签</span></span><br><span class="line">                        .replace(<span class="regexp">/&lt;link.*http:\/\/fonts.googleapis.com.*?&gt;/</span>, <span class="string">''</span>)</span><br><span class="line">                        <span class="comment">// 清理首页的图片，重设为隐藏</span></span><br><span class="line">                        .replace(<span class="regexp">/(&lt;img class="item-preload.*)style="display:\s*inline.*"(&gt;)/g</span>, <span class="string">'$1$2'</span>)</span><br><span class="line">                        <span class="comment">// 清理邮件验证页，重设为隐藏</span></span><br><span class="line">                        .replace(<span class="regexp">/"(item-verify-send)"/</span>, <span class="string">'"$1 i-hide"'</span>)</span><br><span class="line">                        <span class="comment">// signin 重置链接地址</span></span><br><span class="line">                        .replace(<span class="regexp">/(href=".*signin\/)\?.*(")/</span>, <span class="string">'$1$2'</span>)</span><br><span class="line">                        <span class="comment">// 重置 header 右侧的 item-actions 和 item-profile 的状态</span></span><br><span class="line">                        .replace(<span class="regexp">/"(item-actions|item-profile)"/</span>, <span class="string">'"$1 i-hide"'</span>)</span><br><span class="line">                        <span class="comment">// 去掉指定的要删除的脚本</span></span><br><span class="line">                        .replace(<span class="regexp">/&lt;script.*id="removeScript".*?&lt;\/script&gt;/g</span>, <span class="string">''</span>)</span><br><span class="line">                        <span class="comment">// 去掉自动下载的iframe中的url</span></span><br><span class="line">                        .replace(<span class="regexp">/(&lt;iframe id="downloadFrame".*?)(src=")(\S+)(".*&gt;&lt;\/iframe&gt;)/g</span>, <span class="string">'$1$2$4'</span>)</span><br><span class="line">                        <span class="comment">// 去掉首页 Facebook twitter g+ 的 addthis widget 中间代码</span></span><br><span class="line">                        .replace(<span class="regexp">/&lt;div.*id="_atssh".*?&lt;\/iframe&gt;&lt;\/div&gt;/g</span>, <span class="string">''</span>)</span><br><span class="line">                        <span class="comment">// 这条规则要特别注意(用于首页清除addthis的样式)，很容易请到别的页面，所以尽量不要在页面内加上style标签</span></span><br><span class="line">                        .replace(<span class="regexp">/&lt;style.*type="text\/css".*?&lt;\/style&gt;&lt;\/head&gt;/g</span>, <span class="string">'&lt;/head&gt;'</span>)</span><br><span class="line">                        <span class="comment">// 最后把对应的语言文件再加到里面去</span></span><br><span class="line">                        .replace(<span class="regexp">/&lt;\/head&gt;/</span>, <span class="string">'&lt;script src="/'</span> + version + <span class="string">'/lang/'</span> + supportLangObj[lang].code + <span class="string">'.js"&gt;&lt;/script&gt;&lt;/head&gt;'</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;,</span><br><span class="line">            files: files</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> cfg;</span><br><span class="line">&#125;)(),</span><br></pre></td></tr></table></figure></p>
+<h2 id="缺陷"><a href="#缺陷" class="headerlink" title="缺陷"></a>缺陷</h2><p>通过这种方式，虽然可以对模板进行静态预编译，但是还有几个缺陷。</p>
+<ol>
+<li>要去下载 phantomJs 的exe 程序</li>
+<li>加载编译的速度比较慢，而且有时候会卡死</li>
+<li>功能太过复杂了，其实可以简单一点。</li>
+</ol>
+<p>后面会通过用gulp进行这个组件的重写，来解决这些问题。</p>
+<hr>
+<p>系列文章<br><a href="/2018/09/12/www-history-1/" title="官网构建优化流程(1) - 简介">官网构建优化流程(1) - 简介</a><br><a href="/2018/09/12/www-history-2/" title="官网构建优化流程(2) - 旧版grunt打包构建流程">官网构建优化流程(2) - 旧版grunt打包构建流程</a><br><a href="/2018/09/12/www-history-3/" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy</a><br><a href="/2018/09/12/www-history-4/" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy</a><br><a href="/2018/09/12/www-history-5/" title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js</a><br><a href="/2018/09/12/www-history-6/" title="官网构建优化流程(6) - 把原先的grunt换成gulp构建">官网构建优化流程(6) - 把原先的grunt换成gulp构建</a><br><a href="/2018/09/13/www-history-7/" title="官网构建优化流程(7) - 官网的多语言跳转规则">官网构建优化流程(7) - 官网的多语言跳转规则</a><br><a href="/2018/09/13/www-history-8/" title="官网构建优化流程(8) - gulp打包构建在ie8会报错">官网构建优化流程(8) - gulp打包构建在ie8会报错</a><br><a href="/2018/09/13/www-history-9/" title="官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题">官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题</a><br><a href="/2018/09/13/www-history-10/" title="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码</a><br><a href="/2018/09/13/www-history-11/" title="官网构建优化流程(11) - 部署转为用Jenkins自动化部署">官网构建优化流程(11) - 部署转为用Jenkins自动化部署</a><br><a href="/2018/09/13/www-history-12/" title="官网构建优化流程(12) - 优化加载速度，资源分开存放">官网构建优化流程(12) - 优化加载速度，资源分开存放</a><br><a href="/2018/09/13/www-history-13/" title="官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS">官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/09/12/www-history-3/" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">http://kebingzao.com/2018/09/12/www-history-3/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/grunt/" rel="tag"># grunt</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/12/www-history-2/" rel="next" title="官网构建优化流程(2) - 旧版grunt打包构建流程">
+                <i class="fa fa-chevron-left"></i> 官网构建优化流程(2) - 旧版grunt打包构建流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/12/www-history-4/" rel="prev" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">
+                官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">84</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码分析"><span class="nav-number">2.</span> <span class="nav-text">代码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缺陷"><span class="nav-number">3.</span> <span class="nav-text">缺陷</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/09/12/www-history-3/';
+          this.page.identifier = '2018/09/12/www-history-3/';
+          this.page.title = '官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="nginx," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="GoAccess简单来说呢 GoAccess 是一个专门用来分析日志的工具，既可以在终端中展示结果，也可以生成 HTML 报表在浏览器中查看。GoAccess 最吸引人的一点就是它生成的 HTML very 炫酷。 安装我的服务器是 CentOS7, 可以直接用yum安装： yum install goaccess">
+<meta name="keywords" content="nginx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 GoAccess 来分析 Nginx log 记录">
+<meta property="og:url" content="http://kebingzao.com/2018/09/12/goaccess/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="GoAccess简单来说呢 GoAccess 是一个专门用来分析日志的工具，既可以在终端中展示结果，也可以生成 HTML 报表在浏览器中查看。GoAccess 最吸引人的一点就是它生成的 HTML very 炫酷。 安装我的服务器是 CentOS7, 可以直接用yum安装： yum install goaccess">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/goaccess/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/goaccess/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/goaccess/3.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/goaccess/4.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/12/goaccess/5.png">
+<meta property="og:updated_time" content="2018-09-14T15:09:37.757Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 GoAccess 来分析 Nginx log 记录">
+<meta name="twitter:description" content="GoAccess简单来说呢 GoAccess 是一个专门用来分析日志的工具，既可以在终端中展示结果，也可以生成 HTML 报表在浏览器中查看。GoAccess 最吸引人的一点就是它生成的 HTML very 炫酷。 安装我的服务器是 CentOS7, 可以直接用yum安装： yum install goaccess">
+<meta name="twitter:image" content="http://kebingzao.com/2018/09/12/goaccess/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/09/12/goaccess/"/>
+
+
+
+
+
+  <title>使用 GoAccess 来分析 Nginx log 记录 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/09/12/goaccess/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用 GoAccess 来分析 Nginx log 记录</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-12T15:11:53+08:00">
+                2018-09-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/12/goaccess/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/12/goaccess/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/12/goaccess/" class="leancloud_visitors" data-flag-title="使用 GoAccess 来分析 Nginx log 记录">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="GoAccess"><a href="#GoAccess" class="headerlink" title="GoAccess"></a>GoAccess</h2><p>简单来说呢 <a href="https://goaccess.io/" target="_blank" rel="noopener">GoAccess</a> 是一个专门用来分析日志的工具，既可以在终端中展示结果，也可以生成 HTML 报表在浏览器中查看。GoAccess 最吸引人的一点就是它生成的 HTML very 炫酷。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>我的服务器是 CentOS7, 可以直接用yum安装： <strong>yum install goaccess</strong><br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# yum install goaccess</span><br><span class="line">Loaded plugins: fastestmirror, langpacks</span><br><span class="line">Repository epel is listed more than once in the configuration</span><br><span class="line">。。。</span><br><span class="line">Dependency Installed:</span><br><span class="line">  tokyocabinet.x86_64 0:1.4.48-3.el7                                                                                                                                                                     </span><br><span class="line"></span><br><span class="line">Complete!</span><br></pre></td></tr></table></figure></p>
+<p>这样就安装完了。(安装完之后，我没有进行任何的配置修改，没有改过 /etc/goaccess.conf 这个配置文件的东西)</p>
+<h2 id="生成HTML报表"><a href="#生成HTML报表" class="headerlink" title="生成HTML报表"></a>生成HTML报表</h2><p>后面把其他服务器的一个nginx access log上传到这台服务器，准备生成一个HTML文件分析一下：<br>指令： <strong>goaccess -f xx.xxx.com.access.log -a &gt; test.html</strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos nginxlog]# goaccess -f xx.xxx.com.access.log -a &gt; test.html</span><br><span class="line">Parsing... [0] [0/s]</span><br><span class="line">GoAccess - version 1.2 - Jul 23 2017 03:05:48</span><br><span class="line">Config file: /etc/goaccess.conf</span><br><span class="line"></span><br><span class="line">Fatal error has occurred</span><br><span class="line">Error occured at: src/parser.c - parse_log - 2705</span><br><span class="line">No time format was found on your conf file.</span><br></pre></td></tr></table></figure></p>
+<p>果然报了一个时间格式错误，这时候我看一下，这个log的其中一条记录，其实都是有格式的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xx.xxx.com 220.130.153.228 &quot;220.130.153.228&quot; - - [02/Apr/2018:01:50:12 +0000] &quot;GET /?id=f695c9384aa5af44e7b0e508d75bf099&amp;st=data&amp;side=phone&amp;force=true&amp;ver=100011&amp;device_type=1&amp;language=en-US HTTP/1.1&quot; &quot;200&quot; 132 &quot;-&quot; &quot;okhttp/3.8.1&quot; 0.052 538 225 [0.052]</span><br></pre></td></tr></table></figure></p>
+<p>也就是说，我们需要让 goaccess 知道我们的nginx log的format格式，他才能分析得出来。 主要要配置三种：<br>– <strong>time-format</strong> 时间格式<br>– <strong>date-format</strong> 日期格式<br>– <strong>log-format</strong> log 格式</p>
+<p>只有这三个配置完之后，goaccess 才能正常的解析并生成分析报告。 这三个可以在 <strong>/etc/goaccess.conf</strong> 配置文件中设置，也可以直接用指令来临时指定：<br>具体应该怎么设置，可以看官方的 <a href="https://goaccess.io/man#custom-log" target="_blank" rel="noopener">custom-log</a>文档, 上面写的挺清楚的。<br><blockquote><p>%x A date and time field matching the time-format and date-format variables. This is used when a timestamp is given instead of the date and time being in two separate variables.<br>%t time field matching the time-format variable.<br>%d date field matching the date-format variable.<br>%v The server name according to the canonical name setting (Server Blocks or Virtual Host).<br>%e This is the userid of the person requesting the document as determined by HTTP authentication.<br>%h host (the client IP address, either IPv4 or IPv6)<br>%r The request line from the client. This requires specific delimiters around the request (single quotes, double quotes, etc) to be parsable. Otherwise, use a combination of special format specifiers such as %m, %U, %q and %H to parse individual fields.<br>       Note: Use either %r to get the full request OR %m, %U, %q and %H to form your request, do not use both.<br>%m The request method.<br>%U The URL path requested.<br>       Note: If the query string is in %U, there is no need to use %q. However, if the URL path, does not include any query string, you may use %q and the query string will be appended to the request.<br>%q The query string.<br>%H The request protocol.<br>%s The status code that the server sends back to the client.<br>%b The size of the object returned to the client.<br>%R The “Referer” HTTP request header.<br>%u The user-agent HTTP request header.<br>%D The time taken to serve the request, in microseconds.<br>%T The time taken to serve the request, in seconds with milliseconds resolution.<br>%L The time taken to serve the request, in milliseconds as a decimal number.<br>%^ Ignore this field.<br>%~ Move forward through the log string until a non-space (!isspace) char is found.<br>~h The host (the client IP address, either IPv4 or IPv6) in a X-Forwarded-For (XFF) field.</p>
+<footer><strong>https://goaccess.io/man#custom-log</strong></footer></blockquote><br>因为有些字段不需要分析，或者说是有重复的，比如上面例子的ip，其实就有重复，所以，就用 <strong>%^</strong> 表示忽略。<br>接下来具体实作一下，以上面那一条nginx log记录为例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xx.xxx.com 220.130.153.228 &quot;220.130.153.228&quot; - - [02/Apr/2018:01:50:12 +0000] &quot;GET /?id=f695c9384aa5af44e7b0e508d75bf099&amp;st=data&amp;side=phone&amp;force=true&amp;ver=100011&amp;device_type=1&amp;language=en-US HTTP/1.1&quot; &quot;200&quot; 132 &quot;-&quot; &quot;okhttp/3.8.1&quot; 0.052 538 225 [0.052]</span><br></pre></td></tr></table></figure></p>
+<p>当然这时候，我们要先看一下，这个nginx的log format的格式，这样才便于分析：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">log_format access &apos;$host $remote_addr &quot;$clientRealIp&quot; - $remote_user [$time_local] &quot;$request&quot; &apos;</span><br><span class="line">              &apos;&quot;$status&quot; $body_bytes_sent &quot;$http_referer&quot; &quot;$http_user_agent&quot; &apos;</span><br><span class="line">              &apos;$request_time $bytes_sent $request_length [$upstream_response_time]&apos;;</span><br></pre></td></tr></table></figure></p>
+<p>所以对应的format，应该这样写：<br>时间格式和日期格式比较简单, 这两个一般都不会变：<br>– time-format: %H:%M:%S<br>– date-format: %d/%b/%Y</p>
+<p>主要还是log-format这个要分析一下：<br><img src="/2018/09/12/goaccess/1.png" alt="1"></p>
+<p>所以最后是:(我全部直接用options指令，没有在 goaccess.conf 中设置，这样看比较直观)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos nginxlog]# goaccess -f xx.xxx.com.access.log --log-format=&apos;%^ %h %^[%d:%t +0000] &quot;%r&quot; &quot;%s&quot; %b &quot;%R&quot; &quot;%u&quot;&apos; --date-format=&apos;%d/%b/%Y&apos; --time-format=&apos;%H:%M:%S&apos;  -d -a &gt; test.html</span><br></pre></td></tr></table></figure></p>
+<p>然后就慢慢等他分析，并生成 html 报表， 最后查看：<br><img src="/2018/09/12/goaccess/2.png" alt="1"><br>这样分析就出来了。</p>
+<h2 id="服务器上直接分析"><a href="#服务器上直接分析" class="headerlink" title="服务器上直接分析"></a>服务器上直接分析</h2><p>当然，还有一种是在 服务器直接分析的，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">goaccess -f xx.xxx.com.access.log -c -a</span><br></pre></td></tr></table></figure></p>
+<p>输入以上命令，就会弹出一下窗口，<br><img src="/2018/09/12/goaccess/3.png" alt="1"><br>这边自己输入 各种 format，都填完之后，直接按 enter ：这时候就会开始分析：<br><img src="/2018/09/12/goaccess/4.png" alt="1"><br>这个就是 分析报告， 当然还是没有 html 来的好看。<br><img src="/2018/09/12/goaccess/5.png" alt="1"><br>按两下q，就会退出。</p>
+<h2 id="实时分析功能"><a href="#实时分析功能" class="headerlink" title="实时分析功能"></a>实时分析功能</h2><p>goaccess 还有实时分析的功能，用一下命令：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ goaccess --config-file=.goaccessrc /var/log/nginx/access.log</span><br></pre></td></tr></table></figure></p>
+<p>一切正常的话 GoAccess 应该开始分析日志文件了，然后显示 “WebSocket server ready to accept new client connections”。<br>现在用浏览器打开 <strong><a href="http://your-domain/stat/" target="_blank" rel="noopener">http://your-domain/stat/</a></strong> 应该就可以看见分析结果了，每秒钟刷新一次数据。</p>
+<font color="red">ps：这个功能我还没有用过，因为从业务来说，nginx log刷新得太快了，如果没有出问题的话(比如被人刷接口), 老实说实时分析的用处不大， 一般都是出问题之后，取出问题的那一段时间来分析。</font>
+
+
+
+
+
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/09/12/goaccess/" title="使用 GoAccess 来分析 Nginx log 记录">http://kebingzao.com/2018/09/12/goaccess/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nginx/" rel="tag"># nginx</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/12/mongo-update-version3/" rel="next" title="mongo 从 2.x 升级到 3.x 后遇到的一些问题">
+                <i class="fa fa-chevron-left"></i> mongo 从 2.x 升级到 3.x 后遇到的一些问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/12/www-history-1/" rel="prev" title="官网构建优化流程(1) - 简介">
+                官网构建优化流程(1) - 简介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">84</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#GoAccess"><span class="nav-number">1.</span> <span class="nav-text">GoAccess</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生成HTML报表"><span class="nav-number">3.</span> <span class="nav-text">生成HTML报表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器上直接分析"><span class="nav-number">4.</span> <span class="nav-text">服务器上直接分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实时分析功能"><span class="nav-number">5.</span> <span class="nav-text">实时分析功能</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/09/12/goaccess/';
+          this.page.identifier = '2018/09/12/goaccess/';
+          this.page.title = '使用 GoAccess 来分析 Nginx log 记录';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

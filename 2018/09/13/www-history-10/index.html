@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,gulp," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="写在前面的话说在前头，现在是2018-09，下面的文章是我在2016-10月的时候，记录在Evernote的，那时候 phantomjs-node 这个issue，确实没有解决，后面我们团队有提交了一个pr上去，而且这个作者也成功修复了，并更新了新版本，从而修复了这个bug。但是在那个时候，时间是比较赶的，你没办法去赌这个作者，马上去采取你的pr并更新版本，才有了下面的解决。反正我觉得整个过程挺有">
+<meta name="keywords" content="js,gulp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">
+<meta property="og:url" content="http://kebingzao.com/2018/09/13/www-history-10/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="写在前面的话说在前头，现在是2018-09，下面的文章是我在2016-10月的时候，记录在Evernote的，那时候 phantomjs-node 这个issue，确实没有解决，后面我们团队有提交了一个pr上去，而且这个作者也成功修复了，并更新了新版本，从而修复了这个bug。但是在那个时候，时间是比较赶的，你没办法去赌这个作者，马上去采取你的pr并更新版本，才有了下面的解决。反正我觉得整个过程挺有">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/09/13/www-history-10/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/13/www-history-10/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/13/www-history-10/3.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/13/www-history-10/4.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/13/www-history-10/5.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/13/www-history-10/6.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/13/www-history-10/7.png">
+<meta property="og:updated_time" content="2018-09-14T15:14:39.897Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">
+<meta name="twitter:description" content="写在前面的话说在前头，现在是2018-09，下面的文章是我在2016-10月的时候，记录在Evernote的，那时候 phantomjs-node 这个issue，确实没有解决，后面我们团队有提交了一个pr上去，而且这个作者也成功修复了，并更新了新版本，从而修复了这个bug。但是在那个时候，时间是比较赶的，你没办法去赌这个作者，马上去采取你的pr并更新版本，才有了下面的解决。反正我觉得整个过程挺有">
+<meta name="twitter:image" content="http://kebingzao.com/2018/09/13/www-history-10/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/09/13/www-history-10/"/>
+
+
+
+
+
+  <title>官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/09/13/www-history-10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-13T17:09:43+08:00">
+                2018-09-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/官网构建优化流程/" itemprop="url" rel="index">
+                    <span itemprop="name">官网构建优化流程</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/13/www-history-10/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/13/www-history-10/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/13/www-history-10/" class="leancloud_visitors" data-flag-title="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="写在前面的话"><a href="#写在前面的话" class="headerlink" title="写在前面的话"></a>写在前面的话</h2><p>说在前头，现在是2018-09，下面的文章是我在2016-10月的时候，记录在Evernote的，那时候 <a href="https://github.com/amir20/phantomjs-node" target="_blank" rel="noopener">phantomjs-node</a> 这个issue，确实没有解决，后面我们团队有提交了一个pr上去，而且这个作者也成功修复了，并更新了新版本，从而修复了这个bug。<br>但是在那个时候，时间是比较赶的，你没办法去赌这个作者，马上去采取你的pr并更新版本，才有了下面的解决。<br>反正我觉得整个过程挺有意思的，有记录并分享的价值。&lt;(￣︶￣)&gt;<br><a id="more"></a></p>
+<h2 id="前因"><a href="#前因" class="headerlink" title="前因"></a>前因</h2><p>在使用gulp-staticfy组件对官网项目进行多语言预编译的时候。出现了一个很奇葩的情况，就是会随机出现乱码。而且非英文的其他语言都有可能会出现这种情况。<br>比如我们的日语的某个页面，就会出现这种情况：<br><img src="/2018/09/13/www-history-10/1.png" alt="1"><br>乱码的正则匹配值是 ‘\ufffd’， 通过这个匹配这个值，就可以判断当前页面是否有包含乱码：<br><img src="/2018/09/13/www-history-10/2.png" alt="1"></p>
+<h2 id="寻找解决方案"><a href="#寻找解决方案" class="headerlink" title="寻找解决方案"></a>寻找解决方案</h2><h3 id="定位问题"><a href="#定位问题" class="headerlink" title="定位问题"></a>定位问题</h3><p>刚开始是怀疑是 gulp-staticfy 在设置phantom 抓取的时候，没有设置编码为 utf8 ，然后后面改了一下：<br>在 phantom.create 的时候，加上 output-encoding<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> phantom.create([<span class="string">'--output-encoding=utf8'</span>]).then(<span class="function"><span class="params">_ph</span> =&gt;</span> &#123;</span><br><span class="line">    ph = _ph;</span><br><span class="line">    <span class="keyword">return</span> ph.createPage();</span><br><span class="line">&#125;).catch(<span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(e);</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>然后在 后面 ph_page 在 open url 的时候，也加上 encoding 为 utf8 的配置：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">createPhPage().then(<span class="function"><span class="params">page</span> =&gt;</span> &#123;</span><br><span class="line">    ph_page = page;</span><br><span class="line">    <span class="keyword">return</span> ph_page.open(url, &#123;<span class="attr">encoding</span>: <span class="string">'utf8'</span>&#125;);</span><br><span class="line">&#125;).then(<span class="function"><span class="params">status</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">//console.log(status);</span></span><br><span class="line">    <span class="keyword">return</span> ph_page.property(<span class="string">'content'</span>)</span><br><span class="line">&#125;).then(<span class="function"><span class="params">content</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(gutil.colors.blue(baseName) + gutil.colors.green(<span class="string">" load success"</span>));</span><br><span class="line">    ph_page.close();</span><br><span class="line">    doFinish();</span><br><span class="line">    file.contents = <span class="keyword">new</span> Buffer(content);</span><br><span class="line">    callback(<span class="literal">null</span>, file);</span><br><span class="line">&#125;).catch(<span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">    ph_page &amp;&amp; ph_page.close();</span><br><span class="line">    doFinish();</span><br><span class="line">    <span class="built_in">console</span>.log(e)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>事实证明，这个设置也没有什么用。而且phantom 本身默认就是输出utf8 编码的。<br>那么到底是什么问题导致这种情况呢？ 后面看到这篇文章: <a href="http://www.imooc.com/article/9053" target="_blank" rel="noopener">Node.js 爬虫程序汉字乱码的原因：buffer 的拼接问题！</a>。<br><blockquote><p>也就是如果爬取的数据的中文数据量比较小，一般显示是正常的。但当爬取的数据量较大时，很有可能出现部分汉字会乱码现象。<br>产生原因：<br>在默认的情况下 trunk 是一个 Buffer 对象，而 data += trunk 的实质上隐藏了 toString 的变换的：<br>data = data.toString() + trunk.toString();<br>由于汉字不是用一个字节来存储的，如果某一块 buffer 传输的恰好不完整，将会导致有被截破的汉字的存在，于是出现乱码。</p>
+<footer><strong>Node.js 爬虫程序汉字乱码的原因：buffer 的拼接问题！</strong><cite><a href="http://www.imooc.com/article/9053" target="_blank" rel="noopener">www.imooc.com/article/9053</a></cite></footer></blockquote><br>所以有可能是这个原因，即在进行读取的时候，如果把当前的chunk块之间转换为string，就有可能会包含乱码了。那么原因可能就在用的那个库上了，即 <a href="https://github.com/amir20/phantomjs-node" target="_blank" rel="noopener">phantomjs-node</a>, 查了一下这个库的issues，看看有没有人提这个问题，果然看到了一个未解决的提问:<br><img src="/2018/09/13/www-history-10/3.png" alt="1"><br>可以看到 在抓取这个页面的时候， <a href="http://varlamov.ru/1960870.html，" target="_blank" rel="noopener">http://varlamov.ru/1960870.html，</a> 每一次都会跑出乱码出来，不过很明显，这个作者还没有解决。<br><img src="/2018/09/13/www-history-10/4.png" alt="1"><br>既然这个作者还没有解决，那么我们就自己找找解决方案了， 就从 这个库开始找。 首先先找到这个库读取chunk的那一部分代码。<br>后面定位到这个代码: <strong>phantom/lib/phantom.js</strong> 片段：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.process.stdout.pipe(<span class="keyword">new</span> _linerstream2.default()).on(<span class="string">'data'</span>, data =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> message = data.toString(<span class="string">'utf8'</span>);</span><br><span class="line">    <span class="keyword">if</span> (message[<span class="number">0</span>] === <span class="string">'&gt;'</span>) &#123;</span><br><span class="line">        <span class="comment">// Server end has finished NOOP, lets allow NOOP again..</span></span><br><span class="line">        <span class="keyword">if</span> (message === <span class="string">'&gt;'</span> + NOOP) &#123;</span><br><span class="line">            <span class="keyword">this</span>.isNoOpInProgress = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure></p>
+<p>而且在输出的时候，还用了 <strong>new _linerstream2.default()</strong> 这个组件再封装一次。这个 <strong>linerstream</strong> 又是另一个引入的库，<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> _linerstream = <span class="built_in">require</span>(<span class="string">'linerstream'</span>);</span><br></pre></td></tr></table></figure></p>
+<p>所以接下来再找到 <strong>linerstream</strong> 库， 发现这个库的作用其实很简单，就是把文件一行一行的读出来，然后推送给<strong>phantom</strong>, 而且看了一下代码，刚好这个库犯了刚才说的chunk的那个错误。<br><strong>linerstream/index.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Liner.prototype._transform = <span class="function"><span class="keyword">function</span> <span class="title">transform</span>(<span class="params">chunk, encoding, done</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> data = chunk.toString()</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">this</span>._lastLineData) &#123;</span><br><span class="line">    data = <span class="keyword">this</span>._lastLineData + data</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">var</span> lines = data.split(os.EOL)</span><br><span class="line">  <span class="keyword">this</span>._lastLineData = lines.splice(lines.length - <span class="number">1</span>, <span class="number">1</span>)[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">  lines.forEach(<span class="keyword">this</span>.push.bind(<span class="keyword">this</span>))</span><br><span class="line">  done()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，他把 chunk 给 toString了，这个就是乱码产生的原因<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> data = chunk.toString()</span><br></pre></td></tr></table></figure></p>
+<p>因为这时候有可能这个chunk含有一半的字（只要不是单个字节的语言都有可能，比如中文，日语之类的）。<br>既然知道了问题的所在，那么有没有可能自己修改， 按照 <a href="http://www.imooc.com/article/9053" target="_blank" rel="noopener">Node.js 爬虫程序汉字乱码的原因：buffer 的拼接问题！</a> 里面所说的解决方法。<br>他建议的解决方法是这样的：<br><blockquote><p>解决方法：<br>先用一个数组把所有 buffer 保存起来，同时记录 buffer 的总长度。<br>数据传输完毕的时，再通过 Buffer.concat 方法把所有 buffer 拼接。<br>最后，用 toString 方法转成字符串，这时获取的 data 数据就是正确的了。</p>
+<p>var chunks = [], size = 0;<br>res.on(“data” , function(chunk){<br>    chunks.push(chunk);<br>    size += chunk.length;<br>});<br>res.on(“end” , function(){<br>    var buffer = Buffer.concat(chunks, size);<br>    var html = buffer.toString();<br>});</p>
+<p>// 在更细腻的连接方式:<br>res.on(‘end’, function () {<br>    var buffer = null;<br>    switch(buffers.length) {<br>        case 0:<br>            buffer = new Buffer(0);<br>            break;<br>        case 1:<br>            buffer = buffers[0];<br>            break;<br>        default:<br>            buffer = new Buffer(size);<br>            for (var i = 0, pos = 0, l = buffers.length; i &lt; l; i++) {<br>                var chunk = buffers[i];<br>                chunk.copy(buffer, pos);<br>                pos += chunk.length;<br>            }<br>        break;<br>    }<br>    var html = buffer.toString();<br>});</p>
+<footer><strong>Node.js 爬虫程序汉字乱码的原因：buffer 的拼接问题！</strong><cite><a href="http://www.imooc.com/article/9053" target="_blank" rel="noopener">www.imooc.com/article/9053</a></cite></footer></blockquote><br>而且通过这篇文章：<a href="https://segmentfault.com/a/1190000000740718" target="_blank" rel="noopener">通过Node.js Stream API 实现逐行读取的实例</a>, 我们也可以知道node stream 关于transform的用法。其实问题就在于，如果只是把chunk存起来，没有转化为string的话，那么怎么去根据换行符去切割呢？ 从而达到整行读取的效果。 其实早有另外的库，有实现这个效果。 那就是 <a href="https://github.com/mcollina/split2/" target="_blank" rel="noopener">https://github.com/mcollina/split2/</a> 这个库。<br>使用也非常简单：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">fs.createReadStream(file)</span><br><span class="line">    .pipe(split2())</span><br><span class="line">    .on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">line</span>) </span>&#123;</span><br><span class="line">      <span class="comment">//each chunk now is a seperate line!</span></span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure></p>
+<p>而且看了一下他的代码，发现他这部分的代码处理会比较好，而且不会有这个问题, <strong>split2/index.js</strong> 代码：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> through = <span class="built_in">require</span>(<span class="string">'through2'</span>)</span><br><span class="line"><span class="keyword">var</span> StringDecoder = <span class="built_in">require</span>(<span class="string">'string_decoder'</span>).StringDecoder</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">transform</span> (<span class="params">chunk, enc, cb</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>._last += <span class="keyword">this</span>._decoder.write(chunk)</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">this</span>._last.length &gt; <span class="keyword">this</span>.maxLength) &#123;</span><br><span class="line">    <span class="keyword">return</span> cb(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'maximum buffer reached'</span>))</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> list = <span class="keyword">this</span>._last.split(<span class="keyword">this</span>.matcher)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">this</span>._last = list.pop()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; list.length; i++) &#123;</span><br><span class="line">    push(<span class="keyword">this</span>, <span class="keyword">this</span>.mapper(list[i]))</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  cb()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">flush</span> (<span class="params">cb</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// forward any gibberish left in there</span></span><br><span class="line">  <span class="keyword">this</span>._last += <span class="keyword">this</span>._decoder.end()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">this</span>._last) &#123;</span><br><span class="line">    push(<span class="keyword">this</span>, <span class="keyword">this</span>.mapper(<span class="keyword">this</span>._last))</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  cb()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">push</span> (<span class="params">self, val</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (val !== <span class="literal">undefined</span>) &#123;</span><br><span class="line">    self.push(val)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">noop</span> (<span class="params">incoming</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> incoming</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">split</span> (<span class="params">matcher, mapper, options</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// Set defaults for any arguments not supplied.</span></span><br><span class="line">  matcher = matcher || <span class="regexp">/\r?\n/</span></span><br><span class="line">  mapper = mapper || noop</span><br><span class="line">  options = options || &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Test arguments explicitly.</span></span><br><span class="line">  <span class="keyword">switch</span> (<span class="built_in">arguments</span>.length) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">      <span class="comment">// If mapper is only argument.</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">typeof</span> matcher === <span class="string">'function'</span>) &#123;</span><br><span class="line">        mapper = matcher</span><br><span class="line">        matcher = <span class="regexp">/\r?\n/</span></span><br><span class="line">      <span class="comment">// If options is only argument.</span></span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> matcher === <span class="string">'object'</span> &amp;&amp; !(matcher <span class="keyword">instanceof</span> <span class="built_in">RegExp</span>)) &#123;</span><br><span class="line">        options = matcher</span><br><span class="line">        matcher = <span class="regexp">/\r?\n/</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">      <span class="comment">// If mapper and options are arguments.</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">typeof</span> matcher === <span class="string">'function'</span>) &#123;</span><br><span class="line">        options = mapper</span><br><span class="line">        mapper = matcher</span><br><span class="line">        matcher = <span class="regexp">/\r?\n/</span></span><br><span class="line">      <span class="comment">// If matcher and options are arguments.</span></span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> mapper === <span class="string">'object'</span>) &#123;</span><br><span class="line">        options = mapper</span><br><span class="line">        mapper = noop</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> stream = through(options, transform, flush)</span><br><span class="line"></span><br><span class="line">  <span class="comment">// this stream is in objectMode only in the readable part</span></span><br><span class="line">  stream._readableState.objectMode = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">  stream._last = <span class="string">''</span></span><br><span class="line">  stream._decoder = <span class="keyword">new</span> StringDecoder(<span class="string">'utf8'</span>)</span><br><span class="line">  stream.matcher = matcher</span><br><span class="line">  stream.mapper = mapper</span><br><span class="line">  stream.maxLength = options.maxLength</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> stream</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = split</span><br></pre></td></tr></table></figure></p>
+<p>通过 string_decoder 这个 node 的api， 核心就是这一句话<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>._last += <span class="keyword">this</span>._decoder.write(chunk)</span><br></pre></td></tr></table></figure></p>
+<p>既可以读入chunk，又可以正则匹配换行符。其他的逻辑都差不多。那么就可以用这个 <strong>split2</strong> 库 去 替换原来有问题的 <strong>linerstream</strong> 库。<br>所以代码可以改成这样： <strong>phantom/lib/phantom.js</strong>：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> split = <span class="built_in">require</span>(<span class="string">'split2'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">this</span>.process.stdout.pipe(split()).on(<span class="string">'data'</span>, data =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> message = data.toString(<span class="string">'utf8'</span>);</span><br><span class="line">    <span class="keyword">if</span> (message[<span class="number">0</span>] === <span class="string">'&gt;'</span>) &#123;</span><br><span class="line">        <span class="comment">// Server end has finished NOOP, lets allow NOOP again..</span></span><br><span class="line">        <span class="keyword">if</span> (message === <span class="string">'&gt;'</span> + NOOP) &#123;</span><br><span class="line">            <span class="keyword">this</span>.isNoOpInProgress = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">const</span> json = message.substr(<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">this</span>.logger.debug(<span class="string">'Parsing: %s'</span>, json);</span><br></pre></td></tr></table></figure></p>
+<p>其实只把linerstream 换成 split 而已，其他都没有变。</p>
+<h3 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h3><p>因为 phantom 这个库是别人的库，因此直接改其实是不合适的方法，只作用于这个项目。如果要让作者去改的话，只能自己pull request一个分支，然后让作者merge进去。我们要做的，当然是完善 gulp-staticfy 这个库啊，因为这个库才会去引用phantom这个库。不过还有一个方法，就是fork 这个phantom库，然后自己改，最后gulp-staticfy 再去引用fork的这个修改过的库。</p>
+<h4 id="1-先fork-这个项目，-https-github-com-kebingzao-phantomjs-node"><a href="#1-先fork-这个项目，-https-github-com-kebingzao-phantomjs-node" class="headerlink" title="1 先fork 这个项目， https://github.com/kebingzao/phantomjs-node"></a>1 先fork 这个项目， <a href="https://github.com/kebingzao/phantomjs-node" target="_blank" rel="noopener">https://github.com/kebingzao/phantomjs-node</a></h4><h4 id="2-然后git-clone-到本地"><a href="#2-然后git-clone-到本地" class="headerlink" title="2 然后git clone 到本地"></a>2 然后git clone 到本地</h4><p>用gulp 跑一下情况,结果发现这个问题。<br><img src="/2018/09/13/www-history-10/5.png" alt="1"><br>发现好像是gulp版本的问题，因此重装了最新版的gulp<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ npm install --global gulp-cli</span><br></pre></td></tr></table></figure></p>
+<p>然后就解决了，就可以正常跑了。接下来就是在原有的基础上做修改。</p>
+<h4 id="3-换库并publish"><a href="#3-换库并publish" class="headerlink" title="3 换库并publish"></a>3 换库并publish</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//import Linerstream from 'linerstream';</span></span><br><span class="line"><span class="keyword">import</span> split <span class="keyword">from</span> <span class="string">'split2'</span>;</span><br><span class="line">。。。。。。。</span><br><span class="line"><span class="comment">//this.process.stdout.pipe(new Linerstream()).on('data', data =&gt; &#123;</span></span><br><span class="line"><span class="keyword">this</span>.process.stdout.pipe(split()).on(<span class="string">'data'</span>, data =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> message = data.toString(<span class="string">'utf8'</span>);</span><br></pre></td></tr></table></figure>
+<p>然后再跑一下gulp，没有问题之后，就可以提交到项目中去了。<br><img src="/2018/09/13/www-history-10/6.png" alt="1"><br>不过这边要注意问题。 因为有把 <strong>linerstream</strong> 换成 <strong>split2</strong>. 但是在安装的时候，被安装在<strong>devDependencies</strong>里面了，导致后面被<strong>gulp-staticfy</strong>组件引用的时候，在跑gulp的提示是找不到<strong>split2</strong> 模块，原来是当库被别的库引用的时候，node只装 <strong>dependencies</strong> 里面的依赖，不会装 <strong>devDependencies</strong> 里面的依赖（他认为<strong>devDependencies</strong>里面的依赖只是做测试程序所需要的）， 因此要把<strong>split2</strong>模块装在 <strong>dependencies</strong> 里面<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"dependencies"</span>: &#123;  </span><br><span class="line">    <span class="string">"phantomjs-prebuilt"</span>: <span class="string">"^2.1.4"</span>,  </span><br><span class="line">    <span class="string">"winston"</span>: <span class="string">"^2.2.0"</span>,  </span><br><span class="line">    <span class="string">"split2"</span>: <span class="string">"^2.1.0"</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>那么接下来就要在 <strong>gulp-staticfy</strong> 里面把原先的 <strong>phantom</strong> 依赖，换成我们自己项目的 <strong>phantom</strong><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install git+ssh:<span class="comment">//git@github.com:kebingzao/phantomjs-node.git --save</span></span><br></pre></td></tr></table></figure></p>
+<p>注意，因为我们没有把这个组件publish到npm的组件库中，所以要安装的话，只能用这种方式安装。<br>这样安装之后，package.json 就会换成我们的地址了：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"dependencies"</span>: &#123;</span><br><span class="line">  <span class="string">"gulp-sequence"</span>: <span class="string">"^0.4.6"</span>,</span><br><span class="line">  <span class="string">"gulp-util"</span>: <span class="string">"^3.0.1"</span>,</span><br><span class="line">  <span class="string">"lodash"</span>: <span class="string">"^4.16.6"</span>,</span><br><span class="line">  <span class="string">"map-stream"</span>: <span class="string">"0.0.6"</span>,</span><br><span class="line">  <span class="string">"node-static"</span>: <span class="string">"^0.7.9"</span>,</span><br><span class="line">  <span class="string">"phantom"</span>: <span class="string">"git+ssh://git@github.com/kebingzao/phantomjs-node.git"</span>,</span><br><span class="line">  <span class="string">"portfinder"</span>: <span class="string">"^1.0.9"</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>看了一下，代码是对的了：phantom/lib/phantom.js:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> _split = <span class="built_in">require</span>(<span class="string">'split2'</span>);</span><br><span class="line"><span class="keyword">var</span> _split2 = _interopRequireDefault(_split);</span><br></pre></td></tr></table></figure></p>
+<p>然后把package.json重新提交一下，换成 0.0.5 版本，并publish 到 npm:<br><img src="/2018/09/13/www-history-10/7.png" alt="1"><br>接下来就是重新装一下官网的 <strong>gulp-staticfy</strong>， 换成 <strong>0.0.5</strong> 的版本，就行了。<br>验证下，打个包，终于没有乱码了。</p>
+<h4 id="4-拉取的权限问题"><a href="#4-拉取的权限问题" class="headerlink" title="4 拉取的权限问题"></a>4 拉取的权限问题</h4><p>后面又发现了一个情况，就是在同事的电脑在安装 <strong>gulp-staticfy</strong> 这个组件的时候，发现在下载我自己的phantom 源（git+ssh:<a href="mailto://git@github.com" target="_blank" rel="noopener">//git@github.com</a>/kebingzao/phantomjs-node.git）的时候。发现报错？？<br>原因是 <strong>permission deny</strong>。 没有权限？？<br>后面查了一下，原来用ssh拉取的库，要是当前这个库的用户才行，如果不是这个用户的话，就会报错，所以后面改成用https的方式，即：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"dependencies"</span>: &#123;  </span><br><span class="line">    <span class="string">"gulp-sequence"</span>: <span class="string">"^0.4.6"</span>,  </span><br><span class="line">    <span class="string">"gulp-util"</span>: <span class="string">"^3.0.1"</span>,  </span><br><span class="line">    <span class="string">"lodash"</span>: <span class="string">"^4.16.6"</span>,  </span><br><span class="line">    <span class="string">"map-stream"</span>: <span class="string">"0.0.6"</span>,  </span><br><span class="line">    <span class="string">"node-static"</span>: <span class="string">"^0.7.9"</span>,  </span><br><span class="line">    <span class="string">"phantom"</span>: <span class="string">"git+https://github.com/kebingzao/phantomjs-node.git"</span>,  </span><br><span class="line">    <span class="string">"portfinder"</span>: <span class="string">"^1.0.9"</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>然后重新提交一下，变成 0.0.6。 这样子同事的项目就可以正常安装了</p>
+<hr>
+<p>参考：<br><a href="http://www.imooc.com/article/9053" target="_blank" rel="noopener">Node.js 爬虫程序汉字乱码的原因：buffer 的拼接问题！</a><br><a href="https://segmentfault.com/a/1190000000740718" target="_blank" rel="noopener">通过Node.js Stream API 实现逐行读取的实例</a></p>
+<hr>
+<p>系列文章<br><a href="/2018/09/12/www-history-1/" title="官网构建优化流程(1) - 简介">官网构建优化流程(1) - 简介</a><br><a href="/2018/09/12/www-history-2/" title="官网构建优化流程(2) - 旧版grunt打包构建流程">官网构建优化流程(2) - 旧版grunt打包构建流程</a><br><a href="/2018/09/12/www-history-3/" title="官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy">官网构建优化流程(3) - grunt静态页面预编译插件 grunt-staticfy</a><br><a href="/2018/09/12/www-history-4/" title="官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy">官网构建优化流程(4) - gulp 静态页面预编译插件 gulp-staticfy</a><br><a href="/2018/09/12/www-history-5/" title="官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js">官网构建优化流程(5) - gulp jst模板联合组件 gulp-concat-js</a><br><a href="/2018/09/12/www-history-6/" title="官网构建优化流程(6) - 把原先的grunt换成gulp构建">官网构建优化流程(6) - 把原先的grunt换成gulp构建</a><br><a href="/2018/09/13/www-history-7/" title="官网构建优化流程(7) - 官网的多语言跳转规则">官网构建优化流程(7) - 官网的多语言跳转规则</a><br><a href="/2018/09/13/www-history-8/" title="官网构建优化流程(8) - gulp打包构建在ie8会报错">官网构建优化流程(8) - gulp打包构建在ie8会报错</a><br><a href="/2018/09/13/www-history-9/" title="官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题">官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题</a><br><a href="/2018/09/13/www-history-10/" title="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码</a><br><a href="/2018/09/13/www-history-11/" title="官网构建优化流程(11) - 部署转为用Jenkins自动化部署">官网构建优化流程(11) - 部署转为用Jenkins自动化部署</a><br><a href="/2018/09/13/www-history-12/" title="官网构建优化流程(12) - 优化加载速度，资源分开存放">官网构建优化流程(12) - 优化加载速度，资源分开存放</a><br><a href="/2018/09/13/www-history-13/" title="官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS">官网构建优化流程(13) - 字体文件的跨域问题 和 S3/CloudFront/COS 设置跨域CORS</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/09/13/www-history-10/" title="官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码">http://kebingzao.com/2018/09/13/www-history-10/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/gulp/" rel="tag"># gulp</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/13/www-history-9/" rel="next" title="官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题">
+                <i class="fa fa-chevron-left"></i> 官网构建优化流程(9) - windows 下打zip包到服务器没有执行权限的问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/13/www-history-11/" rel="prev" title="官网构建优化流程(11) - 部署转为用Jenkins自动化部署">
+                官网构建优化流程(11) - 部署转为用Jenkins自动化部署 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">84</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#写在前面的话"><span class="nav-number">1.</span> <span class="nav-text">写在前面的话</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前因"><span class="nav-number">2.</span> <span class="nav-text">前因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#寻找解决方案"><span class="nav-number">3.</span> <span class="nav-text">寻找解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定位问题"><span class="nav-number">3.1.</span> <span class="nav-text">定位问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决问题"><span class="nav-number">3.2.</span> <span class="nav-text">解决问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-先fork-这个项目，-https-github-com-kebingzao-phantomjs-node"><span class="nav-number">3.2.1.</span> <span class="nav-text">1 先fork 这个项目， https://github.com/kebingzao/phantomjs-node</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-然后git-clone-到本地"><span class="nav-number">3.2.2.</span> <span class="nav-text">2 然后git clone 到本地</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-换库并publish"><span class="nav-number">3.2.3.</span> <span class="nav-text">3 换库并publish</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-拉取的权限问题"><span class="nav-number">3.2.4.</span> <span class="nav-text">4 拉取的权限问题</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/09/13/www-history-10/';
+          this.page.identifier = '2018/09/13/www-history-10/';
+          this.page.title = '官网构建优化流程(10) - gulp-staticfy进行多语言预编译的时候，会随机出现乱码';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

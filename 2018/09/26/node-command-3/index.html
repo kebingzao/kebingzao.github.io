@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="nodejs," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前做了一个练习之作 Node命令行工具实践(2) - 自制项目脚手架命令行，实用价值不高，这次要做的命令行就是用在项目中的。 需求和方案为了收集用户在web上的点击行为，我们有自己的talking data 系统，并提供给web端，让web端的程序抛送。 但是为了便于存储，所以基本上存在数据库里面就是以 01020304 这种方式存放的。其中前面两位就是项目的代号，每一个项目都有一个唯一的代">
+<meta name="keywords" content="nodejs">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Node命令行工具实践(3) - 一个用于批量导入key的命令行">
+<meta property="og:url" content="http://kebingzao.com/2018/09/26/node-command-3/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前做了一个练习之作 Node命令行工具实践(2) - 自制项目脚手架命令行，实用价值不高，这次要做的命令行就是用在项目中的。 需求和方案为了收集用户在web上的点击行为，我们有自己的talking data 系统，并提供给web端，让web端的程序抛送。 但是为了便于存储，所以基本上存在数据库里面就是以 01020304 这种方式存放的。其中前面两位就是项目的代号，每一个项目都有一个唯一的代">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/09/26/node-command-3/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/26/node-command-3/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/26/node-command-3/3.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/26/node-command-3/4.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/26/node-command-3/5.png">
+<meta property="og:image" content="http://kebingzao.com/2018/09/26/node-command-3/6.png">
+<meta property="og:updated_time" content="2018-10-05T11:30:36.176Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Node命令行工具实践(3) - 一个用于批量导入key的命令行">
+<meta name="twitter:description" content="前言之前做了一个练习之作 Node命令行工具实践(2) - 自制项目脚手架命令行，实用价值不高，这次要做的命令行就是用在项目中的。 需求和方案为了收集用户在web上的点击行为，我们有自己的talking data 系统，并提供给web端，让web端的程序抛送。 但是为了便于存储，所以基本上存在数据库里面就是以 01020304 这种方式存放的。其中前面两位就是项目的代号，每一个项目都有一个唯一的代">
+<meta name="twitter:image" content="http://kebingzao.com/2018/09/26/node-command-3/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/09/26/node-command-3/"/>
+
+
+
+
+
+  <title>Node命令行工具实践(3) - 一个用于批量导入key的命令行 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/09/26/node-command-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Node命令行工具实践(3) - 一个用于批量导入key的命令行</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-26T16:42:40+08:00">
+                2018-09-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/node相关/" itemprop="url" rel="index">
+                    <span itemprop="name">node相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/node相关/Node命令行工具实践/" itemprop="url" rel="index">
+                    <span itemprop="name">Node命令行工具实践</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/26/node-command-3/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/26/node-command-3/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/26/node-command-3/" class="leancloud_visitors" data-flag-title="Node命令行工具实践(3) - 一个用于批量导入key的命令行">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前做了一个练习之作 <a href="/2018/09/26/node-command-2/" title="Node命令行工具实践(2) - 自制项目脚手架命令行">Node命令行工具实践(2) - 自制项目脚手架命令行</a>，实用价值不高，这次要做的命令行就是用在项目中的。</p>
+<h2 id="需求和方案"><a href="#需求和方案" class="headerlink" title="需求和方案"></a>需求和方案</h2><p>为了收集用户在web上的点击行为，我们有自己的talking data 系统，并提供给web端，让web端的程序抛送。 但是为了便于存储，所以基本上存在数据库里面就是以 <strong>01020304</strong> 这种方式存放的。<br>其中前面两位就是项目的代号，每一个项目都有一个唯一的代号，后面的6位，两位为一个单位，所以会有树级的结构，所以会有三层来描述一个具体的用户行为，举个例子， 比如 <strong>01020101</strong> 可能就是表示 官网(01)下的个人中心(02)的购买模块(01)，然后用户点击购买按钮行为(01)。<br><a id="more"></a><br>但是只有code存在数据库中，如果产品要看数据的话，他怎么把这个code和对应的意思结合起来。 这个就涉及到一个 map 对应，当然我们有自己的后台，可以让开发人员去添加：<br><img src="/2018/09/26/node-command-3/1.png" alt="1"><br>但是这个后台只适合用来添加一些零散的，或者用来做修改。如果一个新的项目，他的td key可能就有一两百个了，一个一个添加就直接疯掉了。<br>所以刚开始服务端就做了一个批量添加 key 的接口：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span> *(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> params = req.body[<span class="string">"list"</span>];</span><br><span class="line">    params = <span class="built_in">JSON</span>.parse(params);</span><br><span class="line">    <span class="comment">// 这边设置 如果 key 重复的话，就变成更新</span></span><br><span class="line">    res.body.data = <span class="keyword">yield</span> models.td_model_list.bulkCreate(params,&#123;</span><br><span class="line">        validate: <span class="literal">false</span>,</span><br><span class="line">        ignoreDuplicates: <span class="literal">true</span>,</span><br><span class="line">        updateOnDuplicate: <span class="literal">true</span></span><br><span class="line">    &#125;);</span><br><span class="line">    next();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>接口很简单，就是将前端传过来的list数组，直接批量入库就行了，如果唯一key已经存在，那么就变成修改，相当于就是 upsert 操作。<br>但是这样只是说明接口有着落了，但是拼成list数组的那个最繁琐的步骤其实还在。 而且web站点也有自己的一份 <strong>td key - value</strong> 的映射map。<br>这边截取一部分（实际上这个map非常大）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">/**</span><br><span class="line"> *  value 的值非必填</span><br><span class="line"> *  category model action 3层模式  category model 2层模式</span><br><span class="line"> **/</span><br><span class="line"></span><br><span class="line">const td = &#123;</span><br><span class="line">  &quot;device&quot;: &#123;</span><br><span class="line">    &quot;uid&quot;: &quot;01&quot;,</span><br><span class="line">    &quot;value&quot;: &quot;设备页面&quot;,</span><br><span class="line">    &quot;des&quot;: &quot;device des&quot;,</span><br><span class="line">    &quot;model&quot;: &#123;</span><br><span class="line">      &quot;list&quot;: &#123;</span><br><span class="line">        &quot;uid&quot;: &quot;01&quot;,</span><br><span class="line">        &quot;value&quot;: &quot;设备列表模块&quot;,</span><br><span class="line">        &quot;des&quot;: &quot;list des&quot;,</span><br><span class="line">        &quot;action&quot;: &#123;</span><br><span class="line">          &quot;add&quot;: &#123;</span><br><span class="line">            &quot;uid&quot;: &quot;01&quot;,</span><br><span class="line">            &quot;des&quot;: &quot;01 des&quot;,</span><br><span class="line">            &quot;value&quot;: &quot;添加设备&quot;</span><br><span class="line">          &#125;,</span><br><span class="line">          &quot;openPermission&quot;: &#123;</span><br><span class="line">            &quot;uid&quot;: &quot;02&quot;,</span><br><span class="line">            &quot;value&quot;: &quot;开启分组权限管理&quot;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &quot;wall&quot;: &#123;</span><br><span class="line">        &quot;uid&quot;: &quot;02&quot;,</span><br><span class="line">        &quot;value&quot;: &quot;设备墙展示&quot;,</span><br><span class="line">        &quot;action&quot;: &#123;</span><br><span class="line">          &quot;switchDeviceStatusShow2&quot;: &#123;</span><br><span class="line">            &quot;value&quot;: &quot;顶部选择展示总设备&quot;,</span><br><span class="line">            &quot;uid&quot;: &quot;01&quot;</span><br><span class="line">          &#125;,</span><br><span class="line">          &quot;switchDeviceStatusShow1&quot;: &#123;</span><br><span class="line">            &quot;value&quot;: &quot;顶部选择展示总设备-在线&quot;,</span><br><span class="line">            &quot;uid&quot;: &quot;02&quot;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;member&quot;: &#123;</span><br><span class="line">    &quot;uid&quot;: &quot;02&quot;,</span><br><span class="line">    &quot;value&quot;: &quot;成员页面&quot;,</span><br><span class="line">    &quot;model&quot;: &#123;</span><br><span class="line">      &quot;list&quot;: &#123;</span><br><span class="line">        &quot;uid&quot;: &quot;01&quot;,</span><br><span class="line">        &quot;value&quot;: &quot;成员列表模块&quot;,</span><br><span class="line">        &quot;action&quot;: &#123;</span><br><span class="line">          &quot;invite&quot;: &#123;</span><br><span class="line">            &quot;uid&quot;: &quot;01&quot;,</span><br><span class="line">            &quot;value&quot;: &quot;邀请成员&quot;</span><br><span class="line">          &#125;,</span><br><span class="line">          &quot;move&quot;: &#123;</span><br><span class="line">            &quot;uid&quot;: &quot;02&quot;,</span><br><span class="line">            &quot;value&quot;: &quot;成员移动分组&quot;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">export default td;</span><br></pre></td></tr></table></figure></p>
+<p>那是不是我可以写一个命令行工具，然后当在这个项目的根目录调用的时候，就去找这个map文件，通过正则表达式取出这一串有用的 json 串，然后解析生成类似这种map：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">[ &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25010000&apos;,</span><br><span class="line">    value: &apos;设备页面&apos;,</span><br><span class="line">    description: &apos;device des&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25010100&apos;,</span><br><span class="line">    value: &apos;设备列表模块&apos;,</span><br><span class="line">    description: &apos;list des&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25010101&apos;,</span><br><span class="line">    value: &apos;添加设备&apos;,</span><br><span class="line">    description: &apos;01 des&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25010102&apos;,</span><br><span class="line">    value: &apos;开启分组权限管理&apos;,</span><br><span class="line">    description: &apos;&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25010200&apos;,</span><br><span class="line">    value: &apos;设备墙展示&apos;,</span><br><span class="line">    description: &apos;&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25010201&apos;,</span><br><span class="line">    value: &apos;顶部选择展示总设备&apos;,</span><br><span class="line">    description: &apos;&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25010202&apos;,</span><br><span class="line">    value: &apos;顶部选择展示总设备-在线&apos;,</span><br><span class="line">    description: &apos;&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25020000&apos;,</span><br><span class="line">    value: &apos;成员页面&apos;,</span><br><span class="line">    description: &apos;&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25020100&apos;,</span><br><span class="line">    value: &apos;成员列表模块&apos;,</span><br><span class="line">    description: &apos;&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25020101&apos;,</span><br><span class="line">    value: &apos;邀请成员&apos;,</span><br><span class="line">    description: &apos;&apos; &#125;,</span><br><span class="line">  &#123; device_type: &apos;25&apos;,</span><br><span class="line">    key: &apos;25020102&apos;,</span><br><span class="line">    value: &apos;成员移动分组&apos;,</span><br><span class="line">    description: &apos;&apos; &#125; ]</span><br></pre></td></tr></table></figure></p>
+<p>最后将这个数组直接post到那个批量添加的接口，不就可以了。<br>而且为了让这个命令行具有普遍性，不仅仅这个项目会用，其他项目也会用到，所以这边的想法就是将这个命令行的操作分为两步。</p>
+<h3 id="第一步初始化配置文件，指令是-td-helper-i"><a href="#第一步初始化配置文件，指令是-td-helper-i" class="headerlink" title="第一步初始化配置文件，指令是 td-helper i"></a>第一步初始化配置文件，指令是 <strong>td-helper i</strong></h3><p>这时候就会生成这个项目特有的配置文件，比如项目代号是多少，tdMap源文件放在哪里，提取的正则是多少，调用的接口是多少（有测试环境和生产环境），甚至可以自定义json串(可能有些项目不一定有tdMap文件，但是他又想批量添加，这时候直接将实现弄好的json串拷贝过去就行了)<br>配置文件<strong>td-options.json</strong>类似如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;uri&quot;: &quot;http://xxx.com/td/key_bulk_create&quot;,</span><br><span class="line">  &quot;deviceType&quot;: &quot;25&quot;,</span><br><span class="line">  &quot;code&quot;: &quot;25&quot;,</span><br><span class="line">  &quot;targetFile&quot;: &quot;./td-config.js&quot;,</span><br><span class="line">  &quot;findReg&quot;: &quot;(.*td = )(.*)(;export default td;)&quot;,</span><br><span class="line">  &quot;replaceReg&quot;: &quot;$2&quot;,</span><br><span class="line">  &quot;jsonData&quot;: &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="第二步就是执行上面的逻辑，指令就是-td-helper-u"><a href="#第二步就是执行上面的逻辑，指令就是-td-helper-u" class="headerlink" title="第二步就是执行上面的逻辑，指令就是 td-helper u"></a>第二步就是执行上面的逻辑，指令就是 <strong>td-helper u</strong></h3><p>其实就是找到tdMap文件，然后通过正则表达式将json串提取出来，然后遍历形成记录record 条目，最后调用批量添加的接口。这样就行了。</p>
+<h2 id="实际开发"><a href="#实际开发" class="headerlink" title="实际开发"></a>实际开发</h2><p>文件目录如下：<br><img src="/2018/09/26/node-command-3/2.png" alt="1"></p>
+<ul>
+<li><strong>td-config.js</strong> 就是用来做开发的tdMap，具体项目会有具体的名称和位置，这个只是用来作为开发和调试用。 </li>
+<li><strong>td-options.json</strong> 这个是init之后生成的配置文件，具体项目在用的时候，也会具体生成新的配置，这边也只是用于开发和调试会用到。</li>
+<li><strong>bin/td-helper.js</strong> 这个是入口文件</li>
+<li><strong>src/</strong> 这个文件夹是具体的业务代码，后面会讲到</li>
+<li><strong>package.json</strong> 项目的配置文件</li>
+</ul>
+<p>目录结构非常清晰，接下来具体分析一下：</p>
+<h3 id="总入口文件-bin-td-helper-js"><a href="#总入口文件-bin-td-helper-js" class="headerlink" title="总入口文件 bin/td-helper.js"></a>总入口文件 bin/td-helper.js</h3><p><strong>td-helper.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/usr/bin/env node</span></span><br><span class="line"><span class="built_in">require</span>(<span class="string">'../src'</span>);</span><br></pre></td></tr></table></figure></p>
+<p>内容非常简单，直接指向 <strong>src</strong> 目录的 <strong>index.js</strong> 文件</p>
+<h3 id="业务的入口文件-index-js"><a href="#业务的入口文件-index-js" class="headerlink" title="业务的入口文件 index.js"></a>业务的入口文件 index.js</h3><p><strong>src/index.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"><span class="keyword">const</span> program = <span class="built_in">require</span>(<span class="string">'commander'</span>);</span><br><span class="line"><span class="keyword">const</span> init = <span class="built_in">require</span>(<span class="string">'./init'</span>);</span><br><span class="line"><span class="keyword">const</span> update = <span class="built_in">require</span>(<span class="string">'./update'</span>);</span><br><span class="line"><span class="keyword">const</span> pkg = <span class="built_in">require</span>(<span class="string">'../package.json'</span>);</span><br><span class="line"></span><br><span class="line">program.version(pkg.version);</span><br><span class="line">program.command(<span class="string">'init'</span>).alias(<span class="string">'i'</span>).description(<span class="string">'初始化td批量添加key配置'</span>).action(init);</span><br><span class="line">program.command(<span class="string">'update'</span>).alias(<span class="string">'u'</span>).description(<span class="string">'批量添加或修改'</span>).action(update);</span><br><span class="line"></span><br><span class="line">program.parse(process.argv);</span><br><span class="line"><span class="keyword">if</span> (!program.args.length) program.help();</span><br></pre></td></tr></table></figure></p>
+<p>可以看到逻辑也非常简单，就两个指令，一个初始化 <strong>init(i)</strong>, 一个用于批量添加 <strong>update(u)</strong>, 接下来先分析初始化的指令 <strong>init.js</strong></p>
+<h3 id="初始化指令-init-js"><a href="#初始化指令-init-js" class="headerlink" title="初始化指令 init.js"></a>初始化指令 init.js</h3><p><strong>src/init.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> inquirer = <span class="built_in">require</span>(<span class="string">'inquirer'</span>);</span><br><span class="line"><span class="keyword">const</span> readOptions = <span class="built_in">require</span>(<span class="string">'./read-options'</span>);</span><br><span class="line"><span class="keyword">const</span> chalk = <span class="built_in">require</span>(<span class="string">'chalk'</span>);</span><br><span class="line"><span class="keyword">const</span> constants = <span class="built_in">require</span>(<span class="string">'./constants'</span>);</span><br><span class="line"><span class="keyword">const</span> TD_OPTIONS_FILE = constants.OPTIONS_FILE;</span><br><span class="line"><span class="keyword">const</span> API_URI = constants.URI;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">init</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> options = readOptions();</span><br><span class="line">    <span class="keyword">if</span> (!options) &#123;</span><br><span class="line">        <span class="comment">// 设置默认值</span></span><br><span class="line">        options = &#123;</span><br><span class="line">            uri: API_URI,</span><br><span class="line">            deviceType: <span class="number">4</span>,</span><br><span class="line">            code: <span class="string">"07"</span>,</span><br><span class="line">            targetFile: <span class="string">''</span>,</span><br><span class="line">            findReg: <span class="string">''</span>,</span><br><span class="line">            replaceReg: <span class="string">''</span>,</span><br><span class="line">            jsonData: &#123;&#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    inquirer.prompt([&#123;</span><br><span class="line">        name: <span class="string">'uri'</span>,</span><br><span class="line">        message: <span class="string">'请输入接口地址'</span>,</span><br><span class="line">        <span class="keyword">default</span>: options.uri,</span><br><span class="line">        type: <span class="string">'input'</span></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        name: <span class="string">'deviceType'</span>,</span><br><span class="line">        message: <span class="string">'请输入该TD项目的device type'</span>,</span><br><span class="line">        <span class="keyword">default</span>: options.deviceType,</span><br><span class="line">        type: <span class="string">'input'</span></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        name: <span class="string">'code'</span>,</span><br><span class="line">        message: <span class="string">'请输入该项目的code(前两位)?'</span>,</span><br><span class="line">        <span class="keyword">default</span>: options.code,</span><br><span class="line">        type: <span class="string">'input'</span></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        name: <span class="string">'targetFile'</span>,</span><br><span class="line">        message: <span class="string">'请输入要分析的TD文件?'</span>,</span><br><span class="line">        <span class="keyword">default</span>: options.targetFile,</span><br><span class="line">        type: <span class="string">'input'</span></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        name: <span class="string">'findReg'</span>,</span><br><span class="line">        message: <span class="string">'请输入从TD文件中，提取有效内容的正则表达式?'</span>,</span><br><span class="line">        <span class="keyword">default</span>: options.findReg,</span><br><span class="line">        type: <span class="string">'input'</span></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        name: <span class="string">'replaceReg'</span>,</span><br><span class="line">        message: <span class="string">'请输入从TD文件中，替换的正则表达式'</span>,</span><br><span class="line">        <span class="keyword">default</span>: options.replaceReg,</span><br><span class="line">        type: <span class="string">'input'</span></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        name: <span class="string">'jsonData'</span>,</span><br><span class="line">        message: <span class="string">'请输入本地的json数据，注意，如果有设置要读取的td文件的话，那么这个就忽略'</span>,</span><br><span class="line">        <span class="keyword">default</span>: options.jsonData,</span><br><span class="line">        type: <span class="string">'input'</span></span><br><span class="line">    &#125;, &#123;</span><br><span class="line">        name: <span class="string">'is_ok'</span>,</span><br><span class="line">        type: <span class="string">'confirm'</span>,</span><br><span class="line">        message: <span class="string">'确认以上信息没有问题?'</span>,</span><br><span class="line">        <span class="keyword">default</span>: <span class="literal">true</span></span><br><span class="line">    &#125;]).then(<span class="function"><span class="keyword">function</span> (<span class="params">result</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (result.is_ok) &#123;</span><br><span class="line">            options.uri = result.uri;</span><br><span class="line">            options.deviceType = result.deviceType;</span><br><span class="line">            options.code = result.code;</span><br><span class="line">            options.targetFile = result.targetFile;</span><br><span class="line">            options.findReg = result.findReg;</span><br><span class="line">            options.replaceReg = result.replaceReg;</span><br><span class="line">            options.jsonData = result.jsonData;</span><br><span class="line">            fs.writeFileSync(TD_OPTIONS_FILE, <span class="built_in">JSON</span>.stringify(options, <span class="literal">null</span>, <span class="number">2</span>));</span><br><span class="line">            <span class="built_in">console</span>.log(chalk.green(<span class="string">'初始化完成, 现在可以使用 td-helper update 批量更新td key.'</span>));</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(chalk.red(<span class="string">'已取消'</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).catch(<span class="function"><span class="keyword">function</span> (<span class="params">e</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">console</span>.log(e);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = init;</span><br></pre></td></tr></table></figure></p>
+<p>逻辑其实也非常简单，就是在执行 init 的时候，出现一些交互页面，用户可以自己一步一步设置，如果本地已经存在 td-options.json文件，就会去读取这个文件，并当做默认值，如果不存在，在设置完之后，就会生成这个文件了<br>这边有涉及到这个 <strong>read-options.js</strong> 这个文件，其实逻辑很简单，就是去读取 <strong>td-options.json</strong> 文件的内容，并返回：<br><strong>read-options.js</strong>：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> constants = <span class="built_in">require</span>(<span class="string">'./constants'</span>);</span><br><span class="line"><span class="keyword">const</span> TD_OPTIONS_FILE = constants.OPTIONS_FILE;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">readOptions</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (fs.existsSync(TD_OPTIONS_FILE)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">JSON</span>.parse(fs.readFileSync(TD_OPTIONS_FILE).toString());</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'找不到TD配置, 请先使用 td-helper init 命令生成当前项目的TD配置文件.'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = readOptions;</span><br></pre></td></tr></table></figure></p>
+<p>而另一个 <strong>constants.js</strong> 就是存放一些变量，比如这个文件的名字，或者是默认的批量添加的接口：<br><strong>constants.js</strong>：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports.URI = <span class="string">'http://xxx.xxx.com/td/key_bulk_create'</span>;</span><br><span class="line"><span class="built_in">module</span>.exports.OPTIONS_FILE = <span class="string">'./td-options.json'</span>;</span><br></pre></td></tr></table></figure></p>
+<p>执行 init 的效果就是：<br><img src="/2018/09/26/node-command-3/3.png" alt="1"><br><img src="/2018/09/26/node-command-3/4.png" alt="1"><br>这样子我们需要的配置文件 <strong>td-options.json</strong> 就生成了 (或者重新设置了)， 当然如果本地项目已经有这个文件了，也可以直接到这个文件直接修改也可以，不需要再执行 init 命令，因为本质上执行 init 命令就是为了生成并设置这个json文件。</p>
+<h3 id="更新指令-update-js"><a href="#更新指令-update-js" class="headerlink" title="更新指令 update.js"></a>更新指令 update.js</h3><p>初始化设置之后，接下来肯定就是 批量更新了：<br><strong>src/update.js</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 批量更新 td key</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">const</span> request = <span class="built_in">require</span>(<span class="string">'request'</span>);</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>);</span><br><span class="line"><span class="keyword">const</span> _ = <span class="built_in">require</span>(<span class="string">'lodash'</span>);</span><br><span class="line"><span class="keyword">const</span> chalk = <span class="built_in">require</span>(<span class="string">'chalk'</span>);</span><br><span class="line"><span class="keyword">const</span> readOptions = <span class="built_in">require</span>(<span class="string">'./read-options'</span>);</span><br><span class="line"><span class="keyword">const</span> readline = <span class="built_in">require</span>(<span class="string">'readline'</span>);</span><br><span class="line"><span class="keyword">const</span> constants = <span class="built_in">require</span>(<span class="string">'./constants'</span>);</span><br><span class="line"><span class="keyword">const</span> API_URI = constants.URI;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateLang</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> options = readOptions();</span><br><span class="line">    <span class="keyword">if</span> (!options) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(chalk.red(<span class="string">'找不到本地配置文件，请执行 td-helper i 指令进行配置文件的创建'</span>));</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 获取本地的TD config 文件</span></span><br><span class="line">    <span class="keyword">if</span> (fs.existsSync(options.targetFile)) &#123;</span><br><span class="line">        <span class="keyword">const</span> r1 = readline.createInterface(&#123;</span><br><span class="line">            input: fs.createReadStream(options.targetFile)</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> i = <span class="number">1</span>; <span class="comment">//txt中的行数</span></span><br><span class="line">        <span class="keyword">let</span> str = <span class="string">''</span>;</span><br><span class="line">        <span class="keyword">let</span> strObj = &#123;&#125;;</span><br><span class="line">        r1.on(<span class="string">'line'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">line</span>) </span>&#123; <span class="comment">//事件监听</span></span><br><span class="line">            <span class="comment">// console.log('Line from file:' + i + ":" + line);</span></span><br><span class="line">            str += line.trim();</span><br><span class="line">            i += <span class="number">1</span>;</span><br><span class="line">        &#125;);</span><br><span class="line">        r1.on(<span class="string">'close'</span>, () =&gt; &#123;</span><br><span class="line">            <span class="comment">// console.log(str);</span></span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'readline close...'</span>);</span><br><span class="line">            <span class="comment">// 接下来用正则表达式，将json串提取出来</span></span><br><span class="line">            str = str.replace(<span class="keyword">new</span> <span class="built_in">RegExp</span>(options.findReg), options.replaceReg);</span><br><span class="line">            <span class="comment">// console.log(str);</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// 接下来就格式化，判断是不是一个json串</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="built_in">console</span>.log(chalk.green(<span class="string">'开始格式化'</span>));</span><br><span class="line">                strObj = <span class="built_in">JSON</span>.parse(str);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">                <span class="built_in">console</span>.log(chalk.red(<span class="string">'json 格式化失败：请将 这个配置文件的json串拿去 https://www.bejson.com/ 进行校验，只有校验成功，才是合格的json串'</span>));</span><br><span class="line">                <span class="keyword">return</span> e;</span><br><span class="line">            &#125;</span><br><span class="line">            bulkUpdate(strObj, options);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(chalk.red(<span class="string">'找不到本地td配置文件，获取jsonData参数'</span>));</span><br><span class="line">        <span class="keyword">if</span>(_.isEmpty(options.jsonData))&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(chalk.red(<span class="string">'jsonData 也为空, 请重新配置'</span>));</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">try</span>&#123;</span><br><span class="line">                <span class="built_in">JSON</span>.parse(<span class="built_in">JSON</span>.stringify(options.jsonData));</span><br><span class="line">            &#125;<span class="keyword">catch</span> (e)&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(chalk.red(<span class="string">'jsonData 格式有误, 请重新配置'</span>));</span><br><span class="line">                <span class="keyword">return</span> e;</span><br><span class="line">            &#125;</span><br><span class="line">            bulkUpdate(options.jsonData, options);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createTdMap</span>(<span class="params">strObj, options</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> obj = &#123;&#125;,</span><br><span class="line">            modelKey = <span class="string">''</span>,</span><br><span class="line">            actionKey = <span class="string">''</span>,</span><br><span class="line">            model = <span class="string">''</span>,</span><br><span class="line">            action = <span class="string">''</span>,</span><br><span class="line">            key = <span class="string">''</span>,</span><br><span class="line">            modelValue = <span class="string">''</span>,</span><br><span class="line">            actionValue = <span class="string">''</span>,</span><br><span class="line">            modelDes = <span class="string">''</span>,</span><br><span class="line">            actionDes = <span class="string">''</span>,</span><br><span class="line">            td = strObj,</span><br><span class="line">            originCode = options.code;</span><br><span class="line">    <span class="keyword">const</span> DEFAULT_UID = <span class="string">'00'</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> t <span class="keyword">in</span> td) &#123;</span><br><span class="line">        model = td[t].model;</span><br><span class="line">        modelValue = td[t].value || <span class="string">''</span>;</span><br><span class="line">        modelKey = td[t].uid;</span><br><span class="line">        modelDes = td[t].des || <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">let</span> m <span class="keyword">in</span> model) &#123;</span><br><span class="line">            action = model[m].action;</span><br><span class="line">            actionKey = modelKey + model[m].uid;</span><br><span class="line">            actionValue = model[m].value || <span class="string">''</span>;</span><br><span class="line">            actionDes = model[m].des || <span class="string">''</span>;</span><br><span class="line">            <span class="keyword">if</span> (action) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">let</span> a <span class="keyword">in</span> action) &#123;</span><br><span class="line">                    key = originCode + actionKey + action[a].uid;</span><br><span class="line">                    obj[key] = &#123;<span class="string">"value"</span>: action[a].value || <span class="string">''</span>, <span class="string">"des"</span>: action[a].des || <span class="string">''</span>&#125;;</span><br><span class="line">                &#125;</span><br><span class="line">                key = originCode + actionKey + DEFAULT_UID;</span><br><span class="line">                obj[key] = &#123;<span class="string">"value"</span>: actionValue, <span class="string">"des"</span>: actionDes&#125;;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                key = originCode + actionKey + DEFAULT_UID;</span><br><span class="line">                obj[key] = &#123;<span class="string">"value"</span>: actionValue, <span class="string">"des"</span>: actionDes&#125;;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        key = originCode + modelKey + DEFAULT_UID + DEFAULT_UID;</span><br><span class="line">        obj[key] = &#123;<span class="string">"value"</span>: modelValue, <span class="string">"des"</span>: modelDes&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> obj;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">post</span>(<span class="params">data, uri</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span> (<span class="params">resolve, reject</span>) </span>&#123;</span><br><span class="line">        request(&#123;</span><br><span class="line">                    url: uri || API_URI,</span><br><span class="line">                    method: <span class="string">'POST'</span>,</span><br><span class="line">                    form: data</span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="function"><span class="keyword">function</span> (<span class="params">error, response, body</span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">if</span> (!error &amp;&amp; response.statusCode === <span class="number">200</span>) &#123;</span><br><span class="line">                        <span class="comment">//输出返回的内容</span></span><br><span class="line">                        <span class="comment">// console.log(body);</span></span><br><span class="line">                        resolve(body);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="comment">// console.log(error);</span></span><br><span class="line">                        reject(error)</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;)</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">bulkUpdate</span>(<span class="params">strObj, options</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> map = createTdMap(strObj, options);</span><br><span class="line">    <span class="comment">// console.log(map);</span></span><br><span class="line">    <span class="keyword">let</span> data = [];</span><br><span class="line">    _.each(map, <span class="function"><span class="keyword">function</span> (<span class="params">item, key</span>) </span>&#123;</span><br><span class="line">        data.push(&#123;</span><br><span class="line">            <span class="string">"device_type"</span>: options.deviceType,</span><br><span class="line">            <span class="string">"key"</span>: key,</span><br><span class="line">            <span class="string">"value"</span>: item.value,</span><br><span class="line">            <span class="string">"description"</span>: item.des</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// console.log(data);</span></span><br><span class="line">    post(&#123;<span class="string">"list"</span>: <span class="built_in">JSON</span>.stringify(data)&#125;, options.uri).then(<span class="function"><span class="keyword">function</span> (<span class="params">resp</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(chalk.green(<span class="string">"update成功，本地共添加了"</span> + <span class="built_in">JSON</span>.parse(resp).data.length + <span class="string">"条数据"</span>));</span><br><span class="line">    &#125;, <span class="function"><span class="keyword">function</span> (<span class="params">err</span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(chalk.red(<span class="string">"update失败："</span> + err));</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = updateLang;</span><br></pre></td></tr></table></figure></p>
+<p>逻辑其实也很简单，主要是分为以下几个小步骤：</p>
+<ul>
+<li>获取td-options.json中设置的tdMap文件，如果存在，那么就一行一行读取出来，将内容合并成一行，再用之前设置的正则表达式去获取这个json串，当获取到这个json串之后，还要去判断这个json串是否合法，能否正常执行<strong>JSON.parse</strong>, 如果找不到tdMap，那么就去判断是否有设置 jsonData这个配置，如果有的话，那么就把jsonData当做json串传到下一步处理。</li>
+<li>将这个json串进行解析和重整，形成可以直接post到批量添加接口的 record 记录</li>
+<li>最后再通过批量添加接口，将数据抛送过去，得到返回值</li>
+</ul>
+<p>执行的一个结果如下：<br><img src="/2018/09/26/node-command-3/5.png" alt="1"><br>这样子 这个命令行就做好了。</p>
+<h2 id="全局安装"><a href="#全局安装" class="headerlink" title="全局安装"></a>全局安装</h2><p>接下来就是全局安装了，因为是内部的gitlab私有库的项目，因此直接用这种方式全局安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\td-helper&gt;npm i -g git+ssh://git@xxx.xxx.com:airdroid_web/td-helper.git</span><br><span class="line">C:\Program Files\nodejs\td-helper -&gt; C:\Program Files\nodejs\node_modules\td-helper\bin\td-helper.js</span><br><span class="line">+ td-helper@1.0.9</span><br><span class="line">updated 1 package in 27.615s</span><br></pre></td></tr></table></figure></p>
+<p>这样就安装完了， 接下来就可以使用了，找到一个项目，然后在当前项目的目录下，执行 <strong>td-helper i</strong>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\airdroid_business_admin&gt;td-helper i</span><br><span class="line">找不到TD配置, 请先使用 td-helper init 命令生成当前项目的TD配置文件.</span><br><span class="line">? 请输入接口地址 http:<span class="comment">//xxx.xxx.com/td/key_bulk_create</span></span><br><span class="line">? 请输入该TD项目的device type <span class="number">25</span></span><br><span class="line">? 请输入该项目的code(前两位)? <span class="number">25</span></span><br><span class="line">? 请输入要分析的TD文件? ./src/analysis/td.config.js</span><br><span class="line">? 请输入从TD文件中，提取有效内容的正则表达式? (.*td = )(.*)(;<span class="keyword">export</span> <span class="keyword">default</span> td;)</span><br><span class="line">? 请输入从TD文件中，替换的正则表达式 $<span class="number">2</span></span><br><span class="line">? 请输入本地的json数据，注意，如果有设置要读取的td文件的话，那么这个就忽略 [object <span class="built_in">Object</span>]</span><br><span class="line">? 确认以上信息没有问题? Yes</span><br><span class="line">初始化完成, 现在可以使用 td-helper update 批量更新td key.</span><br></pre></td></tr></table></figure></p>
+<p>这时候就在这个项目的根目录就生成了 <strong>td-options.json</strong> 文件了，接下来就执行 <strong>td-helper u</strong> 来批量更新 key了<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\airdroid_business_admin&gt;td-helper u</span><br><span class="line">readline close...</span><br><span class="line">开始格式化</span><br><span class="line">update成功，本地共添加了<span class="number">142</span>条数据</span><br></pre></td></tr></table></figure></p>
+<p>这样就更新成功了。</p>
+<p>注意，如果是没有执行 init，而是直接执行 update，那么就会提示先执行 init：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\github\blog_hexo&gt;td-helper u</span><br><span class="line">找不到本地配置文件，请执行 td-helper i 指令进行配置文件的创建</span><br></pre></td></tr></table></figure></p>
+<p>最后配上<strong>package.json</strong>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;name&quot;: &quot;td-helper&quot;,</span><br><span class="line">  &quot;version&quot;: &quot;1.0.9&quot;,</span><br><span class="line">  &quot;description&quot;: &quot;td bulk insert or update key&quot;,</span><br><span class="line">  &quot;main&quot;: &quot;src/index.js&quot;,</span><br><span class="line">  &quot;bin&quot;: &#123;</span><br><span class="line">    &quot;td-helper&quot;: &quot;bin/td-helper.js&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;scripts&quot;: &#123;</span><br><span class="line">    &quot;test&quot;: &quot;node src/index.js&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;keywords&quot;: [</span><br><span class="line">    &quot;td bulk update key helper&quot;</span><br><span class="line">  ],</span><br><span class="line">  &quot;author&quot;: &quot;kebingzao&quot;,</span><br><span class="line">  &quot;license&quot;: &quot;ISC&quot;,</span><br><span class="line">  &quot;dependencies&quot;: &#123;</span><br><span class="line">    &quot;chalk&quot;: &quot;^2.4.1&quot;,</span><br><span class="line">    &quot;commander&quot;: &quot;^2.18.0&quot;,</span><br><span class="line">    &quot;inquirer&quot;: &quot;^6.2.0&quot;,</span><br><span class="line">    &quot;lodash&quot;: &quot;^4.17.11&quot;,</span><br><span class="line">    &quot;request&quot;: &quot;^2.88.0&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><h3 id="忘记启动脚本定义"><a href="#忘记启动脚本定义" class="headerlink" title="忘记启动脚本定义"></a>忘记启动脚本定义</h3><p>之前有出现一个问题，就是我全局安装好了，但是在windows下执行，出现这个问题<br><img src="/2018/09/26/node-command-3/6.png" alt="1"><br>后面查了一下，原来是我在 <strong>bin/td-helper.js</strong> 开头那边漏了这个定义为启动脚本：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env node</span><br></pre></td></tr></table></figure></p>
+<p>文件开头加上这一行就正常了。</p>
+<h3 id="npm安装报错-rollbackFailedOptional-verb-npm-session"><a href="#npm安装报错-rollbackFailedOptional-verb-npm-session" class="headerlink" title="npm安装报错 rollbackFailedOptional verb npm-session"></a>npm安装报错 rollbackFailedOptional verb npm-session</h3><p>我的其他同事在安装的时候，一直报这个错误，后面看了一下，好像是代理有问题。<br>所以后面转为用<strong>cnpm</strong>安装，好像就正常了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>有了这个命令行之后，对于前端的程序员会方便很多，每次在tdMap文件添加完新的key之后，随手调用 <strong>td-helper u</strong>直接搞定。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/09/26/node-command-3/" title="Node命令行工具实践(3) - 一个用于批量导入key的命令行">http://kebingzao.com/2018/09/26/node-command-3/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nodejs/" rel="tag"># nodejs</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/26/node-command-2/" rel="next" title="Node命令行工具实践(2) - 自制项目脚手架命令行">
+                <i class="fa fa-chevron-left"></i> Node命令行工具实践(2) - 自制项目脚手架命令行
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/05/http-status-code/" rel="prev" title="浅谈之-http的状态码以及使用场景">
+                浅谈之-http的状态码以及使用场景 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">88</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#需求和方案"><span class="nav-number">2.</span> <span class="nav-text">需求和方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#第一步初始化配置文件，指令是-td-helper-i"><span class="nav-number">2.1.</span> <span class="nav-text">第一步初始化配置文件，指令是 td-helper i</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第二步就是执行上面的逻辑，指令就是-td-helper-u"><span class="nav-number">2.2.</span> <span class="nav-text">第二步就是执行上面的逻辑，指令就是 td-helper u</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实际开发"><span class="nav-number">3.</span> <span class="nav-text">实际开发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#总入口文件-bin-td-helper-js"><span class="nav-number">3.1.</span> <span class="nav-text">总入口文件 bin/td-helper.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#业务的入口文件-index-js"><span class="nav-number">3.2.</span> <span class="nav-text">业务的入口文件 index.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#初始化指令-init-js"><span class="nav-number">3.3.</span> <span class="nav-text">初始化指令 init.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#更新指令-update-js"><span class="nav-number">3.4.</span> <span class="nav-text">更新指令 update.js</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全局安装"><span class="nav-number">4.</span> <span class="nav-text">全局安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#遇到的问题"><span class="nav-number">5.</span> <span class="nav-text">遇到的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#忘记启动脚本定义"><span class="nav-number">5.1.</span> <span class="nav-text">忘记启动脚本定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#npm安装报错-rollbackFailedOptional-verb-npm-session"><span class="nav-number">5.2.</span> <span class="nav-text">npm安装报错 rollbackFailedOptional verb npm-session</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/09/26/node-command-3/';
+          this.page.identifier = '2018/09/26/node-command-3/';
+          this.page.title = 'Node命令行工具实践(3) - 一个用于批量导入key的命令行';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

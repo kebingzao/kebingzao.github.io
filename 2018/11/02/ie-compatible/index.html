@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ie," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言虽然现在做的一些项目，越来越不需要兼容IE的问题，但是早期几年在做的时候，还是需要兼容一些IE的问题的，所以这边就把之前遇到的一些IE的兼容问题列一下，算加入到自己的问题手册中。 IE8,IE9 使用 XDomainRequest 下不支持不同协议的post 跨域这个可以看我的早期文章：ie8,ie9 使用 XDomainRequest 进行跨域还是讲的比较详细的。 IE8 下对象带关键字报错">
+<meta name="keywords" content="ie">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IE 浏览器兼容问题整理">
+<meta property="og:url" content="http://kebingzao.com/2018/11/02/ie-compatible/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言虽然现在做的一些项目，越来越不需要兼容IE的问题，但是早期几年在做的时候，还是需要兼容一些IE的问题的，所以这边就把之前遇到的一些IE的兼容问题列一下，算加入到自己的问题手册中。 IE8,IE9 使用 XDomainRequest 下不支持不同协议的post 跨域这个可以看我的早期文章：ie8,ie9 使用 XDomainRequest 进行跨域还是讲的比较详细的。 IE8 下对象带关键字报错">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/11/02/ie-compatible/1.png">
+<meta property="og:image" content="http://kebingzao.com/2018/11/02/ie-compatible/2.png">
+<meta property="og:image" content="http://kebingzao.com/2018/11/02/ie-compatible/3.png">
+<meta property="og:updated_time" content="2018-11-20T17:21:29.888Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IE 浏览器兼容问题整理">
+<meta name="twitter:description" content="前言虽然现在做的一些项目，越来越不需要兼容IE的问题，但是早期几年在做的时候，还是需要兼容一些IE的问题的，所以这边就把之前遇到的一些IE的兼容问题列一下，算加入到自己的问题手册中。 IE8,IE9 使用 XDomainRequest 下不支持不同协议的post 跨域这个可以看我的早期文章：ie8,ie9 使用 XDomainRequest 进行跨域还是讲的比较详细的。 IE8 下对象带关键字报错">
+<meta name="twitter:image" content="http://kebingzao.com/2018/11/02/ie-compatible/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/11/02/ie-compatible/"/>
+
+
+
+
+
+  <title>IE 浏览器兼容问题整理 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/11/02/ie-compatible/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">IE 浏览器兼容问题整理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-02T11:47:36+08:00">
+                2018-11-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/02/ie-compatible/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/11/02/ie-compatible/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/11/02/ie-compatible/" class="leancloud_visitors" data-flag-title="IE 浏览器兼容问题整理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>虽然现在做的一些项目，越来越不需要兼容IE的问题，但是早期几年在做的时候，还是需要兼容一些IE的问题的，所以这边就把之前遇到的一些IE的兼容问题列一下，算加入到自己的问题手册中。</p>
+<h2 id="IE8-IE9-使用-XDomainRequest-下不支持不同协议的post-跨域"><a href="#IE8-IE9-使用-XDomainRequest-下不支持不同协议的post-跨域" class="headerlink" title="IE8,IE9 使用 XDomainRequest 下不支持不同协议的post 跨域"></a>IE8,IE9 使用 XDomainRequest 下不支持不同协议的post 跨域</h2><p>这个可以看我的早期文章：<a href="/2018/06/14/ie-xdomainrequest/" title="ie8,ie9 使用 XDomainRequest 进行跨域">ie8,ie9 使用 XDomainRequest 进行跨域</a><br>还是讲的比较详细的。</p>
+<h2 id="IE8-下对象带关键字报错"><a href="#IE8-下对象带关键字报错" class="headerlink" title="IE8 下对象带关键字报错"></a>IE8 下对象带关键字报错</h2><p>之前做官网项目的时候，有报了一个错误, 就是 IE8 以下不能用 <strong>self.server.payFromType.new</strong> 这种写法，因为 new 是关键字，会导致代码报错。<br>要改成这种写法 <strong>self.server.payFromType[“new”]</strong><br><a id="more"></a></p>
+<h2 id="IE10-11-取消input框默认的叉叉和密码输入框的眼睛"><a href="#IE10-11-取消input框默认的叉叉和密码输入框的眼睛" class="headerlink" title="IE10 11 取消input框默认的叉叉和密码输入框的眼睛"></a>IE10 11 取消input框默认的叉叉和密码输入框的眼睛</h2><p>IE10默认在input框中输入内容后会显示一个‘X’按钮，方便删除输入的所有内容。<br>在password输入框显示一个眼睛的按钮，去掉眼睛和叉叉的方法如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">::-ms-clear &#123; <span class="attr">display</span>: none; &#125;</span><br><span class="line">::-ms-reveal &#123; <span class="attr">display</span>: none; &#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="IE6-支持png的透明度"><a href="#IE6-支持png的透明度" class="headerlink" title="IE6 支持png的透明度"></a>IE6 支持png的透明度</h2><p>这是IE6的老问题了，网上有很多相关的解决办法，归结起来有三种：<br>1.使用htc文件修复(自行查找相关文章) ；<br>2.js修复；<br>3.css hack。<br>这里主要说下css hack方法。通过filter我们可以间接让IE6支持png的alpha值(注：这种方法适合用png作为背景图的hack)，比如为某个元素设置了背景图:<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.class</span>&#123;<span class="attribute">background</span>:<span class="built_in">url</span>(images/bg.png)&#125;</span><br></pre></td></tr></table></figure></p>
+<p>则相应的hack写法：<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.class</span>&#123;</span><br><span class="line">    <span class="attribute">background</span>:<span class="built_in">url</span>(images/bg.png);</span><br><span class="line">    <span class="comment">/*IE6清除背景图*/</span></span><br><span class="line">    <span class="attribute">_background</span>:none;</span><br><span class="line">    <span class="comment">/*用filter载入的png图片就具有了alpha属性*/</span></span><br><span class="line">    <span class="attribute">_filter</span>:progid:DXImageTransform.Microsoft.<span class="built_in">AlphaImageLoader</span>(enabled=true, sizingMethod=scale, src=<span class="string">"misc/images/icon_circle.png"</span>)&#125;</span><br></pre></td></tr></table></figure></p>
+<p>filter的相关属性和缺点(性能和不能平铺等)在此不赘述，需要注意的是对应的路径，虽然同样是写在css里，但filter的运行环境是相对于当前文档，而不是当前css，所以css中的url相对路径和filter中的路径很可能是不相同的，为了避免出错，你也可以使用完整路径，如：<a href="http://abc.com/misc/images/icon_circle.png" target="_blank" rel="noopener">http://abc.com/misc/images/icon_circle.png</a> ，如果你在使用filter时发现不起作用，很有可能是路径搞错了！</p>
+<h2 id="解决IE6-下png-透明背景图片-有锯齿的bug"><a href="#解决IE6-下png-透明背景图片-有锯齿的bug" class="headerlink" title="解决IE6 下png 透明背景图片 有锯齿的bug"></a>解决IE6 下png 透明背景图片 有锯齿的bug</h2><p>在 IE6 下，不支持 透明背景的图片，一般的PNG透明都是 png 32，但是IE6 不支持 png32，只支持png 8。<br>看这个： <a href="/2018/05/05/ie-png-fliter/" title="解决ie6 下png 透明背景图片 有锯齿的bug">解决ie6 下png 透明背景图片 有锯齿的bug</a></p>
+<h2 id="关于滤镜AlphaImageLoader-src属性的相对路径问题"><a href="#关于滤镜AlphaImageLoader-src属性的相对路径问题" class="headerlink" title="关于滤镜AlphaImageLoader src属性的相对路径问题"></a>关于滤镜AlphaImageLoader src属性的相对路径问题</h2><p>今天偶然发现一个很让人无奈的问题,在我们的页面在样式文件里边设置了filter滤镜来过滤png图片(png图片在ie6中有灰色的背景，需要使用过滤器来过滤)，结果这些滤镜全都不能显示。后来查找问题，发现写在样式文件里边的filter的src是相对于当前浏览器的url路径，而不是相对于样式文件的路径(这与background-image的路径不同，background-image的路径是相对于样式文件的路径)<br>例如：样式文件<br><strong><a href="http://a.b.c/a/b/c/d.css" target="_blank" rel="noopener">http://a.b.c/a/b/c/d.css</a></strong> 里边有如下样式定义：<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.test</span>&#123; </span><br><span class="line">    <span class="attribute">background-image</span>:<span class="built_in">url</span>(‘../../images/a.gif’); </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line"><span class="selector-class">.testFilter</span>&#123; </span><br><span class="line">    <span class="attribute">filter</span>: progid:DXImageTransform.Microsoft.AlphaImageLoader ( enabled=true , sizingMethod=scale, src=’../../images/b.png’ ) </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在页面<strong><a href="http://b.c/a/b/c.html" target="_blank" rel="noopener">http://b.c/a/b/c.html</a></strong>里边引用该样式文件，那么：<br>使用test样式时，它的背景图片取值路径为： <strong><a href="http://a.b.c/a/images/a.gif" target="_blank" rel="noopener">http://a.b.c/a/images/a.gif</a></strong>,<br>而使用testFilter时，引用的滤镜的图片地址为： <strong><a href="http://b.c/images/b.png" target="_blank" rel="noopener">http://b.c/images/b.png</a></strong>。 </p>
+<h2 id="IE6-IE7-下-table-中-有长字符串导致table被扩大"><a href="#IE6-IE7-下-table-中-有长字符串导致table被扩大" class="headerlink" title="IE6 IE7 下 table 中 有长字符串导致table被扩大"></a>IE6 IE7 下 table 中 有长字符串导致table被扩大</h2><p>在 ie6 ie7 下，如果在table 中 td 里面 div 中有长字符串的时候，会导致 整个table 被扩大,这时候，无论怎么定义 table td 和 div 的宽度，都没有效果, 只能使用 <strong>work-break = break-all</strong> 来切断字符<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ie 浏览器下，检查长字符串，并做切断处理</span></span><br><span class="line"><span class="comment">// 只有 传输模块的文本，短信列表，新建短信 会用到，其他模块不适用</span></span><br><span class="line"><span class="comment">// todo ie 6 下很耗性能，后面不行的话，ie 6 直接砍掉</span></span><br><span class="line">checkLongStrAndBreak:<span class="function"><span class="keyword">function</span>(<span class="params">dom, targetDomSelector ,maxWidth</span>)</span>&#123;</span><br><span class="line">    maxWidth = maxWidth || <span class="number">315</span>;</span><br><span class="line">    targetDomSelector = targetDomSelector || <span class="string">".item-content"</span>;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">if</span>(Airdroid.Util.browser.ie &amp;&amp; dom.length &gt; <span class="number">0</span>)&#123;</span><br><span class="line">        setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> isReinit = <span class="literal">false</span>;</span><br><span class="line">            dom.each(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                <span class="keyword">if</span>($(<span class="keyword">this</span>).find(targetDomSelector).outerWidth() &gt; maxWidth)&#123;</span><br><span class="line">                    $(<span class="keyword">this</span>).find(targetDomSelector).css(<span class="string">"word-break"</span>,<span class="string">"break-all"</span>);</span><br><span class="line">                    isReinit = <span class="literal">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">            <span class="keyword">if</span>(isReinit)&#123;</span><br><span class="line">                <span class="comment">// 全部完了之后，再渲染一遍</span></span><br><span class="line">                self.reinitScrollbar();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="number">20</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<h2 id="IE9以下没有-location-origin"><a href="#IE9以下没有-location-origin" class="headerlink" title="IE9以下没有 location.origin"></a>IE9以下没有 location.origin</h2><p>ie 9 及以下，没有 location.origin 这个属性，只能 用 location.protocol + “//“ + location.host 来代替<br><img src="/2018/11/02/ie-compatible/1.png" alt="1"></p>
+<h2 id="IE6-IE9-CSS禁止选择文本功能"><a href="#IE6-IE9-CSS禁止选择文本功能" class="headerlink" title="IE6 - IE9 CSS禁止选择文本功能"></a>IE6 - IE9 CSS禁止选择文本功能</h2><p>有时候，我们为了用户体验，需要禁用选择文本功能。 这需要用到一个CSS属性：<strong>user-select</strong>。<br>一般浏览器我们都这样写：<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">body</span>&#123;</span><br><span class="line">    <span class="attribute">-moz-user-select</span>: none; <span class="comment">/*火狐*/</span></span><br><span class="line">    <span class="attribute">-webkit-user-select</span>: none; <span class="comment">/*webkit浏览器*/</span></span><br><span class="line">    <span class="attribute">-ms-user-select</span>: none; <span class="comment">/*IE10*/</span></span><br><span class="line">    <span class="attribute">-khtml-user-select</span>: none; <span class="comment">/*早期浏览器*/</span></span><br><span class="line">    <span class="attribute">user-select</span>: none;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>IE6-9还没发现相关的CSS属性，只能通过JS来实现:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//IE6-9</span></span><br><span class="line"><span class="built_in">document</span>.body.onselectstart = <span class="built_in">document</span>.body.ondrag = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="IE6，IE7不支持tr的border样式"><a href="#IE6，IE7不支持tr的border样式" class="headerlink" title="IE6，IE7不支持tr的border样式"></a>IE6，IE7不支持tr的border样式</h2><p>IE6，IE7不支持tr的border样式。<br>Firefox和IE8及以上支持tr的border样式。<br>在IE6,IE7只好用td来控制border了。</p>
+<h2 id="IE6-使用-inline-block"><a href="#IE6-使用-inline-block" class="headerlink" title="IE6 使用 inline-block"></a>IE6 使用 inline-block</h2><p>IE6 默认 inline 的元素才可设为 inline-block， 所以要用 inline 元素 <strong>span</strong>。<br>如果是其他非默认inline布局的元素，如果设置为 inline-block，那么是不起效果的。</p>
+<h2 id="IE7-下设置绝对定位的时候，有时候显示不出来"><a href="#IE7-下设置绝对定位的时候，有时候显示不出来" class="headerlink" title="IE7 下设置绝对定位的时候，有时候显示不出来"></a>IE7 下设置绝对定位的时候，有时候显示不出来</h2><p>IE7 下有时候，会有这个问题，就是某个元素设置绝对定位，并设置成 <strong>display : block</strong>， (用 js 或者添加css类来设置),但是在界面上却没有显示出来。<br>解决方法， 添加 <strong>zoom: 1</strong> 来触发  IE 的hasLayout属性， 同时 <strong>z-index</strong> 也要设大</p>
+<h2 id="关于Zoom属性-清除margin重叠"><a href="#关于Zoom属性-清除margin重叠" class="headerlink" title="关于Zoom属性(清除margin重叠)"></a>关于Zoom属性(清除margin重叠)</h2><p>Zoom属性是IE浏览器的专有属性，Firefox等浏览器不支持。它可以设置或检索对象的缩放比例。除此之外，它还有其他一些小作用，比如触发ie的hasLayout属性，清除浮动、清除margin的重叠等。<br>Zoom的使用方法：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zoom :﻿ normal | number</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">normal</span> :　 默认值。使用对象的实际尺寸</span><br><span class="line">number :　 百分数 | 无符号浮点实数。浮点实数值为1.0或百分数为100%时相当于此属性的 normal 值 用白话讲解就是zoom:后面的数字即放大的倍数，可以是数值，也可以是百分比。如：zoom:1，zoom:120%。 而这个属性只要在IE中才起作用，所以很少用到它的实际用途，而最经常用到作用是清除浮动等。</span><br></pre></td></tr></table></figure>
+<p>清除浮动，清除margin重叠：<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.border</span>&#123;</span><br><span class="line">    <span class="attribute">border</span>:<span class="number">1px</span> solid <span class="number">#CCC</span>;</span><br><span class="line">    <span class="attribute">padding</span>:<span class="number">2px</span>;</span><br><span class="line">    <span class="attribute">overflow</span>:hidden;</span><br><span class="line">    <span class="attribute">_zoom</span>:<span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>_zoom是CSS hack中专对IE6起作用的部分。IE6浏览器会执行zoom:1表示对象的缩放比例，但这里 overflow:hidden;和_zoom:1;是连起来用的，作用是清除border内部浮动。<br>同理，还可以使用同样方法清除margin属性在IE浏览器中的重叠问题。</p>
+<h2 id="IE6-不支持-css-属性选择器"><a href="#IE6-不支持-css-属性选择器" class="headerlink" title="IE6 不支持 css 属性选择器"></a>IE6 不支持 css 属性选择器</h2><p>只有在规定了 !DOCTYPE 时，IE7 和 IE8 才支持属性选择器。在 IE6 及更低的版本中，不支持属性选择。<br>比如这样写在 IE6 下是不起作用的<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-attr">[title]</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>:red;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="IE6不支持两个连续并列class类名"><a href="#IE6不支持两个连续并列class类名" class="headerlink" title="IE6不支持两个连续并列class类名"></a>IE6不支持两个连续并列class类名</h2><p>简单的来说，就是<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.item-state-3</span><span class="selector-class">.item-to-3</span>  &#123;</span><br><span class="line">     <span class="attribute">display</span>:block</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>到 IE6 就变成<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.item-to-3</span>  &#123;</span><br><span class="line">     <span class="attribute">display</span>:block</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>前面的选择丢了，只取后面那一个</p>
+<h2 id="IE7处理colspan的列有问题"><a href="#IE7处理colspan的列有问题" class="headerlink" title="IE7处理colspan的列有问题"></a>IE7处理colspan的列有问题</h2><p>IE7处理colspan的列有问题。当colspan的单元格内容宽度大于同列非colspan列的宽度时，非colspan的单元格会被撑大。</p>
+<h2 id="IE6-IE7-下-padding-算在-width-里面"><a href="#IE6-IE7-下-padding-算在-width-里面" class="headerlink" title="IE6 IE7 下 padding 算在 width 里面"></a>IE6 IE7 下 padding 算在 width 里面</h2><p>这个就是 IE 怪异盒子模型。 这边不细讲，网上到处都是</p>
+<h2 id="IE6-IE7-下-兼容-max-width-和-max-height"><a href="#IE6-IE7-下-兼容-max-width-和-max-height" class="headerlink" title="IE6 IE7 下 兼容 max-width 和  max-height"></a>IE6 IE7 下 兼容 max-width 和  max-height</h2><p>我们知道 IE6 IE7 下是没有这两个属性的，可以用以下方式兼容：<br><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">// =lt-ie8</span><br><span class="line"></span><br><span class="line">// =lt-ie7</span><br><span class="line">// max-width and max-height</span><br><span class="line">// not support .max-width(10%)</span><br><span class="line"><span class="selector-class">.max-width</span> (@<span class="keyword">width</span>) &#123;</span><br><span class="line">  <span class="selector-tag">max-width</span>: <span class="selector-tag">unit</span>(@<span class="keyword">width</span>, px);</span><br><span class="line">  @<span class="keyword">w</span> : unit(@width);</span><br><span class="line">  <span class="selector-class">.lt-ie7</span> &amp; &#123;</span><br><span class="line">    <span class="attribute">width</span>: <span class="built_in">e</span>(<span class="string">'expression(this.scrollWidth&gt;@&#123;w&#125;?"@&#123;w&#125;px":"auto")'</span>);</span><br><span class="line">    <span class="attribute">overflow</span>: hidden;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="selector-class">.max-height</span> (@<span class="keyword">height</span>) &#123;</span><br><span class="line">  <span class="selector-tag">max-height</span>: <span class="selector-tag">unit</span>(@<span class="keyword">height</span>, px);</span><br><span class="line">  @<span class="keyword">h</span> : unit(@height);</span><br><span class="line">  <span class="selector-class">.lt-ie7</span> &amp; &#123;</span><br><span class="line">    <span class="attribute">height</span>: ~<span class="string">'expression(this.scrollHeight&gt;@&#123;h&#125;?"@&#123;h&#125;px":"auto")'</span>;</span><br><span class="line">    <span class="attribute">overflow</span>: hidden;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>该 less 属性 兼容 IE6 IE7 的 max-width 属性, 使用方式如下:<br><strong>.item-content {.max-width(340px)}</strong><br>但是有一种情况下，会出错，就是  item-content 这个类，不能放在table上 ，不然ie6 下会出问题。遇到这种情况的话，只能在 item-content 再套一层的 div，然后设置固定宽度。</p>
+<h2 id="IE6-下双倍margin的问题"><a href="#IE6-下双倍margin的问题" class="headerlink" title="IE6 下双倍margin的问题"></a>IE6 下双倍margin的问题</h2><p>解决方法，在class上设置  display: inline;</p>
+<h2 id="IE6-下用table会有间隙"><a href="#IE6-下用table会有间隙" class="headerlink" title="IE6 下用table会有间隙"></a>IE6 下用table会有间隙</h2><p>用<strong>cellspacing=”0”</strong>来消除 间隙<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">table</span> <span class="attr">cellspacing</span>=<span class="string">"0"</span>&gt;</span>xxx<span class="tag">&lt;/<span class="name">table</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="IE-6-7-8-下加载script脚本，并执行成功和失败事件"><a href="#IE-6-7-8-下加载script脚本，并执行成功和失败事件" class="headerlink" title="IE 6,7,8 下加载script脚本，并执行成功和失败事件"></a>IE 6,7,8 下加载script脚本，并执行成功和失败事件</h2><p>请看这个： <a href="/2018/06/15/js-loader/" title="前端工具集(8) -- 兼容IE的脚本加载器">前端工具集(8) -- 兼容IE的脚本加载器</a></p>
+<h2 id="IE6-7-8-兼容-oninput-方法"><a href="#IE6-7-8-兼容-oninput-方法" class="headerlink" title="IE6,7,8 兼容 oninput 方法"></a>IE6,7,8 兼容 oninput 方法</h2><p>当对输入框框(input)的输入做监听时，会用到诸如：onchange, oninput, onpropertychange，来看看他们的区别和联系吧。<br>onchange：</p>
+<ul>
+<li>事件触发条件：输入框(input)的值改变，且失去焦点(onblur)后才触发(这一点就很不好)。</li>
+<li>兼容性：各浏览器都支持。</li>
+</ul>
+<p>oninput &amp; onpropertychange：</p>
+<ul>
+<li>事件触发条件：输入时，实时触发，而不是失去焦点才触发。</li>
+<li>兼容性：<br><strong>oninput</strong>: 在用户输入、退格、删除、剪切、粘贴及鼠标剪切与粘贴时触发(在 IE9&amp;IE9+ 中可能略有区别)。 Chrome/IE9/Firefox/Safari/Opera 支持<br><strong>onpropertychange</strong>: 在用户输入、退格、删除、剪切、粘贴及鼠标剪切与粘贴时触发。 IE6/IE7/IE8/IE9 支持</li>
+</ul>
+<p>所以如果要实现输入时，实时触发事件，结合使用oninput + onpropertychange就可以了，即<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="keyword">if</span> IE) onpropertychange + <span class="keyword">else</span> oninput</span><br></pre></td></tr></table></figure></p>
+<p>注意：IE9下： 剪切(cut)，删除(delete)不会触发事件。<br>oninput 事件要 ie9 及以上才支持。</p>
+<p>同时顺便讲下 onkeyup 和 oninput 事件的差别，input 事件 会比 keyup 更容易监听内容变化事件，因为keyup不能监听粘贴等操作。</p>
+<h2 id="如何写针对IE9-的-css"><a href="#如何写针对IE9-的-css" class="headerlink" title="如何写针对IE9 的 css"></a>如何写针对IE9 的 css</h2><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">background-color</span><span class="selector-pseudo">:blue</span>\9\0; 仅<span class="selector-tag">IE9</span>支持；</span><br></pre></td></tr></table></figure>
+<h2 id="IE-下图片加载失败的无限错误"><a href="#IE-下图片加载失败的无限错误" class="headerlink" title="IE 下图片加载失败的无限错误"></a>IE 下图片加载失败的无限错误</h2><p>之前在做项目的时候，又遇到过这个问题，代码如下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;</span><span class="comment">&lt;!-- saved from url=(0022)http://www.airdroid.com --&gt;</span><span class="comment">&lt;!--[if lt IE 7]&gt;</span></span><br><span class="line"><span class="comment">&lt;html class="lt-ie9 lt-ie8 lt-ie7 ie-6"&gt; &lt;![endif]--&gt;</span><span class="comment">&lt;!--[if IE 7]&gt;</span></span><br><span class="line"><span class="comment">&lt;html class="lt-ie9 lt-ie8 ie-7"&gt; &lt;![endif]--&gt;</span><span class="comment">&lt;!--[if IE 8]&gt;</span></span><br><span class="line"><span class="comment">&lt;html class="lt-ie9 ie-8"&gt; &lt;![endif]--&gt;</span><span class="comment">&lt;!--[if gt IE 8]&gt;&lt;!--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">class</span>=<span class="string">"no-ie"</span>&gt;</span> <span class="comment">&lt;!--&lt;![endif]--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/html; charset=utf-8"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>AirDroid<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">id</span>=<span class="string">"test"</span> <span class="attr">src</span>=<span class="string">"1.jpg"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript">    <span class="built_in">document</span>.getElementById(<span class="string">'test'</span>).onerror = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span></span><br><span class="line"><span class="javascript">          <span class="keyword">this</span>.src = <span class="string">'2.jpg'</span>;</span></span><br><span class="line"><span class="undefined">     &#125;</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>在ie下，以上代码会出现 堆栈溢出的错误。<br><img src="/2018/11/02/ie-compatible/2.png" alt="1"><br>原因就是 1.jpg 和 2.jpg 都不存在，导致 onerror 的无限循环。因此改成<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.getElementById(<span class="string">'test'</span>).onerror = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">     <span class="keyword">this</span>.onerror = <span class="literal">null</span>;</span><br><span class="line">      <span class="keyword">this</span>.src = <span class="string">'2.jpg'</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>就解决了。</p>
+<h2 id="IE6-使用eval来代替json格式转换"><a href="#IE6-使用eval来代替json格式转换" class="headerlink" title="IE6 使用eval来代替json格式转换"></a>IE6 使用eval来代替json格式转换</h2><p>在IE6 下，不支持 JSON 原生函数，所以要用eval来代替 json格式转换。<br>比如这样子：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">eval</span>(<span class="string">'var a=&#123;"name":"kk"&#125;'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>但是这样会产生一种情况，就是 a 变成全局变量了，因此可以采用另一种方法，用括号包起来<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="built_in">eval</span>(<span class="string">'(&#123;"name":"kk"&#125;)'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>这种会更好，就不会变成全局变量了。<br><img src="/2018/11/02/ie-compatible/3.png" alt="1"></p>
+<h2 id="IE7及以下使用activexobject进行同域异步请求"><a href="#IE7及以下使用activexobject进行同域异步请求" class="headerlink" title="IE7及以下使用activexobject进行同域异步请求"></a>IE7及以下使用activexobject进行同域异步请求</h2><p>具体看这个：<a href="/2018/06/14/ie-xdomainrequest/" title="ie8,ie9 使用 XDomainRequest 进行跨域">ie8,ie9 使用 XDomainRequest 进行跨域</a><br>简单的来说，就是 IE8 和 IE9 如果要进行请求跨域的时候，那么就要用 XDomainRequest 对象，IE10 及以上和其他的浏览器 都用 xhr 对象来进行跨域请求。<br>也就是 IE7 及以下是不能进行异步跨域请求的，只能用异步同域请求。那么是用什么对象来进行异步同域请求的呢？？？<br>ActiveXObject 这个对象是 ie5 才加进去的。<br>也就是如果要在 ie5 及以上（ie5， ie6， ie7， ie8， ie9）要执行同域下的异步请求的话， 那么就用这个。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="built_in">window</span>.ActiveXObject)<span class="comment">//IE</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//IE6以及以后版本中可以使用</span></span><br><span class="line">        xmlHttp = <span class="keyword">new</span> ActiveXObject(<span class="string">"Msxml2.XMLHTTP"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">        <span class="comment">//IE5.5以及以后版本可以使用</span></span><br><span class="line">        xmlHttp = <span class="keyword">new</span> ActiveXObject(<span class="string">"Microsoft.XMLHTTP"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/11/02/ie-compatible/" title="IE 浏览器兼容问题整理">http://kebingzao.com/2018/11/02/ie-compatible/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ie/" rel="tag"># ie</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/01/gulp-package/" rel="next" title="整合项目中常用的一些 gulp 组件">
+                <i class="fa fa-chevron-left"></i> 整合项目中常用的一些 gulp 组件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/02/js-random/" rel="prev" title="前端工具集(12) -- 原生js实现生成随机字符串">
+                前端工具集(12) -- 原生js实现生成随机字符串 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">103</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE8-IE9-使用-XDomainRequest-下不支持不同协议的post-跨域"><span class="nav-number">2.</span> <span class="nav-text">IE8,IE9 使用 XDomainRequest 下不支持不同协议的post 跨域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE8-下对象带关键字报错"><span class="nav-number">3.</span> <span class="nav-text">IE8 下对象带关键字报错</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE10-11-取消input框默认的叉叉和密码输入框的眼睛"><span class="nav-number">4.</span> <span class="nav-text">IE10 11 取消input框默认的叉叉和密码输入框的眼睛</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-支持png的透明度"><span class="nav-number">5.</span> <span class="nav-text">IE6 支持png的透明度</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决IE6-下png-透明背景图片-有锯齿的bug"><span class="nav-number">6.</span> <span class="nav-text">解决IE6 下png 透明背景图片 有锯齿的bug</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于滤镜AlphaImageLoader-src属性的相对路径问题"><span class="nav-number">7.</span> <span class="nav-text">关于滤镜AlphaImageLoader src属性的相对路径问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-IE7-下-table-中-有长字符串导致table被扩大"><span class="nav-number">8.</span> <span class="nav-text">IE6 IE7 下 table 中 有长字符串导致table被扩大</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE9以下没有-location-origin"><span class="nav-number">9.</span> <span class="nav-text">IE9以下没有 location.origin</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-IE9-CSS禁止选择文本功能"><span class="nav-number">10.</span> <span class="nav-text">IE6 - IE9 CSS禁止选择文本功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6，IE7不支持tr的border样式"><span class="nav-number">11.</span> <span class="nav-text">IE6，IE7不支持tr的border样式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-使用-inline-block"><span class="nav-number">12.</span> <span class="nav-text">IE6 使用 inline-block</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE7-下设置绝对定位的时候，有时候显示不出来"><span class="nav-number">13.</span> <span class="nav-text">IE7 下设置绝对定位的时候，有时候显示不出来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于Zoom属性-清除margin重叠"><span class="nav-number">14.</span> <span class="nav-text">关于Zoom属性(清除margin重叠)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-不支持-css-属性选择器"><span class="nav-number">15.</span> <span class="nav-text">IE6 不支持 css 属性选择器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6不支持两个连续并列class类名"><span class="nav-number">16.</span> <span class="nav-text">IE6不支持两个连续并列class类名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE7处理colspan的列有问题"><span class="nav-number">17.</span> <span class="nav-text">IE7处理colspan的列有问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-IE7-下-padding-算在-width-里面"><span class="nav-number">18.</span> <span class="nav-text">IE6 IE7 下 padding 算在 width 里面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-IE7-下-兼容-max-width-和-max-height"><span class="nav-number">19.</span> <span class="nav-text">IE6 IE7 下 兼容 max-width 和  max-height</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-下双倍margin的问题"><span class="nav-number">20.</span> <span class="nav-text">IE6 下双倍margin的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-下用table会有间隙"><span class="nav-number">21.</span> <span class="nav-text">IE6 下用table会有间隙</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE-6-7-8-下加载script脚本，并执行成功和失败事件"><span class="nav-number">22.</span> <span class="nav-text">IE 6,7,8 下加载script脚本，并执行成功和失败事件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-7-8-兼容-oninput-方法"><span class="nav-number">23.</span> <span class="nav-text">IE6,7,8 兼容 oninput 方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何写针对IE9-的-css"><span class="nav-number">24.</span> <span class="nav-text">如何写针对IE9 的 css</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE-下图片加载失败的无限错误"><span class="nav-number">25.</span> <span class="nav-text">IE 下图片加载失败的无限错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE6-使用eval来代替json格式转换"><span class="nav-number">26.</span> <span class="nav-text">IE6 使用eval来代替json格式转换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IE7及以下使用activexobject进行同域异步请求"><span class="nav-number">27.</span> <span class="nav-text">IE7及以下使用activexobject进行同域异步请求</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/11/02/ie-compatible/';
+          this.page.identifier = '2018/11/02/ie-compatible/';
+          this.page.title = 'IE 浏览器兼容问题整理';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

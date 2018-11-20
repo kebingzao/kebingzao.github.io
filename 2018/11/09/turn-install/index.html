@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="turn," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言最近在做一个基于webrtc的项目，所以肯定需要turn和stun转发服务器，我用的是 coturn 这个服务来做。 安装首先下载 centos7 对应的 tar 包，然后解压地址：传送门">
+<meta name="keywords" content="turn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="webrtc 的 turn 服务器 coturn 的搭建">
+<meta property="og:url" content="http://kebingzao.com/2018/11/09/turn-install/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言最近在做一个基于webrtc的项目，所以肯定需要turn和stun转发服务器，我用的是 coturn 这个服务来做。 安装首先下载 centos7 对应的 tar 包，然后解压地址：传送门">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2018/11/09/turn-install/1.png">
+<meta property="og:updated_time" content="2018-11-20T17:21:29.893Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="webrtc 的 turn 服务器 coturn 的搭建">
+<meta name="twitter:description" content="前言最近在做一个基于webrtc的项目，所以肯定需要turn和stun转发服务器，我用的是 coturn 这个服务来做。 安装首先下载 centos7 对应的 tar 包，然后解压地址：传送门">
+<meta name="twitter:image" content="http://kebingzao.com/2018/11/09/turn-install/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2018/11/09/turn-install/"/>
+
+
+
+
+
+  <title>webrtc 的 turn 服务器 coturn 的搭建 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/11/09/turn-install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">webrtc 的 turn 服务器 coturn 的搭建</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-09T14:41:52+08:00">
+                2018-11-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
+                    <span itemprop="name">webrtc相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/09/turn-install/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/11/09/turn-install/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/11/09/turn-install/" class="leancloud_visitors" data-flag-title="webrtc 的 turn 服务器 coturn 的搭建">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近在做一个基于webrtc的项目，所以肯定需要turn和stun转发服务器，我用的是 <a href="https://github.com/coturn/coturn" target="_blank" rel="noopener">coturn</a> 这个服务来做。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="首先下载-centos7-对应的-tar-包，然后解压"><a href="#首先下载-centos7-对应的-tar-包，然后解压" class="headerlink" title="首先下载 centos7 对应的 tar 包，然后解压"></a>首先下载 centos7 对应的 tar 包，然后解压</h3><p>地址：<a href="http://turnserver.open-sys.org/downloads/v4.5.0.7/" target="_blank" rel="noopener">传送门</a><br><a id="more"></a><br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# wget http://turnserver.open-sys.org/downloads/v4.5.0.7/turnserver-4.5.0.7-CentOS7.4-x86_64.tar.gz</span><br><span class="line">--2018-04-19 23:53:42--  http://turnserver.open-sys.org/downloads/v4.5.0.7/turnserver-4.5.0.7-CentOS7.4-x86_64.tar.gz</span><br><span class="line">正在解析主机 turnserver.open-sys.org (turnserver.open-sys.org)... 78.47.74.102</span><br><span class="line">正在连接 turnserver.open-sys.org (turnserver.open-sys.org)|78.47.74.102|:80... 已连接。</span><br><span class="line">已发出 HTTP 请求，正在等待回应... 200 OK</span><br><span class="line">长度：370013 (361K) [application/x-gzip]</span><br><span class="line">正在保存至: “turnserver-4.5.0.7-CentOS7.4-x86_64.tar.gz”</span><br><span class="line"></span><br><span class="line">100%[====================================================================================&gt;] 370,013     17.3KB/s 用时 18s    </span><br><span class="line"></span><br><span class="line">2018-04-19 23:54:02 (20.2 KB/s) - 已保存 “turnserver-4.5.0.7-CentOS7.4-x86_64.tar.gz” [370013/370013])</span><br><span class="line"></span><br><span class="line">[root@VM_156_200_centos ~]# ls</span><br><span class="line">anaconda-ks.cfg  docker-compose-file  docker-node-hello  go  mynginx  turnserver-4.5.0.7-CentOS7.4-x86_64.tar.gz</span><br></pre></td></tr></table></figure></p>
+<h3 id="解压tar-包"><a href="#解压tar-包" class="headerlink" title="解压tar 包"></a>解压tar 包</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# tar xvfz turnserver-4.5.0.7-CentOS7.4-x86_64.tar.gz</span><br><span class="line">turnserver-4.5.0.7/</span><br><span class="line">turnserver-4.5.0.7/turnserver-4.5.0.7-0.el7.centos.x86_64.rpm</span><br><span class="line">turnserver-4.5.0.7/turnserver-client-libs-4.5.0.7-0.el7.centos.x86_64.rpm</span><br><span class="line">turnserver-4.5.0.7/turnserver-utils-4.5.0.7-0.el7.centos.x86_64.rpm</span><br><span class="line">turnserver-4.5.0.7/install.sh</span><br><span class="line">turnserver-4.5.0.7/uninstall.turnserver.sh</span><br><span class="line">[root@VM_156_200_centos ~]# ls</span><br><span class="line">anaconda-ks.cfg  docker-compose-file  go       turnserver-4.5.0.7</span><br><span class="line">coturn           docker-node-hello    mynginx  turnserver-4.5.0.7-CentOS7.4-x86_64.tar.gz</span><br></pre></td></tr></table></figure>
+<h3 id="进入到-turnserver-4-5-0-7-这个目录，-执行-install-sh-直接进行安装"><a href="#进入到-turnserver-4-5-0-7-这个目录，-执行-install-sh-直接进行安装" class="headerlink" title="进入到 turnserver-4.5.0.7 这个目录， 执行 install.sh, 直接进行安装"></a>进入到 turnserver-4.5.0.7 这个目录， 执行 install.sh, 直接进行安装</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# cd turnserver-4.5.0.7/</span><br><span class="line">[root@VM_156_200_centos turnserver-4.5.0.7]# ls</span><br><span class="line">install.sh                                  turnserver-client-libs-4.5.0.7-0.el7.centos.x86_64.rpm  uninstall.turnserver.sh</span><br><span class="line">turnserver-4.5.0.7-0.el7.centos.x86_64.rpm  turnserver-utils-4.5.0.7-0.el7.centos.x86_64.rpm</span><br><span class="line">[root@VM_156_200_centos turnserver-4.5.0.7]# ./install.sh </span><br><span class="line">已加载插件：fastestmirror, langpacks</span><br><span class="line">Repodata is over 2 weeks old. Install yum-cron? Or run: yum makecache fast</span><br><span class="line">epel                                                                                                   | 4.7 kB  00:00:00     </span><br><span class="line">extras                                                                                                 | 3.4 kB  00:00:00     </span><br><span class="line">os                                                                                                     | 3.6 kB  00:00:00     </span><br><span class="line">updates                                                                                                | 3.4 kB  00:00:00     </span><br><span class="line">(1/4): epel/7/x86_64/updateinfo                                                                        | 916 kB  00:00:00     </span><br><span class="line">(2/4): extras/7/x86_64/primary_db                                                                      | 185 kB  00:00:00     </span><br><span class="line">(3/4): epel/7/x86_64/primary_db                                                                        | 6.3 MB  00:00:00     </span><br><span class="line">(4/4): updates/7/x86_64/primary_db                                                                     | 6.9 MB  00:00:00     </span><br><span class="line">Determining fastest mirrors</span><br><span class="line">正在解决依赖关系</span><br><span class="line">--&gt; 正在检查事务</span><br><span class="line">---&gt; 软件包 epel-release.noarch.0.7-11 将被 安装</span><br><span class="line">--&gt; 解决依赖关系完成</span><br><span class="line"></span><br><span class="line">依赖关系解决</span><br><span class="line">。</span><br><span class="line">。</span><br><span class="line">。</span><br><span class="line">总计：529 k</span><br><span class="line">安装大小：529 k</span><br><span class="line">Downloading packages:</span><br><span class="line">Running transaction check</span><br><span class="line">Running transaction test</span><br><span class="line">Transaction test succeeded</span><br><span class="line">Running transaction</span><br><span class="line">  正在安装    : turnserver-utils-4.5.0.7-0.el7.centos.x86_64                                                              1/1 </span><br><span class="line">  验证中      : turnserver-utils-4.5.0.7-0.el7.centos.x86_64                                                              1/1 </span><br><span class="line"></span><br><span class="line">已安装:</span><br><span class="line">  turnserver-utils.x86_64 0:4.5.0.7-0.el7.centos                                                                              </span><br><span class="line"></span><br><span class="line">完毕！</span><br><span class="line">SUCCESS !</span><br></pre></td></tr></table></figure>
+<p>这样就成功了</p>
+<h2 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h2><p>这样子turnserver 就安装成功了，接下来就是修改配置文件 <strong>/etc/turnserver/turnserver.conf</strong><br>不过修改之前，要先用openssl生成证书<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl req -x509 -newkey rsa:2048 -keyout /etc/turn_server_pkey.pem -out /etc/turn_server_cert.pem -days 99999 -nodes</span><br></pre></td></tr></table></figure></p>
+<p>以下是修改的内容：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"># 设置转发的ip（局域网ip），如果不设置，他会自己选择默认的</span><br><span class="line">relay-ip=172.16.184.108</span><br><span class="line"></span><br><span class="line"># 转发的外网ip(本机外网ip)，用于NAT 地址映射</span><br><span class="line">external-ip=47.96.xx.xx</span><br><span class="line"></span><br><span class="line"># 转发的线程数，其实默认不设置最好</span><br><span class="line">relay-threads=5</span><br><span class="line"></span><br><span class="line"># WebRTC 的消息里会用到</span><br><span class="line">fingerprint</span><br><span class="line"></span><br><span class="line"># WebRTC 认证需要</span><br><span class="line">lt-cred-mech</span><br><span class="line"></span><br><span class="line"># REST API 认证需要</span><br><span class="line">use-auth-secret</span><br><span class="line"></span><br><span class="line"># REST API 加密所需的 KEY</span><br><span class="line"># 这里我们使用“静态”的 KEY，Google 自己也用的这个</span><br><span class="line">static-auth-secret=1234567890</span><br><span class="line"></span><br><span class="line"># 统计状态信息的redis db</span><br><span class="line">redis-statsdb="ip=59.57.xx.xx dbname=13 port=6379 connect_timeout=30"</span><br><span class="line"></span><br><span class="line"># 用户登录域</span><br><span class="line">realm=pano</span><br><span class="line"></span><br><span class="line"># 证书</span><br><span class="line">cert=/etc/turn_server_cert.pem</span><br><span class="line"></span><br><span class="line"># 证书key</span><br><span class="line">pkey=/etc/turn_server_pkey.pem</span><br><span class="line"></span><br><span class="line"># 不输出log</span><br><span class="line">#no-stdout-log</span><br><span class="line"></span><br><span class="line"># 输出的log，将log输出到前台，然后会用supervisor来捕获</span><br><span class="line">log-file=stdout</span><br><span class="line"></span><br><span class="line">#syslog</span><br><span class="line"></span><br><span class="line"># 存放进程的地方</span><br><span class="line">pidfile="/var/run/turnserver.pid"</span><br></pre></td></tr></table></figure></p>
+<h2 id="启动service"><a href="#启动service" class="headerlink" title="启动service"></a>启动service</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos turnserver]# service turnserver  start</span><br><span class="line">Redirecting to /bin/systemctl start  turnserver.service</span><br></pre></td></tr></table></figure>
+<p>当然因为我们用supervisor来捕获输出的log，所以其实后面就改用supervisor来启动了，supervisor 的配置文件如下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_13_centos ~]$ cat /etc/supervisor/conf.d/turnserver.conf </span><br><span class="line">[program:turnserver]</span><br><span class="line">command = /usr/bin/turnserver -c /etc/turnserver/turnserver.conf -v</span><br><span class="line">user = root</span><br><span class="line">autostart = true</span><br><span class="line">autorestart = true</span><br><span class="line">stdout_logfile = /var/log/supervisor/turnserver.info.log</span><br><span class="line">stdout_logfile_maxbytes = 100MB</span><br><span class="line">stdout_logfile_backups = 5</span><br><span class="line">stderr_logfile = /var/log/supervisor/turnserver.error.log</span><br></pre></td></tr></table></figure></p>
+<p>这样子，输出的log就到了 /var/log/supervisor/turnserver.info.log 这个文件了<br>然后启动就变成这样<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo supervisorctl start turnserver</span><br></pre></td></tr></table></figure></p>
+<p>这样就启动起来了。<br>可以直接访问 3478 端口:<br><img src="/2018/11/09/turn-install/1.png" alt="1"></p>
+<p>也可以看输出的日志了：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_13_centos ~]$ tail -f /var/log/supervisor/turnserver.info.log</span><br><span class="line">200428: session 003000000000002007: realm <span class="tag">&lt;<span class="name">pano</span>&gt;</span> user <span class="tag">&lt;<span class="name">1531992181:28888f252480d1af366b693162e112ec_21_24_18153164</span>&gt;</span>: incoming packet BINDING processed, success</span><br><span class="line">200428: session 004000000000001287: realm <span class="tag">&lt;<span class="name">pano</span>&gt;</span> user <span class="tag">&lt;<span class="name">1531993610:5075a3126b483f336d79705035d36e06_21_24_18154148</span>&gt;</span>: incoming packet BINDING processed, success</span><br><span class="line">200428: session 002000000000000749: closed (2nd stage), user <span class="tag">&lt;<span class="name">1531994358:e404da3f835436e43f6a1cceac91f485_21_25_tomwang304@gmail.com</span>&gt;</span> realm <span class="tag">&lt;<span class="name">pano</span>&gt;</span> origin <span class="tag">&lt;&gt;</span>, local 172.16.16.13:3478, remote 220.130.xxx.xxx:2463, reason: allocation timeout</span><br><span class="line">200428: session 002000000000000749: delete: realm=<span class="tag">&lt;<span class="name">pano</span>&gt;</span>, username=<span class="tag">&lt;<span class="name">1531994358:e404da3f835436e43f6a1cceac91f485_21_25_tomwang304@gmail.com</span>&gt;</span></span><br><span class="line">200430: session 004000000000001245: realm <span class="tag">&lt;<span class="name">pano</span>&gt;</span> user <span class="tag">&lt;<span class="name">1531986896:97f711c420972472e31e7599b0b78372_21_24_18154458</span>&gt;</span>: incoming packet BINDING processed, success</span><br><span class="line">200431: session 002000000000000745: realm <span class="tag">&lt;<span class="name">pano</span>&gt;</span> user <span class="tag">&lt;<span class="name">1531993978:d5651643a0a1f66c720fc3502769dd96_21_24_18154654</span>&gt;</span>: incoming packet BINDING processed, success</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2018/11/09/turn-install/" title="webrtc 的 turn 服务器 coturn 的搭建">http://kebingzao.com/2018/11/09/turn-install/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/turn/" rel="tag"># turn</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/08/js-download/" rel="next" title="前端工具集(14) -- 原生js实现自动下载">
+                <i class="fa fa-chevron-left"></i> 前端工具集(14) -- 原生js实现自动下载
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/15/turn-verify/" rel="prev" title="webrtc 的 turn 服务器 coturn 的权限校验">
+                webrtc 的 turn 服务器 coturn 的权限校验 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">103</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">18</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">2.</span> <span class="nav-text">安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#首先下载-centos7-对应的-tar-包，然后解压"><span class="nav-number">2.1.</span> <span class="nav-text">首先下载 centos7 对应的 tar 包，然后解压</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解压tar-包"><span class="nav-number">2.2.</span> <span class="nav-text">解压tar 包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进入到-turnserver-4-5-0-7-这个目录，-执行-install-sh-直接进行安装"><span class="nav-number">2.3.</span> <span class="nav-text">进入到 turnserver-4.5.0.7 这个目录， 执行 install.sh, 直接进行安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改配置文件"><span class="nav-number">3.</span> <span class="nav-text">修改配置文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启动service"><span class="nav-number">4.</span> <span class="nav-text">启动service</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2018/11/09/turn-install/';
+          this.page.identifier = '2018/11/09/turn-install/';
+          this.page.title = 'webrtc 的 turn 服务器 coturn 的搭建';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

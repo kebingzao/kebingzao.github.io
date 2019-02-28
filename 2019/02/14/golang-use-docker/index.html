@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang,docker," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言最近打算将之前项目中的go程序放到docker来维护和管理，所以打算写个简单的demo来看看效果。docker 基于 Golang 开发，已经不用解释了，而 Golang 天生适合运行在 docker 容器中，却不是这个原因，这得益于：Golang 的静态编译，当在编译的时候关闭 cgo 的时候，可以完全不依赖系统环境。">
+<meta name="keywords" content="golang,docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 docker 运行 golang 程序">
+<meta property="og:url" content="http://kebingzao.com/2019/02/14/golang-use-docker/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言最近打算将之前项目中的go程序放到docker来维护和管理，所以打算写个简单的demo来看看效果。docker 基于 Golang 开发，已经不用解释了，而 Golang 天生适合运行在 docker 容器中，却不是这个原因，这得益于：Golang 的静态编译，当在编译的时候关闭 cgo 的时候，可以完全不依赖系统环境。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-02-28T13:53:58.169Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 docker 运行 golang 程序">
+<meta name="twitter:description" content="前言最近打算将之前项目中的go程序放到docker来维护和管理，所以打算写个简单的demo来看看效果。docker 基于 Golang 开发，已经不用解释了，而 Golang 天生适合运行在 docker 容器中，却不是这个原因，这得益于：Golang 的静态编译，当在编译的时候关闭 cgo 的时候，可以完全不依赖系统环境。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/02/14/golang-use-docker/"/>
+
+
+
+
+
+  <title>使用 docker 运行 golang 程序 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/02/14/golang-use-docker/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用 docker 运行 golang 程序</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-14T17:45:57+08:00">
+                2019-02-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang相关/" itemprop="url" rel="index">
+                    <span itemprop="name">golang相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/14/golang-use-docker/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/02/14/golang-use-docker/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/02/14/golang-use-docker/" class="leancloud_visitors" data-flag-title="使用 docker 运行 golang 程序">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近打算将之前项目中的go程序放到docker来维护和管理，所以打算写个简单的demo来看看效果。<br>docker 基于 Golang 开发，已经不用解释了，而 Golang 天生适合运行在 docker 容器中，却不是这个原因，这得益于：Golang 的静态编译，当在编译的时候关闭 cgo 的时候，可以完全不依赖系统环境。<br><a id="more"></a></p>
+<h2 id="编写demo代码"><a href="#编写demo代码" class="headerlink" title="编写demo代码"></a>编写demo代码</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# mkdir docker-golang-demo</span><br><span class="line">[root@VM_156_200_centos ~]# cd docker-golang-demo</span><br><span class="line">[root@VM_156_200_centos docker-golang-demo]# vim main.go</span><br><span class="line">[root@VM_156_200_centos docker-golang-demo]# cat main.go</span><br><span class="line">package main</span><br><span class="line"></span><br><span class="line">import (</span><br><span class="line">	"fmt"</span><br><span class="line">	"io/ioutil"</span><br><span class="line">	"net/http"</span><br><span class="line">	"os"</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	resp, err := http.Get("https://www.baidu.com")</span><br><span class="line">	check(err)</span><br><span class="line">	body, err := ioutil.ReadAll(resp.Body)</span><br><span class="line">	check(err)</span><br><span class="line">	fmt.Println(len(body))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func check(err error) &#123;</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		fmt.Println(err)</span><br><span class="line">		os.Exit(1)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是一个简单的程序，拉取百度的页面，并计算页面的字节大小。需要注意的是，<font color="red">这里采用了 https ，这边埋了一个伏笔，后面会说到</font>。</p>
+<h2 id="编写-dockerfile"><a href="#编写-dockerfile" class="headerlink" title="编写 dockerfile"></a>编写 dockerfile</h2><p>Docker官方提供了Golang各版本的镜像： <a href="https://hub.docker.com/_/golang/" target="_blank" rel="noopener">Official Repository - golang</a>.<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# vim dockerfile</span><br><span class="line">[root@VM_156_200_centos docker-golang-demo]# cat dockerfile</span><br><span class="line">FROM golang:latest</span><br><span class="line">RUN mkdir /app </span><br><span class="line">ADD . /app/ </span><br><span class="line">WORKDIR /app </span><br><span class="line">RUN go build -o main . </span><br><span class="line">CMD ["/app/main"]</span><br></pre></td></tr></table></figure></p>
+<p>每一行的意思就是：</p>
+<ul>
+<li>Docker的镜像必须基于某个镜像开始，然后开始创建新的镜像，这里基于 golang:latest 开始创建</li>
+<li>在镜像里创建/app文件夹</li>
+<li>将当前所在文件夹内所有内容添加到镜像内的/app文件内</li>
+<li>将镜像内的/app设置为容器工作目录（这里不可使用RUN cd /app切换当前工作目录）</li>
+<li>在镜像内编译当前目录下Golang代码</li>
+<li>最后使用CMD命令运行刚才编译出的程序。</li>
+</ul>
+<p>这时候这个目录其实就只有两个文件：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# ls</span><br><span class="line">dockerfile  main.go</span><br></pre></td></tr></table></figure></p>
+<h2 id="编译镜像"><a href="#编译镜像" class="headerlink" title="编译镜像"></a>编译镜像</h2><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# sudo docker build --rm -t golang-demo-app .</span><br></pre></td></tr></table></figure>
+<p>编译完成之后，这个需要点时间，就可以看到镜像已经生成了<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# docker images</span><br><span class="line">REPOSITORY                       TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">golang-demo-app                  latest              86ab72857964        2 hours ago         822 MB</span><br><span class="line">docker.io/golang                 latest              901414995ecd        7 days ago          816 MB</span><br><span class="line">。。。</span><br></pre></td></tr></table></figure></p>
+<p>接下来执行一下镜像看看效果：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# sudo docker run -it --rm --name golang-demo-app-1 golang-demo-app</span><br><span class="line">227</span><br></pre></td></tr></table></figure></p>
+<p>其中<strong>golang-demo-app</strong>是镜像名，<strong>golang-demo-app-1</strong>是容器名。 执行结果没问题。说明我们成功将一个go程序放到docker容器里面执行了。但是从上面的 images 的 list 可以看到这个 demo 的完成大小竟然有 822 M，对于线上的部署，无论是编译时间还是大小都是不合适的，下面的scratch镜像，用来解决这个问题。</p>
+<h2 id="使用scratch镜像"><a href="#使用scratch镜像" class="headerlink" title="使用scratch镜像"></a>使用scratch镜像</h2><p>Scratch 是一个特殊的镜像，它是一个虚拟镜像，也就是一个空白镜像， 它很赞，它简洁、小巧而且快速， 它没有bug、安全漏洞、延缓的代码或技术债务。这是因为它基本上是空的。除了有点儿被Docker添加的metadata (译注：元数据为描述数据的数据)。<br>你可以用以下命令创建这个scratch镜像（官方文档上有描述）：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# tar cv --files-from /dev/null | docker import - scratch </span><br><span class="line">sha256:92e88945fd0715812b59aec9e5bcdb60b09afe5e8d5ad142d1c926c908e46c0f</span><br><span class="line">[root@VM_156_200_centos docker-golang-demo]# docker images</span><br><span class="line">REPOSITORY                       TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">scratch                          latest              92e88945fd07        4 seconds ago       0 B</span><br><span class="line">。。。</span><br></pre></td></tr></table></figure></p>
+<p>可以看到他的大小几乎为 0。而且利用Golang的静态化编译无依赖性，可以大幅度减少编译时间和镜像大小。</p>
+<h3 id="编译-go"><a href="#编译-go" class="headerlink" title="编译 go"></a>编译 go</h3><p>因此我们第一步就要先把go程序编译成二进制文件。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# docker run  --rm -it -v $&#123;PWD&#125;:/go golang:stretch env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags -s -a -installsuffix cgo main.go</span><br></pre></td></tr></table></figure></p>
+<p>其中：</p>
+<ul>
+<li>–-rm 表示构建完成删除镜像</li>
+<li>-it 表示交互模式 </li>
+<li>-v ${PWD}:/go 加载卷 </li>
+<li>剩下是设置 linux 变量，其中 GOOS=linux 是将交叉编译的目标设置为Linux，这样你在Mac或者Win下也不会出现问题， cgo 是为了在静态编译中导入net，  -ldflags -s 使用裁剪模式。</li>
+</ul>
+<p>这样子我们就在当前目录下，生成了编译好的二进制文件 main。 而这个其实就是我们平时放在服务器上的二进制文件，是可以被执行的：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# ./main</span><br><span class="line">277</span><br></pre></td></tr></table></figure></p>
+<h3 id="编辑-dockerfile"><a href="#编辑-dockerfile" class="headerlink" title="编辑 dockerfile"></a>编辑 dockerfile</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# vim dockerfile</span><br><span class="line">[root@VM_156_200_centos docker-golang-demo]# cat dockerfile</span><br><span class="line">FROM scratch</span><br><span class="line">RUN mkdir /app</span><br><span class="line">ADD main /app/</span><br><span class="line">WORKDIR /app</span><br><span class="line">CMD ["/app/main"]</span><br></pre></td></tr></table></figure>
+<p>逻辑很简单，其实就是把当前目录的 main 文件放到镜像里面，然后最后执行镜像里面的 main 程序。</p>
+<h3 id="编译镜像-1"><a href="#编译镜像-1" class="headerlink" title="编译镜像"></a>编译镜像</h3><p>接下来编译镜像：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# docker build --rm -t golang-scratch-demo-app .</span><br><span class="line">Sending build context to Docker daemon 4.509 MB</span><br><span class="line">Step 1/5 : FROM scratch</span><br><span class="line"> ---&gt; </span><br><span class="line">Step 2/5 : RUN mkdir /app</span><br><span class="line"> ---&gt; Running in f79380951be8</span><br><span class="line"></span><br><span class="line">container_linux.go:247: starting container process caused "exec: \"/bin/sh\": stat /bin/sh: no such file or directory"</span><br><span class="line">oci runtime error: container_linux.go:247: starting container process caused "exec: \"/bin/sh\": stat /bin/sh: no such file or directory"</span><br></pre></td></tr></table></figure></p>
+<p>发现报错了，第二步的时候报错了，也就是 mkdir 的时候，有用到了 /bin/sh 这个文件， 但是这个文件他是没有在 scratch 镜像里面的，因为这个镜像本来就是空的，不会有这个文件？？<br>这个是相关资料：<br><a href="https://stackoverflow.com/questions/42584395/cannot-start-docker-container-from-scratch" target="_blank" rel="noopener">Cannot start docker container from scratch</a><br><a href="https://github.com/moby/moby/issues/17896" target="_blank" rel="noopener">Issues using /bin/sh in CMD command in scratch docker container</a><br>所以我后面就改了一下dockerfile，就不创建app目录了，直接将程序放到镜像的根目录：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# vim dockerfile</span><br><span class="line">[root@VM_156_200_centos docker-golang-demo]# cat dockerfile</span><br><span class="line">FROM scratch</span><br><span class="line">ADD main /</span><br><span class="line">CMD ["/main"]</span><br></pre></td></tr></table></figure></p>
+<p>然后再试下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# docker build --rm -t golang-scratch-demo-app-2 .</span><br><span class="line">Sending build context to Docker daemon 4.509 MB</span><br><span class="line">Step 1/3 : FROM scratch</span><br><span class="line"> ---&gt; </span><br><span class="line">Step 2/3 : ADD main /</span><br><span class="line"> ---&gt; bca8bd34a8ed</span><br><span class="line">Removing intermediate container f5ec92a8ace6</span><br><span class="line">Step 3/3 : CMD /main</span><br><span class="line"> ---&gt; Running in 7f05155640f3</span><br><span class="line"> ---&gt; 33c14eb6fb33</span><br><span class="line">Removing intermediate container 7f05155640f3</span><br><span class="line">Successfully built 33c14eb6fb33</span><br></pre></td></tr></table></figure></p>
+<p>这样就编译成功了。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# docker images</span><br><span class="line">REPOSITORY                       TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">golang-scratch-demo-app-2        latest              33c14eb6fb33        11 seconds ago      4.51 MB</span><br><span class="line">。。。</span><br><span class="line">golang-demo-app                  latest              86ab72857964        About an hour ago   822 MB</span><br></pre></td></tr></table></figure></p>
+<p>可以看到才 4.5M, 比之刚才的 822M，简直差了几百倍。</p>
+<h3 id="挂载镜像"><a href="#挂载镜像" class="headerlink" title="挂载镜像"></a>挂载镜像</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# sudo docker run -it --rm --name my-golang-scratch-demo golang-scratch-demo-app-2</span><br><span class="line">Get https://www.baidu.com: x509: certificate signed by unknown authority</span><br></pre></td></tr></table></figure>
+<p>发现报了一个错误？？？这是一个非常常见的问题：为了进行SSL请求，我们需要SSL根证书。</p>
+<h3 id="获取证书"><a href="#获取证书" class="headerlink" title="获取证书"></a>获取证书</h3><p>根据操作系统，这些证书可以在许多不同的地方。如果您查看Go的x509库，可以查看Go搜索的所有位置。对于许多Linux发行版，这是<strong>/etc/ssl/certs/cacert.pem</strong>。首先，我们将把我们的机器（或Linux VM或在线证书提供者）的<strong>cacert.pem</strong>复制到我们的存储库中。然后，我们将在Docker文件中添加一个ADD，将这个文件放在Go所期望的位置：<br>下载 cacert.pem 到当前工作目录:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# wget https://curl.haxx.se/ca/cacert.pem</span><br><span class="line">--2019-02-14 17:17:56--  https://curl.haxx.se/ca/cacert.pem</span><br><span class="line">Connecting to 127.0.0.1:8118... connected.</span><br><span class="line">Proxy request sent, awaiting response... 200 OK</span><br><span class="line">Length: 219596 (214K) [application/x-pem-file]</span><br><span class="line">Saving to: ‘cacert.pem’</span><br><span class="line"></span><br><span class="line">100%[===============================================================================================================================================================================================================&gt;] 219,596     --.-K/s   in 0.05s   </span><br><span class="line"></span><br><span class="line">2019-02-14 17:17:56 (4.42 MB/s) - ‘cacert.pem’ saved [219596/219596]</span><br></pre></td></tr></table></figure></p>
+<p>再次编辑 dockerfile：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# cat dockerfile</span><br><span class="line">FROM scratch</span><br><span class="line">ADD cacert.pem /etc/ssl/certs/</span><br><span class="line">ADD main /</span><br><span class="line">CMD ["/main"]</span><br></pre></td></tr></table></figure></p>
+<p>再次重新生成镜像：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# docker build --rm -t golang-scratch-demo-app-2 .</span><br><span class="line">Sending build context to Docker daemon 4.729 MB</span><br><span class="line">Step 1/4 : FROM scratch</span><br><span class="line"> ---&gt; </span><br><span class="line">Step 2/4 : ADD cacert.pem /etc/ssl/certs/</span><br><span class="line"> ---&gt; c160fd8c7d94</span><br><span class="line">Removing intermediate container 4d84742b28c7</span><br><span class="line">Step 3/4 : ADD main /</span><br><span class="line"> ---&gt; d182f68177ae</span><br><span class="line">Removing intermediate container f411337673ee</span><br><span class="line">Step 4/4 : CMD /main</span><br><span class="line"> ---&gt; Running in 254686e2208b</span><br><span class="line"> ---&gt; a7d182445c8d</span><br><span class="line">Removing intermediate container 254686e2208b</span><br><span class="line">Successfully built a7d182445c8d</span><br></pre></td></tr></table></figure></p>
+<p>然后重新挂载：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-demo]# sudo docker run -it --rm --name my-golang-scratch-demo golang-scratch-demo-app-2</span><br><span class="line">227</span><br></pre></td></tr></table></figure></p>
+<p>这次就成功了。</p>
+<hr>
+<p>参考资料：<br><a href="https://blog.csdn.net/freewebsys/article/details/79224625" target="_blank" rel="noopener">使用docker scratch 空镜像构建golang docker 服务</a><br><a href="https://my.oschina.net/dingdayu/blog/1554105?utm_campaign=studygolang.com&amp;utm_medium=studygolang.com&amp;utm_source=studygolang.com" target="_blank" rel="noopener">Golang的docker尝试</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/02/14/golang-use-docker/" title="使用 docker 运行 golang 程序">http://kebingzao.com/2019/02/14/golang-use-docker/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/docker/" rel="tag"># docker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/14/gvm-install/" rel="next" title="安装 gvm 来管理多个go版本">
+                <i class="fa fa-chevron-left"></i> 安装 gvm 来管理多个go版本
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/22/docker-update/" rel="prev" title="docker 升级到最新版">
+                docker 升级到最新版 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">114</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写demo代码"><span class="nav-number">2.</span> <span class="nav-text">编写demo代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写-dockerfile"><span class="nav-number">3.</span> <span class="nav-text">编写 dockerfile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编译镜像"><span class="nav-number">4.</span> <span class="nav-text">编译镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用scratch镜像"><span class="nav-number">5.</span> <span class="nav-text">使用scratch镜像</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译-go"><span class="nav-number">5.1.</span> <span class="nav-text">编译 go</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编辑-dockerfile"><span class="nav-number">5.2.</span> <span class="nav-text">编辑 dockerfile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译镜像-1"><span class="nav-number">5.3.</span> <span class="nav-text">编译镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#挂载镜像"><span class="nav-number">5.4.</span> <span class="nav-text">挂载镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取证书"><span class="nav-number">5.5.</span> <span class="nav-text">获取证书</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/02/14/golang-use-docker/';
+          this.page.identifier = '2019/02/14/golang-use-docker/';
+          this.page.title = '使用 docker 运行 golang 程序';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

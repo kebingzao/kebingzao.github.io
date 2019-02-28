@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang,docker," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言现在我们使用 CI/CD 是通过 gitlab + Jenkins 的方式， 也就是无论是部署到生产环境还是部署到测试环境，都会通过一台叫做部署Jenkins的构建/部署服务器。以Golang程序的部署来说，比如我要将一个go程序更新部署到测试环境，那么通过 gitlab 的项目分支构建的 webhook，会触发到 Jenkins 对应的构建任务，这时候 Jenkins 就会去 pull gi">
+<meta name="keywords" content="golang,docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 docker 来让多个 golang 环境并存并实现多版本打包和编译">
+<meta property="og:url" content="http://kebingzao.com/2019/02/28/docker-multiple-golang/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言现在我们使用 CI/CD 是通过 gitlab + Jenkins 的方式， 也就是无论是部署到生产环境还是部署到测试环境，都会通过一台叫做部署Jenkins的构建/部署服务器。以Golang程序的部署来说，比如我要将一个go程序更新部署到测试环境，那么通过 gitlab 的项目分支构建的 webhook，会触发到 Jenkins 对应的构建任务，这时候 Jenkins 就会去 pull gi">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-02-28T13:53:58.168Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 docker 来让多个 golang 环境并存并实现多版本打包和编译">
+<meta name="twitter:description" content="前言现在我们使用 CI/CD 是通过 gitlab + Jenkins 的方式， 也就是无论是部署到生产环境还是部署到测试环境，都会通过一台叫做部署Jenkins的构建/部署服务器。以Golang程序的部署来说，比如我要将一个go程序更新部署到测试环境，那么通过 gitlab 的项目分支构建的 webhook，会触发到 Jenkins 对应的构建任务，这时候 Jenkins 就会去 pull gi">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/02/28/docker-multiple-golang/"/>
+
+
+
+
+
+  <title>使用 docker 来让多个 golang 环境并存并实现多版本打包和编译 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/02/28/docker-multiple-golang/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用 docker 来让多个 golang 环境并存并实现多版本打包和编译</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-28T10:24:48+08:00">
+                2019-02-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/docker相关/" itemprop="url" rel="index">
+                    <span itemprop="name">docker相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/28/docker-multiple-golang/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/02/28/docker-multiple-golang/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/02/28/docker-multiple-golang/" class="leancloud_visitors" data-flag-title="使用 docker 来让多个 golang 环境并存并实现多版本打包和编译">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>现在我们使用 <strong>CI/CD</strong> 是通过 <strong>gitlab + Jenkins</strong> 的方式， 也就是无论是部署到生产环境还是部署到测试环境，都会通过一台叫做部署Jenkins的构建/部署服务器。<br>以Golang程序的部署来说，比如我要将一个go程序更新部署到测试环境，那么通过 gitlab 的项目分支构建的 webhook，会触发到 Jenkins 对应的构建任务，这时候 Jenkins 就会去 pull gitlab 对应的项目代码，然后开始打包编译成二进制文件，最后在上传到对应的测试服，然后执行测试服的脚本，比如 supervisor 脚本，然后将这个二进制程序启动起来。<br>但是现在我们 Jenkins 打包服务器上面的 golang 环境还是比较旧的版本，而且是直接装在服务器上的，只有一个版本，现在为了提高 golang 程序的执行效率和使用更新的语法，我后面打算慢慢将 golang 的版本升级上来，但是因为我们的 go 服务实在太多，而且有复杂的，也有简单的。 所以刚开始不可能一下子就把所有的go版本全部升上来，这样风险太大，所以肯定会有一部分的 go 程序还是用的旧版本，但是一部分 go 程序已经要换成新版本了。<br>所以这个也就要求 Jenkins 打包服务器上，要并存多个 golang 版本的环境，并且 src 还不能共用，并且还要支持同一时间的多个不同的 golang 版本的程序一起构建。<br><a id="more"></a></p>
+<h2 id="GVM-方案"><a href="#GVM-方案" class="headerlink" title="GVM 方案"></a>GVM 方案</h2><p>刚开始有考虑过通过 gvm 来做，让它安装并管理 go 的多个版本， 具体实作： <a href="/2019/02/14/gvm-install/" title="安装 gvm 来管理多个go版本">安装 gvm 来管理多个go版本</a>。<br>后面确实也折腾成功了，也可以成功管理和切换多个 go 版本，但是有两个问题：</p>
+<ul>
+<li>每次切换 go 版本，都要再重新指定该 go 版本的 gopath 路径，这个很麻烦，暂时没有找到解决的方法</li>
+<li>一次只能切换一个 go 版本，也就是我们不能同时有多个 go 版本同时在跑， 因为 <strong>go env</strong> 只会有一个当前的版本。所以我们没办法实现同一个时间多个 go 版本同时进行编译的情况，恰恰这又是 Jenkins 构建服务器会出现的情况</li>
+</ul>
+<p>所以最后只能认为这个 GVM 方案只适合于个人开发环境来使用，不适合构建服务器来使用。</p>
+<h2 id="每个-go-程序都用-Docker-容器装载"><a href="#每个-go-程序都用-Docker-容器装载" class="headerlink" title="每个 go 程序都用 Docker 容器装载"></a>每个 go 程序都用 Docker 容器装载</h2><p>既然要有同时存在多个 go 版本存在的情况，那么我们首先想到的就是 Docker 的容器环境隔离，每一个容器都是一个单独的环境。我完全可以每一个 go 程序都用 Docker 容器装载，然后再运行打包编译。<br>这边也有一个 Demo 实作：  <a href="/2019/02/14/golang-use-docker/" title="使用 docker 运行 golang 程序">使用 docker 运行 golang 程序</a>。 这样是可以达到我们要的效果的，不过也有几个问题：</p>
+<ul>
+<li>src 目录的维护太多了，因为每个 go 程序都是一个容器，因此都占用一个完整的 go 环境，这样 src 目录的资源不仅没法复用，而且维护也很麻烦</li>
+<li>对于公共库的维护很麻烦，我们有一个私有的 go 公共库，专门提取了一些常用的方法和功能，基本上每一个 go 程序都会用到这个公共库，那么这个公共库的维护就会很麻烦，因为每次这个公共库一更新，那么基本上所有项目的 go 程序的容器都得重新 update 这个公共库</li>
+</ul>
+<p>事实上以上这两个问题也不是什么大问题啦，因为我们只需要在每次构建的该 go 程序的时候，进入该项目目录，然后执行 <strong>go get</strong> ，go 就会去自动下载这个程序所需要的依赖包。 但是这个也会导致这个容器的体积会非常膨胀就是了。<br>而且这种方式针对公共库也会有一个隐患： 如果该项目本来就存在，那么执行 go get 是不会再 update 的，所以每次我们公共库更新的时候，就得到所有的容器里面去更新最新的公共库代码，不然是不会更新的。<br>因此我们想了另一种方案。</p>
+<h2 id="针对-go-版本环境来用-Docker-容器挂载"><a href="#针对-go-版本环境来用-Docker-容器挂载" class="headerlink" title="针对 go 版本环境来用 Docker 容器挂载"></a>针对 go 版本环境来用 Docker 容器挂载</h2><p>这种方案也是要用 Docker 容器挂载的，不过它不是一个 go 程序一个容器，而是一个 go 版本环境，一个容器。 假设我们有新旧两个 go 版本，那么就只会有两个容器。使用该环境的所有的 go 程序的所有的依赖都是共用的，因此维护也比较简单。<br>接下来我们具体实作一下：</p>
+<h3 id="选择一个-go-版本创建镜像"><a href="#选择一个-go-版本创建镜像" class="headerlink" title="选择一个 go 版本创建镜像"></a>选择一个 go 版本创建镜像</h3><p>首先从<a href="https://hub.docker.com/_/golang/" target="_blank" rel="noopener">Docker Official Images</a> 选择一个你要的版本，我们选择： go1.10 版本。<br>在用户目录创建一个存放 dockerfile 的目录,并创建一个 dockerfile<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# mkdir docker-go1.10</span><br><span class="line">[root@VM_156_200_centos ~]# cd docker-go1.10/</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# vim dockerfile</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# cat dockerfile</span><br><span class="line">FROM golang:1.10</span><br><span class="line">RUN mkdir /app</span><br><span class="line">ADD . /app/</span><br><span class="line">WORKDIR /app</span><br></pre></td></tr></table></figure></p>
+<p>接下来 build 成镜像：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# sudo docker build --rm -t kbz/golang-1.10 .</span><br><span class="line">...</span><br><span class="line">Successfully built 61b609c1428e</span><br></pre></td></tr></table></figure></p>
+<p>这样子就安装好了， 查看一下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker images</span><br><span class="line">REPOSITORY                       TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">kbz/golang-1.10                  latest              61b609c1428e        28 seconds ago      760 MB</span><br></pre></td></tr></table></figure></p>
+<h3 id="创建对应的容器"><a href="#创建对应的容器" class="headerlink" title="创建对应的容器"></a>创建对应的容器</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# sudo docker run -it  --name golang-1.10-1  kbz/golang-1.10</span><br><span class="line">root@4943d5f1558c:/app#</span><br><span class="line">root@4943d5f1558c:/app# ls</span><br><span class="line">dockerfile</span><br><span class="line">root@4943d5f1558c:/app# cd ..</span><br><span class="line">root@4943d5f1558c:/# ls</span><br><span class="line">app  bin  boot    dev  etc  go  home  lib  lib64    media  mnt  opt  proc  root  run  sbin    srv  sys  tmp  usr  var</span><br><span class="line">root@4943d5f1558c:/# go env</span><br><span class="line">GOARCH="amd64"</span><br><span class="line">GOBIN=""</span><br><span class="line">GOCACHE="/root/.cache/go-build"</span><br><span class="line">GOEXE=""</span><br><span class="line">GOHOSTARCH="amd64"</span><br><span class="line">GOHOSTOS="linux"</span><br><span class="line">GOOS="linux"</span><br><span class="line">GOPATH="/go"</span><br><span class="line">GORACE=""</span><br><span class="line">GOROOT="/usr/local/go"</span><br><span class="line">GOTMPDIR=""</span><br><span class="line">GOTOOLDIR="/usr/local/go/pkg/tool/linux_amd64"</span><br><span class="line">GCCGO="gccgo"</span><br><span class="line">CC="gcc"</span><br><span class="line">CXX="g++"</span><br><span class="line">CGO_ENABLED="1"</span><br><span class="line">CGO_CFLAGS="-g -O2"</span><br><span class="line">CGO_CPPFLAGS=""</span><br><span class="line">CGO_CXXFLAGS="-g -O2"</span><br><span class="line">CGO_FFLAGS="-g -O2"</span><br><span class="line">CGO_LDFLAGS="-g -O2"</span><br><span class="line">PKG_CONFIG="pkg-config"</span><br><span class="line">GOGCCFLAGS="-fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=/tmp/go-build408694441=/tmp/go-build -gno-record-gcc-switches"</span><br><span class="line">root@4943d5f1558c:/# go env</span><br><span class="line">GOARCH="amd64"</span><br><span class="line">GOBIN=""</span><br><span class="line">GOCACHE="/root/.cache/go-build"</span><br><span class="line">GOEXE=""</span><br><span class="line">GOHOSTARCH="amd64"</span><br><span class="line">GOHOSTOS="linux"</span><br><span class="line">GOOS="linux"</span><br><span class="line">GOPATH="/go"</span><br><span class="line">GORACE=""</span><br><span class="line">GOROOT="/usr/local/go"</span><br><span class="line">GOTMPDIR=""</span><br><span class="line">GOTOOLDIR="/usr/local/go/pkg/tool/linux_amd64"</span><br><span class="line">GCCGO="gccgo"</span><br><span class="line">CC="gcc"</span><br><span class="line">CXX="g++"</span><br><span class="line">CGO_ENABLED="1"</span><br><span class="line">CGO_CFLAGS="-g -O2"</span><br><span class="line">CGO_CPPFLAGS=""</span><br><span class="line">CGO_CXXFLAGS="-g -O2"</span><br><span class="line">CGO_FFLAGS="-g -O2"</span><br><span class="line">CGO_LDFLAGS="-g -O2"</span><br><span class="line">PKG_CONFIG="pkg-config"</span><br><span class="line">GOGCCFLAGS="-fPIC -m64 -pthread -fmessage-length=0 -fdebug-prefix-map=/tmp/go-build928433244=/tmp/go-build -gno-record-gcc-switches"</span><br><span class="line">root@4943d5f1558c:/# go version</span><br><span class="line">go version go1.10.8 linux/amd64</span><br><span class="line">root@4943d5f1558c:/app# exit</span><br><span class="line">exit</span><br></pre></td></tr></table></figure>
+<p>现在我们使用 <strong>-i</strong>（交互式）和 <strong>-t</strong>（临时终端）参数运行一个容器，然后输入一些交互命令。可以看到创建容器了之后，就直接进入容器的交互界面了，而且目录就是工作目录 app， 然后上一级目录还有很多其他的目录。最后退出。<br>这边需要注意的一点就是， run 的时候，如果加上 <strong>–rm</strong> 指令的话，会意味着如果交互模式退出来之后，这个容器也会被删掉(<strong>docker ps -a</strong>找不到)，所以除非是临时容器，不然不要加 <strong>–rm</strong>。这时候就可以看到这个容器的 go 版本是 <strong>1.10.8</strong>， 而且 gopath 是 <strong>/go</strong> 这个目录。<br>这时候如果退出交互模式的话，这个容器也会停止，即执行 <strong>docker ps</strong> 会找不到，但是容器还在，通过 <strong>docker ps -a</strong> 可以找到。<br>如果想再开启的话，就执行：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker start  golang-1.10-1</span><br><span class="line">golang-1.10-1</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# docker ps</span><br><span class="line">CONTAINER ID        IMAGE                   COMMAND                  CREATED             STATUS              PORTS                         NAMES</span><br><span class="line">4943d5f1558c        kbz/golang-1.10         "bash"                   43 minutes ago      Up 2 seconds                                      golang-1.10-1</span><br><span class="line">。。。</span><br></pre></td></tr></table></figure></p>
+<p>这时候就启动起来了。 这时候如果要进入容器的交互模式的话，就执行：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker exec -it golang-1.10-1  /bin/bash</span><br><span class="line">root@4943d5f1558c:/app# go version</span><br><span class="line">go version go1.10.8 linux/amd64</span><br></pre></td></tr></table></figure></p>
+<p>当然如果想启动起来的时候，就直接接入交互模式的话，也可以，就执行：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker start -ai golang-1.10-1</span><br><span class="line">root@4943d5f1558c:/app# ls</span><br><span class="line">dockerfile</span><br></pre></td></tr></table></figure></p>
+<p>启动的时候，使用 -a 参数将容器的输出导出到终端，同时使用 -i 参数进行交互式的操作。不过这样子，如果退出的话，容器这时候也会跟 run 的时候一样停止。<br>这样子 go1.10 环境的容器就搭好了。接下来就开始实作了</p>
+<h3 id="在容器里面运行-go-程序"><a href="#在容器里面运行-go-程序" class="headerlink" title="在容器里面运行 go 程序"></a>在容器里面运行 go 程序</h3><p>首先我们将宿主机的 go 程序文件放到这个容器的 src 目录就行了, 使用:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker cp 宿主机文件路径  镜像名称:镜像中文件存放路径</span><br></pre></td></tr></table></figure></p>
+<p>可以将宿主机的目录拷贝到容器的对应目录。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker cp /root/go/src/go_learn_demo golang-1.10-1:/go/src/</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# docker exec -it golang-1.10-1  /bin/bash</span><br><span class="line">root@4943d5f1558c:/app# cd /go/src/</span><br><span class="line">root@4943d5f1558c:/go/src# ls</span><br><span class="line">go_learn_demo</span><br><span class="line">root@4943d5f1558c:/go/src# cd go_learn_demo/</span><br><span class="line">root@4943d5f1558c:/go/src/go_learn_demo# ls</span><br><span class="line">flag</span><br><span class="line">root@4943d5f1558c:/go/src/go_learn_demo# cd flag</span><br><span class="line">root@4943d5f1558c:/go/src/go_learn_demo/flag# ls</span><br><span class="line">example1  example1.go  example2.go</span><br><span class="line">root@4943d5f1558c:/go/src/go_learn_demo/flag# go run example1.go</span><br><span class="line">port is  9088</span><br><span class="line">root@4943d5f1558c:/go/src/go_learn_demo/flag# exit</span><br><span class="line">exit</span><br></pre></td></tr></table></figure></p>
+<p>可以看到这个简单的程序执行成功了。 接下来换个有依赖包的：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker cp /root/go/src/goworker golang-1.10-1:/go/src/</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# docker exec -it golang-1.10-1  /bin/bash</span><br><span class="line">root@4943d5f1558c:/app# cd /go/src</span><br><span class="line">root@4943d5f1558c:/go/src# ls</span><br><span class="line">go_learn_demo  goworker</span><br><span class="line">root@4943d5f1558c:/go/src# cd goworker/</span><br><span class="line">root@4943d5f1558c:/go/src/goworker# ls</span><br><span class="line">hello_worker.go  worker  worker.go</span><br><span class="line">root@4943d5f1558c:/go/src/goworker# go run *.go</span><br><span class="line">hello_worker.go:5:2: cannot find package "github.com/benmanns/goworker" in any of:</span><br><span class="line">    /usr/local/go/src/github.com/benmanns/goworker (from $GOROOT)</span><br><span class="line">    /go/src/github.com/benmanns/goworker (from $GOPATH)</span><br><span class="line">root@4943d5f1558c:/go/src/goworker# cd ../</span><br><span class="line">root@4943d5f1558c:/go/src# go get github.com/benmanns/goworker</span><br><span class="line">package golang.org/x/net/context: unrecognized import path "golang.org/x/net/context" (https fetch: Get https://golang.org/x/net/context?go-get=1: dial tcp 216.239.37.1:443: i/o timeout)</span><br></pre></td></tr></table></figure></p>
+<p>发现确实缺少依赖，所以就到 src 去装依赖了（当然也可以进入项目的目录直接执行 go get 安装会更快）。 结果某些包是要翻墙的。但是我检查了一下，宿主机是有设置代理的，但是容器内没有使用宿主机的代理，所以后面我就折腾了一下： <a href="/2019/02/22/docker-container-proxy/" title="docker 容器内使用宿主机的代理配置">docker 容器内使用宿主机的代理配置</a>, 这样子容器里面也可以使用宿主机的代理了。<br>所以重新执行了一下，这时候就正常了：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker start -ai golang-1.10-1</span><br><span class="line">root@VM_156_200_centos:/app# cd /go/src/</span><br><span class="line">root@VM_156_200_centos:/go/src# ls</span><br><span class="line">goworker</span><br><span class="line">root@VM_156_200_centos:/go/src# go  get github.com/benmanns/goworker</span><br><span class="line">root@VM_156_200_centos:/go/src# ls</span><br><span class="line">github.comgolang.org    goworker  vitess.io</span><br><span class="line">root@VM_156_200_centos:/go/src# cd goworker/</span><br><span class="line">root@VM_156_200_centos:/go/src/goworker# go run *.go</span><br><span class="line">===========start=========</span><br><span class="line">Error: you must specify at least one queue</span><br></pre></td></tr></table></figure></p>
+<p>这样子依赖就下载成功了，并且执行成功了。</p>
+<h3 id="src-目录共享"><a href="#src-目录共享" class="headerlink" title="src 目录共享"></a>src 目录共享</h3><p>当然后面我们不可能每次构建的时候，都要 <strong>docker cp</strong> 将宿主机的更新文件拷贝一份到容器里面。所以就要用目录挂载的方式，来实现文件共享。关于 docker volume 实现目录共享挂载的请看：<a href="/2019/02/25/docker-volume/" title="Docker Volume - 目录挂载以及文件共享">Docker Volume - 目录挂载以及文件共享</a><br>首先在用户根目录下创建一个目录专门用来共享 docker go 版本容器内的目录： <strong>docker-golang-src</strong>， 然后创建一个 <strong>go-10.1</strong> 目录用来存放 <strong>golang-1.10-1</strong> 这个容器的 src 目录的共享目录：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# mkdir  docker-golang-src</span><br><span class="line">[root@VM_156_200_centos ~]# cd docker-golang-src</span><br><span class="line">[root@VM_156_200_centos docker-golang-src]# mkdir go-10.1</span><br></pre></td></tr></table></figure></p>
+<p>接下来将这个目录挂载到这个容器的 <strong>/go/src</strong> 目录, 因为要重新run，而且名字不能重复，所以要先把旧的那个 golang-1.10-1 容器去掉, 而且这边要使用宿主机的代理，所以也要加上 <strong>–net host</strong>:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-src]# docker rm golang-1.10-1</span><br><span class="line">[root@VM_156_200_centos docker-golang-src]# docker run -it -v /docker-golang-src/go-10.1:/go/src --net host --name golang-1.10-1  kbz/golang-1.10</span><br><span class="line">root@fefacc7b3218:/app# cd /go</span><br><span class="line">root@fefacc7b3218:/go# ls</span><br><span class="line">bin  src</span><br><span class="line">root@fefacc7b3218:/go# cd src</span><br><span class="line">root@fefacc7b3218:/go/src# ls</span><br></pre></td></tr></table></figure></p>
+<p>可以通过 docker inspect 去查看挂载的细节, 找到 Mounts 这一行<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-src]# docker inspect golang-1.10-1</span><br><span class="line">...</span><br><span class="line">        "Mounts": [</span><br><span class="line">            &#123;</span><br><span class="line">                "Type": "bind",</span><br><span class="line">                "Source": "/root/docker-golang-src/go-10.1",</span><br><span class="line">                "Destination": "/go/src",</span><br><span class="line">                "Mode": "",</span><br><span class="line">                "RW": true,</span><br><span class="line">                "Propagation": "rprivate"</span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>可以看到已经匹配了。目前这两个目录都是空的，接下来往宿主机的 <strong>go-10.1</strong> 放入一些go的程序文件，看看 容器内的共享目录会不会也会有？<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# cp -r /root/go/src/goworker /root/docker-golang-src/go-10.1/</span><br><span class="line">[root@VM_156_200_centos ~]# cd /root/docker-golang-src/go-10.1/</span><br><span class="line">[root@VM_156_200_centos go-10.1]# ls</span><br><span class="line">goworker</span><br></pre></td></tr></table></figure></p>
+<p>这时候看到宿主机的目录已经有 goworker 这个目录了，接下来进入容器内看下会不会也有：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-golang-src]# docker start  golang-1.10-1</span><br><span class="line">golang-1.10-1</span><br><span class="line"></span><br><span class="line">[root@VM_156_200_centos go-10.1]# docker exec -it golang-1.10-1 /bin/bash</span><br><span class="line">root@c0094ca86758:/app# cd /go/src</span><br><span class="line">root@c0094ca86758:/go/src# ls</span><br><span class="line">goworker</span><br></pre></td></tr></table></figure></p>
+<p>可以看到也有。那接下来我们在容器内到 goworker 目录，去下载依赖包， 然后看看下载的依赖包会不会也会出现宿主机的共享目录下:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">root@c0094ca86758:/go/src# cd goworker/</span><br><span class="line">root@c0094ca86758:/go/src/goworker# go get</span><br><span class="line">root@c0094ca86758:/go/src/goworker# ls</span><br><span class="line">hello_worker.go  worker  worker.go</span><br><span class="line">root@c0094ca86758:/go/src/goworker# cd ..</span><br><span class="line">root@c0094ca86758:/go/src# ls</span><br><span class="line">github.com  golang.org    goworker  vitess.io</span><br><span class="line">root@c0094ca86758:/go/src# cd goworker/</span><br><span class="line">root@c0094ca86758:/go/src/goworker# go run *.go</span><br><span class="line">===========start=========</span><br><span class="line">Error: you must specify at least one queue</span><br></pre></td></tr></table></figure></p>
+<p>可以看到 src 已经有对应的依赖了，并且已经运行成功了,接下来退出，然后到 宿主机对应的共享目录看下，这些依赖是不是也有:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos go-10.1]# ls</span><br><span class="line">github.com  golang.org  goworker  vitess.io</span><br></pre></td></tr></table></figure></p>
+<p>可以看到也是有的，至于为什么不在宿主机的共享目录用 <strong>go get</strong>，而是要在容器里面，这个是因为我们认为宿主机没有 go 环境，也不需要 go 环境， 容器才有对应的 go 版本环境。<br>接下来直接通过 docker 指令来运行对应容器的指令，而不需要再去进入交互模式：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos goworker]# docker exec golang-1.10-1 bash -c "cd /go/src/goworker &amp;&amp; go run *.go"</span><br><span class="line">===========start=========</span><br><span class="line">Error: you must specify at least one queue</span><br></pre></td></tr></table></figure></p>
+<p>通过这种方式，不需要进入容器内，也可以实现在容器内实现 shell 的效果。那接下来我们就生成go的二进制文件：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos goworker]# docker exec golang-1.10-1 bash -c "cd /go/src/goworker &amp;&amp; go build"</span><br><span class="line">[root@VM_156_200_centos goworker]# ls</span><br><span class="line">goworker  hello_worker.go  worker.go</span><br></pre></td></tr></table></figure></p>
+<p>这时候宿主机对应的共享目录也出现了 goworker 这个编译后的二进制文件了。那这个其实就是 Jenkins 这些CI/CD 所在服务器上要实现的功能，接下来只要把这个二进制文件上传到对应的服务器就行了。<br>这个只是 go 环境的一个版本，并且只在 docker 的容器里面。 通过一模一样的操作，我们就可以实现多个 go 版本环境的并存和构建了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>接下来总结一下，在 Jenkins 等构建服务器上，如果用 docker 容器来实现不同go版本的构建： </p>
+<ol>
+<li>当 gitlab 项目构建的时候，这时候在宿主机对应的该项目所需的 go 版本的src共享目录，进行 git pull，将最新的代码拉下来到宿主机对应的共享目录，本例就是 <strong>/root/docker-golang-src/go-10.1/</strong></li>
+<li><p>进入对应的go环境的容器，然后到对应的项目中，执行 go get，下载依赖包，本例就是：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec golang-1.10-1 bash -c "cd /go/src/goworker &amp;&amp; go get"</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>最后编译项目，生成二进制文件，本例就是：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec golang-1.10-1 bash -c "cd /go/src/goworker &amp;&amp; go build"</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>然后在宿主机的共享目录将这个生成的二进制文件，上传到对应的服务器上，就可以了。</p>
+</li>
+</ol>
+<p>通过这种方式，我后面又创建了一个新的版本容器： 1.7.4：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.7.4]# docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                      PORTS                                                                        NAMES</span><br><span class="line">efc6671de52e        kbz/golang-1.7.4    "/bin/bash"              41 seconds ago      Exited (0) 29 seconds ago                                                                                golang-1.7.4-1</span><br></pre></td></tr></table></figure></p>
+<p>这样子新旧版本的 go 版本容器都有了。</p>
+<h2 id="备忘"><a href="#备忘" class="headerlink" title="备忘"></a>备忘</h2><p>这边还有一个细节，就是我们针对我们的公共库的问题，一旦我们的公共库更新的时候，这时候也会触发构建，那么就要把所有的 go 版本环境的容器也要一起更新。不过应该还好，容器不会太多，最多就 2-3 个，而且可以通过脚本去处理，也不是什么大问题。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/02/28/docker-multiple-golang/" title="使用 docker 来让多个 golang 环境并存并实现多版本打包和编译">http://kebingzao.com/2019/02/28/docker-multiple-golang/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/docker/" rel="tag"># docker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/25/docker-volume/" rel="next" title="Docker Volume - 目录挂载以及文件共享">
+                <i class="fa fa-chevron-left"></i> Docker Volume - 目录挂载以及文件共享
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">114</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GVM-方案"><span class="nav-number">2.</span> <span class="nav-text">GVM 方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#每个-go-程序都用-Docker-容器装载"><span class="nav-number">3.</span> <span class="nav-text">每个 go 程序都用 Docker 容器装载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#针对-go-版本环境来用-Docker-容器挂载"><span class="nav-number">4.</span> <span class="nav-text">针对 go 版本环境来用 Docker 容器挂载</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#选择一个-go-版本创建镜像"><span class="nav-number">4.1.</span> <span class="nav-text">选择一个 go 版本创建镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建对应的容器"><span class="nav-number">4.2.</span> <span class="nav-text">创建对应的容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在容器里面运行-go-程序"><span class="nav-number">4.3.</span> <span class="nav-text">在容器里面运行 go 程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#src-目录共享"><span class="nav-number">4.4.</span> <span class="nav-text">src 目录共享</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备忘"><span class="nav-number">6.</span> <span class="nav-text">备忘</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/02/28/docker-multiple-golang/';
+          this.page.identifier = '2019/02/28/docker-multiple-golang/';
+          this.page.title = '使用 docker 来让多个 golang 环境并存并实现多版本打包和编译';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

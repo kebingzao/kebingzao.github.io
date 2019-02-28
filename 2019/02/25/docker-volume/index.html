@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="docker," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为数据卷（Data Volume）。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用 mount 挂载一个文件系统。 Docker文件系统工作情况想要了解">
+<meta name="keywords" content="docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker Volume - 目录挂载以及文件共享">
+<meta property="og:url" content="http://kebingzao.com/2019/02/25/docker-volume/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为数据卷（Data Volume）。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用 mount 挂载一个文件系统。 Docker文件系统工作情况想要了解">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-02-28T13:53:58.169Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Docker Volume - 目录挂载以及文件共享">
+<meta name="twitter:description" content="前言Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为数据卷（Data Volume）。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用 mount 挂载一个文件系统。 Docker文件系统工作情况想要了解">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/02/25/docker-volume/"/>
+
+
+
+
+
+  <title>Docker Volume - 目录挂载以及文件共享 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/02/25/docker-volume/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Docker Volume - 目录挂载以及文件共享</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-25T13:52:02+08:00">
+                2019-02-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/docker相关/" itemprop="url" rel="index">
+                    <span itemprop="name">docker相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/25/docker-volume/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/02/25/docker-volume/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/02/25/docker-volume/" class="leancloud_visitors" data-flag-title="Docker Volume - 目录挂载以及文件共享">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Docker中的数据可以存储在类似于虚拟机磁盘的介质中，在Docker中称为数据卷（Data Volume）。数据卷可以用来存储Docker应用的数据，也可以用来在Docker容器间进行数据共享。数据卷呈现给Docker容器的形式就是一个目录，支持多个容器间共享，修改也不会影响镜像。使用Docker的数据卷，类似在系统中使用 mount 挂载一个文件系统。</p>
+<h2 id="Docker文件系统工作情况"><a href="#Docker文件系统工作情况" class="headerlink" title="Docker文件系统工作情况"></a>Docker文件系统工作情况</h2><p>想要了解Docker Volume，首先我们需要知道Docker的文件系统是如何工作的。Docker镜像是由多个文件系统（只读层）叠加而成。当我们启动一个容器的时候，Docker会加载只读镜像层并在其上（镜像栈顶部）添加一个读写层。如果运行中的容器修改了现有的一个已经存在的文件，那该文件将会从读写层下面的只读层复制到读写层，该文件的只读版本仍然存在，只是已经被读写层中该文件的副本所隐藏。当删除Docker容器，并通过该镜像重新启动时，之前的更改将会丢失。在Docker中，只读层及在顶部的读写层的组合被称为Union File System（联合文件系统）。<br><a id="more"></a><br>为了能够保存（持久化）数据以及共享容器间的数据，Docker提出了Volume的概念。简单来说，Volume就是目录或者文件，它可以绕过默认的联合文件系统，而以正常的文件或者目录的形式存在于宿主机上。<br>最常用的其实就是<strong>目录挂载</strong>和<strong>文件共享</strong>的使用。</p>
+<h2 id="挂载本地目录"><a href="#挂载本地目录" class="headerlink" title="挂载本地目录"></a>挂载本地目录</h2><p>Docker容器启动的时候，如果要挂载宿主机的一个目录，可以用-v参数指定，这个其实也是创建一个数据卷，只不过是把一个本地主机的目录当做数据卷挂载在容器上。<br>譬如我要启动一个 CentOS 容器，宿主机的 /hostTest 目录挂载到容器的 /conainterTest 目录，可通过以下方式指定：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it  -v /hostTest:/conainterTest --name centos-demo-1  centos</span><br></pre></td></tr></table></figure></p>
+<p>这样在容器启动后，容器内会自动创建 /conainterTest 的目录。通过这种方式，我们可以明确一点，即-v参数中，冒号”:”前面的目录是宿主机目录，后面的目录是容器内目录。</p>
+<h3 id="基础操作"><a href="#基础操作" class="headerlink" title="基础操作"></a>基础操作</h3><p>下面我们来验证一下： 我服务器上的docker 版本都是 <strong>18.09.2</strong><br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker version</span><br><span class="line">Client:</span><br><span class="line"> Version:           18.09.2</span><br></pre></td></tr></table></figure></p>
+<p>首先执行命令：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# docker run -it  -v /hostTest:/conainterTest --name centos-demo-1  centos </span><br><span class="line">[root@a8e50a72519e /]# cd conainterTest/</span><br><span class="line">[root@a8e50a72519e conainterTest]# echo "123" &gt; 123</span><br><span class="line">[root@a8e50a72519e conainterTest]# ls</span><br><span class="line">123</span><br><span class="line">[root@a8e50a72519e conainterTest]# exit</span><br><span class="line">exit</span><br></pre></td></tr></table></figure></p>
+<p>run 一个 centos 的镜像，如果本地没有的话，会去执行<strong>docker pull centos</strong>下载，并生成一个 centos-demo-1 的容器，并进入交互模式<br>这时候就可以看到容器里面已经有生成<strong>/conainterTest</strong>这个目录了，接下来我们在这个目录下创建了一个 123 的文件，然后退出容器。<br>回到宿主机之后，可以看到宿主机对应的目录已经有<strong>/hostTest</strong>这个目录了，并且也有 123 这个文件。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# cd /hostTest/</span><br><span class="line">[root@VM_156_200_centos hostTest]# ls</span><br><span class="line">123</span><br><span class="line">[root@VM_156_200_centos hostTest]# echo "456" &gt; 456</span><br><span class="line">[root@VM_156_200_centos hostTest]# ls</span><br><span class="line">123  456</span><br></pre></td></tr></table></figure></p>
+<p>而且我们还再新建了一个 456 文件，看看会不会同步到容器中，接下来启动容器查看一下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos hostTest]# docker start -ai  centos-demo-1</span><br><span class="line">[root@a8e50a72519e /]# cd conainterTest/</span><br><span class="line">[root@a8e50a72519e conainterTest]# ls</span><br><span class="line">123  456</span><br><span class="line">[root@a8e50a72519e conainterTest]# cat 456</span><br><span class="line">456</span><br></pre></td></tr></table></figure></p>
+<p>可以看到这个是有的，所以这两个目录其实就是共享的。接下来具体分析一下这个命令的几种情况。</p>
+<h3 id="容器目录不可以为相对路径"><a href="#容器目录不可以为相对路径" class="headerlink" title="容器目录不可以为相对路径"></a>容器目录不可以为相对路径</h3><p>具体指令如下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# docker run -it  -v /hostTest:conainterTest --name centos-demo-1  centos </span><br><span class="line">docker: Error response from daemon: invalid volume specification: '/hostTest:conainterTest': invalid mount config for type "bind": invalid mount path: 'conainterTest' mount path must be absolute.</span><br><span class="line">See 'docker run --help'.</span><br></pre></td></tr></table></figure></p>
+<p>直接报错，提示 conainterTest 不是一个绝对路径，所谓的绝对路径，必须以下斜线“/”开头。</p>
+<h3 id="宿主机目录如果不存在，则会自动生成"><a href="#宿主机目录如果不存在，则会自动生成" class="headerlink" title="宿主机目录如果不存在，则会自动生成"></a>宿主机目录如果不存在，则会自动生成</h3><p>先把宿主机的目录删掉：然后在run容器：<br>ps： 因为有为容器命名，但是因为相同名字的容器创建会报错，所以这边我有一个隐形操作，就是每次操作，都会先执行：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# docker rm centos-demo-1 </span><br><span class="line">centos-demo-1</span><br></pre></td></tr></table></figure></p>
+<p>当然这个不是重点，所以后面我不会再把这个操作再说明，默认每次run的时候，如果名字相同，那么我就会先删掉同名的容器。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# rm -rf  hostTest</span><br><span class="line">[root@VM_156_200_centos /]# docker run -it  -v /hostTest:/conainterTest --name centos-demo-1  centos </span><br><span class="line">[root@e57a25c8f8e5 /]# ls</span><br><span class="line">anaconda-post.log  bin  conainterTest  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var</span><br></pre></td></tr></table></figure></p>
+<p>查看宿主机，发现新增了 <strong>/hostTest</strong> 这个目录<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# cd hostTest/</span><br><span class="line">[root@VM_156_200_centos hostTest]# pwd</span><br><span class="line">/hostTest</span><br></pre></td></tr></table></figure></p>
+<h3 id="宿主机的目录如果为相对路径呢？"><a href="#宿主机的目录如果为相对路径呢？" class="headerlink" title="宿主机的目录如果为相对路径呢？"></a>宿主机的目录如果为相对路径呢？</h3><p>这次，我们换个目录名 hostTest1 试试:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# docker run -it  -v hostTest1:/conainterTest --name centos-demo-1  centos</span><br></pre></td></tr></table></figure></p>
+<p>接下来去 / 查找有没有增加 hostTest1 目录：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# ll / | grep 'hostTest1'</span><br></pre></td></tr></table></figure></p>
+<p>发现找不到？？ 那么 hostTest1 在哪里创建呢？ 通过<strong>docker inspect</strong>命令，查看容器“Mounts”那一部分，我们可以得到这个问题的答案。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos hostTest]# docker inspect centos-demo-1</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">    ...</span><br><span class="line">        "Mounts": [</span><br><span class="line">            &#123;</span><br><span class="line">                "Type": "volume",</span><br><span class="line">                "Name": "hostTest1",</span><br><span class="line">                "Source": "/var/lib/docker/volumes/hostTest1/_data",</span><br><span class="line">                "Destination": "/conainterTest",</span><br><span class="line">                "Driver": "local",</span><br><span class="line">                "Mode": "z",</span><br><span class="line">                "RW": true,</span><br><span class="line">                "Propagation": ""</span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">    ...</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>可以看出，容器内的 /conainterTest 目录挂载的是宿主机上的 /var/lib/docker/volumes/hostTest1/_data 目录。<br>原来，所谓的相对路径指的是 <strong>/var/lib/docker/volumes/</strong> ，与宿主机的当前目录无关。</p>
+<h3 id="只是-v指定一个目录的情况？"><a href="#只是-v指定一个目录的情况？" class="headerlink" title="只是-v指定一个目录的情况？"></a>只是-v指定一个目录的情况？</h3><p>先启动一个容器：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos volumes]# docker run -it  -v /test2 --name centos-demo-1  centos </span><br><span class="line">[root@64e9d535b48c /]# ls</span><br><span class="line">anaconda-post.log  bin  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  test2  tmp  usr  var</span><br></pre></td></tr></table></figure></p>
+<p>发现 /test2 在容器中有存在，那么宿主机的目录在哪里呢？？ 用 <strong>docker inspect</strong> 查看一下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos hostTest]# docker inspect centos-demo-1</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">    ...</span><br><span class="line">        "Mounts": [</span><br><span class="line">            &#123;</span><br><span class="line">                "Type": "volume",</span><br><span class="line">                "Name": "43c602bf16cf87452499988cd4dbfad834e40e2f01e93d960ec01a557f40bc58",</span><br><span class="line">                "Source": "/var/lib/docker/volumes/43c602bf16cf87452499988cd4dbfad834e40e2f01e93d960ec01a557f40bc58/_data",</span><br><span class="line">                "Destination": "/test2",</span><br><span class="line">                "Driver": "local",</span><br><span class="line">                "Mode": "",</span><br><span class="line">                "RW": true,</span><br><span class="line">                "Propagation": ""</span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">    ...</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>可以看出，同上例中的结果类似，只不过，它不是相对路径的目录名，而是随机生成的一个目录名。</p>
+<h3 id="如果在容器内修改了目录的属主和属组，那么对应的挂载点是否会修改呢？"><a href="#如果在容器内修改了目录的属主和属组，那么对应的挂载点是否会修改呢？" class="headerlink" title="如果在容器内修改了目录的属主和属组，那么对应的挂载点是否会修改呢？"></a>如果在容器内修改了目录的属主和属组，那么对应的挂载点是否会修改呢？</h3><p>首先开启一个容器,并查看容器内 /conainterTest/ 的属性<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos volumes]# docker run -it  -v /hostTest:/conainterTest --name centos-demo-1  centos </span><br><span class="line">[root@25d6613bcb81 /]# ll -d /conainterTest/</span><br><span class="line">drwxr-xr-x 2 root root 4096 Feb 26 03:24 /conainterTest/</span><br></pre></td></tr></table></figure></p>
+<p>接下来查看宿主机内 /hostTest 目录的属性：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos volumes]# ll -d /hostTest/</span><br><span class="line">drwxr-xr-x 2 root root 4096 Feb 26 11:24 /hostTest/</span><br></pre></td></tr></table></figure></p>
+<p>可以看到都是 root。接下来我们在容器内新建用户，修改 /conainterTest 的属主和属组：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos volumes]# docker start -ai  centos-demo-1</span><br><span class="line">[root@25d6613bcb81 /]# useradd kbz</span><br><span class="line">[root@25d6613bcb81 /]# chown -R kbz.kbz /conainterTest/</span><br><span class="line">[root@25d6613bcb81 /]# ll -d /conainterTest/</span><br><span class="line">drwxr-xr-x 2 kbz kbz 4096 Feb 26 03:24 /conainterTest/</span><br></pre></td></tr></table></figure></p>
+<p>可以看到已经将属主和属组都变成 kbz 了。接下来查看宿主机 /hostTest 的属主和属组是否会改变？？<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos volumes]# ll -d /hostTest/</span><br><span class="line">drwxr-xr-x 2 privoxy privoxy 4096 Feb 26 11:24 /hostTest/</span><br></pre></td></tr></table></figure></p>
+<p>发现改变了，但是并不是 kbz，而是一个 privoxy ？？<br>原来，这个与UID有关系，UID，即“用户标识号”，是一个整数，系统内部用它来标识用户。一般情况下它与用户名是一一对应的。首先查看容器内victor对应的UID是多少：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos volumes]# docker start -ai  centos-demo-1</span><br><span class="line">[root@25d6613bcb81 /]# cat /etc/passwd | grep kbz</span><br><span class="line">kbz:x:1000:1000::/home/kbz:/bin/bash</span><br></pre></td></tr></table></figure></p>
+<p>kbz 的 UID 为 1000，那么宿主机内 1000 对应的用户是谁呢？<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos volumes]# cat /etc/passwd | grep 1000</span><br><span class="line">privoxy:x:1000:1000::/home/privoxy:/bin/bash</span><br></pre></td></tr></table></figure></p>
+<p>果然是 privoxy， 那么就说的通了。</p>
+<h3 id="容器销毁了，在宿主机上新建的挂载目录是否会消失"><a href="#容器销毁了，在宿主机上新建的挂载目录是否会消失" class="headerlink" title="容器销毁了，在宿主机上新建的挂载目录是否会消失"></a>容器销毁了，在宿主机上新建的挂载目录是否会消失</h3><p>在这里，主要验证两种情况：</p>
+<ul>
+<li>指定了宿主机目录，即  -v /hostTest:/conainterTest。</li>
+<li>没有指定宿主机目录，即 -v /conainterTest</li>
+</ul>
+<p>首先的第一种情况：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# rm -rf /hostTest/  </span><br><span class="line">[root@VM_156_200_centos /]# ll | grep hostTest</span><br><span class="line">[root@VM_156_200_centos /]# docker run -it  -v /hostTest:/conainterTest --name centos-demo-1  centos </span><br><span class="line">[root@a225da0f4576 /]# exit</span><br><span class="line">exit</span><br><span class="line">[root@VM_156_200_centos /]# docker rm centos-demo-1 </span><br><span class="line">centos-demo-1</span><br><span class="line">[root@VM_156_200_centos /]# ll | grep hostTest</span><br><span class="line">drwxr-xr-x    2 root root     4096 Feb 26 14:10 hostTest</span><br></pre></td></tr></table></figure></p>
+<p>我们先把宿主机的 hostTest 目录删掉，然后进行挂载，再把容器删掉，最后发现挂载时候建的 hostTest 还存在。<br>可以看出，即便容器销毁了，新建的挂载目录不会消失。进一步也可验证，如果宿主机目录的属主和属组发生了变化，容器销毁后，宿主机目录的属主和属组不会恢复到挂载之前的状态。</p>
+<p>第二种情况：<br>通过上面的验证知道，如果没有指定宿主机的目录，则容器会在 /var/lib/docker/volumes/ 随机配置一个目录，那么我们看看这种情况下的容器销毁是否会导致相应目录的删除：<br>首先启动容器：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# docker run -it  -v conainterTest --name centos-demo-1  centos</span><br></pre></td></tr></table></figure></p>
+<p>然后通过 docker inspect 来查看挂载的宿主机的目录：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker inspect centos-demo-1</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">    ...</span><br><span class="line">        "Mounts": [</span><br><span class="line">            &#123;</span><br><span class="line">                "Type": "volume",</span><br><span class="line">                "Name": "225e07eb178cc49ee6a4bd95d82430fdf77af717fc4924cb0d201a3f2f162683",</span><br><span class="line">                "Source": "/var/lib/docker/volumes/225e07eb178cc49ee6a4bd95d82430fdf77af717fc4924cb0d201a3f2f162683/_data",</span><br><span class="line">                "Destination": "conainterTest",</span><br><span class="line">                "Driver": "local",</span><br><span class="line">                "Mode": "",</span><br><span class="line">                "RW": true,</span><br><span class="line">                "Propagation": ""</span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">    ...</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>对应的是/var/lib/docker/volumes/22…83/_data目录, 去查看一下这个目录是否存在：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# ll /var/lib/docker/volumes/225e07eb178cc49ee6a4bd95d82430fdf77af717fc4924cb0d201a3f2f162683/</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x 2 root root 4096 Feb 26 14:14 _data</span><br></pre></td></tr></table></figure></p>
+<p>发现该目录依然存在。而且即使重启了docker服务，该目录依旧存在。</p>
+<h3 id="挂载宿主机已存在目录后，在容器内对其进行操作，报“Permission-denied”"><a href="#挂载宿主机已存在目录后，在容器内对其进行操作，报“Permission-denied”" class="headerlink" title="挂载宿主机已存在目录后，在容器内对其进行操作，报“Permission denied”"></a>挂载宿主机已存在目录后，在容器内对其进行操作，报“Permission denied”</h3><p>可通过两种方式解决：</p>
+<ul>
+<li><p>关闭selinux。<br>临时关闭：# setenforce 0<br>永久关闭：修改/etc/sysconfig/selinux文件，将SELINUX的值设置为disabled。</p>
+</li>
+<li><p>以特权方式启动容器<br>指定–privileged参数</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --privileged=true -v /test:/soft centos /bin/bash</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h3 id="将挂载的路径的权限设置为只读"><a href="#将挂载的路径的权限设置为只读" class="headerlink" title="将挂载的路径的权限设置为只读"></a>将挂载的路径的权限设置为只读</h3><p>挂载的路径权限默认为读写。如果指定为只读可以用：<strong>ro</strong><br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos /]# docker run -it  -v /hostTest:/conainterTest:ro --name centos-demo-1  centos </span><br><span class="line">[root@c9c2a58bbfef /]# cd conainterTest/</span><br><span class="line">[root@c9c2a58bbfef conainterTest]# echo "12" &gt; 12</span><br><span class="line">bash: 12: Read-only file system</span><br></pre></td></tr></table></figure></p>
+<p>这时候，如果在容器的挂载目录下进行读写操作的话，就会报错。</p>
+<h2 id="挂载文件"><a href="#挂载文件" class="headerlink" title="挂载文件"></a>挂载文件</h2><p>不仅可以挂载目录，还可以挂载文件。如果挂载目录可以理解为系统的目录映射的话，那么挂载文件，也可以理解为文件映射。<br>语法跟挂载目录差不多。<font color="red">不过有一点要注意的是，挂载宿主机文件的时候，该文件一定要存在，如果该文件不存在，就会跟上面例子说的一样，docker会自动帮你创建，但是这时候它创建的时候，就是目录了，而不是文件了</font>。<br>接下来尝试一下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# vim web.list</span><br><span class="line">[root@VM_156_200_centos ~]# cat web.list</span><br><span class="line">1111111111</span><br><span class="line">2222222222</span><br></pre></td></tr></table></figure></p>
+<p>我创建了一个 web.list 的文件，并且写入了两行，这时候就开始挂载这个文件了：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker run -it  -v /root/web.list:/root/web.list --name centos-demo-1  centos </span><br><span class="line">[root@6c91b4f6b765 /]# cat /root/web.list </span><br><span class="line">1111111111</span><br><span class="line">2222222222</span><br><span class="line">[root@6c91b4f6b765 /]# echo "333333" &gt;&gt; /root/web.list </span><br><span class="line">[root@6c91b4f6b765 /]# cat /root/web.list </span><br><span class="line">1111111111</span><br><span class="line">2222222222</span><br><span class="line">333333</span><br><span class="line">[root@6c91b4f6b765 /]# exit</span><br><span class="line">exit</span><br></pre></td></tr></table></figure></p>
+<p>可以看到挂载成功了，并且在容器内又在 web.list 写入新的一行,并退出容器<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# cat /root/web.list </span><br><span class="line">1111111111</span><br><span class="line">2222222222</span><br><span class="line">333333</span><br><span class="line">[root@VM_156_200_centos ~]# echo "444444" &gt;&gt; /root/web.list </span><br><span class="line">[root@VM_156_200_centos ~]# docker start -ai  centos-demo-1</span><br><span class="line">[root@6c91b4f6b765 /]# cat /root/web.list </span><br><span class="line">1111111111</span><br><span class="line">2222222222</span><br><span class="line">333333</span><br><span class="line">444444</span><br></pre></td></tr></table></figure></p>
+<p>可以看到在宿主机，之前容器新写的一行也同步过来了，而且之后宿主机也新加了一行，之后进入容器也一样有。<br>挂载文件跟上述挂载目录一样，也是默认为读写的，如果设置为只读的话，那么在容器里面就不能修改了，只能在宿主机修改：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker run -it  -v /root/web.list:/root/web.list:ro --name centos-demo-1  centos </span><br><span class="line">[root@2a7e3a4ed710 /]# echo "5555" &gt;&gt; /root/web.list </span><br><span class="line">bash: /root/web.list: Read-only file system</span><br><span class="line">[root@2a7e3a4ed710 /]# exit</span><br><span class="line">exit</span><br><span class="line">[root@VM_156_200_centos ~]# echo "666" &gt;&gt; /root/web.list </span><br><span class="line">[root@VM_156_200_centos ~]# cat web.list </span><br><span class="line">1111111111</span><br><span class="line">2222222222</span><br><span class="line">333333</span><br><span class="line">444444</span><br><span class="line">666</span><br></pre></td></tr></table></figure></p>
+<p>可以看到在容器内编辑是会报错的，而在宿主机内就不会。</p>
+<h2 id="挂载数据卷容器"><a href="#挂载数据卷容器" class="headerlink" title="挂载数据卷容器"></a>挂载数据卷容器</h2><p>上述的挂载目录和挂载文件，只是 Docker Volume 的使用方式。<br>而我们用的方式就是在docker run命令后面跟上-v参数即可创建一个数据卷，然后把本地目录或者文件当做数据卷挂载到容器中。当然也可以跟多个-v参数来创建多个数据卷。<br>因此我们完全可以创建一个数据卷的容器，后面专门用来提供其他容器来挂载。<br>首先先创建一个专门用来提供数据的本地目录，然后挂载到一个普通的容器，而这个容器就是其他容器要挂载的数据卷容器，这种方式主要就是用来做多个容器的共享数据存在的。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# mkdir go-data</span><br><span class="line">[root@VM_156_200_centos go-data]# cp -r  /root/go/src/goworker/ ./</span><br><span class="line">[root@VM_156_200_centos go-data]# ls</span><br><span class="line">goworker</span><br></pre></td></tr></table></figure></p>
+<p>go-data 这个目录存放一些 golang 语言的项目，然后我们把它做成一个数据卷容器，并指向容器的 /go/src 目录：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos go-data]# docker run -it  -v /root/go-data/:/go/src/ --name centos-go-data  centos </span><br><span class="line">[root@10d5c4f11e77 /]# cd /go/src</span><br><span class="line">[root@10d5c4f11e77 src]# ls</span><br><span class="line">goworker</span><br><span class="line">[root@10d5c4f11e77 src]# exit</span><br><span class="line">exit</span><br></pre></td></tr></table></figure></p>
+<p>这样这个就生成了一个名为 centos-go-data 的数据卷容器了，容器里面 /go/src 目录含有一个叫做 goworker 的 go 程序。刚好我服务器上之前有一个 go-1.10 环境的镜像。<br>接下来我们将这个镜像 run 起来，并且挂载 centos-go-data 这个数据卷容器（通过 –volumes-from 可以挂载数据卷容器），看看原来 /go/src 里面应该为空的目录，会不会有这个数据卷容器里面的go程序代码？<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos go-data]# docker run -it --volumes-from centos-go-data --name golang-volume-demo kbz/golang-1.10</span><br><span class="line">root@412ab80da79e:/app# cd /go/src </span><br><span class="line">root@412ab80da79e:/go/src# ls</span><br><span class="line">goworker</span><br><span class="line">root@412ab80da79e:/go/src# cd goworker/</span><br><span class="line">root@412ab80da79e:/go/src/goworker# ls</span><br><span class="line">hello_worker.go  worker  worker.go</span><br></pre></td></tr></table></figure></p>
+<p>可以看到原本应该有空的 src 目录，竟然有代码目录存在了，说明这个数据卷挂载成功了。接下来将这个 goworker 添加一个文件，看会不会同步到挂载的那个本地目录：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">root@412ab80da79e:/go/src/goworker# echo "123" &gt; 123</span><br><span class="line">root@412ab80da79e:/go/src/goworker# ls</span><br><span class="line">123  hello_worker.go  worker  worker.go</span><br><span class="line">root@412ab80da79e:/go/src/goworker# exit</span><br><span class="line">exit</span><br><span class="line">[root@VM_156_200_centos go-data]# cd /root/go-data/goworker/</span><br><span class="line">[root@VM_156_200_centos goworker]# ls</span><br><span class="line">123  hello_worker.go  worker  worker.go</span><br></pre></td></tr></table></figure></p>
+<p>发现本地目录也出现刚才在容器中出现的 123 文件了，说明还是共享成功了。 这时候我们再 run 一个新的 golang 环境的容器，然后也挂载这个数据卷看看数据会不会也有这个 123 文件？<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos goworker]# docker run -it --volumes-from centos-go-data --name golang-volume-demo-2 kbz/golang-1.10</span><br><span class="line">root@25d7a8fd5da1:/app# cd /go/src/goworker/</span><br><span class="line">root@25d7a8fd5da1:/go/src/goworker# ls</span><br><span class="line">123  hello_worker.go  worker  worker.go</span><br></pre></td></tr></table></figure></p>
+<p>发现新的容器也有这个 123 文件。<br>其实很多时候这种数据卷容器都是用来做持久化的，举个例子，比如我有一些golang的测试代码，做成了一个数据卷容器，然后我本地有好几个不同go环境的容器，每一个容器在 run 的时候，都会挂载这个数据卷容器。但是我们不希望在go环境的容器里面去修改这个数据卷容器里面的数据。所以刚开始我们在生成这个数据卷容器的时候，就要把权限设置为只读才行，这样这个数据卷就变成一个公共的挂载数据卷，别的容器只能挂载使用里面的数据，但是却不能做修改：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos goworker]# docker rm centos-go-data</span><br><span class="line">centos-go-data</span><br><span class="line">[root@VM_156_200_centos goworker]# docker run -it  -v /root/go-data/:/go/src/:ro --name centos-go-data  centos </span><br><span class="line">[root@851a09a40cb8 /]# exit</span><br><span class="line">exit</span><br><span class="line">[root@VM_156_200_centos goworker]# docker run -it --volumes-from centos-go-data --name golang-volume-demo-3 kbz/golang-1.10</span><br><span class="line">root@c986955f5ee0:/app# cd /go/src/goworker/</span><br><span class="line">root@c986955f5ee0:/go/src/goworker# ls</span><br><span class="line">123  hello_worker.go  worker  worker.go</span><br><span class="line">root@c986955f5ee0:/go/src/goworker# echo "456" &gt; 456</span><br><span class="line">bash: 456: Read-only file system</span><br></pre></td></tr></table></figure></p>
+<p>一旦进行修改，就会报错。<br>而且这种数据卷容器可以挂好几个的，就跟用 -v 挂载多个本地目录一样：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name data -v /opt/data1:/var/www/data1 -v /opt/data2:/var/www/data2:ro -it docker.io/ubuntu</span><br></pre></td></tr></table></figure></p>
+<p>这边稍微说一下，没有加-t和-i参数，所以这个容器创建好之后是没有进行交互模式的。其中 -i 表示以“交互模式”运行容器。 -t 表示打开一个连接到容器的终端。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos js-data]# docker run -it --volumes-from centos-go-data --volumes-from centos-js-data  --name golang-volume-demo-4 kbz/golang-1.10</span><br><span class="line">root@94e9d5868711:/app# cd /go/src/ &amp;&amp; ls</span><br><span class="line">goworker</span><br><span class="line">root@94e9d5868711:/go/src# cd /js &amp;&amp; ls</span><br><span class="line">test.js</span><br></pre></td></tr></table></figure></p>
+<p>这样就挂载了两个数据卷容器。<br>使用数据容器的两个注意点：</p>
+<ul>
+<li>不要运行数据容器，这纯粹是在浪费资源。</li>
+<li>不要为了数据容器而使用“最小的镜像”，如busybox或scratch，只使用数据库镜像本身就可以了。你已经拥有该镜像，所以并不需要占用额外的空间。</li>
+</ul>
+<h2 id="创建数据卷的其他方式"><a href="#创建数据卷的其他方式" class="headerlink" title="创建数据卷的其他方式"></a>创建数据卷的其他方式</h2><p>除了以上用 -v 来创建挂载数据卷之外，docker 还可以用以下方式来创建数据卷:</p>
+<h3 id="直接用docker-volume-来管理"><a href="#直接用docker-volume-来管理" class="headerlink" title="直接用docker volume 来管理"></a>直接用docker volume 来管理</h3><p>Docker 新版本中引入了 docker volume 命令来管理 Docker volume：<br>比如我创建一个名为 js-data 的数据卷：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos js-data]# docker volume create --name js-data</span><br><span class="line">js-data</span><br></pre></td></tr></table></figure></p>
+<p>这样就创建成功了，可以通过 <strong>docker volume ls</strong> 来查看当前的数据卷：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos js-data]# docker volume ls</span><br><span class="line">DRIVER              VOLUME NAME</span><br><span class="line">local               0e01f8abe89c9956609eed063c623536112525fb32cf4c0363255a953aa2d35d</span><br><span class="line">...</span><br><span class="line">local               js-data</span><br></pre></td></tr></table></figure></p>
+<p>然后我们可以通过<strong>docker volume inspect xxx</strong>来查看这个数据卷所对应的本地目录是哪个？<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos js-data]# docker volume inspect js-data</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        "CreatedAt": "2019-02-26T16:12:28+08:00",</span><br><span class="line">        "Driver": "local",</span><br><span class="line">        "Labels": &#123;&#125;,</span><br><span class="line">        "Mountpoint": "/var/lib/docker/volumes/js-data/_data",</span><br><span class="line">        "Name": "js-data",</span><br><span class="line">        "Options": &#123;&#125;,</span><br><span class="line">        "Scope": "local"</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>可以看到对应的本地目录就是 <strong>/var/lib/docker/volumes/js-data/_data</strong> 这个目录。当然目前这个目录是空的：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos js-data]# ll /var/lib/docker/volumes/js-data/_data</span><br><span class="line">total 0</span><br></pre></td></tr></table></figure></p>
+<p>接下来就可以将这个数据卷挂载上去：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos js-data]# docker run -it -v js-data:/js  --name golang-volume-demo-3 kbz/golang-1.10</span><br><span class="line">root@c55671066dec:/app# cd /js</span><br><span class="line">root@c55671066dec:/js# ls</span><br><span class="line">root@c55671066dec:/js# echo "123" &gt; 123</span><br><span class="line">root@c55671066dec:/js# ls</span><br><span class="line">123</span><br><span class="line">root@c55671066dec:/js# exit</span><br><span class="line">exit</span><br></pre></td></tr></table></figure></p>
+<p>语法差不了多少，也是 -v 来指定，不过这时候“:”前面已经不是宿主机的目录了，而是换成 js-data 这个数据卷了，当然这个目录是空的。<br>然后我们给他添加了一个新的文件 123，看看宿主机目录会不会也有？<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos js-data]# ll /var/lib/docker/volumes/js-data/_data</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r-- 1 root root 4 Feb 26 16:29 123</span><br><span class="line">[root@VM_156_200_centos js-data]# cat /var/lib/docker/volumes/js-data/_data/123</span><br><span class="line">123</span><br></pre></td></tr></table></figure></p>
+<p>事实上肯定是有的。 而且这种方式其实就是上面那种<strong>当宿主机的目录是相对目录的处理方式</strong>，其实在docker处理过程中，如果宿主机目录是相对的，这时候就会去判断本地是否存在这个volume，如果不存在就创建一个(所以其实我们不太需要去显示的创建一个 volume)，所以我们还可以看到文章前面当<strong>当宿主机的目录是相对目录的处理方式</strong>那时候的相对目录的 hostTest1，其实已经是一个 volume了：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos js-data]# docker volume inspect hostTest1</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        "CreatedAt": "2019-02-26T11:30:34+08:00",</span><br><span class="line">        "Driver": "local",</span><br><span class="line">        "Labels": null,</span><br><span class="line">        "Mountpoint": "/var/lib/docker/volumes/hostTest1/_data",</span><br><span class="line">        "Name": "hostTest1",</span><br><span class="line">        "Options": null,</span><br><span class="line">        "Scope": "local"</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>但是有一点要注意的话，如果要指定具体的宿主机目录的话，那就不能用这种方式，“:” 前面的宿主机目录路径还是得用绝对路径。</p>
+<h3 id="通过dockerfile创建数据卷"><a href="#通过dockerfile创建数据卷" class="headerlink" title="通过dockerfile创建数据卷"></a>通过dockerfile创建数据卷</h3><p>除了用docker volume命令显示或者用 -v 宿主机相对目录隐示的创建数据卷之外，还可以在dockerfile设置volume数据卷。<br>ps： 注意上述<strong>[5 挂载数据卷容器]</strong>创建的数据卷容器,其实本质上是一个容器，即 Docker Container，而不是 Docker Volume。 Container 是可以在 <strong>docker ps -a</strong> 可以找到，而在 <strong>docker volume ls</strong> 这里面是找不到的：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos js-data]# docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                           PORTS                                                                        NAMES</span><br><span class="line">a559685d18ae        centos              "/bin/bash"              About an hour ago   Exited (0) About an hour ago                                                                                  centos-js-data</span><br><span class="line">851a09a40cb8        centos              "/bin/bash"              About an hour ago   Exited (0) About an hour ago                                                                                  centos-go-data</span><br></pre></td></tr></table></figure></p>
+<p>在 dockerfile 设置 volume 数据卷，举个例子：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# mkdir docker-volume-centos</span><br><span class="line">[root@VM_156_200_centos ~]# cd docker-volume-centos/</span><br><span class="line">[root@VM_156_200_centos docker-volume-centos]# vim dockerfile</span><br><span class="line">[root@VM_156_200_centos docker-volume-centos]# cat dockerfile </span><br><span class="line">FROM centos</span><br><span class="line">VOLUME /js-data</span><br></pre></td></tr></table></figure></p>
+<p>可以看到这个 dockerfile 挂载了一个容器内的 js-data。 接下来 build 一下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker build --rm -t volume-centos .</span><br></pre></td></tr></table></figure></p>
+<p>然后 run 起来：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker run -it --name volume-centos-demo  volume-centos</span><br><span class="line">[root@eeb532993285 /]# cd /js-data</span><br><span class="line">[root@eeb532993285 js-data]# ls</span><br><span class="line">[root@eeb532993285 js-data]# echo "456" &gt; 456</span><br><span class="line">[root@eeb532993285 js-data]# ls</span><br><span class="line">456</span><br><span class="line">[root@eeb532993285 js-data]# exit</span><br><span class="line">exit</span><br></pre></td></tr></table></figure></p>
+<p>可以看到跑起来之后，容器里面已经有一个 js-data， 但是这个目录是空的，我们先在这个目录创建一个 456 的文件。然后退出容器。<br>接下来我们看看这个共享目录对应的宿主机的目录是哪个：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker inspect volume-centos-demo</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">    ...</span><br><span class="line">        "Mounts": [</span><br><span class="line">            &#123;</span><br><span class="line">                "Type": "volume",</span><br><span class="line">                "Name": "b07ab9cb039ffa90cc0ea7186716aa861cb9bcda11b1925bffca7a6539ee1304",</span><br><span class="line">                "Source": "/var/lib/docker/volumes/b07ab9cb039ffa90cc0ea7186716aa861cb9bcda11b1925bffca7a6539ee1304/_data",</span><br><span class="line">                "Destination": "/js-data",</span><br><span class="line">                "Driver": "local",</span><br><span class="line">                "Mode": "",</span><br><span class="line">                "RW": true,</span><br><span class="line">                "Propagation": ""</span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">    ...</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>可以看到宿主目录是这个：/var/lib/docker/volumes/b07…304/_data，接下来看看这个目录是否有 456 这个文件：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# ll /var/lib/docker/volumes/b07ab9cb039ffa90cc0ea7186716aa861cb9bcda11b1925bffca7a6539ee1304/_data</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r-- 1 root root 4 Feb 26 16:56 456</span><br><span class="line">[root@VM_156_200_centos docker-volume-centos]# cat /var/lib/docker/volumes/b07ab9cb039ffa90cc0ea7186716aa861cb9bcda11b1925bffca7a6539ee1304/_data/456 </span><br><span class="line">456</span><br></pre></td></tr></table></figure></p>
+<p>是有的。 通过 dockerfile 设置 volume 也可以设置多个，不过这种方式都是相对目录的方式，而且文件名还随机，相当于上述的<strong>-v 只指定一个的情况</strong>：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos volumes]# docker run -it  -v /test2 --name centos-demo-1  centos</span><br></pre></td></tr></table></figure></p>
+<h2 id="Volume-的删除和清理"><a href="#Volume-的删除和清理" class="headerlink" title="Volume 的删除和清理"></a>Volume 的删除和清理</h2><p>如果是属于 volume，那么直接调用<strong>docker volume rm xxx</strong> 就可以删除了：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker volume ls</span><br><span class="line">DRIVER              VOLUME NAME</span><br><span class="line">...</span><br><span class="line">local               js-data</span><br><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker volume rm js-data</span><br><span class="line">js-data</span><br></pre></td></tr></table></figure></p>
+<p>如果是挂载的数据卷容器，就调用<strong>docker rm xxx</strong> 当做普通容器删除即可：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker rm centos-js-data </span><br><span class="line">centos-js-data</span><br></pre></td></tr></table></figure></p>
+<p>虽然容器删除了，但是宿主机挂载的本地目录的资料还是存在的。</p>
+<h2 id="dockerfile-volume-的权限和许可"><a href="#dockerfile-volume-的权限和许可" class="headerlink" title="dockerfile volume 的权限和许可"></a>dockerfile volume 的权限和许可</h2><p>这是个很有意思的现象，就是如果dockerfile里面的volume命令前后对共享目录进行操作的话，是会有差别的，举个例子：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# cat dockerfile</span><br><span class="line">FROM centos</span><br><span class="line">RUN useradd foo</span><br><span class="line">VOLUME /data</span><br><span class="line">RUN touch /data/x</span><br><span class="line">RUN chown -R foo:foo /data</span><br></pre></td></tr></table></figure></p>
+<p>这个是一个dockerfile，我们的预期目录是，当run起来之后，会有 /data/x 这个文件。 但是实际上没有：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker build --rm -t kbz/volume-test .</span><br><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker run -it --name volue-test-demo kbz/volume-test</span><br><span class="line">[root@3d037af9a5ca /]# cd /data</span><br><span class="line">[root@3d037af9a5ca data]# ls</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，虽然有 /data 这个目录，但是在目录里面并没有 x 这个文件？？？ 这个是怎回事呢？？？<br>这个就涉及到dockerfile的运行规则，在Dockerfile中的每个命令都会创建一个新的用于运行指定命令的容器，并将容器提交到镜像，每一步都是在前一步的基础上构建。<br>因此在Dockerfile中 <strong>ENV FOO=bar</strong>等同于：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cid=$(docker run -e FOO=bar <span class="tag">&lt;<span class="name">image</span>&gt;</span>)</span><br><span class="line">docker commit $cid</span><br></pre></td></tr></table></figure></p>
+<p>那么针对我们本例的dockerfile，他的执行顺序应该是(真实过程可能不是这样的，但是应该差不多)：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cid=$(docker run centos useradd foo)</span><br><span class="line">image_id=$(docker commit $cid)</span><br><span class="line">cid=$(docker run -v /data centos)</span><br><span class="line">image_id=$(docker commit $cid)</span><br><span class="line">cid=$(docker run $image_id touch /data/x)</span><br><span class="line">image_id=$(docker commit $cid)</span><br><span class="line">cid=$(docker run $image_id chown -R foo:foo /data)</span><br><span class="line">docker commit $(cid) volue-test-demo</span><br></pre></td></tr></table></figure></p>
+<p>那这个过程就很明显了，因为每一行都会启动一个新的容器，因此每次都会有一个新的 volume，也就是每次run的新容器， /data 都是新的。<br>所以其实我们的这个 touch 操作，就是在当前的 volume 的 data 目录下操作的，而不是实际的容器或镜像的文件系统内。所以当我们重新再run的时候，这时候新的 volume 又是一个空的 data 目录。<br>所以如果要改的话，应该要把这个 touch 的操作，先存在镜像的文件系统之内，然后最后在挂载目录：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# vim dockerfile</span><br><span class="line">[root@VM_156_200_centos docker-volume-centos]# cat dockerfile </span><br><span class="line">FROM centos</span><br><span class="line">RUN useradd foo</span><br><span class="line">RUN touch /data/x</span><br><span class="line">RUN chown -R foo:foo /data</span><br><span class="line">VOLUME /data</span><br></pre></td></tr></table></figure></p>
+<p>这个是改完后的 dockerfile<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker build --rm -t kbz/volume-test-2 .</span><br><span class="line">[root@VM_156_200_centos docker-volume-centos]# docker run -it --name volue-test-demo-2 kbz/volume-test-2</span><br><span class="line">[root@2850978389ac /]# cd /data </span><br><span class="line">[root@2850978389ac data]# ls</span><br><span class="line">x</span><br></pre></td></tr></table></figure></p>
+<p>这时候就有 x 文件了。 而且对应的宿主目录也有这个 x 文件了：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-volume-centos]# cd /var/lib/docker/volumes/d4c83377d137104a13893b31e42c57e3635e8e59c14027463361b814c86c6ad7/_data</span><br><span class="line">[root@VM_156_200_centos _data]# ls</span><br><span class="line">x</span><br></pre></td></tr></table></figure></p>
+<hr>
+<p>参考资料：<br><a href="http://dockone.io/article/128" target="_blank" rel="noopener">深入理解Docker Volume（一）</a><br><a href="http://dockone.io/article/129" target="_blank" rel="noopener">深入理解Docker Volume（二）</a><br><a href="https://docs.docker.com/storage/volumes/" target="_blank" rel="noopener">Use volumes</a><br><a href="https://www.cnblogs.com/ivictor/p/4834864.html" target="_blank" rel="noopener">关于Docker目录挂载的总结</a><br><a href="https://www.cnblogs.com/kevingrace/p/6238195.html" target="_blank" rel="noopener">Docker容器学习梳理–Volume数据卷使用</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/02/25/docker-volume/" title="Docker Volume - 目录挂载以及文件共享">http://kebingzao.com/2019/02/25/docker-volume/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/docker/" rel="tag"># docker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/22/docker-container-proxy/" rel="next" title="docker 容器内使用宿主机的代理配置">
+                <i class="fa fa-chevron-left"></i> docker 容器内使用宿主机的代理配置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/28/docker-multiple-golang/" rel="prev" title="使用 docker 来让多个 golang 环境并存并实现多版本打包和编译">
+                使用 docker 来让多个 golang 环境并存并实现多版本打包和编译 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">114</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker文件系统工作情况"><span class="nav-number">2.</span> <span class="nav-text">Docker文件系统工作情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#挂载本地目录"><span class="nav-number">3.</span> <span class="nav-text">挂载本地目录</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基础操作"><span class="nav-number">3.1.</span> <span class="nav-text">基础操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容器目录不可以为相对路径"><span class="nav-number">3.2.</span> <span class="nav-text">容器目录不可以为相对路径</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#宿主机目录如果不存在，则会自动生成"><span class="nav-number">3.3.</span> <span class="nav-text">宿主机目录如果不存在，则会自动生成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#宿主机的目录如果为相对路径呢？"><span class="nav-number">3.4.</span> <span class="nav-text">宿主机的目录如果为相对路径呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#只是-v指定一个目录的情况？"><span class="nav-number">3.5.</span> <span class="nav-text">只是-v指定一个目录的情况？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如果在容器内修改了目录的属主和属组，那么对应的挂载点是否会修改呢？"><span class="nav-number">3.6.</span> <span class="nav-text">如果在容器内修改了目录的属主和属组，那么对应的挂载点是否会修改呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容器销毁了，在宿主机上新建的挂载目录是否会消失"><span class="nav-number">3.7.</span> <span class="nav-text">容器销毁了，在宿主机上新建的挂载目录是否会消失</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#挂载宿主机已存在目录后，在容器内对其进行操作，报“Permission-denied”"><span class="nav-number">3.8.</span> <span class="nav-text">挂载宿主机已存在目录后，在容器内对其进行操作，报“Permission denied”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将挂载的路径的权限设置为只读"><span class="nav-number">3.9.</span> <span class="nav-text">将挂载的路径的权限设置为只读</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#挂载文件"><span class="nav-number">4.</span> <span class="nav-text">挂载文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#挂载数据卷容器"><span class="nav-number">5.</span> <span class="nav-text">挂载数据卷容器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建数据卷的其他方式"><span class="nav-number">6.</span> <span class="nav-text">创建数据卷的其他方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#直接用docker-volume-来管理"><span class="nav-number">6.1.</span> <span class="nav-text">直接用docker volume 来管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通过dockerfile创建数据卷"><span class="nav-number">6.2.</span> <span class="nav-text">通过dockerfile创建数据卷</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Volume-的删除和清理"><span class="nav-number">7.</span> <span class="nav-text">Volume 的删除和清理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dockerfile-volume-的权限和许可"><span class="nav-number">8.</span> <span class="nav-text">dockerfile volume 的权限和许可</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/02/25/docker-volume/';
+          this.page.identifier = '2019/02/25/docker-volume/';
+          this.page.title = 'Docker Volume - 目录挂载以及文件共享';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

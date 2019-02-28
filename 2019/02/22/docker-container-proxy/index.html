@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang,docker," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前在用docker安装golang 版本的时候，有出现过一种情况，就是宿主机有设置代理，但在docker的容器内(container)下载golang依赖资源的时候，却不能使用宿主机的代理设置，所以下载依赖就会失败。举个例子，我run了一个 docker 的容器，基于 go10.1 这个go版本。1[root@VM_156_200_centos docker-go1.10]# sudo do">
+<meta name="keywords" content="golang,docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker 容器内使用宿主机的代理配置">
+<meta property="og:url" content="http://kebingzao.com/2019/02/22/docker-container-proxy/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前在用docker安装golang 版本的时候，有出现过一种情况，就是宿主机有设置代理，但在docker的容器内(container)下载golang依赖资源的时候，却不能使用宿主机的代理设置，所以下载依赖就会失败。举个例子，我run了一个 docker 的容器，基于 go10.1 这个go版本。1[root@VM_156_200_centos docker-go1.10]# sudo do">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/02/22/docker-container-proxy/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/02/22/docker-container-proxy/2.png">
+<meta property="og:updated_time" content="2019-02-28T13:53:58.166Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="docker 容器内使用宿主机的代理配置">
+<meta name="twitter:description" content="前言之前在用docker安装golang 版本的时候，有出现过一种情况，就是宿主机有设置代理，但在docker的容器内(container)下载golang依赖资源的时候，却不能使用宿主机的代理设置，所以下载依赖就会失败。举个例子，我run了一个 docker 的容器，基于 go10.1 这个go版本。1[root@VM_156_200_centos docker-go1.10]# sudo do">
+<meta name="twitter:image" content="http://kebingzao.com/2019/02/22/docker-container-proxy/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/02/22/docker-container-proxy/"/>
+
+
+
+
+
+  <title>docker 容器内使用宿主机的代理配置 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/02/22/docker-container-proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">docker 容器内使用宿主机的代理配置</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-22T14:11:50+08:00">
+                2019-02-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/docker相关/" itemprop="url" rel="index">
+                    <span itemprop="name">docker相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/22/docker-container-proxy/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/02/22/docker-container-proxy/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/02/22/docker-container-proxy/" class="leancloud_visitors" data-flag-title="docker 容器内使用宿主机的代理配置">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前在用docker安装golang 版本的时候，有出现过一种情况，就是宿主机有设置代理，但在docker的容器内(container)下载golang依赖资源的时候，却不能使用宿主机的代理设置，所以下载依赖就会失败。<br>举个例子，我run了一个 docker 的容器，基于 go10.1 这个go版本。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# sudo docker run -it  --name golang-1.10-1  kbz/golang-1.10</span><br></pre></td></tr></table></figure></p>
+<p>然后我把宿主机的 go 程序的代码放到这个容器里面的 GOPATH 路径的 src 目录,最后跑起来，但是因为没有安装依赖，所以会报错:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker cp /root/go/src/goworker golang-1.10-1:/go/src/</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# docker exec -it golang-1.10-1  /bin/bash</span><br><span class="line">root@4943d5f1558c:/app# cd /go/src</span><br><span class="line">root@4943d5f1558c:/go/src# ls</span><br><span class="line">go_learn_demo  goworker</span><br><span class="line">root@4943d5f1558c:/go/src# cd goworker/</span><br><span class="line">root@4943d5f1558c:/go/src/goworker# ls</span><br><span class="line">hello_worker.go  worker  worker.go</span><br><span class="line">root@4943d5f1558c:/go/src/goworker# go run *.go</span><br><span class="line">hello_worker.go:5:2: cannot find package "github.com/benmanns/goworker" in any of:</span><br><span class="line">    /usr/local/go/src/github.com/benmanns/goworker (from $GOROOT)</span><br><span class="line">    /go/src/github.com/benmanns/goworker (from $GOPATH)</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>这时候我返回到 src，然后安装依赖，发现要挂代理才能下载<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@4943d5f1558c:/go/src/goworker# cd ../</span><br><span class="line">root@4943d5f1558c:/go/src# go get github.com/benmanns/goworker</span><br><span class="line">package golang.org/x/net/context: unrecognized import path "golang.org/x/net/context" (https fetch: Get https://golang.org/x/net/context?go-get=1: dial tcp 216.239.37.1:443: i/o timeout)</span><br></pre></td></tr></table></figure></p>
+<p>结果我检测了一下，发现在容器里面，竟然是没有代理的, 而退出到宿主机，确实有代理的， 宿主机代理设置具体看： <a href="/2019/02/14/centos7-ss-proxy/" title="CentOS7 配置 shadowsocks 全局代理">CentOS7 配置 shadowsocks 全局代理</a><br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">root@4943d5f1558c:/go/src# curl cip.cc</span><br><span class="line">IP    : 119.xx.xx.28</span><br><span class="line">地址    : 中国  广东  广州</span><br><span class="line">运营商    : tencent.com</span><br><span class="line"></span><br><span class="line">数据二    : 广东省广州市海珠区 | 深圳市腾讯计算机系统有限公司IDC机房(BGP)</span><br><span class="line"></span><br><span class="line">数据三    : 中国广东省广州市 | 电信</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/119.xx.xx.28</span><br><span class="line">root@4943d5f1558c:/go/src# exit</span><br><span class="line">exit</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# curl cip.cc</span><br><span class="line">IP    : 119.xx.xx.79</span><br><span class="line">地址    : 中国  香港  tencent.com</span><br><span class="line"></span><br><span class="line">数据二    : 新加坡 | 腾讯云</span><br><span class="line"></span><br><span class="line">数据三    : 中国香港香港 | 腾讯</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/119.xx.xx.79</span><br></pre></td></tr></table></figure></p>
+<h2 id="尝试方案"><a href="#尝试方案" class="headerlink" title="尝试方案"></a>尝试方案</h2><p>查了一下网上的教程：<a href="https://docs.docker.com/config/daemon/systemd/#custom-docker-daemon-options" target="_blank" rel="noopener">custom-docker-daemon-options</a><br>并且参照了一下网上的方案，也说可以这样设置？？ 然后我跟着试了一下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# sudo mkdir -p /etc/systemd/system/docker.service.d</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# vim /etc/systemd/system/docker.service.d/http-proxy.conf</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# vim /etc/systemd/system/docker.service.d/https-proxy.conf</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# sudo systemctl daemon-reload</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# systemctl restart docker</span><br><span class="line">[root@VM_156_200_centos docker-go1.10]# systemctl show --property=Environment docker</span><br><span class="line">Environment=GOTRACEBACK=crash DOCKER_HTTP_HOST_COMPAT=1 PATH=/usr/libexec/docker:/usr/bin:/usr/sbin HTTP_PROXY=http://127.0.0.1:8118/ HTTPS_PROXY=https://127.0.0.1:8118/</span><br></pre></td></tr></table></figure></p>
+<p>刚开始是 设置为 127.0.0.1<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# systemctl show docker |grep 127.0.0.1</span><br><span class="line">Environment=GOTRACEBACK=crash DOCKER_HTTP_HOST_COMPAT=1 PATH=/usr/libexec/docker:/usr/bin:/usr/sbin HTTP_PROXY=http://127.0.0.1:8118/ HTTPS_PROXY=http://127.0.0.1:8118/</span><br></pre></td></tr></table></figure></p>
+<p>接下来进入到 docker 容器中：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker start  -ai golang-1.10-1</span><br><span class="line">root@f6f5b929b332:/app# curl cip.cc</span><br><span class="line">IP    : 119.xx.xx.28</span><br><span class="line">地址    : 中国  广东  广州</span><br><span class="line">运营商    : tencent.com</span><br><span class="line"></span><br><span class="line">数据二    : 广东省广州市海珠区 | 深圳市腾讯计算机系统有限公司IDC机房(BGP)</span><br><span class="line"></span><br><span class="line">数据三    : 中国广东省广州市 | 电信</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/119.xx.xx.28</span><br></pre></td></tr></table></figure></p>
+<p>发现还是没有代理的情况？？？ 之后我改成用的是 docker 的虚拟网桥地址，主机上启动的Docker容器会连接到这个虚拟网桥上：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# ifconfig</span><br><span class="line">。。。</span><br><span class="line"></span><br><span class="line">docker0: flags=4163<span class="tag">&lt;<span class="name">UP,BROADCAST,RUNNING,MULTICAST</span>&gt;</span>  mtu 1500</span><br><span class="line">        inet 172.17.0.1  netmask 255.255.0.0  broadcast 0.0.0.0</span><br><span class="line">        ether 02:42:17:40:c8:62  txqueuelen 0  (Ethernet)</span><br><span class="line">        RX packets 28163  bytes 1512024 (1.4 MiB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 37113  bytes 123305214 (117.5 MiB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br><span class="line">。。。</span><br></pre></td></tr></table></figure></p>
+<p>也就是 <strong>172.17.0.1</strong>, 改过来看看<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# systemctl show docker |grep 172.17.0.1</span><br><span class="line">Environment=GOTRACEBACK=crash DOCKER_HTTP_HOST_COMPAT=1 PATH=/usr/libexec/docker:/usr/bin:/usr/sbin HTTP_PROXY=http://172.17.0.1:8118/ NO_PROXY=localhost,127.0.0.1,docker-registry.example.com,.corp HTTPS_PROXY=http://172.17.0.1:8118/</span><br></pre></td></tr></table></figure></p>
+<p>进入docker 容器里面:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker start  -ai golang-1.10-1</span><br><span class="line">root@f6f5b929b332:/app# curl cip.cc</span><br><span class="line">IP    : 119.xx.xx.28</span><br><span class="line">地址    : 中国  广东  广州</span><br><span class="line">运营商    : tencent.com</span><br><span class="line"></span><br><span class="line">数据二    : 广东省广州市海珠区 | 深圳市腾讯计算机系统有限公司IDC机房(BGP)</span><br><span class="line"></span><br><span class="line">数据三    : 中国广东省广州市 | 电信</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/119.xx.xx.28</span><br></pre></td></tr></table></figure></p>
+<p>发现还是不行。<br>因为宿主机的 /etc/profile 有设置代理，所以容器里面，也设置一下，看看行不行， 反正试试看呗？？<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@f6f5b929b332:/app# vim /etc/profile</span><br><span class="line">bash: vim: command not found</span><br></pre></td></tr></table></figure></p>
+<p>发现容器内，都没有 vim 这个指令？？？<br>因为容器是一个简单的 ubuntu 系统，所以要安装一下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">root@f6f5b929b332:/app# apt-get update</span><br><span class="line">...                              </span><br><span class="line">Reading package lists... Done</span><br><span class="line"></span><br><span class="line">root@f6f5b929b332:/app# apt-get install vim</span><br><span class="line">...</span><br><span class="line">update-alternatives: using /usr/bin/vim.basic to provide /usr/bin/editor (editor) in auto mode</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">root@f6f5b929b332:/app# apt-get install apt-utils</span><br><span class="line">...</span><br><span class="line">Processing triggers for libc-bin (2.24-11+deb9u3) ...</span><br></pre></td></tr></table></figure></p>
+<p>这样子，就可以在容器里面进行 vim 指令了：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">root@f6f5b929b332:/app# vim /etc/profile</span><br><span class="line">root@f6f5b929b332:/app# cat /etc/profile | grep proxy</span><br><span class="line"># ss http proxy</span><br><span class="line">export http_proxy=http://172.17.0.1:8118</span><br><span class="line">export https_proxy=http://172.17.0.1:8118</span><br><span class="line">export ftp_proxy=http://172.17.0.1:8118</span><br><span class="line">root@f6f5b929b332:/app# source /etc/profile</span><br></pre></td></tr></table></figure></p>
+<p>这时候在容器里 curl 这个域名，发现端口都通不了，估计需要映射出来？？ 而且还是没有代理<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">root@f6f5b929b332:/app# curl 172.17.0.1</span><br><span class="line">curl: (7) Failed to connect to 172.17.0.1 port 8118: Connection refused</span><br><span class="line">root@f6f5b929b332:/app# curl cip.cc</span><br><span class="line">IP    : 119.xx.xx.28</span><br><span class="line">地址    : 中国  广东  广州</span><br><span class="line">运营商    : tencent.com</span><br><span class="line"></span><br><span class="line">数据二    : 广东省广州市海珠区 | 深圳市腾讯计算机系统有限公司IDC机房(BGP)</span><br><span class="line"></span><br><span class="line">数据三    : 中国广东省广州市 | 电信</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/119.xx.xx.28</span><br></pre></td></tr></table></figure></p>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><p>后面又在官网找到另一篇教程：<a href="https://docs.docker.com/network/proxy/#use-environment-variables" target="_blank" rel="noopener">use-environment-variables</a><br>根据不同的docker版本，有两种方式：</p>
+<blockquote><p>If your container needs to use an HTTP, HTTPS, or FTP proxy server, you can configure it in different ways:</p>
+<pre><code>- In Docker 17.07 and higher, you can configure the Docker client to pass proxy information to containers automatically.
+
+- In Docker 17.06 and lower, you must set appropriate environment variables within the container. You can do this when you build the image (which makes the image less portable) or when you create or run the container.
+</code></pre><footer><strong>docker</strong><cite><a href="https://docs.docker.com/network/proxy/#use-environment-variables" target="_blank" rel="noopener">docs.docker.com/network/proxy/#use-environment-variables</a></cite></footer></blockquote>
+<p>因为我的 docker 版本的客户端是 1.13.1， 所以只能用下面那种方式：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# docker version</span><br><span class="line">Client:</span><br><span class="line">Version:         1.13.1</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2019/02/22/docker-container-proxy/1.png" alt="1"><br>所以重新改一下 dockerfile<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# cat dockerfile</span><br><span class="line">FROM golang:1.10</span><br><span class="line">ENV HTTP_PROXY "http://127.0.0.1:8118"</span><br><span class="line">ENV HTTPS_PROXY "http://127.0.0.1:8118"</span><br><span class="line">RUN mkdir /app</span><br><span class="line">ADD . /app/</span><br><span class="line">WORKDIR /app</span><br></pre></td></tr></table></figure></p>
+<p>重新 build 成 kbz/golang-1.10-2, 然后重新 run 一个容器出来：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker-go1.10]# sudo docker run -it  --name golang-1.10-3  kbz/golang-1.10-2</span><br><span class="line">root@6b68c09cf1ff:/app# curl cip.cc</span><br><span class="line">IP    : 119.xx.xx.28</span><br><span class="line">地址    : 中国  广东  广州</span><br><span class="line">运营商    : tencent.com</span><br><span class="line"></span><br><span class="line">数据二    : 广东省广州市海珠区 | 深圳市腾讯计算机系统有限公司IDC机房(BGP)</span><br><span class="line"></span><br><span class="line">数据三    : 中国广东省广州市 | 电信</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/119.xx.xx.28</span><br></pre></td></tr></table></figure></p>
+<p>试了一下，好像也不行？？？ 那只能是另一种方式，就是把 docker 升级到 17.07 及以上，通过： <a href="/2019/02/22/docker-update/" title="docker 升级到最新版">docker 升级到最新版</a>，已经升级上来了,并且大于 17.07 了<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker version</span><br><span class="line">Client:</span><br><span class="line">Version:           18.09.2</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2019/02/22/docker-container-proxy/2.png" alt="1"><br>接下来就开始配置 json 文件了：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# mkdir .docker</span><br><span class="line">[root@VM_156_200_centos ~]# vim  ~/.docker/config.json</span><br><span class="line">cat: vim: No such file or directory</span><br><span class="line">&#123;</span><br><span class="line">"proxies":</span><br><span class="line">&#123;</span><br><span class="line">   "default":</span><br><span class="line">   &#123;</span><br><span class="line">     "httpProxy": "http://127.0.0.1:8118",</span><br><span class="line">     "httpsProxy": "http://127.0.0.1:8118",</span><br><span class="line">     "noProxy": "localhost"</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后重新 run 一个 容器看看， 镜像还是用之前的，<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker run -it  --name golang-1.10-1  kbz/golang-1.10</span><br><span class="line">root@bd9ec6bba9eb:/app# curl cip.cc</span><br><span class="line">curl: (7) Failed to connect to 127.0.0.1 port 8118: Connection refused</span><br></pre></td></tr></table></figure></p>
+<p>发现 8118 端口还是被拒绝了， 有可能是 8118 端口没有映射出去，考虑到 docker 默认的是 bridge 的网络模式，端口是要做转发映射的。<br>所以为了直接用宿主机的 ip 和 端口，我们换成用 host 的网络模式，让它可以跟宿主机共用一个 Network Namespace。<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker run -it --net host  --name golang-1.10-1  kbz/golang-1.10</span><br><span class="line">root@VM_156_200_centos:/app# curl cip.cc</span><br><span class="line">IP    : 119.xx.xx.79</span><br><span class="line">地址    : 中国  香港  tencent.com</span><br><span class="line"></span><br><span class="line">数据二    : 新加坡 | 腾讯云</span><br><span class="line"></span><br><span class="line">数据三    : 中国香港香港 | 腾讯</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/119.xx.xx.79</span><br></pre></td></tr></table></figure></p>
+<p>这样子果然代理出去了。</p>
+<p>那么如果把刚才那个代理的json配置文件去掉，是不是就会不能代理了？？？， 试试呗<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# cd .docker/</span><br><span class="line">[root@VM_156_200_centos .docker]# ll</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r-- 1 root root 161 Feb 21 18:03 config.json</span><br><span class="line">[root@VM_156_200_centos .docker]# mv config.json  config.json.bak</span><br><span class="line">[root@VM_156_200_centos .docker]# ll</span><br><span class="line">total 4</span><br><span class="line">-rw-r--r-- 1 root root 161 Feb 21 18:03 config.json.bak</span><br></pre></td></tr></table></figure></p>
+<p>把名字改掉，然后run 一个新的，看看：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos .docker]# docker run -it --net host  --name golang-1.10-test  kbz/golang-1.10</span><br><span class="line">root@VM_156_200_centos:/app# curl cip.cc</span><br><span class="line">IP    : 119.xx.xx.28</span><br><span class="line">地址    : 中国  广东  广州</span><br><span class="line">运营商    : tencent.com</span><br><span class="line"></span><br><span class="line">数据二    : 广东省广州市海珠区 | 深圳市腾讯计算机系统有限公司IDC机房(BGP)</span><br><span class="line"></span><br><span class="line">数据三    : 中国广东省广州市 | 电信</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/119.xx.xx.28</span><br></pre></td></tr></table></figure></p>
+<p>果然不能翻墙了。然后再把 json 文件重新改回来，再试试<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos .docker]# mv config.json.bak  config.json</span><br><span class="line">[root@VM_156_200_centos .docker]# ls</span><br><span class="line">config.json</span><br><span class="line">[root@VM_156_200_centos .docker]# docker run -it --net host  --name golang-1.10-test2  kbz/golang-1.10</span><br><span class="line">root@VM_156_200_centos:/app# curl cip.cc</span><br><span class="line">IP    : 119.xx.xx.79</span><br><span class="line">地址    : 中国  香港  tencent.com</span><br><span class="line"></span><br><span class="line">数据二    : 新加坡 | 腾讯云</span><br><span class="line"></span><br><span class="line">数据三    : 中国香港香港 | 腾讯</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/119.xx.xx.79</span><br></pre></td></tr></table></figure></p>
+<p>果然又可以代理了。</p>
+<hr>
+<p>后面有出现了一个问题：我现在容器里面可以使用宿主机的代理了，但是我发现在宿主机使用 docker pull 下载镜像，会报错，但是进入容器，网络又正常？？ 而且宿主机的网络也正常<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos .docker]# docker pull centos</span><br><span class="line">Using default tag: latest</span><br><span class="line">Error response from daemon: Get https://registry-1.docker.io/v2/: proxyconnect tcp: dial tcp 172.17.0.1:8118: connect: connection refused</span><br></pre></td></tr></table></figure></p>
+<p>后面查了一下，原来是之前我在进行尝试的时候，在docker的配置文件，增加了两个配置文件：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos .docker]# cd /etc/systemd/system/docker.service.d/</span><br><span class="line">[root@VM_156_200_centos docker.service.d]# ll</span><br><span class="line">total 8</span><br><span class="line">-rw-r--r-- 1 root root 124 Feb 19 11:48 http-proxy.conf</span><br><span class="line">-rw-r--r-- 1 root root 125 Feb 19 11:49 https-proxy.conf</span><br></pre></td></tr></table></figure></p>
+<p>但是因为之前尝试失败，就放在那边，而且重装的时候，也一直还在，导致还一直在生效，所以这个要删掉才行,并且重启docker<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos docker.service.d]# cd ..</span><br><span class="line">[root@VM_156_200_centos system]# rm -rf docker.service.d/</span><br><span class="line">[root@VM_156_200_centos system]# systemctl daemon-reload</span><br><span class="line">[root@VM_156_200_centos system]# systemctl restart docker</span><br><span class="line">[root@VM_156_200_centos system]# systemctl show --property=Environment docker</span><br><span class="line">Environment=</span><br></pre></td></tr></table></figure></p>
+<p>这样 docker pull 就正常了：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos system]# docker pull centos</span><br><span class="line">Using default tag: latest</span><br><span class="line">latest: Pulling from library/centos</span><br><span class="line">a02a4930cb5d: Pull complete </span><br><span class="line">Digest: sha256:184e5f35598e333bfa7de10d8fb1cebb5ee4df5bc0f970bf2b1e7c7345136426</span><br><span class="line">Status: Downloaded newer image for centos:latest</span><br></pre></td></tr></table></figure></p>
+<p>所以之后尝试失败的东西，一定要清干净！！！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/02/22/docker-container-proxy/" title="docker 容器内使用宿主机的代理配置">http://kebingzao.com/2019/02/22/docker-container-proxy/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/docker/" rel="tag"># docker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/22/docker-update/" rel="next" title="docker 升级到最新版">
+                <i class="fa fa-chevron-left"></i> docker 升级到最新版
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/25/docker-volume/" rel="prev" title="Docker Volume - 目录挂载以及文件共享">
+                Docker Volume - 目录挂载以及文件共享 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">114</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#尝试方案"><span class="nav-number">2.</span> <span class="nav-text">尝试方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方法"><span class="nav-number">3.</span> <span class="nav-text">解决方法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/02/22/docker-container-proxy/';
+          this.page.identifier = '2019/02/22/docker-container-proxy/';
+          this.page.title = 'docker 容器内使用宿主机的代理配置';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="aws," />
+  <meta name="keywords" content="aws,ses," />
 
 
 
@@ -80,7 +80,7 @@
 
 
 <meta name="description" content="前言时隔快两年，我们的 SES 账号又被封了，有运营在群里面说了，有用户反馈验证账号的邮件和重置密码的邮件又不能发送了。 我查了一下邮件服务队列的日志，果然又看到报错了（不要问我为什么是运营提示的，因为之前的那一次挂掉的经验，我还不涨记性，还没有把这种情况放到 cacti 报警里面）：1MessageRejected: Sending paused for this account. For mo">
-<meta name="keywords" content="aws">
+<meta name="keywords" content="aws,ses">
 <meta property="og:type" content="article">
 <meta property="og:title" content="又记一次AWS SES 邮件服务账号被禁的情况">
 <meta property="og:url" content="http://kebingzao.com/2019/05/29/aws-ses-block-again/index.html">
@@ -91,7 +91,7 @@
 <meta property="og:image" content="http://kebingzao.com/2019/05/29/aws-ses-block-again/2.png">
 <meta property="og:image" content="http://kebingzao.com/2019/05/29/aws-ses-block-again/3.png">
 <meta property="og:image" content="http://kebingzao.com/2019/05/29/aws-ses-block-again/4.png">
-<meta property="og:updated_time" content="2019-06-04T12:34:49.065Z">
+<meta property="og:updated_time" content="2019-07-14T01:54:45.764Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="又记一次AWS SES 邮件服务账号被禁的情况">
 <meta name="twitter:description" content="前言时隔快两年，我们的 SES 账号又被封了，有运营在群里面说了，有用户反馈验证账号的邮件和重置密码的邮件又不能发送了。 我查了一下邮件服务队列的日志，果然又看到报错了（不要问我为什么是运营提示的，因为之前的那一次挂掉的经验，我还不涨记性，还没有把这种情况放到 cacti 报警里面）：1MessageRejected: Sending paused for this account. For mo">
@@ -445,6 +445,7 @@
 <li>后面为了保证我们的邮件服务，可能会采用两个 SES 账号的形式，一个账号用来发送我们的业务服务，这些业务服务应该大部分邮箱都要有效的。 另一个账号用来发送我们的验证账号服务。<br>这样子，就算验证账号的那个 SES 服务挂了，也不会影响我们的其他服务。之所以要有双账号的机制，是因为 SES 的反弹率机制，就是无效邮箱的比例（阀值是10%,这个是不能改的），而验证账号邮件这种东西，本身无效邮件的比率就不可能太低，而我们的其他业务邮件，大部分都是建立在有效邮箱的基础上，所以无效邮箱的比例是会比较低的，所以最好把这两种类型的邮件要分开用不同的账号来发送，这样就算万一哪一天又因为无效邮箱太多而被禁掉了，也可以保证我们的其他邮件业务正常。</li>
 <li>还要有一个备用账号，所以最稳妥的方式就是最好有三个 SES 账号，可以随时切换，备用账号。</li>
 </ul>
+<h2 id="SNS-通知"><a href="#SNS-通知" class="headerlink" title="SNS 通知"></a>SNS 通知</h2><p>后面发现了原来 SES 也可以做硬反弹邮件的 webhook 机制，因此还可以再优化，看这个： <a href="/2019/06/05/aws-ses-sns/" title="AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件">AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件</a></p>
 
       
     </div>
@@ -481,6 +482,8 @@
         <div class="post-tags">
           
             <a href="/tags/aws/" rel="tag"># aws</a>
+          
+            <a href="/tags/ses/" rel="tag"># ses</a>
           
         </div>
       
@@ -596,7 +599,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">135</span>
+                  <span class="site-state-item-count">136</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -618,7 +621,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-count">38</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -661,7 +664,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备用账号也挂了"><span class="nav-number">2.</span> <span class="nav-text">备用账号也挂了</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排除反弹率"><span class="nav-number">3.</span> <span class="nav-text">排除反弹率</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#排查接口被刷的嫌疑"><span class="nav-number">3.1.</span> <span class="nav-text">排查接口被刷的嫌疑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前端的防抖操作"><span class="nav-number">3.2.</span> <span class="nav-text">前端的防抖操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#后端的防抖操作"><span class="nav-number">3.3.</span> <span class="nav-text">后端的防抖操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优化措施"><span class="nav-number">4.</span> <span class="nav-text">优化措施</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#邮件模板黑名单"><span class="nav-number">4.1.</span> <span class="nav-text">邮件模板黑名单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模板有效性校验名单"><span class="nav-number">4.2.</span> <span class="nav-text">模板有效性校验名单</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主账号恢复之后"><span class="nav-number">5.</span> <span class="nav-text">主账号恢复之后</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复盘"><span class="nav-number">6.</span> <span class="nav-text">复盘</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备用账号也挂了"><span class="nav-number">2.</span> <span class="nav-text">备用账号也挂了</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排除反弹率"><span class="nav-number">3.</span> <span class="nav-text">排除反弹率</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#排查接口被刷的嫌疑"><span class="nav-number">3.1.</span> <span class="nav-text">排查接口被刷的嫌疑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前端的防抖操作"><span class="nav-number">3.2.</span> <span class="nav-text">前端的防抖操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#后端的防抖操作"><span class="nav-number">3.3.</span> <span class="nav-text">后端的防抖操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优化措施"><span class="nav-number">4.</span> <span class="nav-text">优化措施</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#邮件模板黑名单"><span class="nav-number">4.1.</span> <span class="nav-text">邮件模板黑名单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模板有效性校验名单"><span class="nav-number">4.2.</span> <span class="nav-text">模板有效性校验名单</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主账号恢复之后"><span class="nav-number">5.</span> <span class="nav-text">主账号恢复之后</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复盘"><span class="nav-number">6.</span> <span class="nav-text">复盘</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SNS-通知"><span class="nav-number">7.</span> <span class="nav-text">SNS 通知</span></a></li></ol></div>
             
 
           </div>

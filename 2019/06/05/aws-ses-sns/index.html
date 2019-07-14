@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="aws,ses," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 又记一次AWS SES 邮件服务账号被禁的情况 我们知道 AWS 之所以会禁掉我们的 SES 账号是因为我们的邮件的反弹率(bounce)太高了, 因此在服务稳定了之后，就打算好好研究一下 SES，看看有没有什么方式可以来处理硬反弹邮件。 电子邮件发送的 Amazon SES 通知事实上，SES 在发生邮件退回和投诉的时候，会通过电子邮件发送 SES 通知。这个是默认启用的功能。 具体文">
+<meta name="keywords" content="aws,ses">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件">
+<meta property="og:url" content="http://kebingzao.com/2019/06/05/aws-ses-sns/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 又记一次AWS SES 邮件服务账号被禁的情况 我们知道 AWS 之所以会禁掉我们的 SES 账号是因为我们的邮件的反弹率(bounce)太高了, 因此在服务稳定了之后，就打算好好研究一下 SES，看看有没有什么方式可以来处理硬反弹邮件。 电子邮件发送的 Amazon SES 通知事实上，SES 在发生邮件退回和投诉的时候，会通过电子邮件发送 SES 通知。这个是默认启用的功能。 具体文">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/3.png">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/4.png">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/6.png">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/7.png">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/8.png">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/9.png">
+<meta property="og:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/10.png">
+<meta property="og:updated_time" content="2019-07-14T01:54:45.764Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件">
+<meta name="twitter:description" content="前言通过 又记一次AWS SES 邮件服务账号被禁的情况 我们知道 AWS 之所以会禁掉我们的 SES 账号是因为我们的邮件的反弹率(bounce)太高了, 因此在服务稳定了之后，就打算好好研究一下 SES，看看有没有什么方式可以来处理硬反弹邮件。 电子邮件发送的 Amazon SES 通知事实上，SES 在发生邮件退回和投诉的时候，会通过电子邮件发送 SES 通知。这个是默认启用的功能。 具体文">
+<meta name="twitter:image" content="http://kebingzao.com/2019/06/05/aws-ses-sns/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/06/05/aws-ses-sns/"/>
+
+
+
+
+
+  <title>AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/06/05/aws-ses-sns/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-05T11:28:04+08:00">
+                2019-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">aws 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/06/05/aws-ses-sns/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/06/05/aws-ses-sns/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/06/05/aws-ses-sns/" class="leancloud_visitors" data-flag-title="AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2019/05/29/aws-ses-block-again/" title="又记一次AWS SES 邮件服务账号被禁的情况">又记一次AWS SES 邮件服务账号被禁的情况</a> 我们知道 AWS 之所以会禁掉我们的 SES 账号是因为我们的邮件的反弹率(bounce)太高了, 因此在服务稳定了之后，就打算好好研究一下 SES，看看有没有什么方式可以来处理硬反弹邮件。</p>
+<h2 id="电子邮件发送的-Amazon-SES-通知"><a href="#电子邮件发送的-Amazon-SES-通知" class="headerlink" title="电子邮件发送的 Amazon SES 通知"></a>电子邮件发送的 Amazon SES 通知</h2><p>事实上，SES 在发生邮件退回和投诉的时候，会通过电子邮件发送 SES 通知。这个是默认启用的功能。 具体文档：<a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/notifications-via-email.html" target="_blank" rel="noopener">通过电子邮件发送的 Amazon SES 通知</a><br><a id="more"></a><br><blockquote><p>启用电子邮件反馈转发<br>默认情况下会启用电子邮件反馈转发。如果您之前禁用了该功能，您可以使用本节中的以下步骤来启用它。使用 Amazon SES 控制台通过电子邮件启用退回邮件和投诉转发：</p>
+<pre><code>1. 登录 AWS 管理控制台并通过以下网址打开 Amazon SES 控制台：https://console.aws.amazon.com/ses/。
+2. 在导航窗格中的身份管理下，选择电子邮件地址 (如果您想为电子邮件地址配置退回邮件和投诉通知) 或域 (如果您想为域配置退回邮件和投诉通知)。
+3. 在经验证的电子邮件地址或域的列表中，选择要为其配置退回邮件和投诉通知的电子邮件地址或域。
+4. 在详细信息窗格中，展开通知部分。
+5. 选择 Edit Configuration。在 Email Feedback Forwarding 下，选择 Enabled。
+注意:在此页面上进行的更改可能需要几分钟才能生效。
+</code></pre><footer><strong>通过电子邮件发送的 Amazon SES 通知</strong><cite><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/notifications-via-email.html" target="_blank" rel="noopener">docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/notifications-via-email.html</a></cite></footer></blockquote><br><img src="/2019/06/05/aws-ses-sns/1.png" alt="1"><br>以下是一封收到了无效邮箱(邮箱退回)的邮件通知，而且下面会附上这封邮件的内容，<br><img src="/2019/06/05/aws-ses-sns/2.png" alt="1"><br>在这一封邮件的最下面，有提供了一个从SES黑名单中删除电子邮件地址的链接，这个是因为：<br><blockquote><p>Amazon SES 会保留一份黑名单，其中包含近期对任何 Amazon SES 客户造成“查无此人的邮件”的收件人电子邮件地址。如果尝试通过 Amazon SES 向黑名单中的地址发送电子邮件，您可以成功调用 Amazon SES，但 Amazon SES 会将该邮件视为“查无此人的邮件”，而不会尝试将其发送出去。与“查无此人的邮件”类似，黑名单退回邮件也会计入发送配额和退回邮件率。电子邮件地址可在黑名单上保留最多 14 天。</p>
+<footer><strong>从 Amazon SES 黑名单中删除电子邮件地址</strong><cite><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/remove-from-suppression-list.html" target="_blank" rel="noopener">docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/remove-from-suppression-list.html</a></cite></footer></blockquote><br>如果你确信黑名单中的某个地址有效，则可以使用以下过程将其从列表中删除，他提供了一个很简单的操作后台：<br><img src="/2019/06/05/aws-ses-sns/3.png" alt="1"></p>
+<h2 id="Amazon-SNS-通知"><a href="#Amazon-SNS-通知" class="headerlink" title="Amazon SNS 通知"></a>Amazon SNS 通知</h2><p>虽然 SES 在发生邮件退回或者投诉的时候，会向我们的发送者邮箱发送邮件通知。但是这样子并不利于我们收集无效邮箱的操作。因此它又提供了另一种类似于 webhook 机制的：<a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/configure-sns-notifications.html" target="_blank" rel="noopener">为 Amazon SES 配置 Amazon SNS 通知</a>。<br>简单的来说，就是它允许你在 SNS 中创建一个主题，并有终端订阅它， 最后在 SES 中，启用这个订阅通知。</p>
+<h3 id="SNS-中创建主题"><a href="#SNS-中创建主题" class="headerlink" title="SNS 中创建主题"></a>SNS 中创建主题</h3><p>Amazon Simple Notification Service (SNS) 这个是 AWS 的另一个服务:<br><blockquote><p>Amazon Simple Notification Service (SNS) 是一种高度可用、持久、安全、完全托管的发布/订阅消息收发服务，可以轻松分离微服务、分布式系统和无服务器应用程序。Amazon SNS 提供了面向高吞吐量、多对多推送式消息收发的主题。借助 Amazon SNS 主题，发布系统可以向大量订阅终端节点（包括 Amazon SQS 队列、AWS Lambda 函数和 HTTP/S Webhook 等）扇出消息，从而实现并行处理。此外，SNS 可用于使用移动推送、短信和电子邮件向最终用户扇出通知。</p>
+<footer><strong>Amazon Simple Notification Service</strong><cite><a href="https://aws.amazon.com/cn/sns/" target="_blank" rel="noopener">aws.amazon.com/cn/sns</a></cite></footer></blockquote><br>首先我们再在 SNS 后台创建一个主题：名字叫做 <strong>ses_bounce_notification</strong><br><img src="/2019/06/05/aws-ses-sns/4.png" alt="1"></p>
+<h3 id="SNS-创建订阅"><a href="#SNS-创建订阅" class="headerlink" title="SNS 创建订阅"></a>SNS 创建订阅</h3><p>接下来针对这个主题，创建一个订阅，因为我们要用 webhook 的方式来通知，所以选择协议 https，并输入要接收的 url： 比如 <a href="https://www.example.com/sns/ses" target="_blank" rel="noopener">https://www.example.com/sns/ses</a><br><img src="/2019/06/05/aws-ses-sns/5.png" alt="1"><br>注意，这个url是要验证的，你必须证明是你自己的域名和接口。所以创建成功之后，SNS 会向这个接口发送一条验证 url，<br><blockquote><p>当您完成终端节点的订阅后，Amazon SNS 会向该终端节点发送一条订阅确认消息。终端节点上的代码必须检索来自订阅确认消息的 SubscribeURL 值，然后访问 SubscribeURL 指定的位置或让其对您可用，这样您就可以手动访问 SubscribeURL，例如，通过 Web 浏览器访问。<br>在订阅得到确认前，Amazon SNS 不会向终端节点发送消息。当您访问 SubscribeURL 时，响应将包含一个 XML 文档，该文档反过来包含用于指定订阅的 ARN 的 SubscriptionArn。</p>
+</blockquote><br><img src="/2019/06/05/aws-ses-sns/6.png" alt="1"><br>得到 url，然后拿到浏览器访问：<br><img src="/2019/06/05/aws-ses-sns/7.png" alt="1"><br>响应是一个 XML 文档，说明没错，接下来可以看到创建的订阅的状态变成确定了（之前是 pending 状态）<br><img src="/2019/06/05/aws-ses-sns/8.png" alt="1"></p>
+<h3 id="SES-控制台配置通知"><a href="#SES-控制台配置通知" class="headerlink" title="SES 控制台配置通知"></a>SES 控制台配置通知</h3><p>既然先决条件都弄好了，那么就可以在 SES 控制台配置了： <a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/configure-sns-notifications.html" target="_blank" rel="noopener">为 Amazon SES 配置 Amazon SNS 通知</a><br>在 Email Address 中选择要启用 SNS 通知的邮件，然后点击 <strong>Notifications</strong> 下的 <strong>Edit Configuration</strong> 按钮, 可以看到 <strong>SNS topic Configuration</strong> 下面有三个项:</p>
+<ul>
+<li>Bounces 邮件反弹率通知</li>
+<li>Complaints 邮件投诉通知</li>
+<li>Deliveries 邮件送达通知</li>
+</ul>
+<p>因为我们只对反弹率做通知，所以只配置了 Bounces，选择主题 <strong>ses_bounce_notification</strong>:<br><img src="/2019/06/05/aws-ses-sns/9.png" alt="1"></p>
+<h3 id="完善接口通知"><a href="#完善接口通知" class="headerlink" title="完善接口通知"></a>完善接口通知</h3><p>这样子就全部配好了，接下来就完善接口通知了，而且要注意一点的是，就算是 bounce 的通知，也有分好几种情况， <a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/notification-contents.html#bounce-types" target="_blank" rel="noopener">具体文档</a></p>
+<ul>
+<li>Undetermined 收件人的电子邮件提供商发送退回邮件消息</li>
+<li>Permanent 硬退回邮件</li>
+<li>Transient 软退回邮件</li>
+</ul>
+<p>而我们只处理硬退回邮件，因此只考虑 bounceType 为 Permanent 的情况, 所以具体代码如下：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// amazon ses 发布的事件</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *SNS)</span> <span class="title">Ses</span><span class="params">()</span> <span class="title">revel</span>.<span class="title">Result</span></span> &#123;</span><br><span class="line">	res := Res&#123;&#125;</span><br><span class="line">	<span class="comment">// 获取参数</span></span><br><span class="line">	body, err := ioutil.ReadAll(s.Request.Body)</span><br><span class="line">	<span class="keyword">defer</span> s.Request.Body.Close()</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Error(err)</span><br><span class="line">		<span class="keyword">return</span> s.RenderJson(res)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 解析用于验证 subscriber 身份的 subscribe confirmation</span></span><br><span class="line">	confirmation := structs.SNSSubscribeConfirmation&#123;&#125;</span><br><span class="line">	err = json.Unmarshal(body, &amp;confirmation)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Error(err)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> confirmation.SubscribeURL != <span class="string">""</span> &#123;</span><br><span class="line">		log.Info(<span class="string">"=========================================="</span>)</span><br><span class="line">		log.Infof(<span class="string">"confirmation topic arn : %v"</span>, confirmation.TopicArn)</span><br><span class="line">		log.Infof(<span class="string">"confirmation sub url : %v"</span>, confirmation.SubscribeURL)</span><br><span class="line">		log.Info(<span class="string">"=========================================="</span>)</span><br><span class="line">		<span class="keyword">return</span> s.RenderJson(res)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 解析正常 sns 发布的 ses 消息</span></span><br><span class="line">	notification := structs.SNSNotificationFromSES&#123;&#125;</span><br><span class="line">	err = json.Unmarshal(body, &amp;notification)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		log.Error(err)</span><br><span class="line">		<span class="keyword">return</span> s.RenderJson(res)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 处理通知</span></span><br><span class="line">	<span class="keyword">switch</span> notification.NotificationType &#123;</span><br><span class="line">	<span class="keyword">case</span> <span class="string">"Bounce"</span>:</span><br><span class="line">		<span class="comment">// Permanent 表示硬退回，邮件被硬退回则对应的 mail_to 入库</span></span><br><span class="line">		<span class="keyword">if</span> notification.BounceInfo.BounceType == <span class="string">"Permanent"</span> &#123;</span><br><span class="line">			<span class="keyword">for</span> _, recp := <span class="keyword">range</span> notification.BounceInfo.BouncedRecipients &#123;</span><br><span class="line">				models.InsertMailBounced(recp.EmailAddress)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">break</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	res.Code = <span class="number">1</span></span><br><span class="line">	<span class="keyword">return</span> s.RenderJson(res)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>逻辑很简单，如果收到硬退回邮件，那么就入库。</p>
+<h3 id="邮件发送服务过滤无效邮箱"><a href="#邮件发送服务过滤无效邮箱" class="headerlink" title="邮件发送服务过滤无效邮箱"></a>邮件发送服务过滤无效邮箱</h3><p>这样子我们就有一张表来存放这些硬退回的无效邮件了，接下来就是在邮件发送服务那边针对这些无效邮件做过滤。简单的来说，就是发送前判断一下，这个邮箱是否在无效邮箱名单里面，如果在的话，就跳过，不发送。<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果 mail_to 在 mail_bounced 表中，不发送</span></span><br><span class="line"><span class="keyword">if</span> IsMailBounced(q.MailTo) == <span class="literal">true</span> &#123;</span><br><span class="line">	log.Infof(<span class="string">"Mail to %v is bounced"</span>, q.MailTo)</span><br><span class="line">	<span class="keyword">return</span> StatusMailBounced</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="定期清除黑名单"><a href="#定期清除黑名单" class="headerlink" title="定期清除黑名单"></a>定期清除黑名单</h3><p>SES 那边会对无效邮件黑名单保存14天，这个是因为有些邮箱当下可能是无效的，但是过一段时间可能就有效了，所以黑名单机制肯定会有一个过期时间的。而我们的处理方式跟 SES 一样，也是保存 14 天。因此我们会有一个计划任务，每天跑一次，将黑名单里面的超过14天的邮箱从黑名单剔除掉。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>自从做了这个无效邮箱黑名单机制之后，我们的 SES 的反弹率又降低了很多，之前是 5% 左右，现在是 2% 左右，可以说是进步了很多。<br><img src="/2019/06/05/aws-ses-sns/10.png" alt="1"></p>
+<h2 id="参考资料："><a href="#参考资料：" class="headerlink" title="参考资料："></a>参考资料：</h2><p><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/notification-contents.html#bounce-object" target="_blank" rel="noopener">Amazon SES 的 Amazon SNS 通知内容</a><br><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/notification-examples.html" target="_blank" rel="noopener">Amazon SES 的 Amazon SNS 通知示例</a><br><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/configure-sns-notifications.html" target="_blank" rel="noopener">为 Amazon SES 配置 Amazon SNS 通知</a><br><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/success-metrics.html" target="_blank" rel="noopener">电子邮件程序成功指标</a><br><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/remove-from-suppression-list.html" target="_blank" rel="noopener">从 Amazon SES 黑名单中删除电子邮件地址</a><br><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/monitor-sending-activity.html" target="_blank" rel="noopener">监控您的 Amazon SES 发送活动</a><br><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/notifications-via-email.html" target="_blank" rel="noopener">通过电子邮件发送的 Amazon SES 通知</a><br><a href="https://www.reddit.com/r/aws/comments/7zvsw0/ses_complaintbounce_rate_calculation_periods/" target="_blank" rel="noopener">bounce rate 计算规则</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/06/05/aws-ses-sns/" title="AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件">http://kebingzao.com/2019/06/05/aws-ses-sns/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/aws/" rel="tag"># aws</a>
+          
+            <a href="/tags/ses/" rel="tag"># ses</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/03/image-thumb-s3-qn/" rel="next" title="针对国内和国外的图片资源和缩略图做CDN优化">
+                <i class="fa fa-chevron-left"></i> 针对国内和国外的图片资源和缩略图做CDN优化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">136</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#电子邮件发送的-Amazon-SES-通知"><span class="nav-number">2.</span> <span class="nav-text">电子邮件发送的 Amazon SES 通知</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Amazon-SNS-通知"><span class="nav-number">3.</span> <span class="nav-text">Amazon SNS 通知</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SNS-中创建主题"><span class="nav-number">3.1.</span> <span class="nav-text">SNS 中创建主题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SNS-创建订阅"><span class="nav-number">3.2.</span> <span class="nav-text">SNS 创建订阅</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SES-控制台配置通知"><span class="nav-number">3.3.</span> <span class="nav-text">SES 控制台配置通知</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#完善接口通知"><span class="nav-number">3.4.</span> <span class="nav-text">完善接口通知</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#邮件发送服务过滤无效邮箱"><span class="nav-number">3.5.</span> <span class="nav-text">邮件发送服务过滤无效邮箱</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定期清除黑名单"><span class="nav-number">3.6.</span> <span class="nav-text">定期清除黑名单</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料："><span class="nav-number">5.</span> <span class="nav-text">参考资料：</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/06/05/aws-ses-sns/';
+          this.page.identifier = '2019/06/05/aws-ses-sns/';
+          this.page.title = 'AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

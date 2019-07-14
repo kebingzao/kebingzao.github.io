@@ -124,7 +124,7 @@
 <meta property="og:image" content="http://kebingzao.com/2019/06/03/image-thumb-s3-qn/35.png">
 <meta property="og:image" content="http://kebingzao.com/2019/06/03/image-thumb-s3-qn/36.png">
 <meta property="og:image" content="http://kebingzao.com/2019/06/03/image-thumb-s3-qn/37.png">
-<meta property="og:updated_time" content="2019-06-04T12:34:49.084Z">
+<meta property="og:updated_time" content="2019-07-14T01:54:45.773Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="针对国内和国外的图片资源和缩略图做CDN优化">
 <meta name="twitter:description" content="前言去年有通过 aws 的 Lambda 服务来解决缩略图的问题： 项目使用 aws 的 lambda服务来生成s3的缩略图，不过那时候是国内七牛缩略图，国外 S3 缩略图各自的策略，他们的缩略图的 URL 是不一样的。因为我们会在用户上传图片的时候，判断这个用户的所在国家，如果是中国的话，就传到七牛那边去，否则就传到 S3。但是这边会有一个问题，就是如果我在国内传了一个图片，这时候是会传到七牛那">
@@ -466,7 +466,7 @@
 <ol>
 <li>上传文件 123.jpg 到 img-example-com bucket 触发 Lambda 事件，接下来判断这个图片的前缀和后缀是否符合我们要生成缩略图的图片，如果不存在，就跳过(事实上这一块不会在代码里面做，而是S3 触发器会帮我们做)。</li>
 <li>如果符合，接下来判断 123.jpg-p10 (123.jpg-p50) 这个缩略图是否存在这个bucket，如果已经存在，说明缩略图已经有了，就跳过。</li>
-<li>如果不存在，就将 123.jpg 原图下载到内存 buffer 里面，然后安装百分比进行裁剪(10% 和 50%)，重新命名为 123.jpg-p10 (123.jpg-p50)， 然后将缩略图传到源bucket里面。</li>
+<li>如果不存在，就将 123.jpg 原图下载到内存 buffer 里面，然后按照百分比进行裁剪(10% 和 50%)，重新命名为 123.jpg-p10 (123.jpg-p50)， 然后将缩略图传到源bucket里面。</li>
 </ol>
 <p>这样就完了，但是要注意几个细节：</p>
 <ol>
@@ -476,7 +476,7 @@
 </ol>
 <h3 id="认识-Lambda"><a href="#认识-Lambda" class="headerlink" title="认识 Lambda"></a>认识 Lambda</h3><p>因为在去年自我上次使用 Lambda 生成缩略图之后， Lambda 这个功能也改了很多。所以我这边再重新介绍一下。具体关于 Lambda 的使用文档，可以看这边：<a href="https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/welcome.html" target="_blank" rel="noopener">AWS Lambda</a><br>我这边就按照正式流程，稍微过一下(因为我是在实现了之后，再写 blog 复盘的，所以之前建的那些流程和图都没有截下来，我就简单模拟了一下流程)：</p>
 <h4 id="创建一个函数"><a href="#创建一个函数" class="headerlink" title="创建一个函数"></a>创建一个函数</h4><p>进入 Lambda 后台，点击创建函数，填写函数名称，并选择运行的语言环境，这边有很多环境可以选，有 Python，nodejs， Go， Java 等等，主要看你熟悉什么语言。 我这边选择的是 Python 3.6 的运行环境。因为上次我创建的那一个 Lambda 函数的运行环境也是 Python 3.6。<br><img src="/2019/06/03/image-thumb-s3-qn/11.png" alt="1"><br>创建好了之后，界面的这样子的<br><img src="/2019/06/03/image-thumb-s3-qn/12.png" alt="1"><br>跟我去年建的不太一样的是，多了一个叫做 Layers 的东西，并且下面竟然可以直接在线编辑 Python 代码。<br><img src="/2019/06/03/image-thumb-s3-qn/13.png" alt="1"></p>
-<h4 id="创建一个-layer-层"><a href="#创建一个-layer-层" class="headerlink" title="创建一个 layer 层"></a>创建一个 layer 层</h4><p>这次跟我去年创建的最大的差别就是多了一个叫做 layer 的层机制。那么这个 layer 是干啥用的。<br><blockquote><p>您可以将 Lambda 函数配置为以层的形式拉入其他代码和内容。层是包含库、自定义运行时或其他依赖项的 ZIP 存档。<br>利用层，您可以在函数中使用库，而不必将库包含在部署程序包中。</p>
+<h4 id="创建一个-layer-层"><a href="#创建一个-layer-层" class="headerlink" title="创建一个 layer 层"></a>创建一个 layer 层</h4><p>这次跟我去年创建的最大的差别就是多了一个叫做 layer 的层机制。那么这个 layer 是干啥用的。<br><blockquote><p>您可以将 Lambda 函数配置为以层的形式拉入其他代码和内容。层是包含库、自定义运行时或其他依赖项的 ZIP 存档。利用层，您可以在函数中使用库，而不必将库包含在部署程序包中。</p>
 <footer><strong>https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/configuration-layers.html</strong></footer></blockquote><br>说白了就是存放第三方库的地方，去年我在上传 Python 代码的时候， 真正可编辑的代码文件只有一个： <strong>CreateThumbnail.py</strong>, 其他的全部都是依赖的第三方库：<br><img src="/2019/06/03/image-thumb-s3-qn/14.png" alt="1"><br>那么这次我如果还想实现类似的功能，第三方库我就不需要再传了，而是直接创建一个包含这些第三方库的 Python layer 层就行了。<br>点击左边菜单栏的 层，然后点击右上角的创建层：<br><img src="/2019/06/03/image-thumb-s3-qn/15.png" alt="1"><br>填入相关信息，选择运行的环境为 Python 3.6，并且上传第三方 zip 包，他是有格式要求的，因为我们 Python 环境，所以最外层是 python 文件夹，里面才是各个第三方包：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python.zip</span><br><span class="line">│ python/PIL</span><br><span class="line">└ python/Pillow-5.3.0.dist-info</span><br></pre></td></tr></table></figure></p>
 <p>具体可以看这个说明：<a href="https://docs.aws.amazon.com/zh_cn/lambda/latest/dg/configuration-layers.html" target="_blank" rel="noopener">在层中包括库依赖项</a><br>点击创建,这时候就多了 Python的 层。<br><img src="/2019/06/03/image-thumb-s3-qn/16.png" alt="1"><br><img src="/2019/06/03/image-thumb-s3-qn/17.png" alt="1"><br>可以看到多了一个叫做 python36PIL 的层。</p>
 <h4 id="将层添加到函数"><a href="#将层添加到函数" class="headerlink" title="将层添加到函数"></a>将层添加到函数</h4><p>既然层创建好了，那么就添加到这个函数里面去：<br><img src="/2019/06/03/image-thumb-s3-qn/18.png" alt="1"><br>点击右上角的保存，这样就为这个函数添加了一个含有python 3.6 第三方包的层了。<br><img src="/2019/06/03/image-thumb-s3-qn/19.png" alt="1"></p>
@@ -565,6 +565,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/05/aws-ses-sns/" rel="prev" title="AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件">
+                AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -655,7 +659,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">135</span>
+                  <span class="site-state-item-count">136</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -677,7 +681,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-count">38</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

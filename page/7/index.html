@@ -300,6 +300,1022 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/08/detect-caps/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/08/detect-caps/" itemprop="url">前端工具集(3) -- 检测密码框输入有没有开启大写标记</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-08T01:00:01+08:00">
+                2018-06-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端工具集/" itemprop="url" rel="index">
+                    <span itemprop="name">前端工具集</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/08/detect-caps/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/06/08/detect-caps/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/08/detect-caps/" class="leancloud_visitors" data-flag-title="前端工具集(3) -- 检测密码框输入有没有开启大写标记">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>之前做一个项目的时候，有个需求是用户在密码框输入密码的时候，如果当前是开启大写的话，那么就要给个提示。像这样子：<br><img src="/2018/06/08/detect-caps/1.png" alt="1"></p>
+<p>具体代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 检测有没有开启大写标记</span></span><br><span class="line"><span class="comment"> * @param e</span></span><br><span class="line"><span class="comment"> * @param showHandle</span></span><br><span class="line"><span class="comment"> * @param hideHandle</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">detectCapsLock: <span class="function"><span class="keyword">function</span> (<span class="params">e, showHandle, hideHandle</span>) </span>&#123;</span><br><span class="line">    e = e || <span class="built_in">window</span>.event;</span><br><span class="line">    <span class="comment">// 获取按键的keyCode</span></span><br><span class="line">    <span class="keyword">var</span> keyCode = e.keyCode || e.which;</span><br><span class="line">    <span class="keyword">var</span> isShift = e.shiftKey || (keyCode === <span class="number">16</span> ) || <span class="literal">false</span>;</span><br><span class="line">    <span class="comment">// 判断shift键是否按住</span></span><br><span class="line">    <span class="keyword">if</span> (((keyCode &gt;= <span class="number">65</span> &amp;&amp; keyCode &lt;= <span class="number">90</span> ) &amp;&amp; !isShift) || ((keyCode &gt;= <span class="number">97</span> &amp;&amp; keyCode &lt;= <span class="number">122</span> ) &amp;&amp; isShift)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (_.isFunction(showHandle)) &#123;</span><br><span class="line">            showHandle();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (_.isFunction(hideHandle)) &#123;</span><br><span class="line">            hideHandle();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>ps: 后面我发现在我的mac book pro 中会失效，因为我的电脑的大写的方式是先按住shift键，然后再按下字母键。其实这个逻辑不在上面的判断中，所以会无效</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/07/vernemq-cluster/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/07/vernemq-cluster/" itemprop="url">webrtc 的 signal 服务器 VerneMQ 的集群设置</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-07T23:20:49+08:00">
+                2018-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
+                    <span itemprop="name">webrtc相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/07/vernemq-cluster/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/06/07/vernemq-cluster/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/07/vernemq-cluster/" class="leancloud_visitors" data-flag-title="webrtc 的 signal 服务器 VerneMQ 的集群设置">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>通过<a href="/2018/06/03/vernemq-verify/" title="webrtc 的 signal 服务器 VerneMQ 的权限校验">webrtc 的 signal 服务器 VerneMQ 的权限校验</a> 我们已经将VerneMQ 的权限校验设置成redis校验了。我们知道VerneMQ作为一个开源的基于MQTT的broker服务，它是支持分布式集群的。也就是说客户端可以连接到任何的节点，并且从其他的节点中接收消息。<br>举个例子：有两台服务器A和B，这两台服务器构成一个集群，然后 client1 连上A服务器，并订阅(sub)这个主题”say”， 这时候client2 连上B服务器，并给主题”say” 发布（pub）了一个消息，这时候client1就会收到这一条消息了。<br>官网的文档说的还是挺详细的 <a href="https://vernemq.com/docs/clustering/" target="_blank" rel="noopener">https://vernemq.com/docs/clustering/</a> ，我这边主要是根据我的理解简单说下几个要注意的点。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/06/07/vernemq-cluster/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/07/php-post-bug/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/07/php-post-bug/" itemprop="url">php 本地调试出现 $HTTP_RAW_POST_DATA is deprecated</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-07T01:12:25+08:00">
+                2018-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/php相关/" itemprop="url" rel="index">
+                    <span itemprop="name">php相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/07/php-post-bug/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/06/07/php-post-bug/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/07/php-post-bug/" class="leancloud_visitors" data-flag-title="php 本地调试出现 $HTTP_RAW_POST_DATA is deprecated">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>之前在用一个php项目在做本地调试的时候，用postman 来进行 post 请求，有报了一个这个错误：<br><img src="/2018/06/07/php-post-bug/1.png" alt="1"><br>后面查了一下资料，原来是有一个配置要设置<br><a href="https://stackoverflow.com/questions/26261001/warning-about-http-raw-post-data-being-deprecated" target="_blank" rel="noopener">https://stackoverflow.com/questions/26261001/warning-about-http-raw-post-data-being-deprecated</a><br>要在php.ini 将 <font color="red">always_populate_raw_post_data</font> 这个配置设置为 -1,<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/06/07/php-post-bug/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/05/security-info/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/05/security-info/" itemprop="url">信息安全入侵总结</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-05T00:14:07+08:00">
+                2018-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/05/security-info/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/06/05/security-info/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/05/security-info/" class="leancloud_visitors" data-flag-title="信息安全入侵总结">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>前端时间在微信上上了一节曹政大佬的网课，讲的是关于信息安全的基础培训课。虽然上面说的是面向非技术岗位的安全常识培训和安全意识培养，不涉及具体的研发管理，但是一节课听了下来，作为一个研发人员，我觉得还是收获颇多。<br>虽然在平时的工作中，对于安全方面的知识和防护，会比非技术人员还要熟悉和了解，但是毕竟缺乏比较系统和全面的认知，刚好趁着这个机会，也好好重新梳理以下， 因此本篇文章更多的是作为一个课后的听后感，并且结合自己的经验的一个简单的总结，当然如果内容有涉及到侵权的话，那么请邮件联系我，或者在下方留言，我会删除掉涉及侵权的内容，并道歉。<br>还有就是对之前我写的一篇关于web安全的文章的进行再补充：<a href="/2018/05/06/web-security/" title="web安全系列(1) - web 安全攻击和防护">web安全系列(1) - web 安全攻击和防护</a>。<br>基础的东西我这边就不说了，主要还是介绍各种入侵和攻击行为的原理和基本防范常识。</p>
+<ol>
+<li>彩虹库及密码碰撞</li>
+<li>嗅探侦听</li>
+<li>劫持，钓鱼</li>
+<li>木马植入，蠕虫</li>
+<li>拒绝服务</li>
+<li>SQL注入与跨站脚本</li>
+<li>溢出攻击</li>
+<li>架构耦合问题</li>
+</ol>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/06/05/security-info/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/04/paypal-back/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/04/paypal-back/" itemprop="url">paypal的webhook走转发代理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-04T01:00:12+08:00">
+                2018-06-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/支付相关/" itemprop="url" rel="index">
+                    <span itemprop="name">支付相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/04/paypal-back/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/06/04/paypal-back/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/04/paypal-back/" class="leancloud_visitors" data-flag-title="paypal的webhook走转发代理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>通过 <a href="/2018/06/04/paypal-test/" title="paypal支付在测试环境下webhook过不来的原因">paypal支付在测试环境下webhook过不来的原因</a> 为了解决测试环境下收不到paypal webhook的情况，我们将pay项目的测试环境放到国外的服务器，但是这个又引发了新的问题，就是接口请求速度太慢了。相当于跨区请求，而且测试库又在国内， 所以就导致， 请求从国内到国外，然后国外从国内连接数据库， 随后response从国外传回国内。 来来回回至少两趟， 因此接口会经常超时。导致测试很不方便。<br>所以为了线路问题和测试的便利性，还得把pay项目的测试环境放到国内来，这么一来我们就得解决paypal webhook收不到的问题。<br>后面我们想出来的解决方案就是，将pay项目的测试域名分区，就是中国区还是走测试服那一台，而国外的请求就走预发布环境那一台的，然后再将这个请求转发到国内的测试服上来，这样子paypal的webhook就可以先到达预发布那一台，然后在经由预发布那一台将请求转发到国内的测试服上来，从而可以解决webhook的问题。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/06/04/paypal-back/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/04/paypal-test/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/04/paypal-test/" itemprop="url">paypal支付在测试环境下webhook过不来的原因</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-04T00:42:24+08:00">
+                2018-06-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/支付相关/" itemprop="url" rel="index">
+                    <span itemprop="name">支付相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/04/paypal-test/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/06/04/paypal-test/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/04/paypal-test/" class="leancloud_visitors" data-flag-title="paypal支付在测试环境下webhook过不来的原因">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>之前做的一个支付项目，里面有用到了paypal支付，线上支付和webhook回调都正常，但是问题就出在测试环境上，当时修改代码之后，部署到测试服，自己在沙盒测试的时候，发现支付成功之后，根本就没有webhook过来。而且查看了一下测试服对应的PayPal账号的 Sandbox Webhooks Events，发现竟然全部都发送失败了。<br><img src="/2018/06/04/paypal-test/1.png" alt="1"><br>这下就蛋疼了，如果测试服的 webhook 没有过来，那怎么测试啊， 总不可能，没有测试就放到线上啊。后面想到，可能有一种情况会导致PayPal的webhook过不了，就是pay的测试服环境是国内的服务器。有可能PayPal的webhook 通知请求被长城防火墙给拦了，导致没法到达我们的服务器。而我们的线上服务器是在国外的，因此没问题。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/06/04/paypal-test/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/06/03/vernemq-verify/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2687,341 +3703,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/05/03/git-reset/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/03/git-reset/" itemprop="url">git 回退已经merge过但是没有提交到远端仓库的分支</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-03T20:20:24+08:00">
-                2018-05-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/git-操作/" itemprop="url" rel="index">
-                    <span itemprop="name">git 操作</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/03/git-reset/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/05/03/git-reset/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/05/03/git-reset/" class="leancloud_visitors" data-flag-title="git 回退已经merge过但是没有提交到远端仓库的分支">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>之前在协作的时候，有发生过一种情况：<br>有个同事有在他的分支上做了一个新的接口。但是我用dev合并的时候，发现这个分支是基于master分支，导致代码是比较旧的。<br>这时候，merge 后的代码还没有提交到远端仓库。<br>所以我是直接抛弃掉这个merge操作。<br>命令就是: </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard HEAD~1</span><br></pre></td></tr></table></figure>
-<p>这时候就会回到了dev最新的分支了，并且没有任何的commit了。<br>但是有时候会发现还是会有未提交的合并分支的commit，这个是因为你merge的分支超过一次提交，上面那个操作其实就是撤销了最近的一次提交。<br>所以如果你merge的分支已经提交了好几次的commit了，那么这时候就要这样子：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard HEAD~n</span><br></pre></td></tr></table></figure><br>n 就是merge分支的总的commit提交次数</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2018/05/03/set-img-cannot-drag/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/03/set-img-cannot-drag/" itemprop="url">web 上设置图片不能拖拽</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-03T14:51:35+08:00">
-                2018-05-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/前端相关/" itemprop="url" rel="index">
-                    <span itemprop="name">前端相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/05/03/set-img-cannot-drag/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/05/03/set-img-cannot-drag/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/05/03/set-img-cannot-drag/" class="leancloud_visitors" data-flag-title="web 上设置图片不能拖拽">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="图片不能拖拽，有两种情况"><a href="#图片不能拖拽，有两种情况" class="headerlink" title="图片不能拖拽，有两种情况:"></a>图片不能拖拽，有两种情况:</h3><h4 id="一种是使用css，-让其不能选择"><a href="#一种是使用css，-让其不能选择" class="headerlink" title="一种是使用css， 让其不能选择"></a>一种是使用css， 让其不能选择</h4><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-class">.i-user-select-none</span>&#123;</span><br><span class="line">  <span class="attribute">-webkit-user-select</span>:none;</span><br><span class="line">  <span class="attribute">-moz-user-select</span>:none;</span><br><span class="line">  <span class="attribute">-khtml-user-select</span>:none;</span><br><span class="line">  <span class="attribute">-o-user-select</span>:none;</span><br><span class="line">  <span class="attribute">user-select</span>:none;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="一种是js，将-onselectstart-，-ondragstart-方法return-false"><a href="#一种是js，将-onselectstart-，-ondragstart-方法return-false" class="headerlink" title="一种是js，将 onselectstart ， ondragstart 方法return false"></a>一种是js，将 onselectstart ， ondragstart 方法return false</h4><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$(img).attr(&#123;</span><br><span class="line">    <span class="string">"onselectstart"</span>: <span class="string">"return false;"</span>,</span><br><span class="line">    <span class="string">"ondragstart"</span>: <span class="string">"return false;"</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span>
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -3071,7 +3757,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">136</span>
+                  <span class="site-state-item-count">142</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3093,7 +3779,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-count">39</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

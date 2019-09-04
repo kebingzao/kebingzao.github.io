@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="stripe," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前项目有用到了一些第三方支付，包括 paypal, google iap, stripe, apple iap, 还有国内的 alipay。其中每个支付类型都有一些坑，本章讲的是第三方支付 stripe 所遇到的一些问题。尝试过很多种支付方式，发现 stripe 真的很友好，不管是对客户还是对商家，体验都是不错的， 而且 stripe 是直接用信用卡支付的， 不需要像 paypal 那样还需">
+<meta name="keywords" content="stripe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="stripe 支付需要注意的点 -- 持续更新">
+<meta property="og:url" content="http://kebingzao.com/2019/07/19/stripe-notice/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前项目有用到了一些第三方支付，包括 paypal, google iap, stripe, apple iap, 还有国内的 alipay。其中每个支付类型都有一些坑，本章讲的是第三方支付 stripe 所遇到的一些问题。尝试过很多种支付方式，发现 stripe 真的很友好，不管是对客户还是对商家，体验都是不错的， 而且 stripe 是直接用信用卡支付的， 不需要像 paypal 那样还需">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-09-04T13:44:34.943Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="stripe 支付需要注意的点 -- 持续更新">
+<meta name="twitter:description" content="前言之前项目有用到了一些第三方支付，包括 paypal, google iap, stripe, apple iap, 还有国内的 alipay。其中每个支付类型都有一些坑，本章讲的是第三方支付 stripe 所遇到的一些问题。尝试过很多种支付方式，发现 stripe 真的很友好，不管是对客户还是对商家，体验都是不错的， 而且 stripe 是直接用信用卡支付的， 不需要像 paypal 那样还需">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/07/19/stripe-notice/"/>
+
+
+
+
+
+  <title>stripe 支付需要注意的点 -- 持续更新 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/07/19/stripe-notice/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">stripe 支付需要注意的点 -- 持续更新</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-19T14:43:32+08:00">
+                2019-07-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/支付相关/" itemprop="url" rel="index">
+                    <span itemprop="name">支付相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/07/19/stripe-notice/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/07/19/stripe-notice/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/07/19/stripe-notice/" class="leancloud_visitors" data-flag-title="stripe 支付需要注意的点 -- 持续更新">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前项目有用到了一些第三方支付，包括 paypal, google iap, stripe, apple iap, 还有国内的 alipay。其中每个支付类型都有一些坑，本章讲的是第三方支付 stripe 所遇到的一些问题。<br>尝试过很多种支付方式，发现 stripe 真的很友好，不管是对客户还是对商家，体验都是不错的， 而且 stripe 是直接用信用卡支付的， 不需要像 paypal 那样还需要拥有账号。<br><a id="more"></a></p>
+<h2 id="无法加载-stripe-的-js-sdk"><a href="#无法加载-stripe-的-js-sdk" class="headerlink" title="无法加载 stripe 的 js sdk"></a>无法加载 stripe 的 js sdk</h2><p>之前在做手机端内嵌页支付的时候，有遇到过一个问题，就是一直没办法加载stripe的sdk：<strong><a href="https://js.stripe.com/v3/" target="_blank" rel="noopener">https://js.stripe.com/v3/</a></strong>，但是其他手机都没有问题。就这一台手机一直加载不出来，一直超时。<br>后面查了一下，发现是这台手机的时间设置为 2020 年 4 月，已经超过了 stripe 这个站点的 证书 时间，导致证书过期。因此就没法访问了。后面只要把手机时间调回来就行了。</p>
+<h2 id="关于-stripe-首次购买之后，-webhook-延迟的问题"><a href="#关于-stripe-首次购买之后，-webhook-延迟的问题" class="headerlink" title="关于 stripe 首次购买之后， webhook 延迟的问题"></a>关于 stripe 首次购买之后， webhook 延迟的问题</h2><p>之前在做 rs 支付的时候，有遇到一个问题，就是 stripe 如果是首次购买的时候， webhook 会延迟过来，一般是一个小时之后才过来。 而且我发现 invoice.payment_succeeded 这个 webhook 是有过来的， 但是 charge 字段是空的，所以根本就没有扣款。<br>后面查了这一单的情况：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    "id": "in_1EuYAEAP4l9EoBkAT02qEtbl",</span><br><span class="line">    "object": "invoice",</span><br><span class="line">    ...</span><br><span class="line">    "billing_reason": "subscription_cycle",</span><br><span class="line">    "charge": null,</span><br><span class="line">    "closed": false,</span><br><span class="line">    ...</span><br><span class="line">    "next_payment_attempt": 1562739374,</span><br><span class="line">    ...</span><br><span class="line">    "status": "draft",</span><br><span class="line">    ...</span><br><span class="line">    "webhooks_delivered_at": 1562735786</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>发现它的状态不是 active， 说明这一次扣款是失败的， 而这个webhook 是马上过来的时候，所以应该还处于试用期。 所以扣款失败。然后尝试下次扣款是一个小时之后，那时候试用期就会过了。<br>后面查了一下代码，发现是这边的问题:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$startTime = time()+<span class="number">20</span>; <span class="comment">// stripe创建循环如果有指定生效时间的话，那么就必须是未来的时间，不然会报错</span></span><br><span class="line">$success = $service-&gt;sub($feeMode, $customer, $startTime, $fromType, $inOrderId, $recurringId);</span><br></pre></td></tr></table></figure></p>
+<p>原来是 startTime 设置了一个 未来的时间，这个本来是没错的， 但是问题就在于，如果这样做的话，就会导致第一次的扣款失败。 而下一次的尝试扣款就会在一个小时之后。就会出现我们现在的这种情况。所以如果是首次扣款的话，应该不要设置生效时间，哪怕是几秒之后。 直接设置为 null 就可以了。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$startTime = <span class="keyword">null</span>; <span class="comment">// 马上扣款的话，就要设置为null</span></span><br><span class="line">$success = $service-&gt;sub($feeMode, $customer, $startTime, $fromType, $inOrderId, $recurringId);</span><br></pre></td></tr></table></figure></p>
+<p>这样子，设置为 null 之后，就会马上扣款了。 不会再延迟一个小时了。</p>
+<h2 id="已经创建的plan是不能修改价钱"><a href="#已经创建的plan是不能修改价钱" class="headerlink" title="已经创建的plan是不能修改价钱"></a>已经创建的plan是不能修改价钱</h2><p>stripe 有更新 plan 的api (<a href="https://stripe.com/docs/api/plans/update" target="_blank" rel="noopener">文档</a>)， 然而遗憾的是，已经创建的 plan 有些参数是不能修改的，比如 plan ID, 金额，币种，循环周期等。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Updates the specified plan by setting the values <span class="keyword">of</span> the parameters passed. Any parameters not provided are left unchanged. By design, you cannot change a plan’s ID, amount, currency, or billing cycle.</span><br></pre></td></tr></table></figure></p>
+<p>所以如果要改价钱的话，直接新建一个新的 plan。</p>
+<h2 id="创建循环订单的时候，可以自定义-metadata"><a href="#创建循环订单的时候，可以自定义-metadata" class="headerlink" title="创建循环订单的时候，可以自定义 metadata"></a>创建循环订单的时候，可以自定义 metadata</h2><p>stripe 允许我们在创建订单的时候，可以自定义一些信息在 metadata 里面。可以将一些我们产品的信息，比如这个支付用户的accountId，放在 metadata 中，这样子我们后面就可以通过这个循环订单的信息来知道是属于哪个用户的。<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">\Stripe\Stripe::setApiKey(<span class="string">"sk_test_4eC39Hqxxx"</span>);</span><br><span class="line"></span><br><span class="line">\Stripe\Subscription::create([</span><br><span class="line">  <span class="string">"customer"</span> =&gt; <span class="string">"cus_FSmIlO8dkvOxiF"</span>,</span><br><span class="line">  <span class="string">"items"</span> =&gt; [</span><br><span class="line">    [</span><br><span class="line">      <span class="string">"plan"</span> =&gt; <span class="string">"plan_FSm6isCPqQnI0Q"</span>,</span><br><span class="line">    ],</span><br><span class="line">  ],</span><br><span class="line">  <span class="string">"metadata"</span> =&gt; [</span><br><span class="line">      <span class="string">"account_id"</span> =&gt; <span class="string">'123456'</span></span><br><span class="line">  ]</span><br><span class="line">]);</span><br></pre></td></tr></table></figure></p>
+<p>这样子，如果支付成功，过来的支付成功的 webhook 里面就可以知道这个循环是那个用户创建并完成支付的了：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="string">"id"</span>: <span class="string">"evt_1ExrRhAP4l9EoBkALxxxxx"</span>,</span><br><span class="line">	<span class="string">"object"</span>: <span class="string">"event"</span>,</span><br><span class="line">	<span class="string">"api_version"</span>: <span class="string">"2017-06-05"</span>,</span><br><span class="line">	<span class="string">"created"</span>: <span class="number">1563524884</span>,</span><br><span class="line">	<span class="string">"data"</span>: &#123;</span><br><span class="line">		<span class="string">"object"</span>: &#123;</span><br><span class="line">			<span class="string">"id"</span>: <span class="string">"in_1ExrRfAP4l9EoBkAZhPbVY1M"</span>,</span><br><span class="line">            ...</span><br><span class="line">			<span class="string">"lines"</span>: &#123;</span><br><span class="line">				<span class="string">"object"</span>: <span class="string">"list"</span>,</span><br><span class="line">				<span class="string">"data"</span>: [&#123;</span><br><span class="line">					<span class="string">"id"</span>: <span class="string">"sub_FSn1Itcxxxx"</span>,</span><br><span class="line">					<span class="string">"object"</span>: <span class="string">"line_item"</span>,</span><br><span class="line">					<span class="string">"amount"</span>: <span class="number">2499</span>,</span><br><span class="line">					<span class="string">"currency"</span>: <span class="string">"usd"</span>,</span><br><span class="line">					<span class="string">"description"</span>: <span class="keyword">null</span>,</span><br><span class="line">					<span class="string">"discountable"</span>: <span class="keyword">true</span>,</span><br><span class="line">					<span class="string">"livemode"</span>: <span class="keyword">false</span>,</span><br><span class="line">					<span class="string">"metadata"</span>: &#123;</span><br><span class="line">						<span class="string">"account_id"</span>: <span class="string">"181544517"</span></span><br><span class="line">					&#125;,</span><br><span class="line">					<span class="string">"period"</span>: &#123;</span><br><span class="line">						<span class="string">"end"</span>: <span class="number">1595147283</span>,</span><br><span class="line">						<span class="string">"start"</span>: <span class="number">1563524883</span></span><br><span class="line">					&#125;,</span><br><span class="line">					<span class="string">"plan"</span>: &#123;</span><br><span class="line">						<span class="string">"id"</span>: <span class="string">"337"</span>,</span><br><span class="line">						<span class="string">"object"</span>: <span class="string">"plan"</span>,</span><br><span class="line">						<span class="string">"active"</span>: <span class="keyword">true</span>,</span><br><span class="line">                        ...</span><br><span class="line">					&#125;,</span><br><span class="line">                    ...</span><br><span class="line">				&#125;],</span><br><span class="line">				<span class="string">"has_more"</span>: <span class="keyword">false</span>,</span><br><span class="line">				<span class="string">"total_count"</span>: <span class="number">1</span>,</span><br><span class="line">				<span class="string">"url"</span>: <span class="string">"/v1/invoices/in_1ExrRfAP4l9EoBkAZhPbVY1M/lines"</span></span><br><span class="line">			&#125;,</span><br><span class="line">            ...</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="string">"livemode"</span>: <span class="keyword">false</span>,</span><br><span class="line">	<span class="string">"pending_webhooks"</span>: <span class="number">1</span>,</span><br><span class="line">	<span class="string">"request"</span>: &#123;</span><br><span class="line">		<span class="string">"id"</span>: <span class="string">"req_a0IZqunPgbESa3"</span>,</span><br><span class="line">		<span class="string">"idempotency_key"</span>: <span class="keyword">null</span></span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="string">"type"</span>: <span class="string">"invoice.payment_succeeded"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到在 sub 的详细里面，其实是有带上 metadata 的，通过这个方式有解决了一个我们之前遇到的一个问题。<br>就是我们在调用 sub 创建循环并支付的时候，因为是同步请求，有时候 http 返回比较慢，反而支付成功的 webhook 却提前过来，这时候是在表里面找不到这个循环的。但是我们从metadata中可以得到accountId的值，因此就去查找这个用户是否存在，如果存在，所以就补上循环，并且正常进行升级流程了。</p>
+<h2 id="最低支付要超过0-5美金才行"><a href="#最低支付要超过0-5美金才行" class="headerlink" title="最低支付要超过0.5美金才行"></a>最低支付要超过0.5美金才行</h2><p>之前在进行stripe订单支付的时候，如果 amount = 50 ， 也就是 0.5美金的时候。这时候就会支付不了，报这个错误：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stripe charge errorAmount must convert to at least <span class="number">400</span> cents. $<span class="number">0.50</span> USD converts to approximately $<span class="number">3.92</span> HKD.</span><br></pre></td></tr></table></figure></p>
+<p>也就是说，金额一定要超过 0.5美金。 后面重试了一把，将 amount 改成 51，也就是 0.51 美金，结果真的支付成功了。所以最低都要是 0.51 美金，才能stripe 付款。 具体可以看这个：<a href="https://stackoverflow.com/questions/35505886/stripe-checkout-is-not-working" target="_blank" rel="noopener">文档</a></p>
+<h2 id="一次操作，进行多次付款的方法"><a href="#一次操作，进行多次付款的方法" class="headerlink" title="一次操作，进行多次付款的方法"></a>一次操作，进行多次付款的方法</h2><p>stripe 一个 token(前端得到) 只能支付一次，如果一个token想要支付两次的话，那么就会报这个错误：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">You cannot <span class="keyword">use</span> <span class="title">a</span> <span class="title">Stripe</span> <span class="title">token</span> <span class="title">more</span> <span class="title">than</span> <span class="title">once</span>: <span class="title">tok_1C5Q9nAP4l9EoBkACxxauZlk</span>.</span><br></pre></td></tr></table></figure></p>
+<p>但是如果是用创建的 customer 来支付的话，就可以在程序里面同时支付多次。所以我们可以先通过这个token，直接创建一个customer，然后用这个customer来进行两次支付，一次是普通支付，一次是循环支付，这个是可以的。</p>
+<h2 id="stripe-的优惠券机制"><a href="#stripe-的优惠券机制" class="headerlink" title="stripe 的优惠券机制"></a>stripe 的优惠券机制</h2><p>stripe 可以创建优惠券： <a href="https://stripe.com/docs/subscriptions/discounts" target="_blank" rel="noopener">discount</a>, <a href="https://stripe.com/docs/api#coupons" target="_blank" rel="noopener">coupons</a>。<br>这边需要知道的一点就是：</p>
+<ul>
+<li>优惠券一旦创建成功，有 sub 或者客户使用的话，就算之前删除了，但是之前已经订阅过的订阅和用户还是照样生效。这一点跟 sub plan 一样，一旦创建成功，有用户订阅之后，就算删掉，已经存在的用户订阅还是会继续存在。</li>
+<li>普通支付是不能用优惠券的。</li>
+</ul>
+<p>具体使用，文档上已经写的很清楚了，这边不细说了</p>
+<h2 id="设置扣款失败的会在几天内尝试扣款"><a href="#设置扣款失败的会在几天内尝试扣款" class="headerlink" title="设置扣款失败的会在几天内尝试扣款"></a>设置扣款失败的会在几天内尝试扣款</h2><p>google 那边可以设置扣款失败之后，之后的重试天数，我们设置为 7 天之内，会再多次尝试扣款， stripe 也可以在后台测试：<a href="https://stripe.com/docs/subscriptions/lifecycle" target="_blank" rel="noopener">文档</a>，一般都是设置为 7 天之内。</p>
+<h2 id="试用期的最长时间"><a href="#试用期的最长时间" class="headerlink" title="试用期的最长时间"></a>试用期的最长时间</h2><p>什么叫试用期， 就是如果某一个用户是高级账号，假设今天是 6月13日， 然后这个用户是7月1日高级账号到期，这时候今天他买了stripe循环支付。这时候创建订阅的时候，就可以设置为试用期就是 30-13 = 17 天 或者就是把试用期设置为 7月1日到期。也就是虽然用户创建了一个订阅，但是到7月1日之前，都是试用期，不扣钱，只有到了7月1号，才扣钱。<br>而stripe的试用期最长是 10年。</p>
+<h2 id="最长订阅周期"><a href="#最长订阅周期" class="headerlink" title="最长订阅周期"></a>最长订阅周期</h2><p>google 和 PayPal 的最长订阅周期都是只有一年，stripe 虽然可以在创建 plan 的时候，自定义周期：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$plan = \Stripe\Plan::create(<span class="keyword">array</span>(</span><br><span class="line">  <span class="string">"name"</span> =&gt; <span class="string">"Basic Plan"</span>,</span><br><span class="line">  <span class="string">"id"</span> =&gt; <span class="string">"basic-monthly"</span>,</span><br><span class="line">  <span class="string">"interval"</span> =&gt; <span class="string">"month"</span>,</span><br><span class="line">  <span class="string">"interval_count"</span> =&gt; <span class="string">"5"</span>,</span><br><span class="line">  <span class="string">"currency"</span> =&gt; <span class="string">"usd"</span>,</span><br><span class="line">  <span class="string">"amount"</span> =&gt; <span class="number">0</span>,));</span><br></pre></td></tr></table></figure></p>
+<p>以上表示循环周期是 5个月。 按照道理说， interval 设置为 year，然后 interval_count 设置为 100， 那不就是 100 年了。<br>但是后面查了一下 api 方法，发现其实最大只允许 1年的周期 （创建的时候）。 <a href="https://stripe.com/docs/api#create_plan" target="_blank" rel="noopener">文档</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/07/19/stripe-notice/" title="stripe 支付需要注意的点 -- 持续更新">http://kebingzao.com/2019/07/19/stripe-notice/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/stripe/" rel="tag"># stripe</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/05/aws-ses-sns/" rel="next" title="AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件">
+                <i class="fa fa-chevron-left"></i> AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/24/page-replace/" rel="prev" title="实现站点同一个页面但是地址栏不同的情况">
+                实现站点同一个页面但是地址栏不同的情况 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">142</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">39</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无法加载-stripe-的-js-sdk"><span class="nav-number">2.</span> <span class="nav-text">无法加载 stripe 的 js sdk</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于-stripe-首次购买之后，-webhook-延迟的问题"><span class="nav-number">3.</span> <span class="nav-text">关于 stripe 首次购买之后， webhook 延迟的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#已经创建的plan是不能修改价钱"><span class="nav-number">4.</span> <span class="nav-text">已经创建的plan是不能修改价钱</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建循环订单的时候，可以自定义-metadata"><span class="nav-number">5.</span> <span class="nav-text">创建循环订单的时候，可以自定义 metadata</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最低支付要超过0-5美金才行"><span class="nav-number">6.</span> <span class="nav-text">最低支付要超过0.5美金才行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一次操作，进行多次付款的方法"><span class="nav-number">7.</span> <span class="nav-text">一次操作，进行多次付款的方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#stripe-的优惠券机制"><span class="nav-number">8.</span> <span class="nav-text">stripe 的优惠券机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设置扣款失败的会在几天内尝试扣款"><span class="nav-number">9.</span> <span class="nav-text">设置扣款失败的会在几天内尝试扣款</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#试用期的最长时间"><span class="nav-number">10.</span> <span class="nav-text">试用期的最长时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最长订阅周期"><span class="nav-number">11.</span> <span class="nav-text">最长订阅周期</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/07/19/stripe-notice/';
+          this.page.identifier = '2019/07/19/stripe-notice/';
+          this.page.title = 'stripe 支付需要注意的点 -- 持续更新';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

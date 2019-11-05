@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="mysql," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="问题之前在做一个连表查询的时候，就是查询某账号的折扣劵的时候，发现了一个问题：1234select flp.coupon_code, coupon.*from fee_logsleft join fee_logs_patch as flp on flp.in_order_id = fee_logs.in_order_idleft join coupon on coupon.code = flp.c">
+<meta name="keywords" content="mysql">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql 查询的时候，大小写敏感的问题">
+<meta property="og:url" content="http://kebingzao.com/2019/09/28/mysql-general-ci/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="问题之前在做一个连表查询的时候，就是查询某账号的折扣劵的时候，发现了一个问题：1234select flp.coupon_code, coupon.*from fee_logsleft join fee_logs_patch as flp on flp.in_order_id = fee_logs.in_order_idleft join coupon on coupon.code = flp.c">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/3.png">
+<meta property="og:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/4.png">
+<meta property="og:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/6.png">
+<meta property="og:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/7.png">
+<meta property="og:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/8.png">
+<meta property="og:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/9.png">
+<meta property="og:updated_time" content="2019-11-05T01:00:29.875Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql 查询的时候，大小写敏感的问题">
+<meta name="twitter:description" content="问题之前在做一个连表查询的时候，就是查询某账号的折扣劵的时候，发现了一个问题：1234select flp.coupon_code, coupon.*from fee_logsleft join fee_logs_patch as flp on flp.in_order_id = fee_logs.in_order_idleft join coupon on coupon.code = flp.c">
+<meta name="twitter:image" content="http://kebingzao.com/2019/09/28/mysql-general-ci/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/09/28/mysql-general-ci/"/>
+
+
+
+
+
+  <title>mysql 查询的时候，大小写敏感的问题 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/09/28/mysql-general-ci/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">mysql 查询的时候，大小写敏感的问题</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-28T18:29:55+08:00">
+                2019-09-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mysql遇到的小问题/" itemprop="url" rel="index">
+                    <span itemprop="name">mysql遇到的小问题</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/09/28/mysql-general-ci/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/09/28/mysql-general-ci/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/09/28/mysql-general-ci/" class="leancloud_visitors" data-flag-title="mysql 查询的时候，大小写敏感的问题">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>之前在做一个连表查询的时候，就是查询某账号的折扣劵的时候，发现了一个问题：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select flp.coupon_code, coupon.*</span><br><span class="line">from fee_logs</span><br><span class="line">left join fee_logs_patch as flp on flp.in_order_id = fee_logs.in_order_id</span><br><span class="line">left join coupon on coupon.code = flp.coupon_code</span><br></pre></td></tr></table></figure></p>
+<p>发现左联的另一半竟然查不到记录：<br><img src="/2019/09/28/mysql-general-ci/1.png" alt="1"><br><a id="more"></a><br>但是我单独用这个折扣码去查是有东西的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from coupon where code = &apos;gcma1fwwdawn3jaD&apos;;</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2019/09/28/mysql-general-ci/2.png" alt="1"><br>这时候是有数据的，而且可以看到这个字段是不区分大小写的。<br>这时候用另一个表去查折扣码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from fee_logs_patch where coupon_code = &apos;gcma1fwwdawn3jad&apos;;</span><br></pre></td></tr></table></figure></p>
+<p>发现也是有数据的，<br><img src="/2019/09/28/mysql-general-ci/3.png" alt="1"><br>这不过这时候是完全匹配。 所以我觉得有可能是 <code>fee_logs_patch</code> 这个表的 <code>coupon_code</code> 可能大小写敏感，所以我又换了一个：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from fee_logs_patch where coupon_code = &apos;gcma1fwwdawn3jaD&apos;;</span><br></pre></td></tr></table></figure></p>
+<p>果然发现查询不到数据了。 只支持完全匹配??? 而 <code>coupon</code> 表的 <code>code</code> 字段，无论是大写，还是小写，都是可以被查出来的。</p>
+<h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>后面查了一下这两个字段的差别，终于发现有一个不同：<br><code>coupon</code> 表的排序规则是 <code>utf8_general_ci</code>, <code>code</code> 字段的排序规则也是 <code>utf8_general_ci</code>：<br><img src="/2019/09/28/mysql-general-ci/4.png" alt="1"><br><img src="/2019/09/28/mysql-general-ci/5.png" alt="1"></p>
+<p>而 <code>fee_logs_patch</code> 表的排序规则是 <code>utf8_bin</code>, <code>coupon_code</code> 字段的排序规则也是 <code>utf8_bin</code>：<br><img src="/2019/09/28/mysql-general-ci/6.png" alt="1"><br><img src="/2019/09/28/mysql-general-ci/7.png" alt="1"></p>
+<p>一个是 <code>utf8_bin</code>  ，一个是 <code>utf8_general_ci</code>, 有啥差别呢？</p>
+<h2 id="编码的排序规则"><a href="#编码的排序规则" class="headerlink" title="编码的排序规则"></a>编码的排序规则</h2><p>可以看到这两个表和对应的列的字符集都是 <code>utf8</code> (事实上 <code>utf8</code> 也是不对的，应该是 <code>utf8mb4</code>, 具体看 <a href="/2019/09/27/mysql-utf8mb4/" title="如何在mysql数据库中保存 emoji 特殊字符?">如何在mysql数据库中保存 emoji 特殊字符?</a>), 但是排序规则是有差别的，差别在哪里呢？<br>mysql 有很多种排序规则，如果字符集选的是 <code>utf8</code> 的话，那么经常用的就这几个：<br>(ps: 如果选的是 <code>utf8mb4</code>， 那么下面的排序规则也是对应的，比如 <code>utf8mb4_bin</code>)</p>
+<ul>
+<li><code>utf8_bin</code>: 将字符串中的每一个字符用二进制数据存储，区分大小写, (在二进制中 ,小写字母和大写字母不相等.即 a !=A)</li>
+<li><code>utf8_general_ci</code>:  不区分大小写，ci 为 <code>case insensitive</code> 的缩写，即大小写不敏感，为<code>utf8</code> 默认编码</li>
+<li><code>utf8_general_cs</code>: 区分大小写，cs为 <code>case sensitive</code> 的缩写，即大小写敏感</li>
+<li><code>utf8_unicode_ci</code>:  跟 <code>utf8_genera_ci</code> 差不多,对中、英文来说没有实质的差别,如果你的应用有德语、法语或者俄语，请一定使用<code>utf8_unicode_ci</code></li>
+</ul>
+<p>这边总结一下：</p>
+<ol>
+<li><code>utf8_bin</code> 是区分大小写的，因为是二进制存储的， <code>a</code> 和 <code>A</code> 对应的二进制就是不一样,因此它不仅可以存字符，它还可以存二进制的内容</li>
+<li>后缀带 <code>ci</code> 就是大小写不敏感， 带 <code>cs</code> 就是大小写敏感，所以像存邮箱和用户名之类的，一般都是不区分大小写的，都要用这种来存</li>
+<li>带<code>general</code> 和带 <code>unicode</code> 其实差不多(除非有小语种)，不过从速度上来说，<code>utf8_general_ci</code> 校对速度快，但准确度稍差。<code>utf8_unicode_ci</code> 准确度高，但校对速度稍慢。</li>
+</ol>
+<h3 id="举个例子喽"><a href="#举个例子喽" class="headerlink" title="举个例子喽"></a>举个例子喽</h3><p>建三个表（第二个和第三个其实一样的）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE `t_bin` (</span><br><span class="line">`id` int(11) DEFAULT NULL,</span><br><span class="line">`name` varchar(20) DEFAULT NULL,</span><br><span class="line">UNIQUE KEY `uk_name` (`name`)</span><br><span class="line"> ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;</span><br><span class="line"></span><br><span class="line">CREATE TABLE `t_ci` (</span><br><span class="line">`id` int(11) DEFAULT NULL,</span><br><span class="line">`name` varchar(20) DEFAULT NULL,</span><br><span class="line">UNIQUE KEY `uk_name` (`name`)</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;</span><br><span class="line"></span><br><span class="line">CREATE TABLE `t_default` (</span><br><span class="line">`id` int(11) DEFAULT NULL,</span><br><span class="line">`name` varchar(20) DEFAULT NULL,</span><br><span class="line">UNIQUE KEY `uk_name` (`name`)</span><br><span class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8;</span><br></pre></td></tr></table></figure></p>
+<p>然后试着插入数据：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">//可以插入</span><br><span class="line">insert into t_bin values (1, &apos;Zach&apos;);	</span><br><span class="line">//可以插入</span><br><span class="line">insert into t_bin values (2, &apos;zach&apos;);		</span><br><span class="line"> </span><br><span class="line">//可以插入</span><br><span class="line">insert into t_ci values (1, &apos;Zach&apos;);		</span><br><span class="line">//[Err] 1062 - Duplicate entry &apos;zach&apos; for key &apos;uk_name&apos;</span><br><span class="line">insert into t_ci values (2, &apos;zach&apos;);		</span><br><span class="line"></span><br><span class="line">//可以插入</span><br><span class="line">insert into t_default values (1, &apos;Zach&apos;);		</span><br><span class="line">//[Err] 1062 - Duplicate entry &apos;zach&apos; for key &apos;uk_name&apos;</span><br><span class="line">insert into t_default values (2, &apos;zach&apos;);</span><br></pre></td></tr></table></figure></p>
+<p>最终<code>t_bin</code>表中会有两条记录，而<code>t_ci</code>和<code>t_default</code>表中，只有第一条记录。</p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>所以上述问题出现的原因，其实就是排序规则不一样， <code>code</code> 字段是 <code>utf8_general_ci</code> 所以不区分大小写，而<code>coupon_code</code> 字段的排序规则是 <code>utf8_bin</code>， 是区分大小写的。所以就会导致连表的时候，如果存储的字串不完全一样，就会匹配不上。</p>
+<h3 id="方法一：-将表和字段的COLLATE属性修改为utf8-general-ci"><a href="#方法一：-将表和字段的COLLATE属性修改为utf8-general-ci" class="headerlink" title="方法一： 将表和字段的COLLATE属性修改为utf8_general_ci"></a>方法一： 将表和字段的COLLATE属性修改为utf8_general_ci</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-- 将整个表中列的char，varchar，text等都修改字符集；</span><br><span class="line">ALTER TABLE fee_logs_patch CONVERT TO CHARACTER SET utf8 COLLATE utf8_general_ci;</span><br><span class="line"></span><br><span class="line">-- 修改表的定义的字符集</span><br><span class="line">ALTER TABLE fee_logs_patch DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;</span><br></pre></td></tr></table></figure>
+<p>这样就可以了。（事实上，库也需要改，不过我看了一下，库的字符集和排序规则已经是 <code>utf8</code> 和 <code>utf8_general_ci</code>, 所以就不需要额外调整了）。<br>不过这样就相当于数据重新写入了，可能会导致锁表，会造成堵塞，所以数据大的表，要谨慎操作！！</p>
+<h3 id="从sql上调整"><a href="#从sql上调整" class="headerlink" title="从sql上调整"></a>从sql上调整</h3><p>加上 <code>convert</code> 转换成 <code>utf8</code> 就行了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from fee_logs_patch where CONVERT(coupon_code using utf8) = &apos;gcma1fwwdawn3jaD&apos;;</span><br></pre></td></tr></table></figure></p>
+<p>这样子就可以查询出来了<br><img src="/2019/09/28/mysql-general-ci/8.png" alt="1"><br>连表也是一样的操作：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">select flp.coupon_code, coupon.*</span><br><span class="line">from fee_logs</span><br><span class="line">left join fee_logs_patch as flp on flp.in_order_id = fee_logs.in_order_id</span><br><span class="line">left join coupon on coupon.code = CONVERT(flp.coupon_code using utf8)</span><br><span class="line">where fee_logs.account_id = &apos;181544914&apos; and fee_logs.fee_mode_id &gt; 200000;</span><br></pre></td></tr></table></figure></p>
+<p>这样也是可以查到的</p>
+<h2 id="改完之后的新问题"><a href="#改完之后的新问题" class="headerlink" title="改完之后的新问题"></a>改完之后的新问题</h2><p>事实上，我们是通过第一种的方式来调整的，就是将 表和列 的排序方式改成 <code>utf8_general_ci</code>， 但是后面发现 DBA 有报警了，发现了一个慢查询：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT A.id </span><br><span class="line">FROM  fee_logs_patch AS A </span><br><span class="line">INNER JOIN fee_logs AS C ON C.in_order_id = A.in_order_id and C.status = 1 </span><br><span class="line">WHERE A.account_id = &apos;24193341&apos; </span><br><span class="line">AND A.is_use = 0</span><br><span class="line">ORDER BY  A.start_time;</span><br></pre></td></tr></table></figure></p>
+<p>就会变成这个 sql 有问题了， 原因就是 <code>fee_logs_patch</code> 表中的 <code>in_order_id</code> 是 <code>utf8_general_ci</code> 存的。 而 <code>fee_logs</code> 表中的 <code>in_order_id</code> 是 <code>utf8_bin</code> 存储的，而表的字符集也是不一样的，<code>fee_logs</code> 表的字符集也是<code>utf8_bin</code>。 因为存储的方式不一样，所以可能会导致连表的时候，查询的复杂度会上升，而且非常的耗 cpu 和 耗时间，<br><img src="/2019/09/28/mysql-general-ci/9.png" alt="1"><br>考虑到可能对线上业务造成影响，所以就先回滚成原先的排序方式了。 果然改回之后，就不会有慢查询了。 所以就只能先用 sql convert 的方式来兼容了。</p>
+<h2 id="备注"><a href="#备注" class="headerlink" title="备注"></a>备注</h2><p>其实最优方式，就是将 库，表，列的字符集全部设置为 <code>utf8mb4</code>, 而排序方式都设置为 <code>utf8mb4_general_ci</code>。 除非你有存放二进制的需求。<br>(之前建表的时候，用默认的 <code>utf8</code> 来创建，也是太年轻了，到现在业务复杂度太大了，反而很难去调整了。)</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/09/28/mysql-general-ci/" title="mysql 查询的时候，大小写敏感的问题">http://kebingzao.com/2019/09/28/mysql-general-ci/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/mysql/" rel="tag"># mysql</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/28/mysql-update-date/" rel="next" title="mysql 设置 update 字段，每次有更新的时候，自动更新该字段">
+                <i class="fa fa-chevron-left"></i> mysql 设置 update 字段，每次有更新的时候，自动更新该字段
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">146</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原因"><span class="nav-number">2.</span> <span class="nav-text">原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编码的排序规则"><span class="nav-number">3.</span> <span class="nav-text">编码的排序规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#举个例子喽"><span class="nav-number">3.1.</span> <span class="nav-text">举个例子喽</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决"><span class="nav-number">4.</span> <span class="nav-text">解决</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#方法一：-将表和字段的COLLATE属性修改为utf8-general-ci"><span class="nav-number">4.1.</span> <span class="nav-text">方法一： 将表和字段的COLLATE属性修改为utf8_general_ci</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从sql上调整"><span class="nav-number">4.2.</span> <span class="nav-text">从sql上调整</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#改完之后的新问题"><span class="nav-number">5.</span> <span class="nav-text">改完之后的新问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备注"><span class="nav-number">6.</span> <span class="nav-text">备注</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/09/28/mysql-general-ci/';
+          this.page.identifier = '2019/09/28/mysql-general-ci/';
+          this.page.title = 'mysql 查询的时候，大小写敏感的问题';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

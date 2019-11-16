@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前段时间有收到一封来自国外安全公司的关于安全的预警邮件，大致的意思就是 他发现我们站点的 忘记密码，发送验证邮件 的功能并没有做防刷限制，导致他可以用burp suite 之类的web安全工具来批量刷接口，或者是自己写脚本来批量刷。 这样就会导致我们发送大量的垃圾邮件，这样子不仅会打扰我们的用户，而且还会导致我们发邮件的费用增加，更严重的可能会导致我们的 SES 账号被 AWS 封掉，具体之前">
+<meta name="keywords" content="security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用&quot;Google reCaptcha&quot;来防止站点接口被刷">
+<meta property="og:url" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前段时间有收到一封来自国外安全公司的关于安全的预警邮件，大致的意思就是 他发现我们站点的 忘记密码，发送验证邮件 的功能并没有做防刷限制，导致他可以用burp suite 之类的web安全工具来批量刷接口，或者是自己写脚本来批量刷。 这样就会导致我们发送大量的垃圾邮件，这样子不仅会打扰我们的用户，而且还会导致我们发邮件的费用增加，更严重的可能会导致我们的 SES 账号被 AWS 封掉，具体之前">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/rev1.jpg">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/rev2.jpg">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/rev3.jpg">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/revinvisible.jpg">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/revchanllenge.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/rev3.jpg">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/revsetting.jpg">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/rev_finished_setup.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/rev_error_codes.png">
+<meta property="og:updated_time" content="2019-11-16T12:54:41.164Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用&quot;Google reCaptcha&quot;来防止站点接口被刷">
+<meta name="twitter:description" content="前言前段时间有收到一封来自国外安全公司的关于安全的预警邮件，大致的意思就是 他发现我们站点的 忘记密码，发送验证邮件 的功能并没有做防刷限制，导致他可以用burp suite 之类的web安全工具来批量刷接口，或者是自己写脚本来批量刷。 这样就会导致我们发送大量的垃圾邮件，这样子不仅会打扰我们的用户，而且还会导致我们发邮件的费用增加，更严重的可能会导致我们的 SES 账号被 AWS 封掉，具体之前">
+<meta name="twitter:image" content="http://kebingzao.com/2019/11/15/use-google-recaptcha/rev1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/11/15/use-google-recaptcha/"/>
+
+
+
+
+
+  <title>使用"Google reCaptcha"来防止站点接口被刷 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/11/15/use-google-recaptcha/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用"Google reCaptcha"来防止站点接口被刷</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-15T15:17:33+08:00">
+                2019-11-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/15/use-google-recaptcha/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/11/15/use-google-recaptcha/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/11/15/use-google-recaptcha/" class="leancloud_visitors" data-flag-title="使用"Google reCaptcha"来防止站点接口被刷">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有收到一封来自国外安全公司的关于安全的预警邮件，大致的意思就是 他发现我们站点的 <strong>忘记密码，发送验证邮件</strong> 的功能并没有做防刷限制，导致他可以用<strong>burp suite</strong> 之类的web安全工具来批量刷接口，或者是自己写脚本来批量刷。 这样就会导致我们发送大量的垃圾邮件，这样子不仅会打扰我们的用户，而且还会导致我们发邮件的费用增加，更严重的可能会导致我们的 SES 账号被 AWS 封掉，具体之前有出现过：<a href="/2019/05/29/aws-ses-block-again/" title="又记一次AWS SES 邮件服务账号被禁的情况">又记一次AWS SES 邮件服务账号被禁的情况</a></p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>因为这个接口的特殊性(它不需要用户登录，所以也没有所谓的 cookie，session 验证，更没有 jwt token 之类的身份验证), 所以在排除掉 身份验证之后，只能通过其他的方式来处理：<br><a id="more"></a></p>
+<h3 id="1-在网关那边加上防刷接口"><a href="#1-在网关那边加上防刷接口" class="headerlink" title="1.在网关那边加上防刷接口"></a>1.在网关那边加上防刷接口</h3><p>首先要考虑的是加上接口防刷验证，比如 <code>nginx</code> 网关那边加上针对这个接口的防刷限制，比如一分钟之内，同一个 ip 访问超过 10 次的话，那么就直接返回 <code>403</code>。 同时将这个 ip 加入到黑名单， 24 小时之后解禁。</p>
+<h3 id="2-加上验证码"><a href="#2-加上验证码" class="headerlink" title="2. 加上验证码"></a>2. 加上验证码</h3><p>原则上来说，ip 防刷机制是可以解决 90% 的刷接口的问题的，但是有时候会误杀，比如普通用户的多次输错邮箱之类的多次尝试，可能就会因为尝试太多，而被我们误杀。还有一种更普遍误杀的情况就是，很多时候，某一个区域(比如学校，公司)的出口 ip 其实是同一个，如果在这个区域内，同时有多个使用者一起使用这个功能的话，那么就会误杀了。 所以更友好的方式，就是加上<code>验证码</code>, 用户在提交请求的时候，要加上验证码，服务端那边才会通过请求。 这样就不会有误杀问题，而且也不怕被刷接口。但是验证码有以下问题：</p>
+<ul>
+<li>验证码体验会比较不好，毕竟需要用户识别并输入</li>
+<li>验证码机制如果不够强，也很容易被攻破，尤其是现在图片识别机器人和语音识别机器人其实很厉害了，差的验证码机制很容易就被破了，形同虚设</li>
+</ul>
+<p>所以先排除自己做的可能性(无论是人力还是时间成本，性价比都很低)，考虑了一下市面上成熟的验证码产品，最后选择了 <a href="https://www.google.com/recaptcha/intro/v3.html" target="_blank" rel="noopener">Google reCaptcha</a>, 接下来我们来了解一下。</p>
+<h2 id="Google-reCaptcha"><a href="#Google-reCaptcha" class="headerlink" title="Google reCaptcha"></a>Google reCaptcha</h2><p>国外很多网站都用这个这个服务，开发文档：<a href="https://developers.google.com/recaptcha/intro" target="_blank" rel="noopener">recaptcha intro</a></p>
+<h3 id="1-Google-reCaptcha-介绍"><a href="#1-Google-reCaptcha-介绍" class="headerlink" title="1 Google reCaptcha 介绍"></a>1 Google reCaptcha 介绍</h3><p>简单的来说，<code>google reCaptcha</code> 目前有3个版本：</p>
+<h4 id="reCaptcha-v1"><a href="#reCaptcha-v1" class="headerlink" title="reCaptcha v1"></a>reCaptcha v1</h4><p>图形验证码，需要用户输入图片里的文字 (目前已经是 shutdown 状态，无法创建该类型 reCaptcha)  </p>
+<p><img src="/2019/11/15/use-google-recaptcha/rev1.jpg" alt=""> </p>
+<h4 id="reCaptcha-v2"><a href="#reCaptcha-v2" class="headerlink" title="reCaptcha v2"></a>reCaptcha v2</h4><p>如果我们选择使用 <code>reCaptcha v2</code>, 我们可以为我们的站点创建以下 <code>1</code>、<code>2</code>、<code>3</code> 这3种验证类型中的其中一种。当 google 认为你可能是一个 robot 的时候，会出现 <code>4</code>.的情况，要求你进行进一步验证。</p>
+<h5 id="1-checkbox"><a href="#1-checkbox" class="headerlink" title="1 checkbox"></a>1 checkbox</h5><p>需要用户勾选 <code>I&#39;m not robot</code> 复选框  </p>
+<p><img src="/2019/11/15/use-google-recaptcha/rev2.jpg" alt=""> </p>
+<h5 id="2-invisible"><a href="#2-invisible" class="headerlink" title="2 invisible"></a>2 invisible</h5><p>用户无需做任何操作。前端需要使用 google 提供的 js api, 把相关事件绑定到 “提交” 按钮（或其他事件）上。相当于原本的 <code>&quot;i&#39;m not robot&quot;</code> 复选框勾选事件可以替换成自定义的 <code>onSubmit</code> 或者其他事件。</p>
+<p><img src="/2019/11/15/use-google-recaptcha/rev3.jpg" alt=""> </p>
+<p>invisible 下的 <code>image challenge</code>  : </p>
+<p><img src="/2019/11/15/use-google-recaptcha/revinvisible.jpg" alt=""> </p>
+<p>这时候google 那边会有一个蒙层，上面用一个 <code>iframe</code> 嵌入进入，不会影响到我们原来的 ui 元素</p>
+<h5 id="3-reCAPTCHA-Android"><a href="#3-reCAPTCHA-Android" class="headerlink" title="3 reCAPTCHA Android"></a>3 reCAPTCHA Android</h5><p>安卓设备中的 reCaptcha 验证，这块还没研究。后面如果有应用，再补上</p>
+<h5 id="4-进一步验证：image-challenge"><a href="#4-进一步验证：image-challenge" class="headerlink" title="4 进一步验证：image challenge"></a>4 进一步验证：image challenge</h5><p><code>v2 reCaptcha</code> 在以下几种情况，会要求进行进一步验证(v3不会)：</p>
+<ul>
+<li>过于频繁：一定时间内同一个 ip 频繁重试这个 <code>i&#39;m not a robot</code> （在 v2 invisible 下，频繁触发对应事件）。</li>
+<li><code>recaptcha js</code> 初始化之后很久才去进行 recaptcha 验证。</li>
+<li>在浏览器种勾选 <code>阻止第三方 cookie</code></li>
+<li>一些异常鼠标或者滚动条行为, 比如没有监测到鼠标的 <code>movement</code> 就点击了勾选复选框（不知道怎么重现）</li>
+</ul>
+<p><img src="/2019/11/15/use-google-recaptcha/revchanllenge.png" alt="">  </p>
+<p>参考：</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/30524505/recaptcha-always-asking-for-extra-verification" target="_blank" rel="noopener">ReCaptcha always asking for extra verification?
+</a></li>
+<li><a href="https://stackoverflow.com/questions/45754869/way-to-skip-recaptcha-images-challenge" target="_blank" rel="noopener">Way to skip reCAPTCHA images challenge
+</a> </li>
+<li><a href="https://www.wired.com/2014/12/google-one-click-recaptcha/" target="_blank" rel="noopener">google-one-click-recaptcha</a></li>
+</ul>
+<h4 id="reCaptcha-v3"><a href="#reCaptcha-v3" class="headerlink" title="reCaptcha v3"></a>reCaptcha v3</h4><p>无需用户进行任何操作。根据用户的各种行为以及在浏览器上的各种事件，评出一个 0.0 ~ 1.0 之间分数(score)，待服务端请求 api 去验证的时候把 score 交给服务端，至此 reCaptcha 的工作就完成了。服务端根据得到的 score 结合具体场景，自行处理后面的业务。</p>
+<p><strong>v3 不会出现 image challenge</strong>。</p>
+<p><img src="/2019/11/15/use-google-recaptcha/rev3.jpg" alt=""> </p>
+<h3 id="2-reCaptcha-接入须知"><a href="#2-reCaptcha-接入须知" class="headerlink" title="2 reCaptcha 接入须知"></a>2 reCaptcha 接入须知</h3><h4 id="接入建议"><a href="#接入建议" class="headerlink" title="接入建议"></a>接入建议</h4><p>建议使用 <code>v2</code> ，因为 <code>v3</code> 存在已知并且未 close 的问题：</p>
+<ul>
+<li><a href="https://github.com/google/recaptcha/issues/235" target="_blank" rel="noopener">https://github.com/google/recaptcha/issues/235</a></li>
+<li><a href="https://github.com/google/recaptcha/issues/248" target="_blank" rel="noopener">https://github.com/google/recaptcha/issues/248</a></li>
+</ul>
+<p>有用户反馈突然发生所有的 score 都变成 0.1 分的情况(包括真实用户测试)。我在自测的时候出现了这种情况：在 chrome 下验证总是得到 0.9 分，但是在 safari 下得总是得到 0.1 分。 </p>
+<h4 id="浏览器支持情况"><a href="#浏览器支持情况" class="headerlink" title="浏览器支持情况"></a>浏览器支持情况</h4><p>基本上现代的浏览器都支持</p>
+<p>详情见  <a href="https://support.google.com/recaptcha#6223828" target="_blank" rel="noopener">https://support.google.com/recaptcha#6223828</a> 。</p>
+<h4 id="国内用户访问问题"><a href="#国内用户访问问题" class="headerlink" title="国内用户访问问题"></a>国内用户访问问题</h4><p>由于 <code>reCaptcha</code> 接入需要前端载入 google.com 域名下的 js 文件，所以国内用户可能无法正常加载 reCaptcha。 但是 google 提供了<code>Globally accessible</code> 的域名： <a href="http://www.recaptcha.net" target="_blank" rel="noopener">www.recaptcha.net</a> ，只要把对应的资源 url 中的 <a href="http://www.google.com" target="_blank" rel="noopener">www.google.com</a> 换成 <a href="http://www.recaptcha.net" target="_blank" rel="noopener">www.recaptcha.net</a> 就可以使用 <code>reCapatcha</code> 的全部功能。</p>
+<p>参考：<a href="https://developers.google.com/recaptcha/docs/faq" target="_blank" rel="noopener">reCaptcha faq</a> </p>
+<h4 id="安全设置问题"><a href="#安全设置问题" class="headerlink" title="安全设置问题"></a>安全设置问题</h4><p><img src="/2019/11/15/use-google-recaptcha/revsetting.jpg" alt=""> </p>
+<p>安全偏好设置有 3 个可选选项，不同选项不知道具体有哪些区别，以及对用户的使用会有哪些影响。目前暂时没有找到相关资料，自测起来好像也没有什么区别。<br>不过后面在多次测试过程中，在接入 <code>google recaptcha</code> 的时候，发现选用介于 <code>用户使用最方便</code> 和 <code>最安全</code> 中间的这个等级，会导致 <code>image challenge</code> 频繁出现(基本每次都出现)。 所以我们选用 <code>用户使用最方便</code> 这个等级。</p>
+<h4 id="已知问题"><a href="#已知问题" class="headerlink" title="已知问题"></a>已知问题</h4><ul>
+<li><a href="https://support.google.com/recaptcha" target="_blank" rel="noopener">IE 下可能需要用户手动设置处理无法显示 reCaptcha 问题</a></li>
+</ul>
+<h3 id="3-开发流程"><a href="#3-开发流程" class="headerlink" title="3 开发流程"></a>3 开发流程</h3><h4 id="创建-reCaptcha"><a href="#创建-reCaptcha" class="headerlink" title="创建 reCaptcha"></a>创建 reCaptcha</h4><p>在 <a href="https://www.google.com/recaptcha/admin/create" target="_blank" rel="noopener">https://www.google.com/recaptcha/admin/create</a> 页面，创建一个新网站。 根据提示填写，我们选用 reCaptcha 第2版的 <code>隐形reCAPTCHA徽章</code>。<br>标签随便填一个好认的，然后域名填写你要验证的前端站点域名。创建完成后，转到“设置”，在配置中，完善配置。</p>
+<ul>
+<li>将 “网站密钥” 和 ”密钥“ 发送给前后端开发者。</li>
+<li>安全偏好设置，根据需求来选择，目前我们应该选 “用户使用最方便“ 等级。</li>
+<li>切记勾选 “验证 erCAPTCHA 解决方案来源”</li>
+</ul>
+<p>最后创建成功之后会生成：</p>
+<ol>
+<li>site key (用于前端嵌入页面)  </li>
+<li>secret key (用于服务端调用 <code>recaptcha api</code> 验证)</li>
+</ol>
+<p><img src="/2019/11/15/use-google-recaptcha/1.png" alt=""> </p>
+<p><img src="/2019/11/15/use-google-recaptcha/rev_finished_setup.png" alt=""></p>
+<p><img src="/2019/11/15/use-google-recaptcha/2.png" alt=""> </p>
+<p>所以虽然有填写要验证的域名，但是其实并不需要去验证这个域名是不是你持有的，因为有成套的 <code>key</code> 会验证。如果前后端的 <code>key</code> 不匹配，那么就会验证失败。</p>
+<h4 id="前端接入"><a href="#前端接入" class="headerlink" title="前端接入"></a>前端接入</h4><p>前端根据文档接入 reCaptcha 之后，在提交请求的时候会带上一个 <code>g-recaptcha-response</code> 参数。见 <a href="https://developers.google.com/recaptcha/docs/display" target="_blank" rel="noopener">reCaptcha 接入文档</a>。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>reCAPTCHA demo: Simple page<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://www.google.com/recaptcha/api.js"</span> <span class="attr">async</span> <span class="attr">defer</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">form</span> <span class="attr">action</span>=<span class="string">"?"</span> <span class="attr">method</span>=<span class="string">"POST"</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"g-recaptcha"</span> <span class="attr">data-sitekey</span>=<span class="string">"your_site_key"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">br</span>/&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">value</span>=<span class="string">"Submit"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>当然这个是最简单的实例，很多时候我们并不会在 html 的页面加载，而是另一种异步加载，比如真实使用中，我们的代码如下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">form</span> <span class="attr">id</span>=<span class="string">"form_resend"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">'recaptcha'</span> <span class="attr">class</span>=<span class="string">"g-recaptcha"</span> <span class="attr">data-sitekey</span>=<span class="string">""</span> <span class="attr">data-callback</span>=<span class="string">"grecaptchaCallback"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">data-size</span>=<span class="string">"invisible"</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">label</span> <span class="attr">for</span>=<span class="string">"email"</span>&gt;</span>请输入您的邮箱，我们将会发送一封重置密码的邮件到该邮箱<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">input</span> <span class="attr">id</span>=<span class="string">"email"</span> <span class="attr">type</span>=<span class="string">"email"</span> <span class="attr">name</span>=<span class="string">"mail"</span> <span class="attr">placeholder</span>=<span class="string">"邮箱"</span> <span class="attr">autocomplete</span>=<span class="string">"off"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> <span class="attr">id</span>=<span class="string">"submit"</span> <span class="attr">class</span>=<span class="string">"button-primary"</span> <span class="attr">name</span>=<span class="string">"submit"</span> <span class="attr">value</span>=<span class="string">"submit"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">type</span>=<span class="string">"submit"</span>&gt;</span>发送邮件<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>然后初始化的时候，在 js 代码里面进行加载：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="string">'#recaptcha'</span>).attr(<span class="string">'data-sitekey'</span>, <span class="string">"xxxxxxxxxxxxxxxxxxxx"</span>)</span><br><span class="line"><span class="built_in">window</span>.grecaptchaCallback = <span class="function"><span class="keyword">function</span>(<span class="params">token</span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 发送给服务端</span></span><br><span class="line">    self.server.sendResetpwMail(&#123;</span><br><span class="line">        mail: $(<span class="string">"#mail"</span>).val().trim(),</span><br><span class="line">        g_token:token</span><br><span class="line">    &#125;).done(<span class="function"><span class="keyword">function</span> (<span class="params">resp</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// success</span></span><br><span class="line">    &#125;).fail(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="comment">// fail</span></span><br><span class="line">    &#125;).always(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 重置状态</span></span><br><span class="line">        grecaptcha.reset();</span><br><span class="line">        <span class="comment">// do something tip</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">var</span> script = <span class="built_in">document</span>.createElement(<span class="string">"script"</span>);</span><br><span class="line">script.type = <span class="string">"text/javascript"</span>;</span><br><span class="line">script.src = <span class="string">"https://www.recaptcha.net/recaptcha/api.js"</span>;</span><br><span class="line">script.async = <span class="string">'async'</span>;</span><br><span class="line">script.defer = <span class="string">'defer'</span>;</span><br><span class="line"><span class="built_in">document</span>.body.appendChild(script);</span><br></pre></td></tr></table></figure></p>
+<p>这样子逻辑就好了，接下来就是绑定 <code>form</code> 的 <code>submit</code> 事件，然后触发 <code>grecaptcha.execute()</code> 即可，这时候如果验证通过的话，就会触发<code>grecaptchaCallback</code> 这个全局对象，然后把 <code>token</code> 传给前端，然后前端再连同 <code>token</code> 和 <code>key</code>，一起传给服务端进行校验。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">grecaptchaExecute:<span class="function"><span class="keyword">function</span>(<span class="params">e</span>)</span>&#123;</span><br><span class="line">    e.preventDefault();</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">this</span>.validEmail()) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    grecaptcha.reset();</span><br><span class="line">    grecaptcha.execute();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="服务端验证"><a href="#服务端验证" class="headerlink" title="服务端验证"></a>服务端验证</h4><p>服务端接受前端请求中的 <code>g-recaptcha-response</code> 参数，然后调用 reCaptcha 的验证接口，根据验证接口返回值判断验证是否通过。</p>
+<p>如果在创建 <code>reCaptcha</code> 时没有勾选 <code>验证 reCAPTCHA 解决方案来源</code>，任何人都可以从你站点的 html 表单或者 js 里拿到 site key ，来嵌入到自己的网站(hack.com) 然后自己提交，并得到正确的 <code>g-recaptcha-response</code>。然后用得到的 response token 去你的接口进行伪造提交。如果服务端这时候去调用 reCaptcha 验证接口，返回的结果是通过的。解决方式为服务端不仅要验证“是否通过”，还要验证 “来源”。</p>
+<p>如果在创建 <code>reCaptcha</code> 时勾选了 <code>验证 reCAPTCHA 解决方案来源</code>，攻击者仍然可以拿到我们网站 site key 并得到正确 <code>g-recaptcha-response</code>，然后提交到我们的服务端。只是服务端在调用 reCaptcha 接口时会直接判断为不通过，返回 <code>incorrect-captcha-sol</code>。</p>
+<p>见 <a href="https://developers.google.com/recaptcha/docs/verify" target="_blank" rel="noopener">服务端验证</a>。 </p>
+<p>具体的代码为:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 来自官网请求，则进行 google recaptcha token 验证。 若校验失败，则直接结束请求。</span></span><br><span class="line">$gtoken = Request::getParam(<span class="string">'g_token'</span>);</span><br><span class="line">$isGTokenValid = Request::checkGoogleRecaptcha($gtoken);</span><br><span class="line"><span class="keyword">if</span> (! $isGTokenValid) &#123;</span><br><span class="line">    LogService::logWarning(<span class="string">"mail : $mail, gtoken invalid : $gtoken"</span>);</span><br><span class="line">    Yii::$app-&gt;end();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后进行 token 的校验:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 发送一个 post 请求并返回结果</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> $url</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> array $formData 表单格式</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> int $timeout</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> bool|string</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">httpPost</span><span class="params">($url, $formData = [], $timeout = <span class="number">5</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    LogService::logInfo(<span class="string">"Guzzle Request Post Url : $url"</span>);</span><br><span class="line">    $client = <span class="keyword">new</span> Client([<span class="string">'timeout'</span> =&gt; $timeout]);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        $response = $client-&gt;request(<span class="string">'POST'</span>, $url, [</span><br><span class="line">            <span class="string">'form_params'</span> =&gt; $formData,</span><br><span class="line">        ]);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (\<span class="keyword">Exception</span> $e) &#123;</span><br><span class="line">        LogService::logError(<span class="string">"Guzzle Exception : $url , "</span> . $e-&gt;getMessage());</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> $response-&gt;getBody()-&gt;getContents();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 校验 google recaptcha token (该方法目前仅支持 v2 recaptcha)</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> $token</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> bool</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">checkGoogleRecaptcha</span><span class="params">($token = <span class="string">''</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    $formData = [</span><br><span class="line">        <span class="string">'secret'</span> =&gt; yiicfg(<span class="string">'googleRecaptchaSecretKey'</span>),</span><br><span class="line">        <span class="string">'response'</span> =&gt; $token,</span><br><span class="line">    ];</span><br><span class="line"></span><br><span class="line">    $resp = Request::httpPost(yiicfg(<span class="string">'googleRecaptchaApiUrl'</span>), $formData);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果请求 recaptcha api 异常，则本次判校验为通过</span></span><br><span class="line">    <span class="keyword">if</span> ($resp === <span class="keyword">false</span> || is_string($resp) === <span class="keyword">false</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    $jsonData = json_decode($resp, <span class="keyword">true</span>);</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">isset</span>($jsonData[<span class="string">'success'</span>]) &amp;&amp; $jsonData[<span class="string">'success'</span>] == <span class="keyword">false</span> ) &#123;</span><br><span class="line">        $errcode = <span class="keyword">isset</span>($jsonData[<span class="string">'error-codes'</span>]) ? $jsonData[<span class="string">'error-codes'</span>] : [];</span><br><span class="line">        LogService::logWarning(<span class="string">"gtoken invalid : $token, error : "</span> . json_encode($errcode));</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样子服务端的校验就完成了。<br>google 返回的验证错误码,如下图：  </p>
+<p><img src="/2019/11/15/use-google-recaptcha/rev_error_codes.png" alt=""></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实对于大部分的正常用户来说，基本上就是不需要强制的图片验证码，所以使用体验几乎跟之前没有差别，只有刷接口或者是频繁操作页面的使用者，这时候 google 会判断是否需要显示图片验证码。</p>
+<p>最后感谢新隆同学，这里面的很多细节调研都是他去处理和整理的，所以才有这篇文章的产出。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/11/15/use-google-recaptcha/" title="使用"Google reCaptcha"来防止站点接口被刷">http://kebingzao.com/2019/11/15/use-google-recaptcha/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/28/mysql-general-ci/" rel="next" title="mysql 查询的时候，大小写敏感的问题">
+                <i class="fa fa-chevron-left"></i> mysql 查询的时候，大小写敏感的问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">147</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决"><span class="nav-number">2.</span> <span class="nav-text">解决</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-在网关那边加上防刷接口"><span class="nav-number">2.1.</span> <span class="nav-text">1.在网关那边加上防刷接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-加上验证码"><span class="nav-number">2.2.</span> <span class="nav-text">2. 加上验证码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Google-reCaptcha"><span class="nav-number">3.</span> <span class="nav-text">Google reCaptcha</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Google-reCaptcha-介绍"><span class="nav-number">3.1.</span> <span class="nav-text">1 Google reCaptcha 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#reCaptcha-v1"><span class="nav-number">3.1.1.</span> <span class="nav-text">reCaptcha v1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#reCaptcha-v2"><span class="nav-number">3.1.2.</span> <span class="nav-text">reCaptcha v2</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-checkbox"><span class="nav-number">3.1.2.1.</span> <span class="nav-text">1 checkbox</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-invisible"><span class="nav-number">3.1.2.2.</span> <span class="nav-text">2 invisible</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-reCAPTCHA-Android"><span class="nav-number">3.1.2.3.</span> <span class="nav-text">3 reCAPTCHA Android</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-进一步验证：image-challenge"><span class="nav-number">3.1.2.4.</span> <span class="nav-text">4 进一步验证：image challenge</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#reCaptcha-v3"><span class="nav-number">3.1.3.</span> <span class="nav-text">reCaptcha v3</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-reCaptcha-接入须知"><span class="nav-number">3.2.</span> <span class="nav-text">2 reCaptcha 接入须知</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#接入建议"><span class="nav-number">3.2.1.</span> <span class="nav-text">接入建议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#浏览器支持情况"><span class="nav-number">3.2.2.</span> <span class="nav-text">浏览器支持情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#国内用户访问问题"><span class="nav-number">3.2.3.</span> <span class="nav-text">国内用户访问问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安全设置问题"><span class="nav-number">3.2.4.</span> <span class="nav-text">安全设置问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#已知问题"><span class="nav-number">3.2.5.</span> <span class="nav-text">已知问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-开发流程"><span class="nav-number">3.3.</span> <span class="nav-text">3 开发流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建-reCaptcha"><span class="nav-number">3.3.1.</span> <span class="nav-text">创建 reCaptcha</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#前端接入"><span class="nav-number">3.3.2.</span> <span class="nav-text">前端接入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务端验证"><span class="nav-number">3.3.3.</span> <span class="nav-text">服务端验证</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/11/15/use-google-recaptcha/';
+          this.page.identifier = '2019/11/15/use-google-recaptcha/';
+          this.page.title = '使用\"Google reCaptcha\"来防止站点接口被刷';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

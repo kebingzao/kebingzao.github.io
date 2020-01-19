@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言UI组件的一个很重要的功能，就是允许可以定制化主题。 而且这也是为啥写组件的时候，要把对应组件的 scss 样式抽出来，不让其打包到 air-ui.common.js 的原因，这个原因就跟语言包为啥也要抽出来，不打包进去的原因。因为这样会增加 air-ui.common.js 的体积，而且我们要使用定制化主题的话，或者使用其他语种的，原有的打进去的默认主题和默认语种，就都没有用了。 所以这也是">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建vue组件 air-ui (15) -- 主题定制">
+<meta property="og:url" content="http://kebingzao.com/2020/01/11/air-ui-15/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言UI组件的一个很重要的功能，就是允许可以定制化主题。 而且这也是为啥写组件的时候，要把对应组件的 scss 样式抽出来，不让其打包到 air-ui.common.js 的原因，这个原因就跟语言包为啥也要抽出来，不打包进去的原因。因为这样会增加 air-ui.common.js 的体积，而且我们要使用定制化主题的话，或者使用其他语种的，原有的打进去的默认主题和默认语种，就都没有用了。 所以这也是">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/8.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/9.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/10.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/11.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/11/air-ui-15/12.png">
+<meta property="og:updated_time" content="2020-01-19T13:31:29.068Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自建vue组件 air-ui (15) -- 主题定制">
+<meta name="twitter:description" content="前言UI组件的一个很重要的功能，就是允许可以定制化主题。 而且这也是为啥写组件的时候，要把对应组件的 scss 样式抽出来，不让其打包到 air-ui.common.js 的原因，这个原因就跟语言包为啥也要抽出来，不打包进去的原因。因为这样会增加 air-ui.common.js 的体积，而且我们要使用定制化主题的话，或者使用其他语种的，原有的打进去的默认主题和默认语种，就都没有用了。 所以这也是">
+<meta name="twitter:image" content="http://kebingzao.com/2020/01/11/air-ui-15/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/01/11/air-ui-15/"/>
+
+
+
+
+
+  <title>自建vue组件 air-ui (15) -- 主题定制 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/01/11/air-ui-15/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">自建vue组件 air-ui (15) -- 主题定制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-11T16:42:33+08:00">
+                2020-01-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/自建vue组件-air-ui/" itemprop="url" rel="index">
+                    <span itemprop="name">自建vue组件 air-ui</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/01/11/air-ui-15/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/01/11/air-ui-15/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/01/11/air-ui-15/" class="leancloud_visitors" data-flag-title="自建vue组件 air-ui (15) -- 主题定制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>UI组件的一个很重要的功能，就是允许可以定制化主题。 而且这也是为啥写组件的时候，要把对应组件的 scss 样式抽出来，不让其打包到 <code>air-ui.common.js</code> 的原因，这个原因就跟语言包为啥也要抽出来，不打包进去的原因。因为这样会增加 <code>air-ui.common.js</code> 的体积，而且我们要使用定制化主题的话，或者使用其他语种的，原有的打进去的默认主题和默认语种，就都没有用了。 所以这也是为啥当我们引入 <code>air-ui.common.js</code> 的时候，也要同时引用 css 文件的原因，因为 <code>air-ui.common.js</code> 并没有包含样式。</p>
+<h2 id="var-scss"><a href="#var-scss" class="headerlink" title="var.scss"></a>var.scss</h2><p>为了更好的提供组件主题定制，我们规定所有可定制化的参数，全部写在 <code>var.scss</code>, 也就是说，假设我新做了一个组件，叫 <code>dropdown</code>, 并且我希望他有几个样式可以被定制化，那么就可以把参数写在 <code>var.scss</code> 文件里面 (这个文件不涉及到具体的 class 样式，全部都是参数), 那么就可以在这个文件加上以下参数：<br><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$--dropdown-menu-box-shadow</span>: xxx !default;</span><br><span class="line"><span class="variable">$--dropdown-menuItem-hover-fill</span>: xxx !default;</span><br><span class="line"><span class="variable">$--dropdown-menuItem-hover-color</span>: xxx !default;</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>然后参数定义好了。就可以在 <code>dropdown.scss</code> 中， <code>import</code> 这个文件，然后引用这些参数：<br><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">@<span class="keyword">import</span> <span class="string">"common/var"</span>;</span><br><span class="line">@<span class="keyword">include</span> b(dropdown-menu) &#123;</span><br><span class="line">  <span class="attribute">position</span>: absolute;</span><br><span class="line">  <span class="attribute">top</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">left</span>: <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">z-index</span>: <span class="number">10</span>;</span><br><span class="line">  <span class="attribute">padding</span>: <span class="number">10px</span> <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">margin</span>: <span class="number">5px</span> <span class="number">0</span>;</span><br><span class="line">  <span class="attribute">background-color</span>: <span class="variable">$--color-white</span>;</span><br><span class="line">  <span class="attribute">border</span>: <span class="number">1px</span> solid <span class="variable">$--border-color-lighter</span>;</span><br><span class="line">  <span class="attribute">border-radius</span>: <span class="variable">$--border-radius-base</span>;</span><br><span class="line">  <span class="attribute">box-shadow</span>: <span class="variable">$--dropdown-menu-box-shadow</span>;</span><br></pre></td></tr></table></figure></p>
+<p>这样子，我后面如果想改这些参数的值，只需要在 <code>var.scss</code> 文件修改对应的参数值，然后重新打包即可。<br>所以定制化主题的原理，其实就是重写 <code>var.scss</code> 文件，然后重新打包对应的 css 文件。</p>
+<h2 id="element-ui-的实现"><a href="#element-ui-的实现" class="headerlink" title="element ui 的实现"></a>element ui 的实现</h2><p>通过拉取 <code>element-ui</code> 的项目源码，我们知道他有一个页面可以实现主题定制：</p>
+<p><img src="/2020/01/11/air-ui-15/1.png" alt="png"></p>
+<p>原理就是通过修改 <code>var.scss</code> 里面的配置，来重新拉取新的样式从而覆盖：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl "https://element-api.ele.me/element/theme/updateVariable?version=2.12.0" -H "Sec-Fetch-Mode: cors" -H "Referer: http://localhost:8085/" -H "Origin: http://localhost:8085" -H "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36" -H "Content-Type: application/json" --data-binary "^&#123;^\^"global^\^":^&#123;^\^"^$--color-primary^\^":^\^"^#5F12A3^\^"^&#125;,^\^"local^\^":^&#123;^&#125;^&#125;" --compressed</span><br></pre></td></tr></table></figure></p>
+<p>参数就是你修改的参数:</p>
+<p><img src="/2020/01/11/air-ui-15/2.png" alt="png"></p>
+<p>然后通过这个接口返回一个新的样式：</p>
+<p><img src="/2020/01/11/air-ui-15/3.png" alt="png"></p>
+<p>然后再将这个样式覆盖现有的样式，就可以看到界面的变化了。如果点击右上角的下载的话，也会去请求这个接口，然后会变成 <code>download</code> 的方式：<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl "https://element-api.ele.me/element/theme/updateVariable?version=2.12.0" -H "Sec-Fetch-Mode: cors" -H "Referer: http://localhost:8085/" -H "Origin: http://localhost:8085" -H "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36" -H "Content-Type: application/json" --data-binary "^&#123;^\^"global^\^":^&#123;^\^"^$--color-primary^\^":^\^"^#5F12A3^\^"^&#125;,^\^"local^\^":^&#123;^&#125;,^\^"download^\^":true^&#125;" --compressed</span><br></pre></td></tr></table></figure></p>
+<p>而且这时候，有加了一个参数：</p>
+<p><img src="/2020/01/11/air-ui-15/4.png" alt="png"></p>
+<p>多了一个 <code>download</code> 为 true， 所以返回的时候，<code>content-type</code> 就变成 zip 包的形式了：</p>
+<p><img src="/2020/01/11/air-ui-15/5.png" alt="png"></p>
+<p>这样子就把这个自定义的主题下载下来了。 也挺方便的。 解压之后，发现就只有一个重新定义的 <code>index.css</code>:</p>
+<p><img src="/2020/01/11/air-ui-15/6.png" alt="png"></p>
+<p>这个就是新的主题样式文件。因为这个接口是另外一个 element 的服务端项目，我们是没有代码的，他的作用就是通过要调整的参数，重新生成一份 css 文件返回给前端。我们看一下前端代码, 通过这个方法去请求后端数据：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> updateVars = <span class="function">(<span class="params">data, cb</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> post(<span class="string">`<span class="subst">$&#123;host&#125;</span>updateVariable?version=<span class="subst">$&#123;version&#125;</span>`</span>, data, cb);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>调用代码在这边：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">onAction() &#123;</span><br><span class="line">  <span class="keyword">this</span>.triggertProgressBar(<span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">const</span> time = +<span class="keyword">new</span> <span class="built_in">Date</span>();</span><br><span class="line">  updateVars(<span class="keyword">this</span>.userConfig)</span><br><span class="line">    .then(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">this</span>.applyStyle(res, time);</span><br><span class="line">    &#125;)</span><br><span class="line">    .catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">this</span>.onError(err);</span><br><span class="line">    &#125;)</span><br><span class="line">    .then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">this</span>.triggertProgressBar(<span class="literal">false</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>res 就是后端返回的样式代码，然后通过 <code>applyStyle</code> 将新的样式代码覆盖。 同时通过 <code>this.triggertProgressBar(false)</code> 来显示进度。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">applyStyle(res, time) &#123;</span><br><span class="line">  <span class="keyword">if</span> (time &lt; <span class="keyword">this</span>.lastApply) <span class="keyword">return</span>;</span><br><span class="line">  <span class="keyword">this</span>.updateDocs(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    updateDomHeadStyle(<span class="string">'chalk-style'</span>, res);</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">this</span>.lastApply = time;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>通过这个方法动态插入这个css 样式, 进行样式覆盖:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> updateDomHeadStyle = <span class="function">(<span class="params">id, styleContent</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> styleTag = <span class="built_in">document</span>.getElementById(id);</span><br><span class="line">  <span class="keyword">if</span> (!styleTag) &#123;</span><br><span class="line">    styleTag = <span class="built_in">document</span>.createElement(<span class="string">'style'</span>);</span><br><span class="line">    styleTag.setAttribute(<span class="string">'id'</span>, id);</span><br><span class="line">    <span class="built_in">document</span>.head.appendChild(styleTag);</span><br><span class="line">  &#125;</span><br><span class="line">  styleTag.innerText = styleContent.replace(<span class="regexp">/@font-face&#123;[^&#125;]+&#125;/</span>, <span class="string">''</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>通过查看控制台，可以看到：</p>
+<p><img src="/2020/01/11/air-ui-15/7.png" alt="png"></p>
+<p>这样子整个界面就变了。 可以看到，<code>element-ui</code> 的实现的主题定制还是挺详细的，但是还是有几点不足：</p>
+<ol>
+<li>整个界面的逻辑代码太复杂了，每个项都能定制。他这个不适合我们这个内部组件的方式，为了实现这个定制过程，我得实现一个前端的手动操作的定制过程，性价比太低了。</li>
+<li>他每次生成之后的 css 文件，只有根文件 <code>index.css</code>, 其他组件单独的文件其实并没有，也就是我没办法单独定制一个属于我自己的 button 组件的主题。如果要的话，我只能全部引入。</li>
+<li>因为每次只能下载下来，一旦我后面更新了版本增加了新的组件，那边我还想要这个组件，我还得再下载一次，这样子新加的组件才能适用于这个主题。</li>
+</ol>
+<h2 id="air-ui-的做法"><a href="#air-ui-的做法" class="headerlink" title="air-ui 的做法"></a>air-ui 的做法</h2><p><code>air-ui</code> 的做法会非常简单，不需要那么多东西，既然知道了其实新的主题只是去重写了 <code>var.scss</code> 的某些参数属性，那么我们要调试出我们想要的主题，其实很简单。<br>在开发阶段，我们只需要在 <code>var.scss</code> 进行一些参数的调整，比如我调整了这两个属性：<br><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$--color-primary</span>: <span class="number">#7ca37a</span> !default;</span><br><span class="line"><span class="variable">$--color-danger</span>: <span class="number">#d009f5</span> !default;</span><br></pre></td></tr></table></figure></p>
+<p>因为我们是在本地测试环境进行的，所以也不需要重新刷新，直接热更新就可以看到效果了。</p>
+<p><img src="/2020/01/11/air-ui-15/8.png" alt="png"></p>
+<p><img src="/2020/01/11/air-ui-15/9.png" alt="png"></p>
+<p>因为这个页面(<code>home.vue</code>)有全部组件的 demo，所以 <code>var.scss</code> 只要有调整，所有组件的 demo 有涉及到的，全部都会重新编译并且渲染。 (跟 element 那个自定义主题的操作页面的左边的所有的组件展示是一样的，甚至更加全面，因为所有的 demo 都可以看到变化)。</p>
+<p>假设我们通过调整 <code>var.scss</code> 的多个参数，已经达到了我们想要的主题的效果了。接下来怎么把这个主题进行保存呢，肯定是不能直接提交 <code>var.scss</code> 文件的，因为这样子相当于原有的默认主题就被改变了。 所以我们的做法是在 <code>src</code> 目录下创建一个 <code>theme</code> 用来存放你想要的主题。</p>
+<p>假设我通过调整 <code>var.scss</code> 得到两个主题，一个是用于个人版的，一个是用于企业版的，那么我就创建两个文件，命名分别是 <code>biz.scss</code> 和 <code>personal.scss</code>, 名字就是后面的主题名哦：</p>
+<p><img src="/2020/01/11/air-ui-15/10.png" alt="png"></p>
+<p>然后里面的内容，其实就是这些主题跟 <code>var.scss</code> 这个默认主题不一样的配置，也就是你刚才调整的那些变化的参数，就写在这里面，因为这些是要打包的时候覆盖 <code>var.scss</code>， 所以只需要将有变化的摘出来就行了。比如 <code>biz.scss</code> 这个文件的内容是这样子的：<br><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$--color-primary</span>: <span class="number">#7ca37a</span> !default;</span><br><span class="line"><span class="variable">$--color-danger</span>: <span class="number">#d009f5</span> !default;</span><br><span class="line"><span class="variable">$--border-radius-base</span>: <span class="number">8px</span> !default;</span><br></pre></td></tr></table></figure></p>
+<p><code>presonal.scss</code> 的内容是这样子的：<br><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$--color-primary</span>: <span class="number">#18a0a3</span> !default;</span><br><span class="line"><span class="variable">$--color-danger</span>: <span class="number">#f5e727</span> !default;</span><br><span class="line"><span class="variable">$--msgbox-width</span>: <span class="number">620px</span> !default;</span><br></pre></td></tr></table></figure></p>
+<p>里面的内容就是你的自定义主题和默认主题的差异。</p>
+<h3 id="主题打包"><a href="#主题打包" class="headerlink" title="主题打包"></a>主题打包</h3><p>既然差异化整理出来了，那么接下来怎么打包出主题的 css 文件夹呢，思路如下：</p>
+<ol>
+<li>首先打包 dist，先生成默认主题 styles 目录</li>
+<li>然后接下来开始进行主题的打包，首先遍历 theme 的主题文件，一个主题一个主题打</li>
+<li>开始打包第一个主题，先把 <code>src/styles</code> 里面的文件复制到 <code>lib/theme/tmp/biz</code> 这个目录，这边 biz 就是第一个主题的名字</li>
+<li>替换 <code>var.scss</code> 里面的内容，根据 key-value，将 <code>var.scss</code> 对应的内容，替换成 <code>biz.scss</code> 里面的内容</li>
+<li>替换完之后，直接将这个目录编译成 css 即可。并存放到 <code>lib/theme/biz</code> 目录, 然后再进行第二个主题的打包</li>
+<li>最后去掉 <code>lib/theme/tmp/</code> 这个目录</li>
+</ol>
+<p>整个主题的打包，全部由 gulp 来处理，具体代码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> themeMapTaskList = &#123;&#125;;</span><br><span class="line"><span class="keyword">var</span> initThemeMap = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="comment">// 先删除旧的主题</span></span><br><span class="line">  themeMapTaskList[<span class="string">'del-old-theme'</span>] = gulp.task(<span class="string">'del-old-theme'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> del([</span><br><span class="line">      <span class="string">'./lib/theme'</span></span><br><span class="line">    ], cb);</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="comment">// 读取当前的所有的主题的文件</span></span><br><span class="line">  <span class="keyword">var</span> files = fs.readdirSync(path.resolve(<span class="string">`src/theme/`</span>));</span><br><span class="line">  <span class="comment">//遍历读取到的文件列表</span></span><br><span class="line">  files.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">filename</span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(filename);</span><br><span class="line">    <span class="keyword">var</span> fileStr = fs.readFileSync(path.resolve(<span class="string">`src/theme/<span class="subst">$&#123;filename&#125;</span>`</span>));</span><br><span class="line">    <span class="keyword">var</span> tempMap = &#123;&#125;;</span><br><span class="line">    fileStr.toString().replace(<span class="regexp">/(.+):(.+);/g</span>, <span class="function"><span class="keyword">function</span>(<span class="params">match, p1, p2</span>) </span>&#123;</span><br><span class="line">      tempMap[p1.trim()] = p2.trim();</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">var</span> themeName = filename.split(<span class="string">"."</span>)[<span class="number">0</span>];</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>:`</span> + <span class="built_in">JSON</span>.stringify(tempMap));</span><br><span class="line">    <span class="keyword">var</span> tmpTaskList = &#123;&#125;;</span><br><span class="line">    <span class="comment">// 首先将旧的 copy 一份过去</span></span><br><span class="line">    tmpTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-copy`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-copy`</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> gulp.src(<span class="string">'./src/styles/**'</span>)</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`./lib/theme/tmp/<span class="subst">$&#123;themeName&#125;</span>`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 替换 var 里面的内容</span></span><br><span class="line">    tmpTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-replace`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-replace`</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      <span class="keyword">return</span> gulp.src(<span class="string">`./lib/theme/tmp/<span class="subst">$&#123;themeName&#125;</span>/common/var.scss`</span>)</span><br><span class="line">        .pipe(replace(<span class="regexp">/(.+):(.+);/g</span>, <span class="function"><span class="keyword">function</span>(<span class="params">match, p1, p2</span>)</span>&#123;</span><br><span class="line">          p1 = p1.trim();</span><br><span class="line">          <span class="keyword">if</span>(tempMap[p1])&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">`theme replace: key: <span class="subst">$&#123;p1&#125;</span>, before: <span class="subst">$&#123;p2&#125;</span>, after: <span class="subst">$&#123;tempMap[p1]&#125;</span>`</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="string">`<span class="subst">$&#123;p1&#125;</span>: <span class="subst">$&#123;tempMap[p1]&#125;</span>`</span></span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">return</span> match;</span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`./lib/theme/tmp/<span class="subst">$&#123;themeName&#125;</span>/common`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 重新生成 css</span></span><br><span class="line">    tmpTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-compile`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-compile`</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> gulp.src(<span class="string">`./lib/theme/tmp/<span class="subst">$&#123;themeName&#125;</span>/*.scss`</span>)</span><br><span class="line">        .pipe(sass.sync())</span><br><span class="line">        .pipe(autoprefixer(&#123;</span><br><span class="line">          cascade: <span class="literal">false</span></span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(cssmin())</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`./lib/theme/<span class="subst">$&#123;themeName&#125;</span>`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 拷贝 font</span></span><br><span class="line">    tmpTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-font`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-font`</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> gulp.src(<span class="string">`./lib/styles/fonts/**`</span>)</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`./lib/theme/<span class="subst">$&#123;themeName&#125;</span>/fonts`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 最后将这个主题的任务都串起来</span></span><br><span class="line">    themeMapTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme`</span>, seq.apply(<span class="literal">null</span>,_.keys(tmpTaskList)));</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="comment">// 最后将tmp目录删掉</span></span><br><span class="line">  themeMapTaskList[<span class="string">'del-theme-tmp'</span>] = gulp.task(<span class="string">'del-theme-tmp'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> del([</span><br><span class="line">      <span class="string">'./lib/theme/tmp'</span></span><br><span class="line">    ], cb);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">initThemeMap();</span><br><span class="line">gulp.task(<span class="string">'theme'</span>, seq.apply(<span class="literal">null</span>,_.keys(themeMapTaskList)));</span><br></pre></td></tr></table></figure>
+<p>我们执行一下程序看看打包的 log：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">&gt; air-ui@1.0.0 theme F:\code\air-ui</span><br><span class="line">&gt; gulp theme</span><br><span class="line"></span><br><span class="line">biz.scss</span><br><span class="line">biz:&#123;&quot;$--color-primary&quot;:&quot;#7ca37a !default&quot;,&quot;$--color-danger&quot;:&quot;#d009f5 !default&quot;,&quot;$--border-radius-base&quot;:&quot;8px !default&quot;&#125;</span><br><span class="line">personal.scss</span><br><span class="line">personal:&#123;&quot;$--color-primary&quot;:&quot;#18a0a3 !default&quot;,&quot;$--color-danger&quot;:&quot;#f5e727 !default&quot;,&quot;$--msgbox-width&quot;:&quot;620px !default&quot;&#125;</span><br><span class="line">[11:21:37] Using gulpfile F:\code\air-ui\gulpfile.js</span><br><span class="line">[11:21:37] Starting &apos;theme&apos;...</span><br><span class="line">[11:21:37] Starting &apos;del-old-theme&apos;...</span><br><span class="line">[11:21:37] Finished &apos;del-old-theme&apos; after 39 ms</span><br><span class="line">[11:21:37] Starting &apos;biz-theme&apos;...</span><br><span class="line">[11:21:37] Starting &apos;biz-theme-copy&apos;...</span><br><span class="line">[11:21:38] Finished &apos;biz-theme-copy&apos; after 735 ms</span><br><span class="line">[11:21:38] Starting &apos;biz-theme-replace&apos;...</span><br><span class="line">theme replace: key: $--color-primary, before:  #409EFF !default, after: #7ca37a !default</span><br><span class="line">theme replace: key: $--color-danger, before:  #F56C6C !default, after: #d009f5 !default</span><br><span class="line">theme replace: key: $--border-radius-base, before:  4px !default, after: 8px !default</span><br><span class="line">[11:21:38] Finished &apos;biz-theme-replace&apos; after 25 ms</span><br><span class="line">[11:21:38] Starting &apos;biz-theme-compile&apos;...</span><br><span class="line">[11:21:45] Finished &apos;biz-theme-compile&apos; after 7.94 s</span><br><span class="line">[11:21:45] Starting &apos;biz-theme-font&apos;...</span><br><span class="line">[11:21:45] Finished &apos;biz-theme-font&apos; after 16 ms</span><br><span class="line">[11:21:46] Finished &apos;biz-theme&apos; after 8.73 s</span><br><span class="line">[11:21:46] Starting &apos;personal-theme&apos;...</span><br><span class="line">[11:21:46] Starting &apos;personal-theme-copy&apos;...</span><br><span class="line">[11:21:46] Finished &apos;personal-theme-copy&apos; after 627 ms</span><br><span class="line">[11:21:46] Starting &apos;personal-theme-replace&apos;...</span><br><span class="line">theme replace: key: $--color-primary, before:  #409EFF !default, after: #18a0a3 !default</span><br><span class="line">theme replace: key: $--color-danger, before:  #F56C6C !default, after: #f5e727 !default</span><br><span class="line">theme replace: key: $--msgbox-width, before:  420px !default, after: 620px !default</span><br><span class="line">[11:21:46] Finished &apos;personal-theme-replace&apos; after 9.33 ms</span><br><span class="line">[11:21:46] Starting &apos;personal-theme-compile&apos;...</span><br><span class="line">[11:21:54] Finished &apos;personal-theme-compile&apos; after 7.76 s</span><br><span class="line">[11:21:54] Starting &apos;personal-theme-font&apos;...</span><br><span class="line">[11:21:54] Finished &apos;personal-theme-font&apos; after 19 ms</span><br><span class="line">[11:21:54] Finished &apos;personal-theme&apos; after 8.41 s</span><br><span class="line">[11:21:54] Starting &apos;del-theme-tmp&apos;...</span><br><span class="line">[11:21:54] Finished &apos;del-theme-tmp&apos; after 154 ms</span><br><span class="line">[11:21:54] Finished &apos;theme&apos; after 17 s</span><br></pre></td></tr></table></figure></p>
+<p>这个就是打包的顺序。<br>打完包之后，可以看到在 lib 目录有一个 theme 目录存放主题，打开之后，发现有两个主题目录，一个是 biz，一个是 personal：</p>
+<p><img src="/2020/01/11/air-ui-15/11.png" alt="png"></p>
+<p>打开之后，就是这个主题的 css 文件，不仅有 index.scss，单独组件的样式也变成主题样式了：</p>
+<p><img src="/2020/01/11/air-ui-15/12.png" alt="png"></p>
+<h3 id="使用新主题样式"><a href="#使用新主题样式" class="headerlink" title="使用新主题样式"></a>使用新主题样式</h3><p>如果要本次测试打包之后的，只需要把之前引用默认主题的路径改成新主题的路径即可：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">'../lib/styles/index.css'</span></span><br></pre></td></tr></table></figure></p>
+<p>换成<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">'../lib/theme/biz/index.css'</span></span><br></pre></td></tr></table></figure></p>
+<p>这样子就行了。</p>
+<p>如果是其他项目作为第三方依赖，换成这样子：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> AirUI <span class="keyword">from</span> <span class="string">'air-ui'</span>;</span><br><span class="line"><span class="comment">// import 'air-ui/lib/styles/index.css';</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/theme/biz/index.css'</span>;</span><br></pre></td></tr></table></figure></p>
+<p>这样就可以应用新的主题了</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这样子属于 <code>air-ui</code> 的主题定制就完成了。事实上我们后面在进行企业版的主题定制的时候，还在原来 <code>element-ui</code> 定义的 <code>var.scss</code> 的基础上，将很多的组件的定制化做的更细了。 举一个我们现在做的一个企业版的主题的 biz.scss， <code>src/theme/biz.scss</code>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 企业版公用主题色</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line">$--color-primary: #008CEE !default;</span><br><span class="line">$color-primary-lightter:#a0cfff;</span><br><span class="line">$color-primary-light:#009dff;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Button 按钮组件变量</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line"><span class="comment">//按钮的默认padding air-button</span></span><br><span class="line">$--button-padding-vertical:<span class="number">9</span>px !<span class="keyword">default</span>;</span><br><span class="line">$--button-padding-horizontal:<span class="number">20</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-button--mini</span></span><br><span class="line">$--button-mini-padding-vertical:<span class="number">7</span>px !<span class="keyword">default</span>;</span><br><span class="line">$--button-mini-padding-horizontal:<span class="number">15</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-button--primary</span></span><br><span class="line">$--button-primary-background-color:$--color-primary !<span class="keyword">default</span>;</span><br><span class="line">$--button-primary-border-color:$--color-primary !<span class="keyword">default</span>;</span><br><span class="line">$--button-hover-tint-percent:<span class="number">20</span>% !<span class="keyword">default</span>;<span class="comment">//按钮hover时的透明度（说明：hover的样式是通过按钮的背景色和白色按比例计算的）</span></span><br><span class="line">$--button-plain-background-percent:<span class="number">100</span>% !<span class="keyword">default</span>;<span class="comment">//按钮 plain下的背景透明度</span></span><br><span class="line">$--button-plain-border-percent: <span class="number">0</span>% !<span class="keyword">default</span>;<span class="comment">//按钮 plain下的边框透明度</span></span><br><span class="line">$--button-plain-background-dis-percent:<span class="number">50</span>%!<span class="keyword">default</span>;<span class="comment">//按钮 plain disable下的背景透明度</span></span><br><span class="line">$--button-plain-border-dis-percent: <span class="number">50</span>% !<span class="keyword">default</span>;<span class="comment">//按钮 plain disable下的边框透明度</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* input 输入框组件变量</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line">$--input-height: <span class="number">36</span>px !<span class="keyword">default</span>;</span><br><span class="line">$--input-line-height: <span class="number">1.2</span> !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-input-group__append  background</span></span><br><span class="line">$--input-group-append-background: #fff !default;</span><br><span class="line"><span class="comment">/// air-input-group__append  text-align</span></span><br><span class="line">$--input-group-append-text-align: center !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* dialog 对话框组件变量</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line"><span class="comment">//air-dialog 样式配置 （margin、display、flex-direction、height、max-width、max-height）</span></span><br><span class="line">$--dialog-margin-primary:<span class="number">0</span> !important !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-display:flex !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-flex-direction:column !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-height:auto !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-padding-primary: <span class="number">20</span>px <span class="number">24</span>px <span class="number">25</span>px !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-max-width:calc(<span class="number">100</span>vw - <span class="number">40</span>px) !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-max-height:calc(<span class="number">100</span>vh - <span class="number">40</span>px) !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-body-padding:<span class="number">0</span> <span class="number">24</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-dialog__body  样式配置（max-height、overflow-x、overflow-y）</span></span><br><span class="line">$--dialog-body-max-height:calc(<span class="number">100</span>vh - <span class="number">200</span>px) !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-body-overflow-x:hidden !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-body-overflow-y:auto !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-dialog__wrapper 遮罩样式配置(display、justify-content、align-items)</span></span><br><span class="line">$--dialog-wrapper-display:flex !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-wrapper-justify-content:center !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-wrapper-align-items:center !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-dialog__footer  样式配置（padding）</span></span><br><span class="line">$--dialog-footer-padding:<span class="number">24</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-dialog__body &amp;:last-child padding</span></span><br><span class="line">$--dialog-body-last-child-padding:<span class="number">20</span>px !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* MessageBox弹窗 输入框组件变量</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line">$--msgbox-width: <span class="number">600</span>px !<span class="keyword">default</span>;</span><br><span class="line">$--msgbox-padding-header:<span class="number">20</span>px <span class="number">24</span>px <span class="number">25</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">// messagebox的padding</span></span><br><span class="line">$--messagebox-padding-bottom:<span class="number">0</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">// messagebox(带输入框的) padding-top</span></span><br><span class="line">$--messagebox-input-padding-bottom:<span class="number">0</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-message-box__btns  样式配置（padding）</span></span><br><span class="line">$--messagebox-btns-padding:<span class="number">24</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-message-box_content</span></span><br><span class="line">$--messagebox-content-padding:<span class="number">0</span> <span class="number">24</span>px !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Notification 通知</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line"><span class="comment">///air-notification__title</span></span><br><span class="line">$--notification-title-margin:<span class="number">0</span> <span class="number">0</span> <span class="number">10</span>px <span class="number">0</span> !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification__title empty</span></span><br><span class="line">$--notification-title-empty-margin-bottom:<span class="number">10</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification__content</span></span><br><span class="line">$--notification-content-margin:<span class="number">0</span> !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification__closeBtn top</span></span><br><span class="line">$--notification-closeBtn-top:<span class="number">10</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification__closeBtn right</span></span><br><span class="line">$--notification-closeBtn-right:<span class="number">10</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification  air-button  fontsize</span></span><br><span class="line">$--notification-btn-fontsize:<span class="number">12</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification  air-button  padding</span></span><br><span class="line">$--notification-btn-padding:<span class="number">5</span>px <span class="number">15</span>px !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Dropdown 下拉菜单</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line"><span class="comment">/// air-dropdown-menu max-height</span></span><br><span class="line">$--dropdown-menu-max-height:<span class="number">400</span>px  !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-dropdown-menu overflow-y</span></span><br><span class="line">$--dropdown-menu-overflow-y:auto  !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-select-dropdown__list  width</span></span><br><span class="line">$--select-dropdown-list-width:<span class="number">99</span>% !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* NavMenu 导航菜单</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line">$--menu-item-line-height: <span class="number">50</span>px !<span class="keyword">default</span>;</span><br><span class="line">$--menu-item-height: <span class="number">50</span>px !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* air-range-xxx</span></span><br><span class="line"><span class="comment">--------------------------*/</span></span><br><span class="line">$--range-input-vertical-align:middle !<span class="keyword">default</span>;</span><br><span class="line">$--range-separator-height:auto !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Form 表单</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line"><span class="comment">/// fontSize||Font|1</span></span><br><span class="line">$--form-item-height: <span class="number">36</span>px !<span class="keyword">default</span>;</span><br><span class="line">$--form-item-margin-bottom: <span class="number">20</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-form-item__error  line-height</span></span><br><span class="line">$--form-item-error-line-height: <span class="number">1.1</span> !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-form-item__error  position</span></span><br><span class="line">$--form-item-error-position: relative !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-form-item__error  text-align</span></span><br><span class="line">$--form-item-text-align: left !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Loading 加载</span></span><br><span class="line"><span class="comment">--------------------------*/</span></span><br><span class="line"><span class="comment">/// air-loading-mask</span></span><br><span class="line">$--loading-mask-user-select: none !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Message 消息提示</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line">$--message-min-width: <span class="number">200</span>px !<span class="keyword">default</span>;</span><br><span class="line">$--message-icon-font-size: <span class="number">14</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-pagination__editor</span></span><br><span class="line">$--pagination-editor-padding: <span class="number">0</span> !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-pagination__editor margin</span></span><br><span class="line">$--pagination-editor-margin: <span class="number">0</span> <span class="number">10</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">// air-pagination  margin-top</span></span><br><span class="line">$--pagination-margin-top: <span class="number">15</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-pagination  float</span></span><br><span class="line">$--pagination-float: right !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-pagination  padding</span></span><br><span class="line">$--pagination-padding: <span class="number">0</span> !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-pagination  min-height</span></span><br><span class="line">$--pagination-min-height: <span class="number">30</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-pagination__jump margin-left</span></span><br><span class="line">$--pagination-jump-margin-left: <span class="number">20</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-pagination  vertical-align</span></span><br><span class="line">$--pagination-vertical-align: middle !<span class="keyword">default</span>;</span><br><span class="line">$--pagination-btn-vertical-align:middle !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Tree 树形控件</span></span><br><span class="line"><span class="comment">-------------------------- */</span></span><br><span class="line"><span class="comment">/// air-tree-node__content  height</span></span><br><span class="line">$--tree-node-content-height:<span class="number">30</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-tree-node__label  overflow</span></span><br><span class="line">$--tree-node-label-overflow:hidden !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-tree-node__label  text-overflow</span></span><br><span class="line">$--tree-node-label-text-overflow:ellipsis !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-tree-node__label  white-space</span></span><br><span class="line">$--tree-node-label-white-space:nowrap !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">/// air-tree__empty-block  min-height</span></span><br><span class="line">$--tree-node-empty-block-min-height:<span class="number">30</span>px !<span class="keyword">default</span>;</span><br></pre></td></tr></table></figure></p>
+<p>这个定制化程度比之前更细了。 在原先的 <code>var.scss</code> 里面就增加了很多我们后面加上去的更详细的定制：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// messagebox的padding-bottom</span></span><br><span class="line">$--messagebox-padding-bottom:<span class="number">10</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">// messagebox(带输入框的) padding-top</span></span><br><span class="line">$--messagebox-input-padding-bottom:<span class="number">15</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-message-box__btns  样式配置（padding）</span></span><br><span class="line">$--messagebox-btns-padding:<span class="number">5</span>px <span class="number">15</span>px <span class="number">0</span> !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-message-box_content</span></span><br><span class="line">$--messagebox-content-padding:<span class="number">10</span>px $--msgbox-padding-primary !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">///air-notification__title</span></span><br><span class="line">$--notification-title-margin:<span class="number">0</span> !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification__title empty</span></span><br><span class="line">$--notification-title-empty-margin-bottom:<span class="number">0</span> !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification__content</span></span><br><span class="line">$--notification-content-margin:<span class="number">6</span>px <span class="number">0</span> <span class="number">0</span> <span class="number">0</span>!<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification__closeBtn top</span></span><br><span class="line">$--notification-closeBtn-top:<span class="number">18</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification__closeBtn right</span></span><br><span class="line">$--notification-closeBtn-right:<span class="number">15</span>px !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification  air-button  fontsize</span></span><br><span class="line">$--notification-btn-fontsize:initial !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-notification  air-button  padding</span></span><br><span class="line">$--notification-btn-padding:initial !<span class="keyword">default</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">//air-dialog__wrapper 遮罩样式配置(display、justify-content、align-items)</span></span><br><span class="line">$--dialog-wrapper-display:inherit !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-wrapper-justify-content:initial !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-wrapper-align-items:initial !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-dialog 样式配置 （margin、display、flex-direction、height、max-width、max-height、padding）</span></span><br><span class="line">$--dialog-margin-primary: <span class="number">0</span> auto <span class="number">50</span>px !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-display:inherit !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-flex-direction:initial !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-height:initial !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-max-width:initial !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-max-height:initial !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-body-padding:($--dialog-padding-primary + <span class="number">10</span>px) $--dialog-padding-primary !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">//air-dialog__body  样式配置（max-height、overflow-x、overflow-y）</span></span><br><span class="line">$--dialog-body-max-height:initial !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-body-overflow-x:initial !<span class="keyword">default</span>;</span><br><span class="line">$--dialog-body-overflow-y:initial !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-dialog__footer  样式配置（padding）</span></span><br><span class="line">$--dialog-footer-padding:<span class="number">10</span>px $--dialog-padding-primary $--dialog-padding-primary !<span class="keyword">default</span>;</span><br><span class="line"><span class="comment">///air-dialog__body &amp;:last-child padding-bottom</span></span><br><span class="line">$--dialog-body-last-child-padding:initial !<span class="keyword">default</span>;</span><br></pre></td></tr></table></figure></p>
+<p>其实改了很多，以上这一部分都是我们后面对 var.scss 里面的组件进行颗粒度更细的定制。而这种方式，很显然，<code>element-ui</code> 是满足不了的，应该说第三方的 ui 框应该都满足不了，只有自己做的 ui 库才行。</p>
+<p>下节我们讲一下怎么打包 pub 任务。以及为啥需要 pub 任务。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</a><br><a href="/2019/12/03/air-ui-2/" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">自建vue组件 air-ui (2) -- 先分析一下 element ui 项目</a><br><a href="/2019/12/05/air-ui-3/" title="自建vue组件 air-ui (3) -- css 开发规范">自建vue组件 air-ui (3) -- css 开发规范</a><br><a href="/2019/12/07/air-ui-4/" title="自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构">自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构</a><br><a href="/2019/12/09/air-ui-5/" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">自建vue组件 air-ui (5) -- 创建第一个组件 Button</a><br><a href="/2019/12/12/air-ui-6/" title="自建vue组件 air-ui (6) -- 创建内置服务组件">自建vue组件 air-ui (6) -- 创建内置服务组件</a><br><a href="/2019/12/15/air-ui-7/" title="自建vue组件 air-ui (7) -- 创建指令组件">自建vue组件 air-ui (7) -- 创建指令组件</a><br><a href="/2019/12/18/air-ui-8/" title="自建vue组件 air-ui (8) -- 实现部分引入组件">自建vue组件 air-ui (8) -- 实现部分引入组件</a><br><a href="/2019/12/22/air-ui-9/" title="自建vue组件 air-ui (9) -- 用 vuepress 写文档">自建vue组件 air-ui (9) -- 用 vuepress 写文档</a><br><a href="/2019/12/26/air-ui-10/" title="自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)">自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)</a><br><a href="/2020/01/02/air-ui-11/" title="自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)">自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)</a><br><a href="/2020/01/04/air-ui-12/" title="自建vue组件 air-ui (12) -- 国际化机制">自建vue组件 air-ui (12) -- 国际化机制</a><br><a href="/2020/01/06/air-ui-13/" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">自建vue组件 air-ui (13) -- 国际化机制(进阶版)</a><br><a href="/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</a><br><a href="/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">自建vue组件 air-ui (15) -- 主题定制</a><br><a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a><br><a href="/2020/01/16/air-ui-17/" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">自建vue组件 air-ui (17) -- 开发爬坑篇以及总结</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">http://kebingzao.com/2020/01/11/air-ui-15/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/09/air-ui-14/" rel="next" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">
+                <i class="fa fa-chevron-left"></i> 自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/01/13/air-ui-16/" rel="prev" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">
+                自建vue组件 air-ui (16) -- 打包构建 pub 任务 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#var-scss"><span class="nav-number">2.</span> <span class="nav-text">var.scss</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#element-ui-的实现"><span class="nav-number">3.</span> <span class="nav-text">element ui 的实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#air-ui-的做法"><span class="nav-number">4.</span> <span class="nav-text">air-ui 的做法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#主题打包"><span class="nav-number">4.1.</span> <span class="nav-text">主题打包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用新主题样式"><span class="nav-number">4.2.</span> <span class="nav-text">使用新主题样式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/01/11/air-ui-15/';
+          this.page.identifier = '2020/01/11/air-ui-15/';
+          this.page.title = '自建vue组件 air-ui (15) -- 主题定制';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

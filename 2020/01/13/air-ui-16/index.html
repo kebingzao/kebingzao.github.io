@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言在 自建vue组件 air-ui (14) -- 打包构建(dev 和 dist) 我们已经知道 air-ui 的 dev 构建 和 dist 构建。 接下来我们讲一下为啥还需要一个 pub 的构建任务，以及这个任务是用来干啥的。 直接将 master 分支作为第三方库拉取的分支假设我们没有 pub 任务。直接就使用 dist 构建生成 lib 目录，然后将代码提交到 master 分支，并且">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建vue组件 air-ui (16) -- 打包构建 pub 任务">
+<meta property="og:url" content="http://kebingzao.com/2020/01/13/air-ui-16/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言在 自建vue组件 air-ui (14) -- 打包构建(dev 和 dist) 我们已经知道 air-ui 的 dev 构建 和 dist 构建。 接下来我们讲一下为啥还需要一个 pub 的构建任务，以及这个任务是用来干啥的。 直接将 master 分支作为第三方库拉取的分支假设我们没有 pub 任务。直接就使用 dist 构建生成 lib 目录，然后将代码提交到 master 分支，并且">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/8.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/9.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/10.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/11.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/13/air-ui-16/12.png">
+<meta property="og:updated_time" content="2020-01-19T13:31:29.073Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自建vue组件 air-ui (16) -- 打包构建 pub 任务">
+<meta name="twitter:description" content="前言在 自建vue组件 air-ui (14) -- 打包构建(dev 和 dist) 我们已经知道 air-ui 的 dev 构建 和 dist 构建。 接下来我们讲一下为啥还需要一个 pub 的构建任务，以及这个任务是用来干啥的。 直接将 master 分支作为第三方库拉取的分支假设我们没有 pub 任务。直接就使用 dist 构建生成 lib 目录，然后将代码提交到 master 分支，并且">
+<meta name="twitter:image" content="http://kebingzao.com/2020/01/13/air-ui-16/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/01/13/air-ui-16/"/>
+
+
+
+
+
+  <title>自建vue组件 air-ui (16) -- 打包构建 pub 任务 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/01/13/air-ui-16/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">自建vue组件 air-ui (16) -- 打包构建 pub 任务</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-13T18:05:17+08:00">
+                2020-01-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/自建vue组件-air-ui/" itemprop="url" rel="index">
+                    <span itemprop="name">自建vue组件 air-ui</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/01/13/air-ui-16/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/01/13/air-ui-16/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/01/13/air-ui-16/" class="leancloud_visitors" data-flag-title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 <a href="/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</a> 我们已经知道 <code>air-ui</code> 的 dev 构建 和 dist 构建。 接下来我们讲一下为啥还需要一个 pub 的构建任务，以及这个任务是用来干啥的。</p>
+<h2 id="直接将-master-分支作为第三方库拉取的分支"><a href="#直接将-master-分支作为第三方库拉取的分支" class="headerlink" title="直接将 master 分支作为第三方库拉取的分支"></a>直接将 master 分支作为第三方库拉取的分支</h2><p>假设我们没有 pub 任务。直接就使用 dist 构建生成 lib 目录，然后将代码提交到 <code>master</code> 分支，并且用 <code>master</code> 打了一个 tag。<br>这时候我们就可以在某一个项目上用这种方式去加载 <code>air-ui</code>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"air-ui"</span>: <span class="string">"git+ssh://git@gitlab.xxx.com:web/vue-ui.git#v0.0.4"</span>,</span><br></pre></td></tr></table></figure></p>
+<p>然后我们很顺利引用了:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> AirUI <span class="keyword">from</span> <span class="string">'air-ui'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/index.css'</span>;</span><br><span class="line"></span><br><span class="line">Vue.use(AirUI);</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>结果编译的时候，报错了:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ERROR <span class="keyword">in</span> ./node_modules/air-ui/lib/styles/index.css (./node_modules/css-loader/dist/cjs.js??ref-<span class="number">-2</span><span class="number">-1</span>!./node_modules/postcss-loader/src!./node_modules/air-ui/lib/styles/index.css)</span><br><span class="line">Module build failed (<span class="keyword">from</span> ./node_modules/postcss-loader/src/index.js):</span><br><span class="line"><span class="built_in">Error</span>: Loading PostCSS Plugin failed: Cannot find <span class="built_in">module</span> <span class="string">'postcss-import'</span></span><br></pre></td></tr></table></figure></p>
+<p>发现是 <code>air-ui</code> 目录下的 <code>.postcssrc.js</code> 导致的， 因为编译的时候， vue 如果发现有这个文件存在的话，会进行 <code>postcss</code> 的处理。当我把 <code>air-ui</code> 目录下的<code>.postcssrc.js</code> 文件删掉的时候，就正常了。 也就是说 <code>air-ui</code> 在作为第三方库加载的时候，不需要那么多乱七八糟的文件，只要有 lib 目录就够了，其他文件都不需要。</p>
+<p>所以这时候就涉及到另一个问题： 那就是项目的开发环境的目录结构和当做第三方包被下载的目录结构是不同的，以 <code>element-ui</code> 来说， 他的项目的 <code>master</code> 分支是这样子的：</p>
+<p><img src="/2020/01/13/air-ui-16/1.png" alt="png"></p>
+<p>文件还是很多的， 但是如果是作为第三方库被下载下来，就只剩下这样子了：</p>
+<p><img src="/2020/01/13/air-ui-16/2.png" alt="png"></p>
+<p>所以可以肯定这两个就不是同一个分支。 因为文件就不一样。 所以 <code>air-ui</code> 也要这么做，把一些不用的，或者是只在dev环境下才有的去掉，只保留核心的用于第三方库的文件。</p>
+<h2 id="master-release-分支"><a href="#master-release-分支" class="headerlink" title="master-release 分支"></a>master-release 分支</h2><p>现在的 <code>air-ui</code> 被依赖的时候，下载的时候，就是 <code>master</code> 分支的所有的文件, 这样其实是不对的。不需要这么多的文件，其实只需要 <code>lib</code> 文件和 <code>package.json</code>， <code>readme</code> 这三个文件即可。</p>
+<p>最简单的方式，就是再创建一个分支，<code>master-release</code> 分支，然后将打包后的 <code>lib</code> 目录, <code>package.json</code>， <code>readme</code> 这三个文件，放到这个分支中，然后再从这个分支打 <code>tag</code> 就可以了。 后面如果拉这个 tag 就是这个分支的内容。</p>
+<p><img src="/2020/01/13/air-ui-16/3.png" alt="png"></p>
+<p><code>master-release</code> 分支只剩下这一些文件。 其他不必要的文件全部删掉了。 然后再从这个分支打 tag，弄一个新的版本。 然后重新在宿主项目再更新这个新的版本：</p>
+<p><img src="/2020/01/13/air-ui-16/4.png" alt="png"></p>
+<p>这时候下载下来的文件就对了。 只保留需要被引用的文件，其他不需要的文件全部不要。 而且编译也没有问题。</p>
+<h2 id="用脚本来处理"><a href="#用脚本来处理" class="headerlink" title="用脚本来处理"></a>用脚本来处理</h2><p>但是这样的一个问题就是，每次我要更新版本的时候，都要在 <code>master</code> 分支进行 <code>yarn dist</code> 打包，然后将 lib 目录复制到 <code>master-release</code> 分支，最后在 <code>master-release</code> 分支上打一个 tag。 就会变得很麻烦。 所以解决办法就是将这个过程变成一个任务，然后将 git 的操作，变成一个 shell 脚本来处理，就跟 <code>element-ui</code> 一样, 可以用 <code>shell</code> 脚本来做,比如 <code>yarn pub</code> 这个任务， 那么这个任务就包含以下操作：</p>
+<ol>
+<li>检查当前分支是否是远程的 <code>master</code> 分支，如果不是，返回错误</li>
+<li>执行 <code>yarn dist</code>， 生成 lib 目录</li>
+<li>将 lib 目录保存到一个 git ignore 的一个目录 <code>lib_tmp</code></li>
+<li><code>commit and push master</code> 分支 （如果 status 有改变的话）</li>
+<li>切换到 <code>master-release</code> 分支，将 <code>lib_tmp</code> 的文件覆盖 lib 目录</li>
+<li><code>commit and push master-release</code> 分支</li>
+<li><code>master-release</code> 打 tag</li>
+<li>把临时文件 <code>lib_tmp</code> 删掉</li>
+</ol>
+<p>所以我们新建一个文件 <code>build/git-release.sh</code> 来处理一些 git 的操作，内容如下(前提就是开发环境已经存在 <code>master</code> 和 <code>master-release</code> 分支的代码):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env sh</span><br><span class="line">echo &quot;start publish version: &quot;$1</span><br><span class="line">if test &quot;$(git rev-parse --abbrev-ref HEAD)&quot; == &quot;master&quot;;</span><br><span class="line">then</span><br><span class="line">  echo &quot;current branch is master&quot;</span><br><span class="line">  echo &quot;start commit and push master&quot;</span><br><span class="line">  git add -A</span><br><span class="line">  git commit -m &quot;[master build] &quot;$1</span><br><span class="line">  git push origin</span><br><span class="line">  echo &quot;push success&quot;</span><br><span class="line">  echo &quot;copy master lib to lib_tmp&quot;</span><br><span class="line">  mkdir lib_tmp</span><br><span class="line">  cp -rf lib/* lib_tmp</span><br><span class="line">  echo &quot;check branch master-release&quot;</span><br><span class="line">  git checkout master-release</span><br><span class="line">  echo &quot;copy lib_tmp to master-release lib&quot;</span><br><span class="line">  cp -rf lib_tmp/* lib</span><br><span class="line">  echo &quot;start commit and push master-release&quot;</span><br><span class="line">  git add -A</span><br><span class="line">  git commit -m &quot;[master-release build] &quot;$1</span><br><span class="line">  git push origin</span><br><span class="line">  echo &quot;push master-release success&quot;</span><br><span class="line">  echo &quot;create tag....&quot;</span><br><span class="line">  git tag -a $1 -m &quot;version &quot;$1</span><br><span class="line">  git push origin $1</span><br><span class="line">  echo &quot;push tag success&quot;</span><br><span class="line">  echo &quot;remove lib_tmp&quot;</span><br><span class="line">  rm -rf lib_tmp</span><br><span class="line">else</span><br><span class="line">  echo &quot;current branch is not master&quot;</span><br><span class="line">  exit 128;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure></p>
+<p>执行的指令是 <code>yarn pub</code>: (因为我的开发环境是 windows，所以这边执行 .sh 文件，前面不用加 sh 指令)<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"pub"</span>: <span class="string">"npm run dist &amp;&amp; build/git-release.sh v0.0.20"</span>,</span><br></pre></td></tr></table></figure></p>
+<p>执行的 log 如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">start publish version: v0.0.20</span><br><span class="line">current branch is master</span><br><span class="line">start commit and push master</span><br><span class="line">warning: LF will be replaced by CRLF in lib/air-ui.common.js.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br><span class="line">warning: LF will be replaced by CRLF in package.json.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br><span class="line">warning: LF will be replaced by CRLF in src/components/index.js.</span><br><span class="line">The file will have its original line endings in your working directory.</span><br><span class="line">[master e6d5770] [master build] v0.0.20</span><br><span class="line">3 files changed, 4 insertions(+), 4 deletions(-)</span><br><span class="line">Counting objects: 8, done.</span><br><span class="line">Delta compression using up to 4 threads.</span><br><span class="line">Compressing objects: 100% (8/8), done.</span><br><span class="line">Writing objects: 100% (8/8), 703 bytes | 703.00 KiB/s, done.</span><br><span class="line">Total 8 (delta 7), reused 0 (delta 0)</span><br><span class="line">To gitlab.xxx.com:web/air-ui.git</span><br><span class="line">   9690368..e6d5770  master -&gt; master</span><br><span class="line">push success</span><br><span class="line">copy master lib to lib_tmp</span><br><span class="line">check branch master-release</span><br><span class="line">Checking out files: 100% (929/929), done.</span><br><span class="line">Switched to branch &apos;master-release&apos;</span><br><span class="line">Your branch is up to date with &apos;origin/master-release&apos;.</span><br><span class="line">copy lib_tmp to master-release lib</span><br><span class="line">start commit and push master-release</span><br><span class="line">warning: LF will be replaced by CRLF in lib/air-ui.common.js.</span><br><span class="line">。。。。</span><br><span class="line">The file will have its original line endings in your working directory.</span><br><span class="line">[master-release f576e93] [master-release build] v0.0.20</span><br><span class="line">1 file changed, 1 insertion(+), 1 deletion(-)</span><br><span class="line">Counting objects: 4, done.</span><br><span class="line">Delta compression using up to 4 threads.</span><br><span class="line">Compressing objects: 100% (4/4), done.</span><br><span class="line">Writing objects: 100% (4/4), 412 bytes | 412.00 KiB/s, done.</span><br><span class="line">Total 4 (delta 3), reused 0 (delta 0)</span><br><span class="line">remote:</span><br><span class="line">remote: To create a merge request for master-release, visit:</span><br><span class="line">remote:   http://gitlab.xxx.com/web/air-ui/merge_requests/new?merge_request%5Bsource_branch%5D=master-release</span><br><span class="line">remote:</span><br><span class="line">To gitlab.xxx.com:web/air-ui.git</span><br><span class="line">   ce49143..f576e93  master-release -&gt; master-release</span><br><span class="line">push master-release success</span><br><span class="line">create tag....</span><br><span class="line">Counting objects: 1, done.</span><br><span class="line">Writing objects: 100% (1/1), 160 bytes | 160.00 KiB/s, done.</span><br><span class="line">Total 1 (delta 0), reused 0 (delta 0)</span><br><span class="line">To gitlab.xxx.com:web/air-ui.git</span><br><span class="line">* [new tag]         v0.0.20 -&gt; v0.0.20</span><br><span class="line">push tag success</span><br><span class="line">remove lib_tmp</span><br></pre></td></tr></table></figure></p>
+<p>从提交 log 的来看， 确实这两个分支都 push 上去了，并且打 tag 了:</p>
+<p><img src="/2020/01/13/air-ui-16/5.png" alt="png"></p>
+<p>这边需要注意一点的是 <code>lib_tmp</code> 这个目录是存放 lib 的临时目录，虽然最后会被删掉，但是最好在 <code>master</code> 和 <code>master-release</code> 分支将其设置为 git 的 <code>.ignore</code> 文件中。<br>而且这边还有个弊端，就是我每次执行 <code>yarn pub</code> 的时候，都要手动修改 <code>git-release.sh</code> 这个指令后面的版本号。而且 <code>components/index.js</code> 中的 版本号，也要手动对应修改,还不够智能。</p>
+<p><img src="/2020/01/13/air-ui-16/6.png" alt="png"></p>
+<h2 id="重新切回-master-分支有问题"><a href="#重新切回-master-分支有问题" class="headerlink" title="重新切回 master 分支有问题"></a>重新切回 master 分支有问题</h2><p>而且还有一个问题，像上面那个操作，就会变成最后都会切换到 <code>master-release</code> 分支，每次还要手动切换成<code>master</code> 分支。也是很麻烦。之前有试过在 <code>git-release.sh</code> 中最后将其切回 <code>master</code> 分支:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"> rm -rf lib_tmp</span><br><span class="line"> echo <span class="string">"check back branch master"</span></span><br><span class="line"> git checkout master</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>但是最后报错了:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">push tag success</span><br><span class="line">remove lib_tmp</span><br><span class="line">check back branch master</span><br><span class="line">error: cannot stat <span class="string">'build/git-release.sh'</span>: Permission denied</span><br></pre></td></tr></table></figure></p>
+<p>最后报错了，这个是因为切换到 <code>master-release</code> 的分支的时候， 这个目录已经没有 <code>build/git-release.sh</code> 这个文件了，也就导致了这个错误。所以如果要切回来，我们应该要保证切到 <code>master-release</code> 的分支的时候， <code>build/git-release.sh</code> 这个文件还存在。 这样就可以了。</p>
+<h2 id="再优化-改成交互式的方式"><a href="#再优化-改成交互式的方式" class="headerlink" title="再优化-改成交互式的方式"></a>再优化-改成交互式的方式</h2><p>因为每次执行 pub 任务的时候，都要在 pub 指令和 <code>components/index.js</code> 手动修改版本号。这个就很麻烦。 所以我们要优化一下, 全部用 gulp 来实现，包括执行 shell 文件的时候，要做到以下效果：</p>
+<ol>
+<li>刚开始要有交互界面，需要输入版本号，要校验规则：</li>
+<li>替换 <code>components/index.js</code> 下面的版本号</li>
+<li>打 <code>dist</code> 包</li>
+<li>执行 shell 脚本 （用 node 执行带参数）</li>
+<li>最后切换为 <code>master</code> 分支</li>
+</ol>
+<p>具体 gulp 代码如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//============= pub 构建 start ===========</span></span><br><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line"><span class="keyword">var</span> replace = <span class="built_in">require</span>(<span class="string">"gulp-replace"</span>);</span><br><span class="line"><span class="keyword">var</span> rename = <span class="built_in">require</span>(<span class="string">'gulp-rename'</span>);</span><br><span class="line"><span class="keyword">var</span> del = <span class="built_in">require</span>(<span class="string">'del'</span>);</span><br><span class="line"><span class="keyword">var</span> prompt = <span class="built_in">require</span>(<span class="string">'gulp-prompt'</span>);</span><br><span class="line"><span class="keyword">const</span> childProcess = <span class="built_in">require</span>(<span class="string">'child_process'</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> tagVersion = <span class="string">''</span>;</span><br><span class="line"><span class="comment">// 输入版本号</span></span><br><span class="line">gulp.task(<span class="string">'pubVersion'</span>, cb =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./src/components/index.js'</span>)</span><br><span class="line">    .pipe(prompt.prompt(&#123;</span><br><span class="line">      type: <span class="string">'input'</span>,</span><br><span class="line">      name: <span class="string">'version'</span>,</span><br><span class="line">      message: <span class="string">'input your tag version (like v0.0.x)?'</span>,</span><br><span class="line">      validate: <span class="function"><span class="keyword">function</span>(<span class="params">version</span>)</span>&#123;</span><br><span class="line">        <span class="comment">// 这边要进行正则验证</span></span><br><span class="line">        <span class="keyword">return</span> <span class="regexp">/^v\d+.\d+.\d+$/</span>.test(version);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="function"><span class="keyword">function</span>(<span class="params">res</span>)</span>&#123;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">"version:"</span> + res.version);</span><br><span class="line">      tagVersion = res.version;</span><br><span class="line">    &#125;))</span><br><span class="line">    .pipe(replace(<span class="regexp">/version:(.+),/g</span>, <span class="function"><span class="keyword">function</span>(<span class="params">match, p1, p2</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">`version: '<span class="subst">$&#123;tagVersion&#125;</span>',`</span></span><br><span class="line">    &#125;))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./src/components'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来就开始打 dist</span></span><br><span class="line">gulp.task(<span class="string">'pubDist'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">cb</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> workerProcess = childProcess.exec(<span class="string">'npm run dist'</span>, &#123;</span><br><span class="line">    cwd: <span class="string">'./'</span></span><br><span class="line">  &#125;, cb);</span><br><span class="line">  workerProcess.stdout.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data);</span><br><span class="line">  &#125;);</span><br><span class="line">  workerProcess.stderr.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'stderr: '</span> + data);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来执行将 build/git-release.sh 复制到根目录，并重命名(不然后面会切不回来)</span></span><br><span class="line">gulp.task(<span class="string">'pubCopyShell'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./build/git-release.sh'</span>)</span><br><span class="line">    .pipe(rename(<span class="string">'git-release-tmp.sh'</span>))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来执行这个 shell 指令</span></span><br><span class="line">gulp.task(<span class="string">'pubDoShell'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">cb</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> workerProcess = childProcess.exec(<span class="string">`git-release-tmp.sh <span class="subst">$&#123;tagVersion&#125;</span>`</span>, &#123;</span><br><span class="line">    cwd: <span class="string">'./'</span></span><br><span class="line">  &#125;, cb);</span><br><span class="line">  workerProcess.stdout.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data);</span><br><span class="line">  &#125;);</span><br><span class="line">  workerProcess.stderr.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'stderr: '</span> + data);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 最后将这个临时的 shell 文件删除</span></span><br><span class="line">gulp.task(<span class="string">'pubDelTempShell'</span>, cb =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> del([</span><br><span class="line">    <span class="string">'./git-release-tmp.sh'</span></span><br><span class="line">  ], cb);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'pub'</span>, seq(<span class="string">'pubVersion'</span>, <span class="string">'pubDist'</span>, <span class="string">'pubCopyShell'</span>, <span class="string">'pubDoShell'</span>, <span class="string">'pubDelTempShell'</span>));</span><br><span class="line"><span class="comment">//============= pub 构建 end ===========</span></span><br></pre></td></tr></table></figure></p>
+<p>可以看到，因为我后面执行的是一个临时的 sh 文件: <code>git-release-tmp.sh</code>。 所以后面可以切回来 <code>master</code> 分支了。</p>
+<p><img src="/2020/01/13/air-ui-16/7.png" alt="png"></p>
+<p>而且这个是有交互模式的，允许我们输入规则为 <code>v.x.x.x</code> 的版本号， 具体的 log 如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br></pre></td><td class="code"><pre><span class="line">F:\code\air-ui&gt;gulp pub</span><br><span class="line">[<span class="number">15</span>:<span class="number">55</span>:<span class="number">57</span>] Using gulpfile F:\code\air-ui\gulpfile.js</span><br><span class="line">[<span class="number">15</span>:<span class="number">55</span>:<span class="number">57</span>] Starting <span class="string">'pub'</span>...</span><br><span class="line">[<span class="number">15</span>:<span class="number">55</span>:<span class="number">57</span>] Starting <span class="string">'pubVersion'</span>...</span><br><span class="line">? input your tag version (like v0<span class="number">.0</span>.x)? v0<span class="number">.0</span><span class="number">.27</span></span><br><span class="line">version:v0<span class="number">.0</span><span class="number">.27</span></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">02</span>] Finished <span class="string">'pubVersion'</span> after <span class="number">4.6</span> s</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">02</span>] Starting <span class="string">'pubDist'</span>...</span><br><span class="line"></span><br><span class="line">&gt; air-ui@<span class="number">1.0</span><span class="number">.0</span> dist F:\code\air-ui</span><br><span class="line">&gt; npm run clean &amp;&amp; webpack --config build/webpack.common.js &amp;&amp; webpack --config build/webpack.component.js &amp;&amp; npm run css &amp;&amp; npm run lang &amp;&amp; npm run theme</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt; air-ui@<span class="number">1.0</span><span class="number">.0</span> clean F:\code\air-ui</span><br><span class="line">&gt; rimraf lib &amp;&amp; rimraf test<span class="comment">/**/</span>coverage</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Hash: c3c11a0506830b38e6f8</span><br><span class="line">Version: webpack <span class="number">3.12</span><span class="number">.0</span></span><br><span class="line">Time: <span class="number">12278</span>ms</span><br><span class="line">           Asset     Size  Chunks                    Chunk Names</span><br><span class="line">air-ui.common.js  <span class="number">1.29</span> MB       <span class="number">0</span>  [emitted]  [big]  app</span><br><span class="line">   [<span class="number">1</span>] ./src/utils/util.js <span class="number">7.4</span> kB &#123;<span class="number">0</span>&#125; [built]</span><br><span class="line"> ...</span><br><span class="line">    + <span class="number">468</span> hidden modules</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt; air-ui@<span class="number">1.0</span><span class="number">.0</span> css F:\code\air-ui</span><br><span class="line">&gt; gulp buildCss</span><br><span class="line"></span><br><span class="line">Using gulpfile F:\code\air-ui\gulpfile.js</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">34</span>]</span><br><span class="line">Starting <span class="string">'compile'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">34</span>]</span><br><span class="line">Starting <span class="string">'copyfont'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">34</span>]</span><br><span class="line">Finished <span class="string">'copyfont'</span> after <span class="number">315</span> ms</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">41</span>] Finished <span class="string">'compile'</span> after <span class="number">7.06</span> s</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">41</span>] Starting <span class="string">'buildCss'</span>...</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">41</span>] Finished <span class="string">'buildCss'</span> after <span class="number">40</span> μs</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt; air-ui@<span class="number">1.0</span><span class="number">.0</span> lang F:\code\air-ui</span><br><span class="line">&gt; gulp copylang</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">44</span>]</span><br><span class="line">Using gulpfile F:\code\air-ui\gulpfile.js</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">44</span>]</span><br><span class="line">Starting <span class="string">'copylang'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">44</span>]</span><br><span class="line">Finished <span class="string">'copylang'</span> after <span class="number">279</span> ms</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt; air-ui@<span class="number">1.0</span><span class="number">.0</span> theme F:\code\air-ui</span><br><span class="line">&gt; gulp theme</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">46</span>]</span><br><span class="line">Using gulpfile F:\code\air-ui\gulpfile.js</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">46</span>]</span><br><span class="line">Starting <span class="string">'theme'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">46</span>]</span><br><span class="line">Starting <span class="string">'del-old-theme'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">47</span>]</span><br><span class="line">Finished <span class="string">'del-old-theme'</span> after <span class="number">37</span> ms</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">47</span>] Starting <span class="string">'biz-theme'</span>...</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">47</span>] Starting <span class="string">'biz-theme-copy'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">47</span>]</span><br><span class="line">Finished <span class="string">'biz-theme-copy'</span> after <span class="number">576</span> ms</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">47</span>] Starting <span class="string">'biz-theme-replace'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">47</span>]</span><br><span class="line">Finished <span class="string">'biz-theme-replace'</span> after <span class="number">16</span> ms</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">47</span>] Starting <span class="string">'biz-theme-compile'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>]</span><br><span class="line">Finished <span class="string">'biz-theme-compile'</span> after <span class="number">12</span> s</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>] Starting <span class="string">'biz-theme-font'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>]</span><br><span class="line">Finished <span class="string">'biz-theme-font'</span> after <span class="number">12</span> ms</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>] Finished <span class="string">'biz-theme'</span> after <span class="number">12</span> s</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>] Starting <span class="string">'personal-theme'</span>...</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>] Starting <span class="string">'personal-theme-copy'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>]</span><br><span class="line">Finished <span class="string">'personal-theme-copy'</span> after <span class="number">481</span> ms</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>] Starting <span class="string">'personal-theme-replace'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>]</span><br><span class="line">Finished <span class="string">'personal-theme-replace'</span> after <span class="number">8</span> ms</span><br><span class="line">[<span class="number">15</span>:<span class="number">56</span>:<span class="number">59</span>] Starting <span class="string">'personal-theme-compile'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Finished <span class="string">'personal-theme-compile'</span> after <span class="number">8.54</span> s</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Starting <span class="string">'personal-theme-font'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>]</span><br><span class="line">Finished <span class="string">'personal-theme-font'</span> after <span class="number">12</span> ms</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Finished <span class="string">'personal-theme'</span> after <span class="number">9.04</span> s</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Starting <span class="string">'del-theme-tmp'</span>...</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Finished <span class="string">'del-theme-tmp'</span> after <span class="number">129</span> ms</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Finished <span class="string">'theme'</span> after <span class="number">21</span> s</span><br><span class="line"></span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Finished <span class="string">'pubDist'</span> after <span class="number">1.1</span> min</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Starting <span class="string">'pubCopyShell'</span>...</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Finished <span class="string">'pubCopyShell'</span> after <span class="number">9.44</span> ms</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">08</span>] Starting <span class="string">'pubDoShell'</span>...</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">44</span>] Finished <span class="string">'pubDoShell'</span> after <span class="number">36</span> s</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">44</span>] Starting <span class="string">'pubDelTempShell'</span>...</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">44</span>] Finished <span class="string">'pubDelTempShell'</span> after <span class="number">16</span> ms</span><br><span class="line">[<span class="number">15</span>:<span class="number">57</span>:<span class="number">44</span>] Finished <span class="string">'pub'</span> after <span class="number">1.78</span> min</span><br></pre></td></tr></table></figure></p>
+<p>这样就完美了。 指令改成:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"pub"</span>: <span class="string">"gulp pub"</span>,</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2020/01/13/air-ui-16/8.png" alt="png"></p>
+<h2 id="再优化-修改-package-json-的版本号"><a href="#再优化-修改-package-json-的版本号" class="headerlink" title="再优化 - 修改 package.json 的版本号"></a>再优化 - 修改 package.json 的版本号</h2><p>后面发现还有一个细节还可以再优化， <code>package.json</code> 的 <code>version</code> 其实并没有变过来？？</p>
+<p><img src="/2020/01/13/air-ui-16/9.png" alt="png"></p>
+<p>还是一直是 <code>1.0.0</code>， 还是得处理一下。 所以还得再加上这个的处理，并且切换到 <code>master-release</code> 的时候，也要替换掉这个分支的 <code>package.json</code> 文件, 这样子这两个分支的 <code>package.json</code> 就会保持一致：</p>
+<p>所以 gulp 还要再加上这两个任务:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">gulp.task(<span class="string">'pubPackageVersion'</span>, cb =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./package.json'</span>)</span><br><span class="line">    .pipe(replace(<span class="regexp">/"version":(.+),/g</span>, <span class="function"><span class="keyword">function</span>(<span class="params">match, p1, p2</span>)</span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">`"version": "<span class="subst">$&#123;tagVersion.substring(<span class="number">1</span>,tagVersion.length)&#125;</span>",`</span></span><br><span class="line">    &#125;))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 拷贝 package.json 到临时文件</span></span><br><span class="line">gulp.task(<span class="string">'pubCopyPackage'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./package.json'</span>)</span><br><span class="line">    .pipe(rename(<span class="string">'package-tmp.json'</span>))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./'</span>));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>而且 <code>git-release.sh</code> 也要加上 覆盖 <code>package.json</code>  的操作：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo <span class="string">"copy package-tmp.json to master-release package.json"</span></span><br><span class="line">cp -rf package-tmp.json package.json</span><br></pre></td></tr></table></figure></p>
+<p>然后 <code>.ignore</code> 文件还要把这个 <code>package-tmp.json</code> 给忽略掉。（<code>master</code> 和 <code>master-release</code> 都设置）。 然后最后执行一下，然后看下效果，<br>看一下提交记录:</p>
+<p><img src="/2020/01/13/air-ui-16/10.png" alt="png"></p>
+<p>看一下 <code>master</code> 的提交记录,三个地方的 <code>version</code> 都改了：</p>
+<p><img src="/2020/01/13/air-ui-16/11.png" alt="png"></p>
+<p>看 <code>master-release</code> 的提交记录, 两个地方的 <code>version</code> 都改了:</p>
+<p><img src="/2020/01/13/air-ui-16/12.png" alt="png"></p>
+<p>这样就完成了。 最后完整的代码如下, gulp 任务的代码:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> seq = <span class="built_in">require</span>(<span class="string">"gulp-sequence"</span>);</span><br><span class="line"><span class="keyword">var</span> replace = <span class="built_in">require</span>(<span class="string">"gulp-replace"</span>);</span><br><span class="line"><span class="keyword">var</span> rename = <span class="built_in">require</span>(<span class="string">'gulp-rename'</span>);</span><br><span class="line"><span class="keyword">var</span> del = <span class="built_in">require</span>(<span class="string">'del'</span>);</span><br><span class="line"><span class="keyword">var</span> prompt = <span class="built_in">require</span>(<span class="string">'gulp-prompt'</span>);</span><br><span class="line"><span class="keyword">const</span> childProcess = <span class="built_in">require</span>(<span class="string">'child_process'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/** os是否是windows */</span></span><br><span class="line"><span class="keyword">const</span> isWin = <span class="regexp">/^win/</span>.test(process.platform);</span><br><span class="line"></span><br><span class="line"><span class="comment">//============= pub 构建 start ===========</span></span><br><span class="line"><span class="keyword">var</span> tagVersion = <span class="string">''</span>;</span><br><span class="line"><span class="comment">// 输入版本号</span></span><br><span class="line">gulp.task(<span class="string">'pubVersion'</span>, cb =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./src/components/index.js'</span>)</span><br><span class="line">    .pipe(prompt.prompt(&#123;</span><br><span class="line">      type: <span class="string">'input'</span>,</span><br><span class="line">      name: <span class="string">'version'</span>,</span><br><span class="line">      message: <span class="string">'input your tag version (like v0.0.x)?'</span>,</span><br><span class="line">      validate: <span class="function"><span class="keyword">function</span> (<span class="params">version</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 这边要进行正则验证</span></span><br><span class="line">        <span class="keyword">return</span> <span class="regexp">/^v\d+.\d+.\d+$/</span>.test(version);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, <span class="function"><span class="keyword">function</span> (<span class="params">res</span>) </span>&#123;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">"version:"</span> + res.version);</span><br><span class="line">      tagVersion = res.version;</span><br><span class="line">    &#125;))</span><br><span class="line">    .pipe(replace(<span class="regexp">/version:(.+),/g</span>, <span class="function"><span class="keyword">function</span> (<span class="params">match, p1, p2</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">`version: '<span class="subst">$&#123;tagVersion.substring(<span class="number">1</span>, tagVersion.length)&#125;</span>',`</span></span><br><span class="line">    &#125;))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./src/components'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来就开始打 dist</span></span><br><span class="line">gulp.task(<span class="string">'pubDist'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">cb</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> workerProcess = childProcess.exec(<span class="string">'npm run dist'</span>, &#123;</span><br><span class="line">    cwd: <span class="string">'./'</span></span><br><span class="line">  &#125;, cb);</span><br><span class="line"></span><br><span class="line">  workerProcess.stdout.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  workerProcess.stderr.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'stderr: '</span> + data);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来连同 package.json 里面的 version 一起改一下：</span></span><br><span class="line">gulp.task(<span class="string">'pubPackageVersion'</span>, cb =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./package.json'</span>)</span><br><span class="line">    .pipe(replace(<span class="regexp">/"version":(.+),/g</span>, <span class="function"><span class="keyword">function</span> (<span class="params">match, p1, p2</span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="string">`"version": "<span class="subst">$&#123;tagVersion.substring(<span class="number">1</span>, tagVersion.length)&#125;</span>",`</span></span><br><span class="line">    &#125;))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 拷贝 package.json 到临时文件</span></span><br><span class="line">gulp.task(<span class="string">'pubCopyPackage'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./package.json'</span>)</span><br><span class="line">    .pipe(rename(<span class="string">'package-tmp.json'</span>))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 接下来执行将 build/git-release.sh 复制到根目录，并重命名(不然后面会切不回来)</span></span><br><span class="line">gulp.task(<span class="string">'pubCopyShell'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./build/git-release.sh'</span>)</span><br><span class="line">    .pipe(rename(<span class="string">'git-release-tmp.sh'</span>))</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来执行这个 shell 指令</span></span><br><span class="line">gulp.task(<span class="string">'pubDoShell'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">cb</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> workerProcess = childProcess.exec(<span class="string">`<span class="subst">$&#123;isWin ? <span class="string">''</span> : <span class="string">'sh'</span>&#125;</span> git-release-tmp.sh <span class="subst">$&#123;tagVersion&#125;</span>`</span>, &#123;</span><br><span class="line">    cwd: <span class="string">'./'</span></span><br><span class="line">  &#125;, cb);</span><br><span class="line"></span><br><span class="line">  workerProcess.stdout.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(data);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  workerProcess.stderr.on(<span class="string">'data'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'stderr: '</span> + data);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 最后将这个临时文件删除</span></span><br><span class="line">gulp.task(<span class="string">'pubDelTemp'</span>, cb =&gt; &#123;</span><br><span class="line">  <span class="keyword">return</span> del([</span><br><span class="line">    <span class="string">'./git-release-tmp.sh'</span>,</span><br><span class="line">    <span class="string">'./package-tmp.json'</span></span><br><span class="line">  ], cb);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'pub'</span>, seq(</span><br><span class="line">  <span class="string">'pubVersion'</span>,</span><br><span class="line">  <span class="string">'pubDist'</span>,</span><br><span class="line">  <span class="string">'pubPackageVersion'</span>,</span><br><span class="line">  <span class="string">'pubCopyPackage'</span>,</span><br><span class="line">  <span class="string">'pubCopyShell'</span>,</span><br><span class="line">  <span class="string">'pubDoShell'</span>,</span><br><span class="line">  <span class="string">'pubDelTemp'</span></span><br><span class="line">));</span><br><span class="line"></span><br><span class="line"><span class="comment">//============= pub 构建 end ===========</span></span><br></pre></td></tr></table></figure></p>
+<p>git-release.sh 的代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">#!/usr/bin/env sh</span><br><span class="line"></span><br><span class="line">echo &quot;start publish version: &quot;$1</span><br><span class="line">if test &quot;$(git rev-parse --abbrev-ref HEAD)&quot; == &quot;master&quot;;</span><br><span class="line">then</span><br><span class="line">  echo &quot;current branch is master&quot;</span><br><span class="line">  echo &quot;start commit and push master&quot;</span><br><span class="line">  git add -A</span><br><span class="line">  git commit -m &quot;[master build] &quot;$1</span><br><span class="line">  git push origin</span><br><span class="line">  echo &quot;push success&quot;</span><br><span class="line">  echo &quot;copy master lib to lib_tmp&quot;</span><br><span class="line">  mkdir lib_tmp</span><br><span class="line">  cp -rf lib/* lib_tmp</span><br><span class="line">  echo &quot;check branch master-release&quot;</span><br><span class="line">  git checkout master-release</span><br><span class="line">  echo &quot;copy lib_tmp to master-release lib&quot;</span><br><span class="line">  cp -rf lib_tmp/* lib</span><br><span class="line">  echo &quot;copy package-tmp.json to master-release package.json&quot;</span><br><span class="line">  cp -rf package-tmp.json package.json</span><br><span class="line">  echo &quot;start commit and push master-release&quot;</span><br><span class="line">  git add -A</span><br><span class="line">  git commit -m &quot;[master-release build] &quot;$1</span><br><span class="line">  git push origin</span><br><span class="line">  echo &quot;push master-release success&quot;</span><br><span class="line">  echo &quot;create tag....&quot;</span><br><span class="line">  git tag -a $1 -m &quot;version &quot;$1</span><br><span class="line">  git push origin $1</span><br><span class="line">  echo &quot;push tag success&quot;</span><br><span class="line">  echo &quot;remove lib_tmp&quot;</span><br><span class="line">  rm -rf lib_tmp</span><br><span class="line">  echo &quot;check back branch master&quot;</span><br><span class="line">  git checkout master</span><br><span class="line">else</span><br><span class="line">  echo &quot;current branch is not master&quot;</span><br><span class="line">  exit 128;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure></p>
+<p>指令就是:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"pub"</span>: <span class="string">"gulp pub"</span>,</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过 pub 任务，我们实现了以下功能:</p>
+<ol>
+<li>打包的时候，通过输入 tag 版本号，同时修改 <code>master</code> 分支的打包前的 <code>components/index.js</code> 和<code>package.json</code>文件，打包后的 <code>air-ui.common.js</code> 中的对应的版本号字段，并提交到线上库</li>
+<li>并将 lib 目录和 <code>package.json</code> 文件同步到 <code>master-release</code> 分支</li>
+<li><code>master-release</code> 提交到线上库，并且打tag</li>
+<li>最后回到原先的 <code>master</code> 分支</li>
+</ol>
+<p>其实 <code>element-ui</code> 的 pub 任务也是类似的情况，不过它比较复杂，考虑的情况也比较多。<code>air-ui</code> 就不需要考虑那么多情况，相应来说也更好理解。</p>
+<p>下一节我们讲一下在做 <code>air-ui</code> 的组件的过程中，遇到的一些奇葩的情况，以及怎么爬坑的。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</a><br><a href="/2019/12/03/air-ui-2/" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">自建vue组件 air-ui (2) -- 先分析一下 element ui 项目</a><br><a href="/2019/12/05/air-ui-3/" title="自建vue组件 air-ui (3) -- css 开发规范">自建vue组件 air-ui (3) -- css 开发规范</a><br><a href="/2019/12/07/air-ui-4/" title="自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构">自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构</a><br><a href="/2019/12/09/air-ui-5/" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">自建vue组件 air-ui (5) -- 创建第一个组件 Button</a><br><a href="/2019/12/12/air-ui-6/" title="自建vue组件 air-ui (6) -- 创建内置服务组件">自建vue组件 air-ui (6) -- 创建内置服务组件</a><br><a href="/2019/12/15/air-ui-7/" title="自建vue组件 air-ui (7) -- 创建指令组件">自建vue组件 air-ui (7) -- 创建指令组件</a><br><a href="/2019/12/18/air-ui-8/" title="自建vue组件 air-ui (8) -- 实现部分引入组件">自建vue组件 air-ui (8) -- 实现部分引入组件</a><br><a href="/2019/12/22/air-ui-9/" title="自建vue组件 air-ui (9) -- 用 vuepress 写文档">自建vue组件 air-ui (9) -- 用 vuepress 写文档</a><br><a href="/2019/12/26/air-ui-10/" title="自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)">自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)</a><br><a href="/2020/01/02/air-ui-11/" title="自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)">自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)</a><br><a href="/2020/01/04/air-ui-12/" title="自建vue组件 air-ui (12) -- 国际化机制">自建vue组件 air-ui (12) -- 国际化机制</a><br><a href="/2020/01/06/air-ui-13/" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">自建vue组件 air-ui (13) -- 国际化机制(进阶版)</a><br><a href="/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</a><br><a href="/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">自建vue组件 air-ui (15) -- 主题定制</a><br><a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a><br><a href="/2020/01/16/air-ui-17/" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">自建vue组件 air-ui (17) -- 开发爬坑篇以及总结</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">http://kebingzao.com/2020/01/13/air-ui-16/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/11/air-ui-15/" rel="next" title="自建vue组件 air-ui (15) -- 主题定制">
+                <i class="fa fa-chevron-left"></i> 自建vue组件 air-ui (15) -- 主题定制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/01/16/air-ui-17/" rel="prev" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">
+                自建vue组件 air-ui (17) -- 开发爬坑篇以及总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#直接将-master-分支作为第三方库拉取的分支"><span class="nav-number">2.</span> <span class="nav-text">直接将 master 分支作为第三方库拉取的分支</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#master-release-分支"><span class="nav-number">3.</span> <span class="nav-text">master-release 分支</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用脚本来处理"><span class="nav-number">4.</span> <span class="nav-text">用脚本来处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重新切回-master-分支有问题"><span class="nav-number">5.</span> <span class="nav-text">重新切回 master 分支有问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#再优化-改成交互式的方式"><span class="nav-number">6.</span> <span class="nav-text">再优化-改成交互式的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#再优化-修改-package-json-的版本号"><span class="nav-number">7.</span> <span class="nav-text">再优化 - 修改 package.json 的版本号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/01/13/air-ui-16/';
+          this.page.identifier = '2020/01/13/air-ui-16/';
+          this.page.title = '自建vue组件 air-ui (16) -- 打包构建 pub 任务';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言工欲善其事必先利其器，既然我们的 air-ui 大部分都是借鉴 element-ui 项目，所以本章我们就来分析一下 element-ui 项目源码。 下载源码首先我们到这个 https://github.com/ElemeFE/element ， 把源码下载下来 安装 yarn因为是基于 yarn 安装的，所以我们也全局装一下 yarn：12345F:\code\github\element">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">
+<meta property="og:url" content="http://kebingzao.com/2019/12/03/air-ui-2/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言工欲善其事必先利其器，既然我们的 air-ui 大部分都是借鉴 element-ui 项目，所以本章我们就来分析一下 element-ui 项目源码。 下载源码首先我们到这个 https://github.com/ElemeFE/element ， 把源码下载下来 安装 yarn因为是基于 yarn 安装的，所以我们也全局装一下 yarn：12345F:\code\github\element">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/3.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/4.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/6.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/7.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/8.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/9.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/10.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/11.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/12.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/13.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/14.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/15.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/16.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/17.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/18.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/19.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/20.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/03/air-ui-2/21.png">
+<meta property="og:updated_time" content="2020-01-19T13:31:29.082Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">
+<meta name="twitter:description" content="前言工欲善其事必先利其器，既然我们的 air-ui 大部分都是借鉴 element-ui 项目，所以本章我们就来分析一下 element-ui 项目源码。 下载源码首先我们到这个 https://github.com/ElemeFE/element ， 把源码下载下来 安装 yarn因为是基于 yarn 安装的，所以我们也全局装一下 yarn：12345F:\code\github\element">
+<meta name="twitter:image" content="http://kebingzao.com/2019/12/03/air-ui-2/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/12/03/air-ui-2/"/>
+
+
+
+
+
+  <title>自建vue组件 air-ui (2) -- 先分析一下 element ui 项目 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/12/03/air-ui-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">自建vue组件 air-ui (2) -- 先分析一下 element ui 项目</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-03T15:04:43+08:00">
+                2019-12-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/自建vue组件-air-ui/" itemprop="url" rel="index">
+                    <span itemprop="name">自建vue组件 air-ui</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/03/air-ui-2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/12/03/air-ui-2/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/12/03/air-ui-2/" class="leancloud_visitors" data-flag-title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>工欲善其事必先利其器，既然我们的 <code>air-ui</code> 大部分都是借鉴 <code>element-ui</code> 项目，所以本章我们就来分析一下 <code>element-ui</code> 项目源码。</p>
+<h2 id="下载源码"><a href="#下载源码" class="headerlink" title="下载源码"></a>下载源码</h2><p>首先我们到这个 <a href="https://github.com/ElemeFE/element" target="_blank" rel="noopener">https://github.com/ElemeFE/element</a> ， 把源码下载下来</p>
+<h2 id="安装-yarn"><a href="#安装-yarn" class="headerlink" title="安装 yarn"></a>安装 yarn</h2><p>因为是基于 yarn 安装的，所以我们也全局装一下 yarn：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\code\github\element&gt;npm install -g yarn</span><br><span class="line">C:\Program Files\nodejs\yarn -&gt; C:\Program Files\nodejs\node_modules\yarn\bin\yarn.js</span><br><span class="line">C:\Program Files\nodejs\yarnpkg -&gt; C:\Program Files\nodejs\node_modules\yarn\bin\yarn.js</span><br><span class="line">+ yarn@1.19.1</span><br><span class="line">added 1 package in 7.777s</span><br></pre></td></tr></table></figure></p>
+<p>安装成功，试一下指令是否正常：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">F:\code\github\element&gt;yarn --version</span><br><span class="line">1.19.1</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h2 id="本地环境跑起来"><a href="#本地环境跑起来" class="headerlink" title="本地环境跑起来"></a>本地环境跑起来</h2><p><code>element-ui</code> 的当前版本是 <code>2.12.0</code> (我在写这个文章的时候，其实已经更新到 <code>2.13.0</code>，但是差别不大，都是一些细节的调整)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">F:\code\github\element&gt;npm run dev</span><br><span class="line"></span><br><span class="line">&gt; element-ui@2.12.0 dev F:\code\github\element</span><br><span class="line">&gt; npm run bootstrap &amp;&amp; npm run build:file &amp;&amp; cross-env NODE_ENV=development webpack-dev-server --config build/webpack.demo.js &amp; node build/bin/template.js</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt; element-ui@2.12.0 bootstrap F:\code\github\element</span><br><span class="line">&gt; yarn || npm i</span><br><span class="line"></span><br><span class="line">yarn install v1.19.1</span><br><span class="line">[1/4] Resolving packages...</span><br><span class="line">[2/4] Fetching packages...</span><br><span class="line">info fsevents@1.2.7: The platform &quot;win32&quot; is incompatible with this module.</span><br><span class="line">info &quot;fsevents@1.2.7&quot; is an optional dependency and failed compatibility check. Excluding it from installation.</span><br><span class="line">[3/4] Linking dependencies...</span><br><span class="line">warning &quot; &gt; karma-webpack@3.0.5&quot; has incorrect peer dependency &quot;webpack@^2.0.0 || ^3.0.0&quot;.</span><br><span class="line">[4/4] Building fresh packages...</span><br><span class="line">Done in 202.16s.</span><br><span class="line">。。。</span><br><span class="line">i ｢wdm｣: Compiled successfully.</span><br></pre></td></tr></table></figure></p>
+<p>第一次的时候，会先安装依赖。在本地浏览器打开 <code>localhost:8085</code>，可以看到跟官网的站点一样:</p>
+<p><img src="/2019/12/03/air-ui-2/1.png" alt="1"></p>
+<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><p>首先我们先看一些目录结构：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">element</span><br><span class="line">  |---build/       构建相关的文件</span><br><span class="line">  |---example/     放置element api的页面文档</span><br><span class="line">  |---lib/         组件构建打包之后的存放目录</span><br><span class="line">  |---packages/    放置element的组件（css样式放置在这个目录下theme-chalk下）</span><br><span class="line">  |     |---button/            button 组件的目录</span><br><span class="line">  |     |     |---src/         button 组件的业务代码</span><br><span class="line">  |     |     |---index.js     button 组件的定义文件</span><br><span class="line">  ... 这里面 N 个相同目录格式的组件 ...</span><br><span class="line">  |     |---theme-chalk/       存放 scss 样式</span><br><span class="line">  |     |     |---lib/         scss 打包之后的css文件</span><br><span class="line">  |     |     |---src/         scss 样式文件</span><br><span class="line">  |     |     |---gulpfiles    gulp 构建任务，将src目录中的 scss 打包成 css并放到 lib 目录</span><br><span class="line">  |---src/</span><br><span class="line">  |     |---directives/     放置自定义指令</span><br><span class="line">  |     |---locale/         放置语言的配置文件</span><br><span class="line">  |     |     |---lang/     放置多语言</span><br><span class="line">  |     |---mixins/         放置组件用的混合文件</span><br><span class="line">  |     |---transitions/    放置动画配置文件</span><br><span class="line">  |     |---utils/          放置用到工具函数文件</span><br><span class="line">  |     |---index.js        组件注册的入口文件</span><br><span class="line">  |---test/        测试文件</span><br><span class="line">  |---types/       typescript 的数据类，用来给 IDE 在写 ts 代码时候的提示</span><br><span class="line">  |---components.json   存放单独导出组件的json文件</span><br><span class="line">  |---package.json</span><br></pre></td></tr></table></figure></p>
+<p>可以看到几个有点奇怪的地方：</p>
+<ol>
+<li>存放组件的目录，竟然不是在 src 的 components 目录中，而是单独抽出来</li>
+<li>存放css的目录，竟然跟组件是同级，而且藏在了一个叫做<code>theme-chalk</code>的目录，辨识度太低，不注意看，根本找不到，为啥不放 src 目录的 styles 目录呢?</li>
+<li>文档站点所在的 example 的目录结构，也有点乱，至少第一眼看过去，都是看不懂</li>
+</ol>
+<h2 id="1-dev-环境的构建"><a href="#1-dev-环境的构建" class="headerlink" title="1. dev 环境的构建"></a>1. dev 环境的构建</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run dev</span><br></pre></td></tr></table></figure>
+<p>想要更快的了解一个项目，除了将环境跑起来之后，另一个就是分析构建的方式了，所以接下来我们分析一下 dev 环境的构建方式，首先从指令来看：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;dev&quot;: &quot;npm run bootstrap &amp;&amp; npm run build:file &amp;&amp; cross-env NODE_ENV=development webpack-dev-server --config build/webpack.demo.js &amp; node build/bin/template.js&quot;,</span><br></pre></td></tr></table></figure></p>
+<p>这个其实是一连串指令结合的，我们一个一个分析：</p>
+<h3 id="step-1-1"><a href="#step-1-1" class="headerlink" title="step 1.1"></a>step 1.1</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;bootstrap&quot;: &quot;yarn || npm i&quot;</span><br></pre></td></tr></table></figure>
+<p>这个就是纯粹的安装依赖，没有实际操作</p>
+<h3 id="step-1-2"><a href="#step-1-2" class="headerlink" title="step 1.2"></a>step 1.2</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;build:file&quot;: &quot;node build/bin/iconInit.js &amp; node build/bin/build-entry.js &amp; node build/bin/i18n.js &amp; node build/bin/version.js&quot;</span><br></pre></td></tr></table></figure>
+<p>这个又是一连串指令的结合，继续拆开分析：</p>
+<h4 id="stpe-1-2-1"><a href="#stpe-1-2-1" class="headerlink" title="stpe 1.2.1"></a>stpe 1.2.1</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node build/bin/iconInit.js</span><br></pre></td></tr></table></figure>
+<p>简单的来说，就是把<code>packages/theme-chalk/src/icon.scss</code> 这个 css 文件中的所有的 icon 描述字符都提取出来,比如这个：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.el-icon-turn-off:before &#123;</span><br><span class="line">  content: &quot;\e734&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其实就是把<code>turn-off</code>这个子串提取出来，然后放入到这个<code>examples/icon.json</code> 文件里面，这个文件其实就是一个大的 json 数组：</p>
+<p><img src="/2019/12/03/air-ui-2/2.png" alt="1"></p>
+<p>后面这个文件会在显示字体图标的时候，会拿出来做映射。 这样的好处就是，以后添加新的字体图标的时候，写文档的时候，不用手动去添加，它会自动生成这张映射表。</p>
+<p>在启动dev模式的时候，入口的 js 文件<code>examples/entry.js</code> 就会把这个 json 文件引入进入：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">import icon from &apos;./icon.json&apos;;</span><br><span class="line"></span><br><span class="line">Vue.prototype.$icon = icon; // Icon 列表页用</span><br></pre></td></tr></table></figure></p>
+<p>会在 icon 列表的时候，用上这个映射表： 以中文为例，那么文件就在 <code>examples/docs/zh-CN/icon.md</code> 这个展示页用到<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">### 图标集合</span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">ul</span> <span class="attr">class</span>=<span class="string">"icon-list"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">v-for</span>=<span class="string">"name in $icon"</span> <span class="attr">:key</span>=<span class="string">"name"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">span</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">i</span> <span class="attr">:class</span>=<span class="string">"'el-icon-' + name"</span>&gt;</span><span class="tag">&lt;/<span class="name">i</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">"icon-name"</span>&gt;</span>&#123;&#123;'el-icon-' + name&#125;&#125;<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>展示页就是下图：</p>
+<p><img src="/2019/12/03/air-ui-2/3.png" alt="1"></p>
+<h4 id="step-1-2-2"><a href="#step-1-2-2" class="headerlink" title="step 1.2.2"></a>step 1.2.2</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node build/bin/build-entry.js</span><br></pre></td></tr></table></figure>
+<p>生成入口文件 <code>index.js</code>, 简单的来说，就是通过这个任务，来生成 <code>src</code> 目录下的 <code>index.js</code> (每次打包，这个 <code>index.js</code> 都会重新生成), 这个也是整个组件库的入口文件。 他这个有一个模板，里面有一些组件是内置会有的，比如：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">Vue.prototype.$loading = Loading.service;</span><br><span class="line">Vue.prototype.$msgbox = MessageBox;</span><br><span class="line">Vue.prototype.$alert = MessageBox.alert;</span><br><span class="line">Vue.prototype.$confirm = MessageBox.confirm;</span><br><span class="line">Vue.prototype.$prompt = MessageBox.prompt;</span><br><span class="line">Vue.prototype.$notify = Notification;</span><br><span class="line">Vue.prototype.$message = Message;</span><br><span class="line"></span><br><span class="line">export default &#123;</span><br><span class="line">  version: '&#123;&#123;version&#125;&#125;',</span><br><span class="line">  locale: locale.use,</span><br><span class="line">  i18n: locale.i18n,</span><br><span class="line">  install,</span><br><span class="line">  CollapseTransition,</span><br><span class="line">  Loading,</span><br><span class="line">&#123;&#123;list&#125;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>他是通过获取根目录下的<code>components.json</code> 这个文件。这个文件是所有可以配置的组件的列表。一旦这个组件在列表里面，那么我打包的时候，就会把这个组件打进去。反之，如果里面有些组件，比如 <code>drawer</code> 和 <code>divider</code> 这种，我的项目根本不会用到。那么我就把这两个组件从 <code>components.json</code> 中剔除，那么生成的 <code>src/index.js</code> 这个 js，就不会包含这两个组件了。 从而实现可定制化组件的方式。</p>
+<h4 id="step-1-2-3"><a href="#step-1-2-3" class="headerlink" title="step 1.2.3"></a>step 1.2.3</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node build/bin/i18n.js</span><br></pre></td></tr></table></figure>
+<p>生成这个站点的 i18n 多语言的静态页面, 通过这个任务，我们可以生成你想要支持的多语言文件，这个多语言文件其实就是文档站点的多语言的每一个页面的词条，跟组件的多语言没有关系</p>
+<p><img src="/2019/12/03/air-ui-2/4.png" alt="1"></p>
+<p>每一个页面用到的多语言都有，从 <code>json</code> 来看，目前就只支持 4 种多语言：</p>
+<p><img src="/2019/12/03/air-ui-2/5.png" alt="1"></p>
+<p>具体看生成的站点就知道了：</p>
+<p><img src="/2019/12/03/air-ui-2/6.png" alt="1"></p>
+<p>就四种，那么是怎么替换的呢？ 其实很简单，根据不同的语言的不同的页面，然后把对应的词条 json 传进去替换就行了。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Object</span>.keys(lang.pages).forEach(<span class="function"><span class="params">page</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">var</span> templatePath = path.resolve(__dirname, <span class="string">`../../examples/pages/template/<span class="subst">$&#123; page &#125;</span>.tpl`</span>);</span><br><span class="line">  <span class="keyword">var</span> outputPath = path.resolve(__dirname, <span class="string">`../../examples/pages/<span class="subst">$&#123; lang.lang &#125;</span>/<span class="subst">$&#123; page &#125;</span>.vue`</span>);</span><br><span class="line">  <span class="keyword">var</span> content = fs.readFileSync(templatePath, <span class="string">'utf8'</span>);</span><br><span class="line">  <span class="keyword">var</span> pairs = lang.pages[page];</span><br><span class="line"></span><br><span class="line">  <span class="built_in">Object</span>.keys(pairs).forEach(<span class="function"><span class="params">key</span> =&gt;</span> &#123;</span><br><span class="line">    content = content.replace(<span class="keyword">new</span> <span class="built_in">RegExp</span>(<span class="string">`&lt;%=\\s*<span class="subst">$&#123; key &#125;</span>\\s*&gt;`</span>, <span class="string">'g'</span>), pairs[key]);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  fs.writeFileSync(outputPath, content);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>模板就是 <code>.tpl</code>，结果页就是 <code>.vue</code> 文件， 举个例子，就以 design 这个页面来说：</p>
+<p><img src="/2019/12/03/air-ui-2/7.png" alt="1"></p>
+<p>他其实就是把中文下的<code>design</code>页面的词条取出来，然后塞到<code>design.tpl</code>这个模板里面：</p>
+<p><img src="/2019/12/03/air-ui-2/8.png" alt="1"></p>
+<p>最后生成的结果页就是 <code>design.vue</code> 这个页面：</p>
+<p><img src="/2019/12/03/air-ui-2/9.png" alt="1"></p>
+<p>这样就把这个站点的多语言相关的页面都替换完了。</p>
+<h4 id="step-1-2-4"><a href="#step-1-2-4" class="headerlink" title="step 1.2.4"></a>step 1.2.4</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node build/bin/version.js</span><br></pre></td></tr></table></figure>
+<p>生成对应的版本列表文件 <code>examples/version.json</code>, 这个没啥好说的，硬编码写入到一个文件而已。 这个文件会在 <code>changelog</code> 这个页面的时候， 动态用 <code>ajax</code> 来请求：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xhr.open(<span class="string">'GET'</span>, <span class="string">'/versions.json'</span>);</span><br></pre></td></tr></table></figure></p>
+<p>然后再结合根目录下的 <code>CHANGELOG.{lang}.md</code> 来显示出真正的 log 列表, 这个 md 文件会在 <code>changlog.vue</code> 文件中被引用进去：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> ChangeLog <span class="keyword">from</span> <span class="string">'../../../CHANGELOG.zh-CN.md'</span>;</span><br></pre></td></tr></table></figure></p>
+<h3 id="step-1-3"><a href="#step-1-3" class="headerlink" title="step 1.3"></a>step 1.3</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cross-env NODE_ENV=development webpack-dev-server --config build/webpack.demo.js</span><br></pre></td></tr></table></figure>
+<p>到这一步才开始进行<code>webpack</code>构建了，对应的<code>webpack</code>的配置文件是<code>webpack.demo.js</code>。 <code>cross-env</code> 是为了兼容各个OS系统的环境设置的方式。</p>
+<p>因为我们的 <code>env</code> 是 dev，并且是非 <code>play</code> 模式， 所以 js 执行的入口文件是  <code>example/entry.js</code> 这个文件。 这个也是这个项目的 入口 vue 文件 （就是初始化 vue 的那个文件，而入口文件是 <code>index.tpl</code>）,然后经过 <code>webpack</code> 打包之后，这个文件就会变成 <code>[name].js</code>，然后被嵌进去到 <code>index.tpl</code> 这个模板文件里面：</p>
+<p><img src="/2019/12/03/air-ui-2/10.png" alt="1"></p>
+<p>从源码上可以看到，他生成了入口的 js 文件之后，就嵌进去了 <code>index.tpl</code> 这个文件里面。而<code>index.tpl</code> 这个模板文件，也会在打包的时候，进行 <code>webpack</code> 的参数填充，从而变成 真正的入口文件 <code>index.html</code>：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> HtmlWebpackPlugin(&#123;</span><br><span class="line">  template: <span class="string">'./examples/index.tpl'</span>,</span><br><span class="line">  filename: <span class="string">'./index.html'</span>,</span><br><span class="line">  favicon: <span class="string">'./examples/favicon.ico'</span></span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure></p>
+<p>至于为什么这个名字 <code>[name]</code> 是 <code>main</code>，这个确实有点奇怪，按照道理说，我的入口文件是 <code>entry.js</code> ，如果<code>output</code> 没有特别指定的话， 那么<code>output</code> 的 <code>filename</code> 中的 <code>name</code>，也应该是 <code>entry</code> 才对，怎么会变成 <code>main</code> ???</p>
+<p>后面查了一下，原来<code>entry</code> 配置是：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">entry: <span class="string">'./examples/entry.js'</span></span><br></pre></td></tr></table></figure></p>
+<p>那么在 <code>webpack</code> 的解析中，就会变成：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">entry: &#123;</span><br><span class="line">　　main: <span class="string">'./examples/entry.js'</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>所以名字就会变成 <code>main</code> 了, 同时因为 mode 是 dev，所以还会开启本地服务：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">devServer: &#123;</span><br><span class="line">  host: <span class="string">'0.0.0.0'</span>,</span><br><span class="line">  port: <span class="number">8085</span>,</span><br><span class="line">  publicPath: <span class="string">'/'</span>,</span><br><span class="line">  hot: <span class="literal">true</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>这样子 webpack 打包的部分就完成了。 但是还有最后一步呢。</p>
+<h3 id="step-1-4"><a href="#step-1-4" class="headerlink" title="step 1.4"></a>step 1.4</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">node build/bin/template.js</span><br></pre></td></tr></table></figure>
+<p>其实这一步就是<code>watch</code>，针对所有的页面模板，进行监听,其实就是针对 <code>examples/pages/template</code> 这个目录下的所有的模板，进行监听，如果有修改的话，就重新执行 <code>npm run i18n</code> 任务，也就是<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"i18n"</span>: <span class="string">"node build/bin/i18n.js"</span>,</span><br></pre></td></tr></table></figure></p>
+<p>其实就是 <code>1.2.3</code> 的任务，就是为模板插入多语言， 注意，这时候的 <code>__dirname</code> 就是 webpack 运行环境的内存中的目录了,一旦 tpl 文件变了，就会导致对应的 vue 文件改变，从而导致 <code>webpack</code> 重新 reload，然后界面就刷新了。因为用的是 <code>webpack-dev-server</code>  这个 server， 他有自带监听机制。<code>rules</code> 里面的 loader 相关的文件一旦修改的话，是会热更新的：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  test: <span class="regexp">/\.vue$/</span>,</span><br><span class="line">  loader: <span class="string">'vue-loader'</span>,</span><br><span class="line">  options: &#123;</span><br><span class="line">    compilerOptions: &#123;</span><br><span class="line">      preserveWhitespace: <span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<h3 id="dev-打包总结"><a href="#dev-打包总结" class="headerlink" title="dev 打包总结"></a>dev 打包总结</h3><p>最后总结一下：通过打包 dev 模式，我们可以知道，首页文件是<code>examples/index.tpl</code> ， 入口 js 文件是 <code>examples/entry.js</code> （这个其实就是vue 的入口文件）, 然后通过 <code>webpack-dev-server</code> 启动一个热更新服务 （打包的文件都是放在内存里面的）。事实上，以上这些都没有涉及到 <code>element-ui</code> 是怎么编写 ui 组件库的。只是将其 api 站点运行起来而已。</p>
+<h2 id="2-文档站点的-build-版本"><a href="#2-文档站点的-build-版本" class="headerlink" title="2.文档站点的 build 版本"></a>2.文档站点的 build 版本</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run deploy:build</span><br></pre></td></tr></table></figure>
+<p>之前是文档站点的本地环境版本，也就是运行在内存的，接下来这个是线上部署版本，就是打包成静态文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">F:\code\github\element&gt;npm run deploy:build</span><br><span class="line"></span><br><span class="line">&gt; element-ui@2.12.0 deploy:build F:\code\github\element</span><br><span class="line">&gt; npm run build:file &amp;&amp; cross-env NODE_ENV=production webpack --config build/webpack.demo.js &amp;&amp; echo element.eleme.io&gt;&gt;examples/element-ui/CNAME</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>跟开发模式有点像， 只不过这时候就输出到 <code>examples</code> 目录下了，而不是输出到内存了。 整个静态文件都输出到 <code>examples/element-ui/</code> 这个目录里面，相当于是一个完整的站点。如果放到 <code>webserver</code> 下面。就是一个静态站点。 这个就不分析，因为原理跟 dev 差不多。</p>
+<h2 id="3-打包组件库"><a href="#3-打包组件库" class="headerlink" title="3.打包组件库"></a>3.打包组件库</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run dist</span><br></pre></td></tr></table></figure>
+<p>具体log：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">F:\code\github\element&gt;npm run dist</span><br><span class="line"></span><br><span class="line">&gt; element-ui@2.12.0 dist F:\code\github\element</span><br><span class="line">&gt; npm run clean &amp;&amp; npm run build:file &amp;&amp; npm run lint &amp;&amp; webpack --config build/webpack.conf.js &amp;&amp; webpack --config build/webpack.common.js &amp;&amp; webpack --config build/webpack.component.js &amp;&amp; npm run build:utils &amp;&amp; npm run build:um</span><br><span class="line">d &amp;&amp; npm run build:theme</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>目标目录就是 <code>lib</code> 目录，原先的项目是没有 <code>lib</code> 目录的， 打完包，才会有 <code>lib</code> 目录。</p>
+<p><img src="/2019/12/03/air-ui-2/11.png" alt="1"></p>
+<p>总的指令是：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;dist&quot;: &quot;npm run clean &amp;&amp; npm run build:file &amp;&amp; npm run lint &amp;&amp; webpack --config build/webpack.conf.js &amp;&amp; webpack --config build/webpack.common.js &amp;&amp; webpack --config build/webpack.component.js &amp;&amp; npm run build:utils &amp;&amp; npm run build:umd &amp;&amp; npm run build:theme&quot;,</span><br></pre></td></tr></table></figure></p>
+<p>里面有些指令前面已经分析过了，这边就不细讲了：</p>
+<h3 id="step-3-1"><a href="#step-3-1" class="headerlink" title="step 3.1"></a>step 3.1</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;clean&quot;: &quot;rimraf lib &amp;&amp; rimraf packages/*/lib &amp;&amp; rimraf test/**/coverage&quot;,</span><br></pre></td></tr></table></figure>
+<p>其实就是先清理目录：</p>
+<ul>
+<li>清理 <code>lib</code> 目录</li>
+<li>清理 <code>packages</code> 下的 <code>lib</code> 目录</li>
+<li>清理 <code>test</code> 目录下的测试目录</li>
+</ul>
+<h3 id="step-3-2"><a href="#step-3-2" class="headerlink" title="step 3.2"></a>step 3.2</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run build:file</span><br></pre></td></tr></table></figure>
+<p>同上面 dev 构建的 <code>step 1.2</code> 一样，不在重复讲，无非就是 <code>初始化 icon</code>， <code>生成入口文件</code>， <code>生成 多语言静态页</code>， <code>生成版本列表文件</code></p>
+<h3 id="step-3-3"><a href="#step-3-3" class="headerlink" title="step 3.3"></a>step 3.3</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;lint&quot;: &quot;eslint src/**/* test/**/* packages/**/* build/**/* --quiet&quot;</span><br></pre></td></tr></table></figure>
+<p>这个就是跑代码检测工具</p>
+<h3 id="step-3-4"><a href="#step-3-4" class="headerlink" title="step 3.4"></a>step 3.4</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">webpack --config build/webpack.conf.js</span><br></pre></td></tr></table></figure>
+<p>用 <code>webpack</code> 打包，他是把整个 webpack 的打包任务分成了好几块，这个是第一块，这一块的处理其实很简单, 就是将 <code>src/index.js</code> 这个入口文件进行打包，然后生成 <code>umd</code> 通用加载模式的文件：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mode: <span class="string">'production'</span>,</span><br><span class="line">entry: &#123;</span><br><span class="line">  app: [<span class="string">'./src/index.js'</span>]</span><br><span class="line">&#125;,</span><br><span class="line">output: &#123;</span><br><span class="line">  path: path.resolve(process.cwd(), <span class="string">'./lib'</span>),</span><br><span class="line">  publicPath: <span class="string">'/dist/'</span>,</span><br><span class="line">  filename: <span class="string">'index.js'</span>,</span><br><span class="line">  chunkFilename: <span class="string">'[id].js'</span>,</span><br><span class="line">  libraryTarget: <span class="string">'umd'</span>,</span><br><span class="line">  libraryExport: <span class="string">'default'</span>,</span><br><span class="line">  library: <span class="string">'ELEMENT'</span>,</span><br><span class="line">  umdNamedDefine: <span class="literal">true</span>,</span><br><span class="line">  globalObject: <span class="string">'typeof self !== \'undefined\' ? self : this'</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>这时候我的 lib 目录就生成了，采用 <code>umd</code> 模块化加载的方式来打包入口文件 <code>index.js</code> 文件。</p>
+<h3 id="step-3-5"><a href="#step-3-5" class="headerlink" title="step 3.5"></a>step 3.5</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">webpack --config build/webpack.common.js</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mode: <span class="string">'production'</span>,</span><br><span class="line">entry: &#123;</span><br><span class="line">  app: [<span class="string">'./src/index.js'</span>]</span><br><span class="line">&#125;,</span><br><span class="line">output: &#123;</span><br><span class="line">  path: path.resolve(process.cwd(), <span class="string">'./lib'</span>),</span><br><span class="line">  publicPath: <span class="string">'/dist/'</span>,</span><br><span class="line">  filename: <span class="string">'element-ui.common.js'</span>,</span><br><span class="line">  chunkFilename: <span class="string">'[id].js'</span>,</span><br><span class="line">  libraryExport: <span class="string">'default'</span>,</span><br><span class="line">  library: <span class="string">'ELEMENT'</span>,</span><br><span class="line">  libraryTarget: <span class="string">'commonjs2'</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<p>这个是另外一种模块化方式的打包， 这个是将入口文件<code>src/index.js</code> 打包成 <code>element-ui.common.js</code> 这个文件。</p>
+<p><img src="/2019/12/03/air-ui-2/12.png" alt="1"></p>
+<p>这时候应该会有一个疑问？？？ 这两个任务打出来的文件，明显大小不一样？？ 那为啥同一个入口文件，可以通过不同的配置，打出两个不一样的 出口文件？？</p>
+<p>后面发现原来是有差别的，这两个其实都是入口文件，只不过 <code>element-ui.common.js</code> 这个是 <code>ES6 Module</code> 模块化加载方式的入口文件。<br>而 <code>index.js</code> 这个是 <code>umd</code> 通用模块化加载方式的入口文件。 他的 <code>webpack</code> 的 <code>output</code> 配置有一个这个配置：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">libraryTarget: <span class="string">'umd'</span>,</span><br></pre></td></tr></table></figure></p>
+<p>标明要打包成 <code>umd</code> 的模块化方式的入口文件。这是一种可以将你的 <code>library</code> 能够在所有的模块定义下都可运行的方式。它将在 <code>CommonJS</code>, <code>AMD</code> 环境下运行，或将模块导出到 <code>global</code> 下的变量,也可以用<code>script</code>方式引入，像 <code>jquery</code>, <code>lodash</code>，<code>underscore</code>这些工具库, 都是这种打包方式。</p>
+<p>打包出来其实是这样子：以jquery 为例：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params">root, factory</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> define === <span class="string">'function'</span> &amp;&amp; define.amd) &#123;</span><br><span class="line">        <span class="comment">// AMD</span></span><br><span class="line">        define([<span class="string">'jquery'</span>], factory);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> exports === <span class="string">'object'</span>) &#123;</span><br><span class="line">        <span class="comment">// Node, CommonJS之类的</span></span><br><span class="line">        <span class="built_in">module</span>.exports = factory(<span class="built_in">require</span>(<span class="string">'jquery'</span>));</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 浏览器全局变量(root 即 window)</span></span><br><span class="line">        root.returnExports = factory(root.jQuery);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;(<span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> (<span class="params">$</span>) </span>&#123;</span><br><span class="line">    <span class="comment">//    方法</span></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">myFunc</span>(<span class="params"></span>)</span>&#123;&#125;;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">//    暴露公共方法</span></span><br><span class="line">    <span class="keyword">return</span> myFunc;</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure></p>
+<p>其实就是判断环境，以兼容各种模块加载方式。 所以事实上，打完包的这个 <code>index.js</code> 开头就是这个：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">!<span class="function"><span class="keyword">function</span> (<span class="params">e, t</span>) </span>&#123;</span><br><span class="line">  <span class="string">"object"</span> == <span class="keyword">typeof</span> exports &amp;&amp; <span class="string">"object"</span> == <span class="keyword">typeof</span> <span class="built_in">module</span> ? <span class="built_in">module</span>.exports = t(<span class="built_in">require</span>(<span class="string">"vue"</span>)) : <span class="string">"function"</span> == <span class="keyword">typeof</span> define &amp;&amp; define.amd ? define(<span class="string">"ELEMENT"</span>, [<span class="string">"vue"</span>], t) : <span class="string">"object"</span> == <span class="keyword">typeof</span> exports ? exports.ELEMENT = t(<span class="built_in">require</span>(<span class="string">"vue"</span>)) : e.ELEMENT = t(e.Vue)</span><br><span class="line">&#125;(<span class="string">"undefined"</span> != <span class="keyword">typeof</span> self ? self : <span class="keyword">this</span>, <span class="function"><span class="keyword">function</span> (<span class="params">e</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> (<span class="params">e</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> t = &#123;&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>而本步骤的这种方式，其实就是打包成类似于 <code>CommonJs</code> 的方式，只需要将所有的依赖文件都打包成一个文件即可。 而上面的 <code>libraryTarget: commonjs2</code> 其实跟 <code>libraryTarget: commonjs</code> 差不多，只不过 <code>commonjs2</code> 导出的是 <code>module.exports.default</code>, 按照我的理解，他其实就是 <code>es6</code> 提出的模块加载机制 <code>ES6 Module</code>。</p>
+<p>事实上，在我自己的理解中，关于 <code>webpack</code> 的 <code>libraryTarget: commonjs</code> 其实对应就是 <code>CommonJS</code> 的模块化加载方式，而 <code>libraryTarget: commonjs2</code> 其实对应的是 es6 的 <code>ES6 Module</code> 的模块化加载方式，他俩的不同之处在于：</p>
+<ol>
+<li><code>CommonJs</code> 导出的是变量的一份拷贝，<code>ES6 Module</code> 导出的是变量的绑定（export default 是特殊的）</li>
+<li><code>CommonJs</code>是单个值导出，<code>ES6 Module</code>可以导出多个, 一般不提倡 <code>export default</code> 和 <code>export {a, b, c}</code> 混用。(<strong>事实上，我后面这点踩坑了</strong>)</li>
+<li><code>CommonJs</code>是动态语法可以写在判断里，<code>ES6 Module</code>静态语法只能写在顶层, 而且 <code>ES6 Module</code> 是只读的，不能被改变</li>
+<li><code>ES6 Module</code> 默认就是严格模式</li>
+</ol>
+<p>而之所以要用 <code>ES6 Module</code> 的模块化加载方式，主要是因为这边涉及到一个模块化的分类，比如：</p>
+<ol>
+<li>浏览器端的模块化有两个代表：<ol>
+<li><code>AMD(Asynchronous Module Definition,异步模块定义)</code>，代表产品为：<code>Require.js</code></li>
+<li><code>CMD(Common Module Definition,通用模块定义)</code>，代表产品为：<code>Sea.js</code></li>
+</ol>
+</li>
+<li>服务器端的模块化规范是使用<code>CommonJS</code>规范，具体规范是：<ol>
+<li>使用<code>require</code>引入其他模块或者包</li>
+<li>使用<code>exports</code>或者<code>module.exports</code>导出模块成员</li>
+<li>一个文件就是一个模块，都拥有独立的作用域</li>
+</ol>
+</li>
+<li>大一统的模块化规范 – <code>ES6模块化</code>。<code>ES6</code> 语法规范中，在语言层面上定义了 ES6 模块化规范，是浏览器端与服务器端通用的模块化开发规范。规范如下：<ol>
+<li>每一个js文件都是独立的模块</li>
+<li>导入模块成员使用<code>import</code>关键字</li>
+<li>暴露模块成员使用<code>export</code>关键字</li>
+</ol>
+</li>
+</ol>
+<p>总结就是：推荐使用<code>ES6模块化</code>，因为<code>AMD</code>，<code>CMD</code>局限使用于浏览器端，而<code>CommonJS</code>在服务器端使用。<code>ES6模块化</code>是浏览器端和服务器端通用的规范。事实上，后面在做 <code>air-ui</code>的时候，我直接抛弃 <code>umd</code> 的通用模块化加载方式，直接采用 <code>ES6 Module</code> 的方式来引用, 就是 <code>import</code> 的方式来引入（当然如果后面业务的扩展真的需要有类似于 <code>umd</code> 的引用方式，再把这种打包方式加上去，但是如果只是用来做 vue 项目的话，基本上都是用<code>ES6 Module</code> 的方式来引用）。</p>
+<h3 id="step-3-6"><a href="#step-3-6" class="headerlink" title="step 3.6"></a>step 3.6</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">webpack --config build/webpack.component.js</span><br></pre></td></tr></table></figure>
+<p>接下来将单独的组件也打包出来<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">const</span> Components = <span class="built_in">require</span>(<span class="string">'../components.json'</span>);</span><br><span class="line"></span><br><span class="line">mode: <span class="string">'production'</span>,</span><br><span class="line">entry: Components,</span><br><span class="line">output: &#123;</span><br><span class="line">  path: path.resolve(process.cwd(), <span class="string">'./lib'</span>),</span><br><span class="line">  publicPath: <span class="string">'/dist/'</span>,</span><br><span class="line">  filename: <span class="string">'[name].js'</span>,</span><br><span class="line">  chunkFilename: <span class="string">'[id].js'</span>,</span><br><span class="line">  libraryTarget: <span class="string">'commonjs2'</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2019/12/03/air-ui-2/13.png" alt="1"></p>
+<p>生成的这些文件其实就是单独组件的<code>es6 Module</code> 的模块化加载方式，是可以被单独引用的。</p>
+<h3 id="step-3-7"><a href="#step-3-7" class="headerlink" title="step 3.7"></a>step 3.7</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"build:utils"</span>: <span class="string">"cross-env BABEL_ENV=utils babel src --out-dir lib --ignore src/index.js"</span>,</span><br></pre></td></tr></table></figure>
+<p>这个其实就是将 <code>src</code> 目录下的 除了 <code>src/index.js</code> 这个文件之外的其他所有的文件都先经过 <code>babel</code> 转换，然后输出到 <code>lib</code> 目录下：</p>
+<p><img src="/2019/12/03/air-ui-2/14.png" alt="1"></p>
+<p>因为这几个目录在打包的时候，是通过 <code>externals</code> 的方式打包的，并没有打进去 <code>element-ui.common.js</code> 中里面去，所以这边要另外处理。所以才用这种方式 , 其实就是这 5 个目录。</p>
+<h3 id="step-3-8"><a href="#step-3-8" class="headerlink" title="step 3.8"></a>step 3.8</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"build:umd"</span>: <span class="string">"node build/bin/build-locale.js"</span>,</span><br></pre></td></tr></table></figure>
+<p>针对 <code>umd</code> 的加载方式，对词条的多语言进行打包。其实就是把 <code>src/locale/lang</code> 这个目录下的文件拷贝到 <code>umd</code> 目录下，不过为了兼容 <code>umd</code> 的加载方式，就做了一些兼容。</p>
+<h3 id="step-3-9"><a href="#step-3-9" class="headerlink" title="step 3.9"></a>step 3.9</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"build:theme"</span>: <span class="string">"node build/bin/gen-cssfile &amp;&amp; gulp build --gulpfile packages/theme-chalk/gulpfile.js &amp;&amp; cp-cli packages/theme-chalk/lib lib/theme-chalk"</span></span><br></pre></td></tr></table></figure>
+<p>这个其实就是将 <code>scss</code> 文件编译成 <code>css</code> 文件 并且跟字体文件一起拷贝到 <code>lib</code> 目录下的 <code>theme-chalk</code> 目录下。</p>
+<p>这样子，整个库的 打包就完成了。 </p>
+<h2 id="4-打包chrome插件和发布chrome插件"><a href="#4-打包chrome插件和发布chrome插件" class="headerlink" title="4.打包chrome插件和发布chrome插件"></a>4.打包chrome插件和发布chrome插件</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"deploy:extension"</span>: <span class="string">"cross-env NODE_ENV=production webpack --config build/webpack.extension.js"</span>,</span><br><span class="line"><span class="string">"dev:extension"</span>: <span class="string">"rimraf examples/extension/dist &amp;&amp; cross-env NODE_ENV=development webpack --watch --config build/webpack.extension.js"</span>,</span><br></pre></td></tr></table></figure>
+<p>这个是关于组件对应的 chrome 插件。用来配合做主题自定义的。在本文分析中不重要。</p>
+<h2 id="5-发布到线上"><a href="#5-发布到线上" class="headerlink" title="5.发布到线上"></a>5.发布到线上</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"pub"</span>: <span class="string">"npm run bootstrap &amp;&amp; sh build/git-release.sh &amp;&amp; sh build/release.sh &amp;&amp; node build/bin/gen-indices.js &amp;&amp; sh build/deploy-faas.sh"</span>,</span><br></pre></td></tr></table></figure>
+<p>这个就通过几个脚本：</p>
+<ol>
+<li><code>sh build/git-release.sh</code>  这个脚本主要是为了检查 git 状态，如果状态是异常的，那么就继续，否则就退出</li>
+<li><code>sh build/release.sh</code> 这个其实就是将 dev 分支 合并到 master 分支,然后将这个合并的 commit 提交上去，最后提交到 master 分支。</li>
+<li><code>node build/bin/gen-indices.js</code>  这个就是替换多语言的文本，主要是替换索引</li>
+<li><code>sh build/deploy-faas.sh</code> 更新文档站点</li>
+</ol>
+<p>这个在本文分析中，其实也不重要。</p>
+<h2 id="使用一下"><a href="#使用一下" class="headerlink" title="使用一下"></a>使用一下</h2><p>接下来我们试着装一下这个第三方库：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install element-ui</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2019/12/03/air-ui-2/15.png" alt="1"></p>
+<p>这个包下载下来是这样子的， 跟下面完整项目比的话， 大部分的资源还是在的</p>
+<p><img src="/2019/12/03/air-ui-2/16.png" alt="1"></p>
+<p>但是也可以看出，这个用来被安装的分支，其实不是 master 分支的代码，而是另外一个分支的代码。</p>
+<p>具体在项目中引用是这样的：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span></span><br><span class="line"><span class="keyword">import</span> Element <span class="keyword">from</span> <span class="string">'element-ui'</span></span><br><span class="line"></span><br><span class="line">Vue.use(Element)</span><br><span class="line"></span><br><span class="line"><span class="comment">// orimport &#123;</span></span><br><span class="line">  Select,</span><br><span class="line">  Button</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">'element-ui'</span></span><br><span class="line"></span><br><span class="line">Vue.component(Select.name, Select)</span><br><span class="line">Vue.component(Button.name, Button)</span><br></pre></td></tr></table></figure>
+<p>这时候代码引用的 <code>element-ui</code> 其实就是 <code>package.json</code> 中的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"main"</span>: <span class="string">"lib/element-ui.common.js"</span>,</span><br><span class="line"><span class="string">"name"</span>: <span class="string">"element-ui"</span>,</span><br></pre></td></tr></table></figure></p>
+<p>这两个配置，也就是实际引用的是 <code>element-ui.common.js</code> 这个 js，我们看下这个 js 打包后是什么样子的，应该是可以导出各种组件的, 看了一下，他的入口还是原来的 <code>src/index.js</code> 这个文件：</p>
+<blockquote>
+<p>ps: 事实上我后面又重新试了一下，其实引入的并不是 <code>element-ui.common.js</code> 这个文件，而是 <code>lib/index.js</code> 这个文件，所以还是通过用 <code>umd</code> 的模块化加载方式去实现组件的按需加载功能。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line">  version: <span class="string">'2.12.0'</span>,</span><br><span class="line">  locale: lib_locale_default.a.use,</span><br><span class="line">  i18n: lib_locale_default.a.i18n,</span><br><span class="line">  install: src_install,</span><br><span class="line">  CollapseTransition: collapse_transition_default.a,</span><br><span class="line">  Loading: packages_loading,</span><br><span class="line">  Pagination: packages_pagination,</span><br><span class="line">  Dialog: dialog,</span><br><span class="line">  Autocomplete: packages_autocomplete,</span><br><span class="line">  Dropdown: packages_dropdown,</span><br><span class="line">  DropdownMenu: packages_dropdown_menu,</span><br><span class="line">  DropdownItem: packages_dropdown_item,</span><br><span class="line">  Menu: packages_menu,</span><br><span class="line">  Submenu: packages_submenu,</span><br><span class="line">  MenuItem: packages_menu_item,</span><br><span class="line">  MenuItemGroup: packages_menu_item_group,</span><br><span class="line">  Input: packages_input,</span><br><span class="line">  InputNumber: packages_input_number,</span><br><span class="line">  Radio: packages_radio,</span><br><span class="line">  RadioGroup: packages_radio_group,</span><br><span class="line">  RadioButton: packages_radio_button,</span><br><span class="line">  Checkbox: packages_checkbox,</span><br><span class="line">  CheckboxButton: packages_checkbox_button,</span><br><span class="line">  CheckboxGroup: packages_checkbox_group,</span><br><span class="line">  Switch: packages_switch,</span><br><span class="line">  Select: packages_select,</span><br><span class="line">  Option: packages_option,</span><br><span class="line">  OptionGroup: packages_option_group,</span><br><span class="line">  Button: packages_button,</span><br><span class="line">  ButtonGroup: packages_button_group,</span><br><span class="line">  Table: packages_table,</span><br><span class="line">  TableColumn: packages_table_column,</span><br><span class="line">  DatePicker: packages_date_picker,</span><br><span class="line">  TimeSelect: packages_time_select,</span><br><span class="line">  TimePicker: packages_time_picker,</span><br><span class="line">  Popover: popover,</span><br><span class="line">  Tooltip: packages_tooltip,</span><br><span class="line">  MessageBox: message_box,</span><br><span class="line">  Breadcrumb: packages_breadcrumb,</span><br><span class="line">  BreadcrumbItem: packages_breadcrumb_item,</span><br><span class="line">  Form: packages_form,</span><br><span class="line">  FormItem: packages_form_item,</span><br><span class="line">  Tabs: packages_tabs,</span><br><span class="line">  TabPane: packages_tab_pane,</span><br><span class="line">  Tag: packages_tag,</span><br><span class="line">  Tree: packages_tree,</span><br><span class="line">  Alert: packages_alert,</span><br><span class="line">  Notification: notification,</span><br><span class="line">  Slider: slider,</span><br><span class="line">  Icon: packages_icon,</span><br><span class="line">  Row: packages_row,</span><br><span class="line">  Col: packages_col,</span><br><span class="line">  Upload: packages_upload,</span><br><span class="line">  Progress: packages_progress,</span><br><span class="line">  Spinner: packages_spinner,</span><br><span class="line">  Message: packages_message,</span><br><span class="line">  Badge: badge,</span><br><span class="line">  Card: card,</span><br><span class="line">  Rate: rate,</span><br><span class="line">  Steps: packages_steps,</span><br><span class="line">  Step: packages_step,</span><br><span class="line">  Carousel: carousel,</span><br><span class="line">  Scrollbar: scrollbar,</span><br><span class="line">  CarouselItem: carousel_item,</span><br><span class="line">  Collapse: packages_collapse,</span><br><span class="line">  CollapseItem: packages_collapse_item,</span><br><span class="line">  Cascader: packages_cascader,</span><br><span class="line">  ColorPicker: color_picker,</span><br><span class="line">  Transfer: transfer,</span><br><span class="line">  Container: packages_container,</span><br><span class="line">  Header: header,</span><br><span class="line">  Aside: aside,</span><br><span class="line">  Main: packages_main,</span><br><span class="line">  Footer: footer,</span><br><span class="line">  Timeline: timeline,</span><br><span class="line">  TimelineItem: timeline_item,</span><br><span class="line">  Link: packages_link,</span><br><span class="line">  Divider: divider,</span><br><span class="line">  Image: packages_image,</span><br><span class="line">  Calendar: calendar,</span><br><span class="line">  Backtop: backtop,</span><br><span class="line">  InfiniteScroll: infinite_scroll,</span><br><span class="line">  PageHeader: page_header,</span><br><span class="line">  CascaderPanel: packages_cascader_panel,</span><br><span class="line">  Avatar: avatar,</span><br><span class="line">  Drawer: drawer</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">/***/</span> &#125;)</span><br><span class="line"><span class="comment">/******/</span> ])[<span class="string">"default"</span>];</span><br></pre></td></tr></table></figure>
+<p>如果是直接导出的 <code>Element</code>，其实就是包含了这些组件的一个大的对象。当然还得导入 css：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> ElementUI <span class="keyword">from</span> <span class="string">'element-ui'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'element-ui/lib/theme-chalk/index.css'</span>;</span><br></pre></td></tr></table></figure></p>
+<p>至于为啥要单独引用 css， 而不是把 css 也通过 <code>webpack</code> 打到 js 里面去。这个是因为组件式的开发， 所涉及到的所有的样式都不会写在 vue 文件里面。这个最大的原因就是后面如果要自定义主题的话，可以直接引用自定义主题的 css 文件。而不需要管这个默认主题的 css 文件。</p>
+<p>以 <code>element-ui</code> 为例，他所有的组件都是 js 加 vue， 而 vue 文件里面全部都没有 scss 的：</p>
+<p><img src="/2019/12/03/air-ui-2/17.png" alt="1"></p>
+<p>他全部的 scss 文件都放在 <code>package/theme-chalk/src</code> 这个下面：</p>
+<p><img src="/2019/12/03/air-ui-2/18.png" alt="1"></p>
+<p>打完包的话，其实也会在 <code>package/theme-chalk/lib</code> 下也会放一份打包后的：</p>
+<p><img src="/2019/12/03/air-ui-2/19.png" alt="1"></p>
+<p>这个操作，其实是通过这个指令来跑的：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gulp build --gulpfile packages/theme-chalk/gulpfile.js</span><br></pre></td></tr></table></figure></p>
+<p>简单的来说，就是将 <code>theme-chalk</code> 目录下 <code>src</code> 下的 <code>scss</code> 文件编译成 <code>css</code>， 放到 <code>theme-chalk</code> 目录下的 <code>lib</code> 目录,同时将字体文件也一起挪过去。最后再把编译好的 <code>theme-chalk/lib</code> 目录 拷贝到 <code>lib/theme-chalk</code>， 就可以了<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cp-cli packages/theme-chalk/lib lib/theme-chalk</span><br></pre></td></tr></table></figure></p>
+<p>这样就实现了 <code>scss</code> 的编译，以及 <code>css</code> 文件的单独引入机制。 而且从代码里面看，这个入口的 scss 文件，其实就是将其他的 <code>scss</code> 文件全部引入过去：</p>
+<p><img src="/2019/12/03/air-ui-2/20.png" alt="1"></p>
+<p>可以理解为这个 <code>index.css</code> 就是总的样式文件了。 而我们只需要引入这个 css 就可以了。 其他的都不需要引用了。</p>
+<p><img src="/2019/12/03/air-ui-2/21.png" alt="1"></p>
+<h2 id="组件的开发"><a href="#组件的开发" class="headerlink" title="组件的开发"></a>组件的开发</h2><p>理解了构建之后，组件的开发反而是比较好理解的。<code>element-ui</code> 每一个组件都是一个单独的目录，虽然有时候会相互引用，但是逻辑几乎是互不干扰。遵循一定的目录结构，以 <code>alert</code> 这个组件为例，在 <code>packages</code> 目录的目录结构是这样子的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">alert</span><br><span class="line">  |---src/       </span><br><span class="line">  |      |---main.vue      组件的业务逻辑</span><br><span class="line">  |---index.js    组件的声明</span><br></pre></td></tr></table></figure></p>
+<p>这个目录是很清晰的，所以基本上大框架搞懂了，反而组件的开发是显得比较容易的，因为耦合性很低，不会影响到其他的组件。 而且从整个构建来看，其实打包出来的都没有涉及到主题自定义的方面，打包出来的 <code>index.css</code> 就是默认主题， 所以它的主题自定义功能，其实是通过用户交互界面来让用户自己手动自定义的，这个后面讲到<code>air-ui</code>怎么做主题自定义的时候，会详细讲，其实并没有所谓的优劣，就是使用场景不一样，导致的解决方式也不一样。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过对构建的分析，大概就可以知道 <code>element-ui</code> 的大致脉络，当然，如果说完全的了解，那肯定是不够，事实上我也没有把所有的代码全部啃一遍，一方面是时间上不允许，另一方面，我在得到我想要的思路和流程之后，很多东西我都是按照自己的方式和习惯写的，不一定要跟 <code>element-ui</code> 一样。我看源码只是为了一个思路而已，接下来讲一下我们怎么基于 <code>element-ui</code> 来做 <code>air-ui</code> 的。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</a><br><a href="/2019/12/03/air-ui-2/" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">自建vue组件 air-ui (2) -- 先分析一下 element ui 项目</a><br><a href="/2019/12/05/air-ui-3/" title="自建vue组件 air-ui (3) -- css 开发规范">自建vue组件 air-ui (3) -- css 开发规范</a><br><a href="/2019/12/07/air-ui-4/" title="自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构">自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构</a><br><a href="/2019/12/09/air-ui-5/" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">自建vue组件 air-ui (5) -- 创建第一个组件 Button</a><br><a href="/2019/12/12/air-ui-6/" title="自建vue组件 air-ui (6) -- 创建内置服务组件">自建vue组件 air-ui (6) -- 创建内置服务组件</a><br><a href="/2019/12/15/air-ui-7/" title="自建vue组件 air-ui (7) -- 创建指令组件">自建vue组件 air-ui (7) -- 创建指令组件</a><br><a href="/2019/12/18/air-ui-8/" title="自建vue组件 air-ui (8) -- 实现部分引入组件">自建vue组件 air-ui (8) -- 实现部分引入组件</a><br><a href="/2019/12/22/air-ui-9/" title="自建vue组件 air-ui (9) -- 用 vuepress 写文档">自建vue组件 air-ui (9) -- 用 vuepress 写文档</a><br><a href="/2019/12/26/air-ui-10/" title="自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)">自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)</a><br><a href="/2020/01/02/air-ui-11/" title="自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)">自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)</a><br><a href="/2020/01/04/air-ui-12/" title="自建vue组件 air-ui (12) -- 国际化机制">自建vue组件 air-ui (12) -- 国际化机制</a><br><a href="/2020/01/06/air-ui-13/" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">自建vue组件 air-ui (13) -- 国际化机制(进阶版)</a><br><a href="/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</a><br><a href="/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">自建vue组件 air-ui (15) -- 主题定制</a><br><a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a><br><a href="/2020/01/16/air-ui-17/" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">自建vue组件 air-ui (17) -- 开发爬坑篇以及总结</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/12/03/air-ui-2/" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">http://kebingzao.com/2019/12/03/air-ui-2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/01/air-ui-1/" rel="next" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">
+                <i class="fa fa-chevron-left"></i> 自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/05/air-ui-3/" rel="prev" title="自建vue组件 air-ui (3) -- css 开发规范">
+                自建vue组件 air-ui (3) -- css 开发规范 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下载源码"><span class="nav-number">2.</span> <span class="nav-text">下载源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装-yarn"><span class="nav-number">3.</span> <span class="nav-text">安装 yarn</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本地环境跑起来"><span class="nav-number">4.</span> <span class="nav-text">本地环境跑起来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目录结构"><span class="nav-number">5.</span> <span class="nav-text">目录结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-dev-环境的构建"><span class="nav-number">6.</span> <span class="nav-text">1. dev 环境的构建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#step-1-1"><span class="nav-number">6.1.</span> <span class="nav-text">step 1.1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-1-2"><span class="nav-number">6.2.</span> <span class="nav-text">step 1.2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#stpe-1-2-1"><span class="nav-number">6.2.1.</span> <span class="nav-text">stpe 1.2.1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-1-2-2"><span class="nav-number">6.2.2.</span> <span class="nav-text">step 1.2.2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-1-2-3"><span class="nav-number">6.2.3.</span> <span class="nav-text">step 1.2.3</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#step-1-2-4"><span class="nav-number">6.2.4.</span> <span class="nav-text">step 1.2.4</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-1-3"><span class="nav-number">6.3.</span> <span class="nav-text">step 1.3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-1-4"><span class="nav-number">6.4.</span> <span class="nav-text">step 1.4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dev-打包总结"><span class="nav-number">6.5.</span> <span class="nav-text">dev 打包总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-文档站点的-build-版本"><span class="nav-number">7.</span> <span class="nav-text">2.文档站点的 build 版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-打包组件库"><span class="nav-number">8.</span> <span class="nav-text">3.打包组件库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-1"><span class="nav-number">8.1.</span> <span class="nav-text">step 3.1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-2"><span class="nav-number">8.2.</span> <span class="nav-text">step 3.2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-3"><span class="nav-number">8.3.</span> <span class="nav-text">step 3.3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-4"><span class="nav-number">8.4.</span> <span class="nav-text">step 3.4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-5"><span class="nav-number">8.5.</span> <span class="nav-text">step 3.5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-6"><span class="nav-number">8.6.</span> <span class="nav-text">step 3.6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-7"><span class="nav-number">8.7.</span> <span class="nav-text">step 3.7</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-8"><span class="nav-number">8.8.</span> <span class="nav-text">step 3.8</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#step-3-9"><span class="nav-number">8.9.</span> <span class="nav-text">step 3.9</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-打包chrome插件和发布chrome插件"><span class="nav-number">9.</span> <span class="nav-text">4.打包chrome插件和发布chrome插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-发布到线上"><span class="nav-number">10.</span> <span class="nav-text">5.发布到线上</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用一下"><span class="nav-number">11.</span> <span class="nav-text">使用一下</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件的开发"><span class="nav-number">12.</span> <span class="nav-text">组件的开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">13.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/12/03/air-ui-2/';
+          this.page.identifier = '2019/12/03/air-ui-2/';
+          this.page.title = '自建vue组件 air-ui (2) -- 先分析一下 element ui 项目';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言最近的一个月大部分时间都在忙这个事情，就是以 element ui 为基础，做一个属于我们自己的 vue 组件库，并且扩展。 现在已经完成了。并且已经成功替换原项目里面的 element ui 组件，并且开始要编写其他的 element ui 组件没有的组件。 效果如下几个效果如下： wiki 文档截图如下：  因为要完整兼容我们之前用的 element ui 组件，所以这个 air-ui 的">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">
+<meta property="og:url" content="http://kebingzao.com/2019/12/01/air-ui-1/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言最近的一个月大部分时间都在忙这个事情，就是以 element ui 为基础，做一个属于我们自己的 vue 组件库，并且扩展。 现在已经完成了。并且已经成功替换原项目里面的 element ui 组件，并且开始要编写其他的 element ui 组件没有的组件。 效果如下几个效果如下： wiki 文档截图如下：  因为要完整兼容我们之前用的 element ui 组件，所以这个 air-ui 的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/12/01/air-ui-1/2.gif">
+<meta property="og:image" content="http://kebingzao.com/2019/12/01/air-ui-1/1.gif">
+<meta property="og:image" content="http://kebingzao.com/2019/12/01/air-ui-1/3.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/01/air-ui-1/4.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/01/air-ui-1/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/01/air-ui-1/6.png">
+<meta property="og:updated_time" content="2020-01-19T13:31:28.911Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">
+<meta name="twitter:description" content="前言最近的一个月大部分时间都在忙这个事情，就是以 element ui 为基础，做一个属于我们自己的 vue 组件库，并且扩展。 现在已经完成了。并且已经成功替换原项目里面的 element ui 组件，并且开始要编写其他的 element ui 组件没有的组件。 效果如下几个效果如下： wiki 文档截图如下：  因为要完整兼容我们之前用的 element ui 组件，所以这个 air-ui 的">
+<meta name="twitter:image" content="http://kebingzao.com/2019/12/01/air-ui-1/2.gif">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/12/01/air-ui-1/"/>
+
+
+
+
+
+  <title>自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/12/01/air-ui-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-01T13:28:19+08:00">
+                2019-12-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/自建vue组件-air-ui/" itemprop="url" rel="index">
+                    <span itemprop="name">自建vue组件 air-ui</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/01/air-ui-1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/12/01/air-ui-1/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/12/01/air-ui-1/" class="leancloud_visitors" data-flag-title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近的一个月大部分时间都在忙这个事情，就是以 <code>element ui</code> 为基础，做一个属于我们自己的 vue 组件库，并且扩展。 现在已经完成了。并且已经成功替换原项目里面的 <code>element ui</code> 组件，并且开始要编写其他的 <code>element ui</code> 组件没有的组件。</p>
+<h2 id="效果如下"><a href="#效果如下" class="headerlink" title="效果如下"></a>效果如下</h2><p>几个效果如下： wiki 文档截图如下：</p>
+<p><img src="/2019/12/01/air-ui-1/2.gif" alt="1"></p>
+<p>因为要完整兼容我们之前用的 <code>element ui</code> 组件，所以这个 <code>air-ui</code> 的组件列表也会跟 <code>element ui</code> 的组件一样。 以下是存放所有组件的效果图，这个页面也是我们后面做主题自定义的时候的对比页面，存放了所有组件的 demo 的实例：</p>
+<p><img src="/2019/12/01/air-ui-1/1.gif" alt="1"></p>
+<a id="more"></a>
+<h2 id="为啥要这么做"><a href="#为啥要这么做" class="headerlink" title="为啥要这么做"></a>为啥要这么做</h2><p>首先不可否认的是， <code>element ui</code> 组件真的写的非常好了。早期的项目用它完全没有问题。 但是随着项目的规模越来越大，渐渐暴露了以下几个问题：</p>
+<ol>
+<li><p>有些组件 <code>element ui</code> 没有，我们得自己封装到我们的项目。比如以下这几个组件：</p>
+<ol>
+<li>图片裁剪组件 (图像根据比例裁剪，可指定分辨率裁剪)</li>
+</ol>
+<p><img src="/2019/12/01/air-ui-1/3.png" alt="1"></p>
+<ol start="2">
+<li>图片拖动上传popover</li>
+</ol>
+<p><img src="/2019/12/01/air-ui-1/4.png" alt="1"></p>
+<ol start="3">
+<li>文字内容与颜色popover</li>
+</ol>
+<p><img src="/2019/12/01/air-ui-1/5.png" alt="1"></p>
+</li>
+<li><p>有些组件用 <code>element ui</code> 的，但是有些属性我们想要，但是没有，比如以下这个<code>颜色选择器</code></p>
+<p><img src="/2019/12/01/air-ui-1/6.png" alt="1"></p>
+<p>我们之前是基于 <code>element ui</code> 的 <code>color-picker</code> 又做了重新封装和扩展，增加了左下角颜色预览显示，增加了隐藏时候emit事件。才满足我们的业务需求。</p>
+</li>
+<li><p>主题方面，<code>element ui</code> 他有自己的主题定制，这一点非常棒，但是在使用过程中，我们发现可定制点还是少了，或者说有些定制我只希望在 button 组件上应用，结果它这个参数直接应用到所有组件上，这不是我想要的。 当然这也不能怪它，毕竟它已经能满足绝大部分 vue 项目的 ui 组件需求。但是比较遗憾，随着我们的项目规模越来越大，主题定制方面要求越来越细，<code>element ui</code> 已经满足不了了，我们只能在项目里面，针对 <code>element ui</code> 对应组件的 css 样式进行重写来达到我们的目的，但是这样子非常的被动</p>
+</li>
+</ol>
+<p>基于以上几个原因，我们萌生出了要基于现有的 <code>element ui</code> 的基础上，重新定制了我们自己的 ui 组件，才有了现在的 <code>air-ui</code>。</p>
+<h2 id="air-ui-的优点"><a href="#air-ui-的优点" class="headerlink" title="air-ui 的优点"></a>air-ui 的优点</h2><p>经过我一个月左右的吭哧吭哧的开发，<code>air-ui</code> 总算完成了。 当然中间有很多的代码几乎完全借鉴了 <code>element ui</code>， 包括绝大部分组件的逻辑，css 样式，util 方式，甚至包括 demo， 几乎全部借鉴了 <code>element ui</code> 里面的代码，因为就像之前说的，<code>element ui</code> 现有的组件真的写的非常好了，不太需要我去做太多的修改，只要移植过来就行了，我不可能为了表现出自己特立独行很牛逼，全部都要自己写，一定要跟别人不一样，结果自己累的要死要死的， 结果还没有人家写的好。事实上要不是大量的组件业务逻辑，样式，demo 都借鉴 <code>element ui</code> 组件，我也不可能在一个月把这个搞定， 当然如果全部都抄 <code>element ui</code> 的，那就真的没意思，也就不会有这个系列了。事实上在通过读取 <code>element ui</code> 项目源码的过程中，还是发现了一些我觉得做的不那么好的地方，而 <code>air-ui</code> 可以优化的。 比如以下几点：</p>
+<ol>
+<li>目录结构，<code>element ui</code> 的目录结构其实比较乱，可能是比较早期的项目吧，那时候还没有用 <code>vue-cli</code> 的目录结构，而 <code>air-ui</code> 就是基于 <code>vue-cli</code> 的目录结构来创建，可以说目录结构一看便知。</li>
+<li>文档方面，<code>element ui</code> 的文档其实做的还不错，说白了就是这个站点 <a href="https://element.eleme.io/" target="_blank" rel="noopener">https://element.eleme.io/</a> ， 但是我们不需要我们的文档也写的这么复杂，而且在读源码的过程中，我也觉得这个文档的项目也很复杂，而 <code>air-ui</code> 是基于 <code>vuepress</code>, 可以实现跟 <code>element.eleme.io</code> 差不多的效果，但是复杂程度就很少。</li>
+<li>引用路径问题，通过看源码，我发现 <code>element ui</code> 文档组件和方法的引用，有时候用相对路径，有时候用绝对路径引用，当然这个是有原因的，而且我也知道为啥它要这么做，这一点后面我会提到，但是在做 <code>air-ui</code> 的时候，我把这一点合理的避免了，所有的路径引用全部用相对路径就可以了。从可读性来看，会比 <code>element ui</code> 来的好。</li>
+<li>主题定制方面，既然之前是因为主题定制不够给力，才想要新写一个ui组件的，所以主题定制方法也跟 <code>element ui</code> 有点差别，更适合我们项目。这一点后面也会说道。</li>
+<li>多语言方面，多语言肯定是必须的，但是在多语言的处理上，<code>air-ui</code> 也有进行了一些优化，会比 <code>element ui</code> 的结构更好。</li>
+</ol>
+<p>当然除了以上几点，还会有一些小的优化，比如  eslint， 构建方面等等，后面都会提到。</p>
+<h2 id="air-ui-的引入方式"><a href="#air-ui-的引入方式" class="headerlink" title="air-ui 的引入方式"></a>air-ui 的引入方式</h2><p>首先要说明的一点就是 <code>air-ui</code> 并没有开源，所以 npmjs 上面的那个 <code>air-ui</code> 不是我做的这个： 另一个 <a href="https://www.npmjs.com/package/air-ui" target="_blank" rel="noopener">air-ui</a>。</p>
+<p>完整来说，<code>air-ui</code>的引入方式其实有 3 个:</p>
+<h3 id="1-完整引入"><a href="#1-完整引入" class="headerlink" title="1.完整引入"></a>1.完整引入</h3><p>在<code>main.js</code>文件下添加如下配置:<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span>;</span><br><span class="line"><span class="keyword">import</span> AirUI <span class="keyword">from</span> <span class="string">'air-ui'</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/index.css'</span></span><br><span class="line"><span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App.vue'</span>;</span><br><span class="line"></span><br><span class="line">Vue.use(AirUI);</span><br><span class="line"></span><br><span class="line"><span class="keyword">new</span> Vue(&#123;</span><br><span class="line">  render: <span class="function"><span class="params">h</span> =&gt;</span> h(App)</span><br><span class="line">&#125;).$mount(<span class="string">'#app'</span>);</span><br></pre></td></tr></table></figure></p>
+<p>以上代码便完成了 <code>air-ui</code> 的引入。需要注意的是，样式文件需要单独引入。</p>
+<h3 id="2-部分引入-但是全部加载"><a href="#2-部分引入-但是全部加载" class="headerlink" title="2.部分引入(但是全部加载)"></a>2.部分引入(但是全部加载)</h3><p>如果你只希望引入部分组件，比如 <code>Button</code> 和 <code>Row</code>，那么需要在 <code>main.js</code> 中写入以下内容：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Button, Row &#125; <span class="keyword">from</span> <span class="string">'air-ui'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/index.css'</span></span><br><span class="line"><span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App.vue'</span>;</span><br><span class="line"></span><br><span class="line">Vue.use(Button)</span><br><span class="line">Vue.use(Row)</span><br><span class="line"></span><br><span class="line"><span class="keyword">new</span> Vue(&#123;</span><br><span class="line">  el: <span class="string">'#app'</span>,</span><br><span class="line">  render: <span class="function"><span class="params">h</span> =&gt;</span> h(App)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-部分组件按需加载"><a href="#3-部分组件按需加载" class="headerlink" title="3.部分组件按需加载"></a>3.部分组件按需加载</h3><p>或者你也可以直接引用单独组件的 js 和 css：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span>;</span><br><span class="line"><span class="keyword">import</span> Button <span class="keyword">from</span> <span class="string">'air-ui/lib/button'</span>;</span><br><span class="line"><span class="keyword">import</span> Row <span class="keyword">from</span> <span class="string">'air-ui/lib/row'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/button.css'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/row.css'</span>;</span><br><span class="line"><span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App.vue'</span>;</span><br><span class="line"></span><br><span class="line">Vue.use(Button);</span><br><span class="line">Vue.use(Row);</span><br><span class="line"></span><br><span class="line"><span class="keyword">new</span> Vue(&#123;</span><br><span class="line">  el: <span class="string">'#app'</span>,</span><br><span class="line">  render: <span class="function"><span class="params">h</span> =&gt;</span> h(App)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>第二种和第一种其实没啥差别，都是全部加载 <code>air-ui.common.js</code>, 不会省打包体积。只能算第一种的另一种语法糖的变种。为啥跟 <code>element-ui</code> 的按需加载不一样，具体可以看 <a href="/2019/12/18/air-ui-8/" title="自建vue组件 air-ui (8) -- 实现部分引入组件">自建vue组件 air-ui (8) -- 实现部分引入组件</a></p>
+<p>第三种才是真正可以省打包体积的方式。</p>
+<h2 id="暂不开源"><a href="#暂不开源" class="headerlink" title="暂不开源"></a>暂不开源</h2><p>目前 <code>air-ui</code> 是放在公司搭建私有的 gitlab 代码库的，并没有开源，一方面是因为新加的一些组件和新的定制主题都含有公司产品的特点，对其他人来说，并没有太多可借鉴的东西，另一方面也是大部分的组件都是从 <code>element ui</code> 那边挪过来的，对于其他人来说，直接用 <code>element ui</code> 效果更好。</p>
+<p>当然这套组件也只是适用于 pc 端，不适合移动端，因为我们现在的大部分站点项目都是用于 pc 端的。 所以并没有专门去开发移动端的 ui 组件。因为市面上的第三方的移动端的 vue ui 组件已经够用了，没有必要干啥都要重造车轮。</p>
+<h2 id="写-blog-的初衷"><a href="#写-blog-的初衷" class="headerlink" title="写 blog 的初衷"></a>写 blog 的初衷</h2><p>接下来就围绕着我是怎么开发 <code>air-ui</code> 组件的，给大家讲讲我的思路和遇到的一些坑，甚至有些坑到现在都还没有完美的解决。 事实上我写得非常细，甚至都有点啰嗦了，再加上很多篇，每一篇的篇幅也不少，所以估计加起来都可以写成一本书了，哈哈。 当然之所以写的比较细的原因，也是因为我想把那段时间的思考，入坑，爬坑的过程都写清楚，毕竟每一次入坑到爬坑的过程都是一次宝贵的经验。毕竟对于程序员来说，解决问题的能力才是最重要的。</p>
+<p>事实上之所以写这个系列是因为网上虽然有一些怎么教人写 ui 组件的教程，但是都是浅尝而止，做出来的东西根本没有办法达到大型线上项目可以用的地步，这也导致我几乎是啃着 <code>element ui</code> 源码来重写<code>air-ui</code> 组件的，虽然中间也借鉴了其他的一些成熟的开源 ui 项目的方式，但是大部分还是借鉴 <code>element ui</code>。</p>
+<p>而写这个系列文章的原因，也是因为我觉得一旦项目到了一个规模，单独的第三方 ui 组件绝对是满足不了的，为了更好的维护和扩展，很多时候往往需要自己再建一套更符合自己项目风格和规范的 ui 组件。 那时候希望这些文章能对这群人达到一些帮助，少走点弯路， 奥利给~~~。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</a><br><a href="/2019/12/03/air-ui-2/" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">自建vue组件 air-ui (2) -- 先分析一下 element ui 项目</a><br><a href="/2019/12/05/air-ui-3/" title="自建vue组件 air-ui (3) -- css 开发规范">自建vue组件 air-ui (3) -- css 开发规范</a><br><a href="/2019/12/07/air-ui-4/" title="自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构">自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构</a><br><a href="/2019/12/09/air-ui-5/" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">自建vue组件 air-ui (5) -- 创建第一个组件 Button</a><br><a href="/2019/12/12/air-ui-6/" title="自建vue组件 air-ui (6) -- 创建内置服务组件">自建vue组件 air-ui (6) -- 创建内置服务组件</a><br><a href="/2019/12/15/air-ui-7/" title="自建vue组件 air-ui (7) -- 创建指令组件">自建vue组件 air-ui (7) -- 创建指令组件</a><br><a href="/2019/12/18/air-ui-8/" title="自建vue组件 air-ui (8) -- 实现部分引入组件">自建vue组件 air-ui (8) -- 实现部分引入组件</a><br><a href="/2019/12/22/air-ui-9/" title="自建vue组件 air-ui (9) -- 用 vuepress 写文档">自建vue组件 air-ui (9) -- 用 vuepress 写文档</a><br><a href="/2019/12/26/air-ui-10/" title="自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)">自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)</a><br><a href="/2020/01/02/air-ui-11/" title="自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)">自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)</a><br><a href="/2020/01/04/air-ui-12/" title="自建vue组件 air-ui (12) -- 国际化机制">自建vue组件 air-ui (12) -- 国际化机制</a><br><a href="/2020/01/06/air-ui-13/" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">自建vue组件 air-ui (13) -- 国际化机制(进阶版)</a><br><a href="/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</a><br><a href="/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">自建vue组件 air-ui (15) -- 主题定制</a><br><a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a><br><a href="/2020/01/16/air-ui-17/" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">自建vue组件 air-ui (17) -- 开发爬坑篇以及总结</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">http://kebingzao.com/2019/12/01/air-ui-1/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/15/use-google-recaptcha/" rel="next" title="使用"Google reCaptcha"来防止站点接口被刷">
+                <i class="fa fa-chevron-left"></i> 使用"Google reCaptcha"来防止站点接口被刷
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/03/air-ui-2/" rel="prev" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">
+                自建vue组件 air-ui (2) -- 先分析一下 element ui 项目 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#效果如下"><span class="nav-number">2.</span> <span class="nav-text">效果如下</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为啥要这么做"><span class="nav-number">3.</span> <span class="nav-text">为啥要这么做</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#air-ui-的优点"><span class="nav-number">4.</span> <span class="nav-text">air-ui 的优点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#air-ui-的引入方式"><span class="nav-number">5.</span> <span class="nav-text">air-ui 的引入方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-完整引入"><span class="nav-number">5.1.</span> <span class="nav-text">1.完整引入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-部分引入-但是全部加载"><span class="nav-number">5.2.</span> <span class="nav-text">2.部分引入(但是全部加载)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-部分组件按需加载"><span class="nav-number">5.3.</span> <span class="nav-text">3.部分组件按需加载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#暂不开源"><span class="nav-number">6.</span> <span class="nav-text">暂不开源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#写-blog-的初衷"><span class="nav-number">7.</span> <span class="nav-text">写 blog 的初衷</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/12/01/air-ui-1/';
+          this.page.identifier = '2019/12/01/air-ui-1/';
+          this.page.title = '自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

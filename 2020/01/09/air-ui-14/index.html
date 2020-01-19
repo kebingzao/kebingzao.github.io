@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言本节主要讲一下 air-ui 的打包。 air-ui 的构建主要分为 3 个环境:  本地开发环境 dev 打组件包 dist 打 pub 包并打 tag pub  本节主要是讲一下前两种方式， dev 和 dist, 至于最后的 pub 方式,因为遇到的坑比较多，所以会再开一节来讲。">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">
+<meta property="og:url" content="http://kebingzao.com/2020/01/09/air-ui-14/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言本节主要讲一下 air-ui 的打包。 air-ui 的构建主要分为 3 个环境:  本地开发环境 dev 打组件包 dist 打 pub 包并打 tag pub  本节主要是讲一下前两种方式， dev 和 dist, 至于最后的 pub 方式,因为遇到的坑比较多，所以会再开一节来讲。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/01/09/air-ui-14/1.png">
+<meta property="og:updated_time" content="2020-01-19T13:31:29.067Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">
+<meta name="twitter:description" content="前言本节主要讲一下 air-ui 的打包。 air-ui 的构建主要分为 3 个环境:  本地开发环境 dev 打组件包 dist 打 pub 包并打 tag pub  本节主要是讲一下前两种方式， dev 和 dist, 至于最后的 pub 方式,因为遇到的坑比较多，所以会再开一节来讲。">
+<meta name="twitter:image" content="http://kebingzao.com/2020/01/09/air-ui-14/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/01/09/air-ui-14/"/>
+
+
+
+
+
+  <title>自建vue组件 air-ui (14) -- 打包构建(dev 和 dist) | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/01/09/air-ui-14/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-09T15:47:14+08:00">
+                2020-01-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/自建vue组件-air-ui/" itemprop="url" rel="index">
+                    <span itemprop="name">自建vue组件 air-ui</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/01/09/air-ui-14/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/01/09/air-ui-14/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/01/09/air-ui-14/" class="leancloud_visitors" data-flag-title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本节主要讲一下 <code>air-ui</code> 的打包。 <code>air-ui</code> 的构建主要分为 3 个环境:</p>
+<ol>
+<li>本地开发环境 <code>dev</code></li>
+<li>打组件包 <code>dist</code></li>
+<li>打 pub 包并打 tag <code>pub</code></li>
+</ol>
+<p>本节主要是讲一下前两种方式， <code>dev</code> 和 <code>dist</code>, 至于最后的 <code>pub</code> 方式,因为遇到的坑比较多，所以会再开一节来讲。<br><a id="more"></a></p>
+<h2 id="dev-构建"><a href="#dev-构建" class="headerlink" title="dev 构建"></a>dev 构建</h2><p>指令是这样子的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn start</span><br></pre></td></tr></table></figure></p>
+<p>其实 dev 构建没啥好讲的，因为用的是 <code>vue-cli</code> 脚手架搭建的，本来就自带 dev 打包指令:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"dev"</span>: <span class="string">"webpack-dev-server --inline --progress --config build/webpack.dev.conf.js"</span>,</span><br></pre></td></tr></table></figure></p>
+<p>我只不过是因为要对 <code>home.vue</code> 这个文件进行一下处理(查看 <a href="/2019/12/26/air-ui-10/" title="自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)">自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)</a> 中的优化 <code>homve.vue 的写法</code>)，所以才换成用 start 指令:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"start"</span>: <span class="string">"gulp homeVue &amp;&amp; npm run dev"</span>,</span><br></pre></td></tr></table></figure></p>
+<p>所以本质上 dev 构建根本不需要去调整，直接用默认脚手架带的那种方式就行了。而且首页也只有 <code>home.vue</code> 一个页面。也不需要去进行 <code>vue-router</code> 的管理。<br>所以 <code>webpack.dev.conf.js</code> 这个文件根本不需要去调整。 除了 <code>webpack.base.conf.js</code> 需要在 <code>resolve</code> 的 <code>alias</code> 加一个这个配置:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置根目录为 air-ui, 这个没有设置就不能引用绝对路径</span></span><br><span class="line"><span class="string">'air-ui'</span>: path.resolve(__dirname, <span class="string">'../'</span>),</span><br></pre></td></tr></table></figure></p>
+<p>其他 build 目录自带的文件，都不需要去调整。</p>
+<h3 id="关于-eslint"><a href="#关于-eslint" class="headerlink" title="关于 eslint"></a>关于 eslint</h3><p>因为用 <code>vue-cli</code> 搭建的脚手架默认会自带 eslint 检查工具。 所以有些时候对于格式会比较严格，所以可以通过 <code>.eslintrc.js</code> 进行一些规则的过滤, 比如我就是在 rules map 里面过滤掉了一些检查：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">rules: &#123;</span><br><span class="line">  <span class="comment">// 不需要检查大括号之前的空格</span></span><br><span class="line">  <span class="string">"template-curly-spacing"</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="comment">// 不需要检查不需要的 call</span></span><br><span class="line">  <span class="string">"no-useless-call"</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="comment">// 不需要检查 callback 语法</span></span><br><span class="line">  <span class="string">"no-callback-literal"</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="comment">// 不需要分析未定义</span></span><br><span class="line">  <span class="string">"no-use-before-define"</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="comment">// 不需要分析没用的 return</span></span><br><span class="line">  <span class="string">"no-useless-return"</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="comment">// 不需要分析不必要的转义符</span></span><br><span class="line">  <span class="string">"no-useless-escape"</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="comment">// 结尾是否加分号都可以</span></span><br><span class="line">  <span class="string">'semi'</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="comment">// 不要求在方法名和刮号之间需要有一格空格</span></span><br><span class="line">  <span class="string">"space-before-function-paren"</span>: <span class="number">0</span>,</span><br><span class="line">  <span class="comment">// allow async-await</span></span><br><span class="line">  <span class="string">'generator-star-spacing'</span>: <span class="string">'off'</span>,</span><br><span class="line">  <span class="comment">// allow debugger during development</span></span><br><span class="line">  <span class="string">'no-debugger'</span>: process.env.NODE_ENV === <span class="string">'production'</span> ? <span class="string">'error'</span> : <span class="string">'off'</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>当然你也可以直接更粗暴的将 eslint 检查干掉，在 <code>webpack.base.conf.js</code> 中将 module 中的 <code>useEslint</code> 这一行注释掉:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">module</span>: &#123;</span><br><span class="line">  rules: [</span><br><span class="line">    <span class="comment">// ...(config.dev.useEslint ? [createLintingRule()] : []),</span></span><br><span class="line">    &#123;</span><br><span class="line">      test: <span class="regexp">/\.vue$/</span>,</span><br><span class="line">      loader: <span class="string">'vue-loader'</span>,</span><br><span class="line">      options: vueLoaderConfig</span><br><span class="line">    &#125;,</span><br></pre></td></tr></table></figure></p>
+<p>这样就不会触发 eslint 检查了。</p>
+<p>而且你如果想要直接对某些文件或者文件夹进行忽略的话，也可以在 <code>.eslintignore</code> 这个文件里面进行忽略:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/build/</span><br><span class="line">/config/</span><br><span class="line">/dist/</span><br><span class="line"><span class="comment">/*.js</span></span><br><span class="line"><span class="comment">/test/unit/coverage/</span></span><br><span class="line"><span class="comment">src/utils/popper.js</span></span><br><span class="line"><span class="comment">src/utils/date.js</span></span><br></pre></td></tr></table></figure></p>
+<p>像我就忽略了以上这些文件(包括两个被我稍作修改的第三方库 <code>popper</code> 和 <code>date</code>)，让其不进行 eslint 检查。</p>
+<h2 id="dist-构建"><a href="#dist-构建" class="headerlink" title="dist 构建"></a>dist 构建</h2><p><code>dev</code> 构建没啥好说的，接下来我们讲一下 dist 构建，其实就是将 <code>air-ui</code> 组件库文件进行构建，而且是分为两种打包方式:</p>
+<ol>
+<li>打包成通用的 <code>air-ui.common.js</code> 用于全局引入</li>
+<li>单个组件打包成自己的 js 文件，用于按需加载和引入</li>
+</ol>
+<p>接下来我们看下指令:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"dist"</span>: <span class="string">"npm run clean &amp;&amp; webpack --config build/webpack.common.js &amp;&amp; webpack --config build/webpack.component.js &amp;&amp; npm run css &amp;&amp; npm run lang &amp;&amp; npm run theme"</span>,</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>再申明 dist 的打包的webpack 是 3.x 版本，如果是 4.x 版本的话，不适用，还要再进行调整</p>
+</blockquote>
+<p>主要是分为几个步骤，我们接下来分析:</p>
+<h3 id="1-打包前清理"><a href="#1-打包前清理" class="headerlink" title="1.打包前清理"></a>1.打包前清理</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run clean</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"clean"</span>: <span class="string">"rimraf lib &amp;&amp; rimraf test/**/coverage"</span>,</span><br></pre></td></tr></table></figure>
+<p>这个主要是打包前进行文件的清理，就是将目标目录 lib 删掉。</p>
+<h3 id="2-打包common文件"><a href="#2-打包common文件" class="headerlink" title="2.打包common文件"></a>2.打包common文件</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">webpack --config build/webpack.common.js</span><br></pre></td></tr></table></figure>
+<p>接下来就是打包 common 文件。入口文件就是 <code>components/index.js</code>。 具体的 <code>webpack.common.js</code> 代码如下:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">'webpack'</span>);</span><br><span class="line"><span class="keyword">const</span> ProgressBarPlugin = <span class="built_in">require</span>(<span class="string">'progress-bar-webpack-plugin'</span>);</span><br><span class="line"><span class="keyword">const</span> nodeExternals = <span class="built_in">require</span>(<span class="string">'webpack-node-externals'</span>);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  entry: &#123;</span><br><span class="line">    app: [<span class="string">'./src/components/index.js'</span>]</span><br><span class="line">  &#125;,</span><br><span class="line">  output: &#123;</span><br><span class="line">    path: path.resolve(process.cwd(), <span class="string">'./lib'</span>),</span><br><span class="line">    publicPath: <span class="string">'/dist/'</span>,</span><br><span class="line">    filename: <span class="string">'air-ui.common.js'</span>,</span><br><span class="line">    chunkFilename: <span class="string">'[id].js'</span>,</span><br><span class="line">    libraryTarget: <span class="string">'commonjs2'</span></span><br><span class="line">  &#125;,</span><br><span class="line">  resolve: &#123;</span><br><span class="line">    extensions: [<span class="string">'.js'</span>, <span class="string">'.vue'</span>, <span class="string">'.json'</span>],</span><br><span class="line">    alias: &#123;</span><br><span class="line">      main: path.resolve(__dirname, <span class="string">'../src'</span>),</span><br><span class="line">      <span class="string">'air-ui'</span>: path.resolve(__dirname, <span class="string">'../'</span>)</span><br><span class="line">    &#125;,</span><br><span class="line">    modules: [<span class="string">'node_modules'</span>]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 这边将一些文件不打包进去，不然 common 的体积会变得很大，尤其是语言文件。 不过这样一来的后果就是，如果 common 不包含这些文件的话，那么这些文件就要单独打出来，而且路径还不能变， 而且一旦不打包进去，那么引用就要变成 绝对路径引用，不能再用</span></span><br><span class="line">  externals: [<span class="built_in">Object</span>.assign(&#123;</span><br><span class="line">    vue: <span class="string">'vue'</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="string">'../lang/zh-CN'</span>: <span class="string">'air-ui/lib/lang/zh-CN'</span></span><br><span class="line">  &#125;), nodeExternals()],</span><br><span class="line">  <span class="built_in">module</span>: &#123;</span><br><span class="line">    rules: [</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.(jsx?|babel|es6)$/</span>,</span><br><span class="line">        include: process.cwd(),</span><br><span class="line">        exclude: <span class="regexp">/node_modules|utils\/popper\.js|utils\/date.\js/</span>,</span><br><span class="line">        loader: <span class="string">'babel-loader'</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.vue$/</span>,</span><br><span class="line">        loader: <span class="string">'vue-loader'</span>,</span><br><span class="line">        options: &#123;</span><br><span class="line">          preserveWhitespace: <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.json$/</span>,</span><br><span class="line">        loader: <span class="string">'json-loader'</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.css$/</span>,</span><br><span class="line">        loaders: [<span class="string">'style-loader'</span>, <span class="string">'css-loader'</span>, <span class="string">'postcss-loader'</span>]</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.scss$/</span>,</span><br><span class="line">        loaders: [<span class="string">'style-loader'</span>, <span class="string">'css-loader'</span>, <span class="string">'sass-loader'</span>]</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.html$/</span>,</span><br><span class="line">        loader: <span class="string">'html-loader?minimize=false'</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.otf|ttf|woff2?|eot(\?\S*)?$/</span>,</span><br><span class="line">        loader: <span class="string">'url-loader'</span>,</span><br><span class="line">        query: &#123;</span><br><span class="line">          limit: <span class="number">10000</span>,</span><br><span class="line">          name: path.posix.join(<span class="string">'static'</span>, <span class="string">'[name].[hash:7].[ext]'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.svg(\?\S*)?$/</span>,</span><br><span class="line">        loader: <span class="string">'url-loader'</span>,</span><br><span class="line">        query: &#123;</span><br><span class="line">          limit: <span class="number">10000</span>,</span><br><span class="line">          name: path.posix.join(<span class="string">'static'</span>, <span class="string">'[name].[hash:7].[ext]'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.(gif|png|jpe?g)(\?\S*)?$/</span>,</span><br><span class="line">        loader: <span class="string">'url-loader'</span>,</span><br><span class="line">        query: &#123;</span><br><span class="line">          limit: <span class="number">10000</span>,</span><br><span class="line">          name: path.posix.join(<span class="string">'static'</span>, <span class="string">'[name].[hash:7].[ext]'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  plugins: [</span><br><span class="line">    <span class="keyword">new</span> ProgressBarPlugin(),</span><br><span class="line">    <span class="keyword">new</span> webpack.DefinePlugin(&#123;</span><br><span class="line">      <span class="string">'process.env.NODE_ENV'</span>: <span class="built_in">JSON</span>.stringify(<span class="string">'production'</span>)</span><br><span class="line">    &#125;),</span><br><span class="line">    <span class="keyword">new</span> webpack.LoaderOptionsPlugin(&#123;</span><br><span class="line">      minimize: <span class="literal">true</span></span><br><span class="line">    &#125;)</span><br><span class="line">  ]</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>其实逻辑很简单，就是将 <code>components/index.js</code> 通过打包成 <code>ES6 Module</code>的加载方式，将其打包成 <code>air-ui.common.js</code> 这个文件，并放入 <code>lib</code> 目录。 所以要完整加载 <code>air-ui</code> 这个组件库，其实就是加载 <code>air-ui.common.js</code>，为了保证以下这种方式能索引到这个文件:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> AirUI <span class="keyword">from</span> <span class="string">'air-ui'</span></span><br></pre></td></tr></table></figure></p>
+<p>所以我们需要在 <code>package.json</code> 加上这个字段:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"main"</span>: <span class="string">"lib/air-ui.common.js"</span>,</span><br></pre></td></tr></table></figure></p>
+<p>这时候项目检索 <code>air-ui</code> 这个库的默认引入文件的时候，就会指向 <code>air-ui.common.js</code> 这个文件。</p>
+<h3 id="3-各自组件打包"><a href="#3-各自组件打包" class="headerlink" title="3.各自组件打包"></a>3.各自组件打包</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">webpack --config build/webpack.component.js</span><br></pre></td></tr></table></figure>
+<p>上面那个任务是打包 common 文件，就是为了完整引入。但是有时候我们也需要实现组件的部分引入，所以也将我们觉得需要的组件也要打包出来，就在根目录的<code>components.json</code>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">"locale"</span>: <span class="string">"./src/locale/index.js"</span>,</span><br><span class="line">  <span class="string">"button"</span>: <span class="string">"./src/components/button/index.js"</span>,</span><br><span class="line">  <span class="string">"button-group"</span>: <span class="string">"./src/components/button-group/index.js"</span>,</span><br><span class="line">  <span class="string">"row"</span>: <span class="string">"./src/components/row/index.js"</span>,</span><br><span class="line">  <span class="string">"col"</span>: <span class="string">"./src/components/col/index.js"</span>,</span><br><span class="line">  ...中间省略N个组件</span><br><span class="line">  <span class="string">"icon"</span>: <span class="string">"./src/components/icon/index.js"</span>,</span><br><span class="line">  ...中间省略N个组件</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>我们不需要将所有做的组件都要打包单独导出来，只选择我们觉得后面可能需要会单独引用的组件。 接下来我们看下主要的逻辑 <code>webpack.conponent.js</code> 代码:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">const</span> webpack = <span class="built_in">require</span>(<span class="string">'webpack'</span>);</span><br><span class="line"><span class="keyword">const</span> ProgressBarPlugin = <span class="built_in">require</span>(<span class="string">'progress-bar-webpack-plugin'</span>);</span><br><span class="line"><span class="comment">// 分别构建各自的组件，用来做单独引用模式</span></span><br><span class="line"><span class="keyword">const</span> Components = <span class="built_in">require</span>(<span class="string">'../components.json'</span>);</span><br><span class="line"><span class="keyword">const</span> nodeExternals = <span class="built_in">require</span>(<span class="string">'webpack-node-externals'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> webpackConfig = &#123;</span><br><span class="line">  entry: Components,</span><br><span class="line">  output: &#123;</span><br><span class="line">    path: path.resolve(process.cwd(), <span class="string">'./lib'</span>),</span><br><span class="line">    publicPath: <span class="string">'/dist/'</span>,</span><br><span class="line">    filename: <span class="string">'[name].js'</span>,</span><br><span class="line">    chunkFilename: <span class="string">'[id].js'</span>,</span><br><span class="line">    libraryTarget: <span class="string">'commonjs2'</span></span><br><span class="line">  &#125;,</span><br><span class="line">  resolve: &#123;</span><br><span class="line">    extensions: [<span class="string">'.js'</span>, <span class="string">'.vue'</span>, <span class="string">'.json'</span>],</span><br><span class="line">    alias: &#123;</span><br><span class="line">      main: path.resolve(__dirname, <span class="string">'../src'</span>),</span><br><span class="line">      <span class="string">'air-ui'</span>: path.resolve(__dirname, <span class="string">'../'</span>)</span><br><span class="line">    &#125;,</span><br><span class="line">    modules: [<span class="string">'node_modules'</span>]</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 这边将一些文件不打包进去，不然 common 的体积会变得很大，尤其是语言文件。 不过这样一来的后果就是，如果 common 不包含这些文件的话，那么这些文件就要单独打出来，而且路径还不能变， 而且一旦不打包进去，那么引用就要变成 绝对路径引用，不能再用</span></span><br><span class="line">  externals: [<span class="built_in">Object</span>.assign(&#123;</span><br><span class="line">    vue: <span class="string">'vue'</span></span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="string">'../lang/zh-CN'</span>: <span class="string">'air-ui/lib/lang/zh-CN'</span>,</span><br><span class="line">    <span class="comment">// 这边注意，只有在打包单独组件的时候，才需要进行 locale 的路径替换，因为单独加载组件，也需要多语言的支持，如果是打包common，那么就不需要，因为都集成了</span></span><br><span class="line">    <span class="string">'../../../../src/locale'</span>: <span class="string">'air-ui/lib/locale'</span>,</span><br><span class="line">    <span class="string">'../locale'</span>: <span class="string">'air-ui/lib/locale'</span>,</span><br><span class="line">  &#125;), nodeExternals()],</span><br><span class="line">  <span class="built_in">module</span>: &#123;</span><br><span class="line">    rules: [</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.(jsx?|babel|es6)$/</span>,</span><br><span class="line">        include: process.cwd(),</span><br><span class="line">        exclude: <span class="regexp">/node_modules|utils\/popper\.js|utils\/date.\js/</span>,</span><br><span class="line">        loader: <span class="string">'babel-loader'</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.vue$/</span>,</span><br><span class="line">        loader: <span class="string">'vue-loader'</span>,</span><br><span class="line">        options: &#123;</span><br><span class="line">          preserveWhitespace: <span class="literal">false</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.json$/</span>,</span><br><span class="line">        loader: <span class="string">'json-loader'</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.css$/</span>,</span><br><span class="line">        loaders: [<span class="string">'style-loader'</span>, <span class="string">'css-loader'</span>, <span class="string">'postcss-loader'</span>]</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.scss$/</span>,</span><br><span class="line">        loaders: [<span class="string">'style-loader'</span>, <span class="string">'css-loader'</span>, <span class="string">'sass-loader'</span>]</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.html$/</span>,</span><br><span class="line">        loader: <span class="string">'html-loader?minimize=false'</span></span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.otf|ttf|woff2?|eot(\?\S*)?$/</span>,</span><br><span class="line">        loader: <span class="string">'url-loader'</span>,</span><br><span class="line">        query: &#123;</span><br><span class="line">          limit: <span class="number">10000</span>,</span><br><span class="line">          name: path.posix.join(<span class="string">'static'</span>, <span class="string">'[name].[hash:7].[ext]'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.svg(\?\S*)?$/</span>,</span><br><span class="line">        loader: <span class="string">'url-loader'</span>,</span><br><span class="line">        query: &#123;</span><br><span class="line">          limit: <span class="number">10000</span>,</span><br><span class="line">          name: path.posix.join(<span class="string">'static'</span>, <span class="string">'[name].[hash:7].[ext]'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.(gif|png|jpe?g)(\?\S*)?$/</span>,</span><br><span class="line">        loader: <span class="string">'url-loader'</span>,</span><br><span class="line">        query: &#123;</span><br><span class="line">          limit: <span class="number">10000</span>,</span><br><span class="line">          name: path.posix.join(<span class="string">'static'</span>, <span class="string">'[name].[hash:7].[ext]'</span>)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">  plugins: [</span><br><span class="line">    <span class="keyword">new</span> ProgressBarPlugin(),</span><br><span class="line">    <span class="keyword">new</span> webpack.DefinePlugin(&#123;</span><br><span class="line">      <span class="string">'process.env.NODE_ENV'</span>: <span class="built_in">JSON</span>.stringify(<span class="string">'production'</span>)</span><br><span class="line">    &#125;),</span><br><span class="line">    <span class="keyword">new</span> webpack.LoaderOptionsPlugin(&#123;</span><br><span class="line">      minimize: <span class="literal">true</span></span><br><span class="line">    &#125;)</span><br><span class="line">  ]</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = webpackConfig;</span><br></pre></td></tr></table></figure></p>
+<p>跟打 common 文件差不多，只不过入口文件是 <code>components.json</code> 里面的组件。所以生成的就是对应组件的 js 文件。</p>
+<h3 id="4-打包-css"><a href="#4-打包-css" class="headerlink" title="4.打包 css"></a>4.打包 css</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run css</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"css"</span>: <span class="string">"gulp buildCss"</span>,</span><br></pre></td></tr></table></figure>
+<p>这个一个 gulp 任务，逻辑也很简单，就是 生成 css 之后，移到 lib/style 目录：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> sass = <span class="built_in">require</span>(<span class="string">'gulp-sass'</span>);</span><br><span class="line"><span class="keyword">var</span> autoprefixer = <span class="built_in">require</span>(<span class="string">'gulp-autoprefixer'</span>);</span><br><span class="line"><span class="keyword">var</span> cssmin = <span class="built_in">require</span>(<span class="string">'gulp-cssmin'</span>);</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'compile'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./src/styles/*.scss'</span>)</span><br><span class="line">    .pipe(sass.sync())</span><br><span class="line">    .pipe(autoprefixer(&#123;</span><br><span class="line">      cascade: <span class="literal">false</span></span><br><span class="line">    &#125;))</span><br><span class="line">    .pipe(cssmin())</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./lib/styles'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'copyfont'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./src/styles/fonts/**'</span>)</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./lib/styles/fonts'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">gulp.task(<span class="string">'buildCss'</span>, [<span class="string">'compile'</span>, <span class="string">'copyfont'</span>]);</span><br></pre></td></tr></table></figure></p>
+<h3 id="5-打包语言文件"><a href="#5-打包语言文件" class="headerlink" title="5.打包语言文件"></a>5.打包语言文件</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run lang</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"lang"</span>: <span class="string">"gulp copylang"</span>,</span><br></pre></td></tr></table></figure>
+<p>这个也是一个 gulp 任务，也是将 src/lang 移到 lib/lang 目录即可:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gulp.task(<span class="string">'copylang'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./src/lang/**'</span>)</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./lib/lang'</span>));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h3 id="6-打包主题文件"><a href="#6-打包主题文件" class="headerlink" title="6.打包主题文件"></a>6.打包主题文件</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run theme</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"theme"</span>: <span class="string">"gulp theme"</span>,</span><br></pre></td></tr></table></figure>
+<p>这个也是一个 gulp 任务:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> themeMapTaskList = &#123;&#125;;</span><br><span class="line"><span class="keyword">var</span> initThemeMap = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 先删除旧的主题</span></span><br><span class="line">  themeMapTaskList[<span class="string">'del-old-theme'</span>] = gulp.task(<span class="string">'del-old-theme'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> del([</span><br><span class="line">      <span class="string">'./lib/theme'</span></span><br><span class="line">    ], cb);</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="comment">// 读取当前的所有的主题的文件</span></span><br><span class="line">  <span class="keyword">var</span> files = fs.readdirSync(path.resolve(<span class="string">`src/theme/`</span>));</span><br><span class="line">  <span class="comment">//遍历读取到的文件列表</span></span><br><span class="line">  files.forEach(<span class="function"><span class="keyword">function</span> (<span class="params">filename</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(filename);</span><br><span class="line">    <span class="keyword">var</span> fileStr = fs.readFileSync(path.resolve(<span class="string">`src/theme/<span class="subst">$&#123;filename&#125;</span>`</span>));</span><br><span class="line">    <span class="keyword">var</span> tempMap = &#123;&#125;;</span><br><span class="line">    fileStr.toString().replace(<span class="regexp">/(.+):(.+);/g</span>, <span class="function"><span class="keyword">function</span> (<span class="params">match, p1, p2</span>) </span>&#123;</span><br><span class="line">      tempMap[p1.trim()] = p2.trim();</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">var</span> themeName = filename.split(<span class="string">"."</span>)[<span class="number">0</span>];</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>:`</span> + <span class="built_in">JSON</span>.stringify(tempMap));</span><br><span class="line">    <span class="keyword">var</span> tmpTaskList = &#123;&#125;;</span><br><span class="line">    <span class="comment">// 首先将旧的 copy 一份过去</span></span><br><span class="line">    tmpTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-copy`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-copy`</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> gulp.src(<span class="string">'./src/styles/**'</span>)</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`./lib/theme/tmp/<span class="subst">$&#123;themeName&#125;</span>`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 替换 var 里面的内容</span></span><br><span class="line">    tmpTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-replace`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-replace`</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> gulp.src(<span class="string">`./lib/theme/tmp/<span class="subst">$&#123;themeName&#125;</span>/common/var.scss`</span>)</span><br><span class="line">        .pipe(replace(<span class="regexp">/(.+):(.+);/g</span>, <span class="function"><span class="keyword">function</span> (<span class="params">match, p1, p2</span>) </span>&#123;</span><br><span class="line">          p1 = p1.trim();</span><br><span class="line">          <span class="keyword">if</span> (tempMap[p1]) &#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">`theme replace: key: <span class="subst">$&#123;p1&#125;</span>, before: <span class="subst">$&#123;p2&#125;</span>, after: <span class="subst">$&#123;tempMap[p1]&#125;</span>`</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="string">`<span class="subst">$&#123;p1&#125;</span>: <span class="subst">$&#123;tempMap[p1]&#125;</span>`</span></span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">return</span> match;</span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`./lib/theme/tmp/<span class="subst">$&#123;themeName&#125;</span>/common`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 重新生成 css</span></span><br><span class="line">    tmpTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-compile`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-compile`</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> gulp.src(<span class="string">`./lib/theme/tmp/<span class="subst">$&#123;themeName&#125;</span>/*.scss`</span>)</span><br><span class="line">        .pipe(sass.sync())</span><br><span class="line">        .pipe(autoprefixer(&#123;</span><br><span class="line">          cascade: <span class="literal">false</span></span><br><span class="line">        &#125;))</span><br><span class="line">        .pipe(cssmin())</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`./lib/theme/<span class="subst">$&#123;themeName&#125;</span>`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 拷贝 font</span></span><br><span class="line">    tmpTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-font`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme-font`</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> gulp.src(<span class="string">`./lib/styles/fonts/**`</span>)</span><br><span class="line">        .pipe(gulp.dest(<span class="string">`./lib/theme/<span class="subst">$&#123;themeName&#125;</span>/fonts`</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 最后将这个主题的任务都串起来</span></span><br><span class="line">    themeMapTaskList[<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme`</span>] = gulp.task(<span class="string">`<span class="subst">$&#123;themeName&#125;</span>-theme`</span>, seq.apply(<span class="literal">null</span>, _.keys(tmpTaskList)));</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="comment">// 最后将tmp目录删掉</span></span><br><span class="line">  themeMapTaskList[<span class="string">'del-theme-tmp'</span>] = gulp.task(<span class="string">'del-theme-tmp'</span>, cb =&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> del([</span><br><span class="line">      <span class="string">'./lib/theme/tmp'</span></span><br><span class="line">    ], cb);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">initThemeMap();</span><br><span class="line">gulp.task(<span class="string">'theme'</span>, seq.apply(<span class="literal">null</span>, _.keys(themeMapTaskList)));</span><br></pre></td></tr></table></figure></p>
+<p>这个任务比较复杂，具体逻辑可以看这一篇 <a href="/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">自建vue组件 air-ui (15) -- 主题定制</a></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这样子组件库就打包好了，目录是这样子的：</p>
+<p><img src="/2020/01/09/air-ui-14/1.png" alt="1"></p>
+<p>具体各种方式的引入 <a href="/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</a> 这个有说了。 接下来下一节我们讲一下 <code>air-ui</code> 怎么实现主题定制，又跟 <code>element-ui</code> 差别在哪里。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</a><br><a href="/2019/12/03/air-ui-2/" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">自建vue组件 air-ui (2) -- 先分析一下 element ui 项目</a><br><a href="/2019/12/05/air-ui-3/" title="自建vue组件 air-ui (3) -- css 开发规范">自建vue组件 air-ui (3) -- css 开发规范</a><br><a href="/2019/12/07/air-ui-4/" title="自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构">自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构</a><br><a href="/2019/12/09/air-ui-5/" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">自建vue组件 air-ui (5) -- 创建第一个组件 Button</a><br><a href="/2019/12/12/air-ui-6/" title="自建vue组件 air-ui (6) -- 创建内置服务组件">自建vue组件 air-ui (6) -- 创建内置服务组件</a><br><a href="/2019/12/15/air-ui-7/" title="自建vue组件 air-ui (7) -- 创建指令组件">自建vue组件 air-ui (7) -- 创建指令组件</a><br><a href="/2019/12/18/air-ui-8/" title="自建vue组件 air-ui (8) -- 实现部分引入组件">自建vue组件 air-ui (8) -- 实现部分引入组件</a><br><a href="/2019/12/22/air-ui-9/" title="自建vue组件 air-ui (9) -- 用 vuepress 写文档">自建vue组件 air-ui (9) -- 用 vuepress 写文档</a><br><a href="/2019/12/26/air-ui-10/" title="自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)">自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)</a><br><a href="/2020/01/02/air-ui-11/" title="自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)">自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)</a><br><a href="/2020/01/04/air-ui-12/" title="自建vue组件 air-ui (12) -- 国际化机制">自建vue组件 air-ui (12) -- 国际化机制</a><br><a href="/2020/01/06/air-ui-13/" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">自建vue组件 air-ui (13) -- 国际化机制(进阶版)</a><br><a href="/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</a><br><a href="/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">自建vue组件 air-ui (15) -- 主题定制</a><br><a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a><br><a href="/2020/01/16/air-ui-17/" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">自建vue组件 air-ui (17) -- 开发爬坑篇以及总结</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">http://kebingzao.com/2020/01/09/air-ui-14/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/06/air-ui-13/" rel="next" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">
+                <i class="fa fa-chevron-left"></i> 自建vue组件 air-ui (13) -- 国际化机制(进阶版)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/01/11/air-ui-15/" rel="prev" title="自建vue组件 air-ui (15) -- 主题定制">
+                自建vue组件 air-ui (15) -- 主题定制 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dev-构建"><span class="nav-number">2.</span> <span class="nav-text">dev 构建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于-eslint"><span class="nav-number">2.1.</span> <span class="nav-text">关于 eslint</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dist-构建"><span class="nav-number">3.</span> <span class="nav-text">dist 构建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-打包前清理"><span class="nav-number">3.1.</span> <span class="nav-text">1.打包前清理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-打包common文件"><span class="nav-number">3.2.</span> <span class="nav-text">2.打包common文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-各自组件打包"><span class="nav-number">3.3.</span> <span class="nav-text">3.各自组件打包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-打包-css"><span class="nav-number">3.4.</span> <span class="nav-text">4.打包 css</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-打包语言文件"><span class="nav-number">3.5.</span> <span class="nav-text">5.打包语言文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-打包主题文件"><span class="nav-number">3.6.</span> <span class="nav-text">6.打包主题文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.7.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/01/09/air-ui-14/';
+          this.page.identifier = '2020/01/09/air-ui-14/';
+          this.page.title = '自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

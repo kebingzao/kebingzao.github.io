@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过上节 自建vue组件 air-ui (12) -- 国际化机制 我们已经知道怎么在 air-ui 进行国际化配置了。但是还遗留几个问题没有解决：  我们现在是有默认引入 zh-CN.js 这个文件的，这样会导致我们后面打包出来的 air-ui.common.js 体积变大，我们要怎么将之抽出来？？ 组件单独打包出来的话，引入的时候，要怎么接入多语言机制？？  将语言包文件引用单独抽出来我们">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">
+<meta property="og:url" content="http://kebingzao.com/2020/01/06/air-ui-13/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过上节 自建vue组件 air-ui (12) -- 国际化机制 我们已经知道怎么在 air-ui 进行国际化配置了。但是还遗留几个问题没有解决：  我们现在是有默认引入 zh-CN.js 这个文件的，这样会导致我们后面打包出来的 air-ui.common.js 体积变大，我们要怎么将之抽出来？？ 组件单独打包出来的话，引入的时候，要怎么接入多语言机制？？  将语言包文件引用单独抽出来我们">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/8.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/9.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/10.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/06/air-ui-13/11.png">
+<meta property="og:updated_time" content="2020-01-19T13:31:29.060Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">
+<meta name="twitter:description" content="前言通过上节 自建vue组件 air-ui (12) -- 国际化机制 我们已经知道怎么在 air-ui 进行国际化配置了。但是还遗留几个问题没有解决：  我们现在是有默认引入 zh-CN.js 这个文件的，这样会导致我们后面打包出来的 air-ui.common.js 体积变大，我们要怎么将之抽出来？？ 组件单独打包出来的话，引入的时候，要怎么接入多语言机制？？  将语言包文件引用单独抽出来我们">
+<meta name="twitter:image" content="http://kebingzao.com/2020/01/06/air-ui-13/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/01/06/air-ui-13/"/>
+
+
+
+
+
+  <title>自建vue组件 air-ui (13) -- 国际化机制(进阶版) | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/01/06/air-ui-13/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">自建vue组件 air-ui (13) -- 国际化机制(进阶版)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-06T17:16:08+08:00">
+                2020-01-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/自建vue组件-air-ui/" itemprop="url" rel="index">
+                    <span itemprop="name">自建vue组件 air-ui</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/01/06/air-ui-13/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/01/06/air-ui-13/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/01/06/air-ui-13/" class="leancloud_visitors" data-flag-title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过上节 <a href="/2020/01/04/air-ui-12/" title="自建vue组件 air-ui (12) -- 国际化机制">自建vue组件 air-ui (12) -- 国际化机制</a> 我们已经知道怎么在 <code>air-ui</code> 进行国际化配置了。但是还遗留几个问题没有解决：</p>
+<ol>
+<li>我们现在是有默认引入 <code>zh-CN.js</code> 这个文件的，这样会导致我们后面打包出来的 <code>air-ui.common.js</code> 体积变大，我们要怎么将之抽出来？？</li>
+<li>组件单独打包出来的话，引入的时候，要怎么接入多语言机制？？</li>
+</ol>
+<h2 id="将语言包文件引用单独抽出来"><a href="#将语言包文件引用单独抽出来" class="headerlink" title="将语言包文件引用单独抽出来"></a>将语言包文件引用单独抽出来</h2><p>我们知道在打 <code>air-ui.common.js</code> 包的时候，之所以会把语言包的 <code>zh-CN.js</code> 打进去是因为，只要入口文件有引用的话，那么默认就会打包进去，打包链是这样子的：<br><a id="more"></a><br><img src="/2020/01/06/air-ui-13/1.png" alt="1"></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">components/index.js -&gt; components/select/index.js -&gt; components/select/select.vue -&gt; mixins/locale -&gt; local/index.js -&gt; lang/zh-CN.js</span><br></pre></td></tr></table></figure>
+<p>所以如果我们要把 <code>lang/zh-CN.js</code> 不打进去的方式，就是在 webpack 打包的时候，将这个文件忽略掉，不打进去，而是当做外部资源包去引用，<code>externals</code> 这个字段就是用来 webpack 打包的时候，将一些资源进行忽略 (具体整个构建，我后面会再开一节来讲，本节只要知道这个过程即可), 所以在打 <code>air-ui.common.js</code> 文件的时候，要将这个资源进行忽略(vue 相关的资源也要忽略，不要打进去)：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> nodeExternals = <span class="built_in">require</span>(<span class="string">'webpack-node-externals'</span>);</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这边将一些文件不打包进去，不然 common 的体积会变得很大，尤其是语言文件。 不过这样一来的后果就是，如果 common 不包含这些文件的话，那么这些文件就要单独打出来，而且路径还不能变， 而且一旦不打包进去，那么引用就要变成 绝对路径引用，不能再用</span></span><br><span class="line">externals: [<span class="built_in">Object</span>.assign(&#123;</span><br><span class="line">  vue: <span class="string">'vue'</span></span><br><span class="line">&#125;, &#123;</span><br><span class="line">  <span class="string">'../lang/zh-CN'</span>: <span class="string">'air-ui/lib/lang/zh-CN'</span></span><br><span class="line">&#125;), nodeExternals()],</span><br></pre></td></tr></table></figure>
+<p>这样子就会变成，当打包的时候找到这个 <code>../lang/zh-CN</code> 这个资源的时候， webpack 不会打包进去，而是换成对应的绝对引用地址 <code>air-ui/lib/lang/zh-CN</code> ，所以一旦我们这样处理之后，我们的 <code>lang</code> 目录在打 dist 组件包的时候，就要单独复制出来，让 <code>air-ui.common.js</code> 在查找语言包的时候，可以通过这个绝对路径来找到。 我们可以看到在打完包的 <code>air-ui.common.js</code> 关于语言包的引用就变成绝对路径了：</p>
+<p><img src="/2020/01/06/air-ui-13/2.png" alt="1"></p>
+<p>这样子打包的时候，语言包就会当做外部资源的绝对路径来引用了。就不会打进去了。</p>
+<h2 id="element-ui-的做法"><a href="#element-ui-的做法" class="headerlink" title="element-ui 的做法"></a>element-ui 的做法</h2><p><code>element-ui</code> 也是将语言包抽出来，但是他抽的是 <code>src/locale/index.js</code> 这个文件，把这个文件当做外部资源，然后用绝对路径来引入：</p>
+<p><img src="/2020/01/06/air-ui-13/3.png" alt="1"></p>
+<p>但是这个资源不仅仅只是引入语言文件，还有其他的资源，比如 utils 里面的方法。 一旦这个资源不打包进去而是变成外部资源去引用，那么它引用其他依赖资源，也必须也要用绝对路径来引用<br>举个例子，比如 locale 是外部资源，然后要引用 utils 里面的方法，如果 utils 不也变成外部资源的话，而是当做内部资源打入 common.js 的话，就会导致 locale 引用不到了，所以用绝对路径相互依赖的情况就是所有的依赖全部变成外部资源，全部变成绝对路径引用了。而 <code>element-ui</code> 就是这样做的，他把除组件的其他资源全部变成外部资源，然后用绝对路径来引用了。</p>
+<p><img src="/2020/01/06/air-ui-13/4.png" alt="1"></p>
+<p>当然从逻辑上来说，这样并不会报错。也是可以的。但是会导致的一个现象就是，我有些组件在引用资源的时候，一会用相对路径，一会儿用绝对路径，事实上我当初看源码的时候，这一点就会疑惑。而且更奇葩的是哪怕在同一个目录下，也必须要用绝对路径引用，打包才不会出错。</p>
+<p>所以我那时候在处理 <code>air-ui</code> 多语言打包的时候，就要吸取这个教训，代码里面全部用相对路径， 然后在打包的时候，只针对语言文件，当做外部资源来用绝对路径来引用。而其他的资源的引用，还是一样打进去 <code>air-ui.common.js</code> 中。这样子我一个是可以保证我在开发的时候，全部用相对路径来引用，而不需要去管打包的事情。另一个就是打完包的目录结构也比较好看。除了 <code>air-ui.common.js</code> 文件，就一个 lang 目录存放语言包文件：</p>
+<p><img src="/2020/01/06/air-ui-13/5.png" alt="1"></p>
+<h2 id="如果引用绝对路径的写法会遇到什么坑"><a href="#如果引用绝对路径的写法会遇到什么坑" class="headerlink" title="如果引用绝对路径的写法会遇到什么坑"></a>如果引用绝对路径的写法会遇到什么坑</h2><p>虽然我最后采取了全部走相对路径引用的方式。但是其实是有一个过程的，在早期在尝试的时候，还是参照 <code>element-ui</code> 的写法，在代码里面引用绝对路径的写法：</p>
+<p><img src="/2020/01/06/air-ui-13/6.png" alt="1"></p>
+<p>然后开发环境直接报错了:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">This dependency was not found:</span><br><span class="line"></span><br><span class="line">* air-ui/src/lang/zh-CN <span class="keyword">in</span> ./src/locale/index.js</span><br><span class="line"></span><br><span class="line">To install it, you can run: npm install --save air-ui/src/lang/zh-CN</span><br></pre></td></tr></table></figure></p>
+<p>所以构建那边要处理一下， <code>webpack.base.conf.js</code> 要加一个配置，让全局路径有引用:</p>
+<p><img src="/2020/01/06/air-ui-13/7.png" alt="1"></p>
+<p>这样子构建就没有问题了。 当然因为<code>默认 @ 就是 src 目录</code>了，那么也可以写成<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> defaultLang <span class="keyword">from</span> <span class="string">'@/lang/zh-CN'</span>;</span><br></pre></td></tr></table></figure></p>
+<p>这样也是可以的。 不过我倾向于用上面那种方式。</p>
+<p>这样子测试环境就没有问题了。 接下来就处理 <code>dist</code> 打包的 <code>externals</code> 了， 因为只处理 <code>lang</code> 语言文件，所以要改成：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> nodeExternals = <span class="built_in">require</span>(<span class="string">'webpack-node-externals'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这边将一些文件不打包进去，不然 common 的体积会变得很大，尤其是语言文件。 不过这样一来的后果就是，如果 common 不包含这些文件的话，那么这些文件就要单独打出来，而且路径还不能变， 而且一旦不打包进去，那么引用就要变成 绝对路径引用，不能再用</span></span><br><span class="line">externals: [<span class="built_in">Object</span>.assign(&#123;</span><br><span class="line">  vue: <span class="string">'vue'</span></span><br><span class="line">&#125;, &#123;</span><br><span class="line">  <span class="string">'air-ui/src/lang/zh-CN'</span>: <span class="string">'air-ui/lib/lang/zh-CN'</span></span><br><span class="line">&#125;), nodeExternals()],</span><br></pre></td></tr></table></figure></p>
+<p>相当于就是把这个绝对路径，改成打包后的路径，接下来就开始打包： <code>yarn dist</code> 打包完成之后，我们再搜一下，<code>air-ui.common.js</code> 是否还有中文。 发现没有中文了，语言包彻底被抽离出来了。</p>
+<p>但是我们发现  lang 文件夹并没有输出到 lib 目录中，所以这边还得处理一下，在打包的过程中，将 lang 目录也同样输出到 lib 目标目录：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//============= 处理语言文件，挪到 lib 目录 start===========</span></span><br><span class="line">gulp.task(<span class="string">'copylang'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> gulp.src(<span class="string">'./src/lang/**'</span>)</span><br><span class="line">    .pipe(gulp.dest(<span class="string">'./lib/lang'</span>));</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">//============= 处理语言文件，挪到 lib 目录 end=============</span></span><br></pre></td></tr></table></figure></p>
+<p>然后添加到 dist 任务后面。  这样子 lang 目录就打包到 lib 目录了。 这样好像就没啥问题了。<br>结果后面发现在用 vuepress 的时候，会出现这个问题：</p>
+<p><img src="/2020/01/06/air-ui-13/8.png" alt="1"></p>
+<p>他找不到这个路径， 就算改成 <code>@</code> 的方式，也是不行？？ 尴尬了，他就只能用相对路径；<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> defaultLang <span class="keyword">from</span> <span class="string">'../lang/zh-CN'</span>;</span><br></pre></td></tr></table></figure></p>
+<p>所以为了兼容这个 vuepress 的文档可以使用，我们只能在代码里面使用 相对路径， 然后在构建的时候，替换成绝对路径， 所以打包的时候，改成：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">externals: [<span class="built_in">Object</span>.assign(&#123;</span><br><span class="line">  vue: <span class="string">'vue'</span></span><br><span class="line">&#125;, &#123;</span><br><span class="line">  <span class="string">'../lang/zh-CN'</span>: <span class="string">'air-ui/lib/lang/zh-CN'</span></span><br><span class="line">&#125;), nodeExternals()],</span><br></pre></td></tr></table></figure></p>
+<p>因为是用正则匹配的，所以要保证代码里面没有 另一个的非语言的字符串叫做<code>../lang/zh-CN</code>， 不然也会被替换掉，这样就可以了。 既可以保证 vuepress 可以用，也可以让语言文件不会打包进去。</p>
+<h2 id="组件单独打包的时候，怎么引入多语言机制"><a href="#组件单独打包的时候，怎么引入多语言机制" class="headerlink" title="组件单独打包的时候，怎么引入多语言机制"></a>组件单独打包的时候，怎么引入多语言机制</h2><p>我们已经知道在打 common 包的时候，已经可以将多语言抽出来了，并且当做外部资源使用绝对路径来引用。但是当我们组件单独打包并且引用的时候，我要怎么使用多语言，并且把多语言的文件也抽出来呢？</p>
+<p>我们可以按照一下语法，实际引用的时候应该是这样子的：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span>;</span><br><span class="line"><span class="keyword">import</span> Select <span class="keyword">from</span> <span class="string">'air-ui/lib/select'</span>;</span><br><span class="line"><span class="keyword">import</span> Row <span class="keyword">from</span> <span class="string">'air-ui/lib/row'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/select.css'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/row.css'</span>;</span><br><span class="line"><span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App.vue'</span>;</span><br><span class="line"></span><br><span class="line">Vue.use(Button);</span><br><span class="line">Vue.use(Row);</span><br></pre></td></tr></table></figure></p>
+<p>对于这种情况，要设置多语言的话，肯定要使用 locale 对象(不然这么用 use 和 i18n 方法)，但是之前 locale 对象都是加载到 <code>air-ui.common.js</code> 文件里面的，如果需要按需加载的话，那么这个对象还得重新再导出来, 所以在 <code>webpack.component.js</code> 也要把 locale 对象导出来，因此要在 <code>components.json</code> 加上这一行：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"locale"</span>: <span class="string">"./src/locale/index.js"</span>,</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/01/06/air-ui-13/9.png" alt="1"></p>
+<p>这样子导出的组件对象就会包含 locale 这个对象了，那我们就可以通过这个对象去设置多语言了：</p>
+<p><img src="/2020/01/06/air-ui-13/10.png" alt="1"></p>
+<p>这样就出来了。 后面导入这个即可：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> Select <span class="keyword">from</span> <span class="string">'air-ui/lib/select'</span>;</span><br><span class="line"><span class="keyword">import</span> Option <span class="keyword">from</span> <span class="string">'air-ui/lib/option'</span>;</span><br><span class="line"><span class="keyword">import</span> Row <span class="keyword">from</span> <span class="string">'air-ui/lib/row'</span>;</span><br><span class="line"><span class="keyword">import</span> locale <span class="keyword">from</span> <span class="string">'air-ui/lib/locale'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/select.css'</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/row.css'</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/option.css'</span></span><br><span class="line"><span class="keyword">import</span> lang <span class="keyword">from</span> <span class="string">'air-ui/lib/lang/en'</span></span><br><span class="line"></span><br><span class="line">locale.use(lang)</span><br><span class="line">Vue.component(Row.name, Row)</span><br><span class="line">Vue.component(Select.name, Select)</span><br><span class="line">Vue.component(Option.name, Option)</span><br></pre></td></tr></table></figure>
+<p>这样子就是按需加载，并导入对应的多语言了。  但是这样发现并不行， 这个是因为 select 里面的 local 是相对路径的，并且在构建 dist 的时候，并没有抽出来，</p>
+<p>导致读的 locale 对象并不是后面引用的，而是 select.js 里面的 locale：</p>
+<p><img src="/2020/01/06/air-ui-13/11.png" alt="1"></p>
+<p>所以要改成，如果要单独构建组件的时候，要把里面引用的 local，也要换成绝对路径，所以在 <code>webpack.componnent.js</code> 要加这一行：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这边将一些文件不打包进去，不然 common 的体积会变得很大，尤其是语言文件。 不过这样一来的后果就是，如果 common 不包含这些文件的话，那么这些文件就要单独打出来，而且路径还不能变， 而且一旦不打包进去，那么引用就要变成 绝对路径引用，不能再用</span></span><br><span class="line">externals: [<span class="built_in">Object</span>.assign(&#123;</span><br><span class="line">  vue: <span class="string">'vue'</span></span><br><span class="line">&#125;, &#123;</span><br><span class="line">  <span class="string">'../lang/zh-CN'</span>: <span class="string">'air-ui/lib/lang/zh-CN'</span>,</span><br><span class="line">  <span class="comment">// 这边注意，只有在打包单独组件的时候，才需要进行 locale 的路径替换，因为单独加载组件，也需要多语言的支持，如果是打包common，那么就不需要，因为都集成了</span></span><br><span class="line">  <span class="string">'../../../../src/locale'</span>: <span class="string">'air-ui/lib/locale'</span>,</span><br><span class="line">  <span class="string">'../locale'</span>: <span class="string">'air-ui/lib/locale'</span>,</span><br><span class="line">&#125;), nodeExternals()],</span><br></pre></td></tr></table></figure></p>
+<p>这样子单独构建 select 的时候，引用的 locale ，就会变成打包后的 locale 了。这样子对象就能匹配上了。</p>
+<p>这边要特别注意，我们只在 <code>webpack.components.js</code> 打包单独组件的时候，才需要对 locale 对象进行抽离，如果是打包<code>air-ui.common.js</code> 是不需要的，所以不要搞混了。</p>
+<h2 id="国际化的几种方式"><a href="#国际化的几种方式" class="headerlink" title="国际化的几种方式"></a>国际化的几种方式</h2><p>最后我们来总结一下，国际化的几种引入方式:</p>
+<h3 id="完整引入"><a href="#完整引入" class="headerlink" title="完整引入"></a>完整引入</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 完整引入 AirUI</span></span><br><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span></span><br><span class="line"><span class="keyword">import</span> AirUI <span class="keyword">from</span> <span class="string">'air-ui'</span></span><br><span class="line"><span class="keyword">import</span> locale <span class="keyword">from</span> <span class="string">'air-ui/lib/lang/en'</span></span><br><span class="line"></span><br><span class="line">Vue.use(AirUI, &#123; locale &#125;)</span><br></pre></td></tr></table></figure>
+<h3 id="部分引入-全部加载"><a href="#部分引入-全部加载" class="headerlink" title="部分引入(全部加载)"></a>部分引入(全部加载)</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span></span><br><span class="line"><span class="keyword">import</span> &#123; Row, Select, Option, locale &#125; <span class="keyword">from</span> <span class="string">'air-ui'</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/index.css'</span></span><br><span class="line"><span class="keyword">import</span> lang <span class="keyword">from</span> <span class="string">'air-ui/lib/lang/en'</span></span><br><span class="line"></span><br><span class="line">locale.use(lang)</span><br><span class="line">Vue.component(Row.name, Row)</span><br><span class="line">Vue.component(Select.name, Select)</span><br><span class="line">Vue.component(Option.name, Option)</span><br></pre></td></tr></table></figure>
+<p>这边还需要注意一个细节，因为 locale 是单独被导出来的，因此在 <code>components/index.js</code> 这个文件在导出的时候，也要将 locale 对象导出来:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> locale <span class="keyword">from</span> <span class="string">'../../src/locale'</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  locale: locale,</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样才能在这种方式引用到。</p>
+<h3 id="按需加载并引入"><a href="#按需加载并引入" class="headerlink" title="按需加载并引入"></a>按需加载并引入</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 按需加载并引入 AirUI</span></span><br><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span></span><br><span class="line"><span class="keyword">import</span> Select <span class="keyword">from</span> <span class="string">'air-ui/lib/select'</span>;</span><br><span class="line"><span class="keyword">import</span> Option <span class="keyword">from</span> <span class="string">'air-ui/lib/option'</span>;</span><br><span class="line"><span class="keyword">import</span> Row <span class="keyword">from</span> <span class="string">'air-ui/lib/row'</span>;</span><br><span class="line"><span class="keyword">import</span> locale <span class="keyword">from</span> <span class="string">'air-ui/lib/locale'</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/select.css'</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/row.css'</span></span><br><span class="line"><span class="keyword">import</span> <span class="string">'air-ui/lib/styles/option.css'</span></span><br><span class="line"><span class="keyword">import</span> lang <span class="keyword">from</span> <span class="string">'air-ui/lib/lang/en'</span></span><br><span class="line"></span><br><span class="line">locale.use(lang)</span><br><span class="line">Vue.component(Row.name, Row)</span><br><span class="line">Vue.component(Select.name, Select)</span><br><span class="line">Vue.component(Option.name, Option)</span><br></pre></td></tr></table></figure>
+<h3 id="替换默认的中文语言包"><a href="#替换默认的中文语言包" class="headerlink" title="替换默认的中文语言包"></a>替换默认的中文语言包</h3><p>如果使用其它语言，默认情况下中文语言包依旧是被引入的，可以使用 webpack 的 <code>NormalModuleReplacementPlugin</code> 替换默认语言包：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  plugins: [</span><br><span class="line">    <span class="keyword">new</span> webpack.NormalModuleReplacementPlugin(<span class="regexp">/air-ui[\/\\]lib[\/\\]lang[\/\\]zh-CN/</span>, <span class="string">'air-ui/lib/lang/en'</span>)</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本节主要讲打包的时候，多语言文件的抽离和处理。包括打 common 文件和打单独组件包的时候是怎么做的，以及跟 <code>element-ui</code> 的差别在哪里。 本节已经涉及到打包构建的一些情况了。下一节我们来详细讲一下 <code>air-ui</code> 的打包构建，尤其是打 dist 包是怎么处理的。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</a><br><a href="/2019/12/03/air-ui-2/" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">自建vue组件 air-ui (2) -- 先分析一下 element ui 项目</a><br><a href="/2019/12/05/air-ui-3/" title="自建vue组件 air-ui (3) -- css 开发规范">自建vue组件 air-ui (3) -- css 开发规范</a><br><a href="/2019/12/07/air-ui-4/" title="自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构">自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构</a><br><a href="/2019/12/09/air-ui-5/" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">自建vue组件 air-ui (5) -- 创建第一个组件 Button</a><br><a href="/2019/12/12/air-ui-6/" title="自建vue组件 air-ui (6) -- 创建内置服务组件">自建vue组件 air-ui (6) -- 创建内置服务组件</a><br><a href="/2019/12/15/air-ui-7/" title="自建vue组件 air-ui (7) -- 创建指令组件">自建vue组件 air-ui (7) -- 创建指令组件</a><br><a href="/2019/12/18/air-ui-8/" title="自建vue组件 air-ui (8) -- 实现部分引入组件">自建vue组件 air-ui (8) -- 实现部分引入组件</a><br><a href="/2019/12/22/air-ui-9/" title="自建vue组件 air-ui (9) -- 用 vuepress 写文档">自建vue组件 air-ui (9) -- 用 vuepress 写文档</a><br><a href="/2019/12/26/air-ui-10/" title="自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)">自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)</a><br><a href="/2020/01/02/air-ui-11/" title="自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)">自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)</a><br><a href="/2020/01/04/air-ui-12/" title="自建vue组件 air-ui (12) -- 国际化机制">自建vue组件 air-ui (12) -- 国际化机制</a><br><a href="/2020/01/06/air-ui-13/" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">自建vue组件 air-ui (13) -- 国际化机制(进阶版)</a><br><a href="/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</a><br><a href="/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">自建vue组件 air-ui (15) -- 主题定制</a><br><a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a><br><a href="/2020/01/16/air-ui-17/" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">自建vue组件 air-ui (17) -- 开发爬坑篇以及总结</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/01/06/air-ui-13/" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">http://kebingzao.com/2020/01/06/air-ui-13/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/04/air-ui-12/" rel="next" title="自建vue组件 air-ui (12) -- 国际化机制">
+                <i class="fa fa-chevron-left"></i> 自建vue组件 air-ui (12) -- 国际化机制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/01/09/air-ui-14/" rel="prev" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">
+                自建vue组件 air-ui (14) -- 打包构建(dev 和 dist) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将语言包文件引用单独抽出来"><span class="nav-number">2.</span> <span class="nav-text">将语言包文件引用单独抽出来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#element-ui-的做法"><span class="nav-number">3.</span> <span class="nav-text">element-ui 的做法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如果引用绝对路径的写法会遇到什么坑"><span class="nav-number">4.</span> <span class="nav-text">如果引用绝对路径的写法会遇到什么坑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组件单独打包的时候，怎么引入多语言机制"><span class="nav-number">5.</span> <span class="nav-text">组件单独打包的时候，怎么引入多语言机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#国际化的几种方式"><span class="nav-number">6.</span> <span class="nav-text">国际化的几种方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#完整引入"><span class="nav-number">6.1.</span> <span class="nav-text">完整引入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#部分引入-全部加载"><span class="nav-number">6.2.</span> <span class="nav-text">部分引入(全部加载)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#按需加载并引入"><span class="nav-number">6.3.</span> <span class="nav-text">按需加载并引入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#替换默认的中文语言包"><span class="nav-number">6.4.</span> <span class="nav-text">替换默认的中文语言包</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/01/06/air-ui-13/';
+          this.page.identifier = '2020/01/06/air-ui-13/';
+          this.page.title = '自建vue组件 air-ui (13) -- 国际化机制(进阶版)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

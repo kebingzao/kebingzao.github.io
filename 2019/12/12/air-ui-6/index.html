@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 自建vue组件 air-ui (5) -- 创建第一个组件 Button 我们已经知道怎么创建一个标签类型的组件了。本节我们就继续讲怎么创建服务类型的组件。 创建服务类型的组件以 notification 这个组件为例，他就是一个典型的内置服务组件。其实就是绑定到Vue的原型上，当做全局方法来使用。 设置 vue 的全局方法其实很常见，比如发 ajax 请求时喜欢用axios挂载到vue">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建vue组件 air-ui (6) -- 创建内置服务组件">
+<meta property="og:url" content="http://kebingzao.com/2019/12/12/air-ui-6/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 自建vue组件 air-ui (5) -- 创建第一个组件 Button 我们已经知道怎么创建一个标签类型的组件了。本节我们就继续讲怎么创建服务类型的组件。 创建服务类型的组件以 notification 这个组件为例，他就是一个典型的内置服务组件。其实就是绑定到Vue的原型上，当做全局方法来使用。 设置 vue 的全局方法其实很常见，比如发 ajax 请求时喜欢用axios挂载到vue">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/12/12/air-ui-6/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/12/12/air-ui-6/2.png">
+<meta property="og:updated_time" content="2020-01-19T13:31:29.096Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自建vue组件 air-ui (6) -- 创建内置服务组件">
+<meta name="twitter:description" content="前言通过 自建vue组件 air-ui (5) -- 创建第一个组件 Button 我们已经知道怎么创建一个标签类型的组件了。本节我们就继续讲怎么创建服务类型的组件。 创建服务类型的组件以 notification 这个组件为例，他就是一个典型的内置服务组件。其实就是绑定到Vue的原型上，当做全局方法来使用。 设置 vue 的全局方法其实很常见，比如发 ajax 请求时喜欢用axios挂载到vue">
+<meta name="twitter:image" content="http://kebingzao.com/2019/12/12/air-ui-6/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/12/12/air-ui-6/"/>
+
+
+
+
+
+  <title>自建vue组件 air-ui (6) -- 创建内置服务组件 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/12/12/air-ui-6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">自建vue组件 air-ui (6) -- 创建内置服务组件</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-12T14:53:56+08:00">
+                2019-12-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/自建vue组件-air-ui/" itemprop="url" rel="index">
+                    <span itemprop="name">自建vue组件 air-ui</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/12/air-ui-6/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/12/12/air-ui-6/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/12/12/air-ui-6/" class="leancloud_visitors" data-flag-title="自建vue组件 air-ui (6) -- 创建内置服务组件">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2019/12/09/air-ui-5/" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">自建vue组件 air-ui (5) -- 创建第一个组件 Button</a> 我们已经知道怎么创建一个标签类型的组件了。本节我们就继续讲怎么创建服务类型的组件。</p>
+<h2 id="创建服务类型的组件"><a href="#创建服务类型的组件" class="headerlink" title="创建服务类型的组件"></a>创建服务类型的组件</h2><p>以 <code>notification</code> 这个组件为例，他就是一个典型的内置服务组件。其实就是绑定到Vue的原型上，当做全局方法来使用。</p>
+<p>设置 vue 的全局方法其实很常见，比如发 <code>ajax</code> 请求时喜欢用<code>axios</code>挂载到<code>vue</code>原型上，如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1 引入vue和axios</span></span><br><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span></span><br><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">'axios'</span></span><br><span class="line"><span class="comment">// 2 对axios的一些封装</span></span><br><span class="line"><span class="comment">// code ...</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 3 然后挂载到原型上</span></span><br><span class="line">Vue.prototype.$axios = axios</span><br></pre></td></tr></table></figure></p>
+<p>用的时候就直接上 <code>this.$axios</code><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用axios.get()方法可以这样用</span></span><br><span class="line"><span class="keyword">this</span>.$axios.get()</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>这样确实方便，不用每个用到 <code>axios</code> 的组件都去引入。 这种方法其实很简单，而内置的服务也是差不多的原理，只不过会涉及到一些 <code>dom</code> 的操作, 以 <code>notification</code> 为例，这边可以看效果: <a href="https://element.eleme.io/#/zh-CN/component/notification" target="_blank" rel="noopener">element-ui 的 Notification 通知</a></p>
+<p>这边主要分为三个步骤，具体的目录结构如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">components/</span><br><span class="line">|    |--- notification/</span><br><span class="line">|    |     |--- src/</span><br><span class="line">|    |     |     |--- main.js</span><br><span class="line">|    |     |     |--- main.vue</span><br><span class="line">|    |     |--- index.js</span><br></pre></td></tr></table></figure></p>
+<h3 id="创建一个-vue-组件"><a href="#创建一个-vue-组件" class="headerlink" title="创建一个 vue 组件"></a>创建一个 vue 组件</h3><p>因为涉及到 dom 操作，所以第一步就是先创建一个 notification 对应的 vue 组件， 就是 <code>notification/src/main.vue</code>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;transition name=<span class="string">"air-notification-fade"</span>&gt;</span><br><span class="line">    &lt;div</span><br><span class="line">      :<span class="class"><span class="keyword">class</span></span>=<span class="string">"['air-notification', customClass, horizontalClass]"</span></span><br><span class="line">      v-show=<span class="string">"visible"</span></span><br><span class="line">      :style=<span class="string">"positionStyle"</span></span><br><span class="line">      @mouseenter=<span class="string">"clearTimer()"</span></span><br><span class="line">      @mouseleave=<span class="string">"startTimer()"</span></span><br><span class="line">      @click=<span class="string">"click"</span></span><br><span class="line">      role=<span class="string">"alert"</span></span><br><span class="line">    &gt;</span><br><span class="line">      &lt;i</span><br><span class="line">        <span class="class"><span class="keyword">class</span></span>=<span class="string">"air-notification__icon"</span></span><br><span class="line">        :<span class="class"><span class="keyword">class</span></span>=<span class="string">"[ typeClass, iconClass ]"</span></span><br><span class="line">        v-<span class="keyword">if</span>=<span class="string">"type || iconClass"</span>&gt;</span><br><span class="line">      &lt;<span class="regexp">/i&gt;</span></span><br><span class="line"><span class="regexp">      &lt;div class="air-notification__group" :class="&#123; 'is-with-icon': typeClass || iconClass &#125;"&gt;</span></span><br><span class="line"><span class="regexp">        &lt;h2 class="air-notification__title" v-text="title"&gt;&lt;/</span>h2&gt;</span><br><span class="line">        &lt;div <span class="class"><span class="keyword">class</span></span>=<span class="string">"air-notification__content"</span> v-show=<span class="string">"message"</span>&gt;</span><br><span class="line">          &lt;slot&gt;</span><br><span class="line">            &lt;p v-<span class="keyword">if</span>=<span class="string">"!dangerouslyUseHTMLString"</span>&gt;&#123;&#123; message &#125;&#125;&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;p v-else v-html="message"&gt;&lt;/</span>p&gt;</span><br><span class="line">          &lt;<span class="regexp">/slot&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>div&gt;</span><br><span class="line">        &lt;div</span><br><span class="line">          <span class="class"><span class="keyword">class</span></span>=<span class="string">"air-notification__closeBtn air-icon-close"</span></span><br><span class="line">          v-<span class="keyword">if</span>=<span class="string">"showClose"</span></span><br><span class="line">          @click.stop=<span class="string">"close"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">      &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>div&gt;</span><br><span class="line">  &lt;<span class="regexp">/transition&gt;</span></span><br><span class="line"><span class="regexp">&lt;/</span>template&gt;</span><br><span class="line"></span><br><span class="line">&lt;script type=<span class="string">"text/babel"</span>&gt;</span><br><span class="line">  <span class="keyword">let</span> typeMap = &#123;</span><br><span class="line">    success: <span class="string">'success'</span>,</span><br><span class="line">    info: <span class="string">'info'</span>,</span><br><span class="line">    warning: <span class="string">'warning'</span>,</span><br><span class="line">    error: <span class="string">'error'</span></span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">    data() &#123;</span><br><span class="line">      <span class="keyword">return</span> &#123;</span><br><span class="line">        visible: <span class="literal">false</span>,</span><br><span class="line">        title: <span class="string">''</span>,</span><br><span class="line">        message: <span class="string">''</span>,</span><br><span class="line">        duration: <span class="number">4500</span>,</span><br><span class="line">        type: <span class="string">''</span>,</span><br><span class="line">        showClose: <span class="literal">true</span>,</span><br><span class="line">        customClass: <span class="string">''</span>,</span><br><span class="line">        iconClass: <span class="string">''</span>,</span><br><span class="line">        onClose: <span class="literal">null</span>,</span><br><span class="line">        onClick: <span class="literal">null</span>,</span><br><span class="line">        closed: <span class="literal">false</span>,</span><br><span class="line">        verticalOffset: <span class="number">0</span>,</span><br><span class="line">        timer: <span class="literal">null</span>,</span><br><span class="line">        dangerouslyUseHTMLString: <span class="literal">false</span>,</span><br><span class="line">        position: <span class="string">'top-right'</span></span><br><span class="line">      &#125;;</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    computed: &#123;</span><br><span class="line">      typeClass() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.type &amp;&amp; typeMap[<span class="keyword">this</span>.type] ? <span class="string">`air-icon-<span class="subst">$&#123; typeMap[<span class="keyword">this</span>.type] &#125;</span>`</span> : <span class="string">''</span>;</span><br><span class="line">      &#125;,</span><br><span class="line"></span><br><span class="line">      horizontalClass() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.position.indexOf(<span class="string">'right'</span>) &gt; <span class="number">-1</span> ? <span class="string">'right'</span> : <span class="string">'left'</span>;</span><br><span class="line">      &#125;,</span><br><span class="line"></span><br><span class="line">      verticalProperty() &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="regexp">/^top-/</span>.test(<span class="keyword">this</span>.position) ? <span class="string">'top'</span> : <span class="string">'bottom'</span>;</span><br><span class="line">      &#125;,</span><br><span class="line"></span><br><span class="line">      positionStyle() &#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">          [<span class="keyword">this</span>.verticalProperty]: <span class="string">`<span class="subst">$&#123; <span class="keyword">this</span>.verticalOffset &#125;</span>px`</span></span><br><span class="line">        &#125;;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    watch: &#123;</span><br><span class="line">      closed(newVal) &#123;</span><br><span class="line">        <span class="keyword">if</span> (newVal) &#123;</span><br><span class="line">          <span class="keyword">this</span>.visible = <span class="literal">false</span>;</span><br><span class="line">          <span class="keyword">this</span>.$el.addEventListener(<span class="string">'transitionend'</span>, <span class="keyword">this</span>.destroyElement);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    methods: &#123;</span><br><span class="line">      destroyElement() &#123;</span><br><span class="line">        <span class="keyword">this</span>.$el.removeEventListener(<span class="string">'transitionend'</span>, <span class="keyword">this</span>.destroyElement);</span><br><span class="line">        <span class="keyword">this</span>.$destroy(<span class="literal">true</span>);</span><br><span class="line">        <span class="keyword">this</span>.$el.parentNode.removeChild(<span class="keyword">this</span>.$el);</span><br><span class="line">      &#125;,</span><br><span class="line"></span><br><span class="line">      click() &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="keyword">this</span>.onClick === <span class="string">'function'</span>) &#123;</span><br><span class="line">          <span class="keyword">this</span>.onClick();</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line"></span><br><span class="line">      close() &#123;</span><br><span class="line">        <span class="keyword">this</span>.closed = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="keyword">this</span>.onClose === <span class="string">'function'</span>) &#123;</span><br><span class="line">          <span class="keyword">this</span>.onClose();</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line"></span><br><span class="line">      clearTimer() &#123;</span><br><span class="line">        clearTimeout(<span class="keyword">this</span>.timer);</span><br><span class="line">      &#125;,</span><br><span class="line"></span><br><span class="line">      startTimer() &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.duration &gt; <span class="number">0</span>) &#123;</span><br><span class="line">          <span class="keyword">this</span>.timer = setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!<span class="keyword">this</span>.closed) &#123;</span><br><span class="line">              <span class="keyword">this</span>.close();</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;, <span class="keyword">this</span>.duration);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;,</span><br><span class="line">      keydown(e) &#123;</span><br><span class="line">        <span class="keyword">if</span> (e.keyCode === <span class="number">46</span> || e.keyCode === <span class="number">8</span>) &#123;</span><br><span class="line">          <span class="keyword">this</span>.clearTimer(); <span class="comment">// detele 取消倒计时</span></span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (e.keyCode === <span class="number">27</span>) &#123; <span class="comment">// esc关闭消息</span></span><br><span class="line">          <span class="keyword">if</span> (!<span class="keyword">this</span>.closed) &#123;</span><br><span class="line">            <span class="keyword">this</span>.close();</span><br><span class="line">          &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="keyword">this</span>.startTimer(); <span class="comment">// 恢复倒计时</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    mounted() &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.duration &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">this</span>.timer = setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">          <span class="keyword">if</span> (!<span class="keyword">this</span>.closed) &#123;</span><br><span class="line">            <span class="keyword">this</span>.close();</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;, <span class="keyword">this</span>.duration);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">document</span>.addEventListener(<span class="string">'keydown'</span>, <span class="keyword">this</span>.keydown);</span><br><span class="line">    &#125;,</span><br><span class="line">    beforeDestroy() &#123;</span><br><span class="line">      <span class="built_in">document</span>.removeEventListener(<span class="string">'keydown'</span>, <span class="keyword">this</span>.keydown);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>具体逻辑不细说了，他就是普通的一个 vue 组件，无非就是一个 dom 结构，还有就是各种事件和参数的触发和监听，不难理解，可以理解为 notification 这个组件的 dom 渲染。</p>
+<h3 id="构建-notification-的结构体"><a href="#构建-notification-的结构体" class="headerlink" title="构建 notification 的结构体"></a>构建 notification 的结构体</h3><p>既然 dom 已经准备好了，接下来只要构建 <code>Notification</code> 的结构体就行了，然后让这个结构体的各种方法去操作 dom 就行了。 所以 <code>notification/src/main.js</code>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Vue <span class="keyword">from</span> <span class="string">'vue'</span>;</span><br><span class="line"><span class="keyword">import</span> Main <span class="keyword">from</span> <span class="string">'./main.vue'</span>;</span><br><span class="line"><span class="keyword">import</span> merge <span class="keyword">from</span> <span class="string">'../../../../src/utils/merge'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; PopupManager &#125; <span class="keyword">from</span> <span class="string">'../../../../src/utils/popup'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; isVNode &#125; <span class="keyword">from</span> <span class="string">'../../../../src/utils/vdom'</span>;</span><br><span class="line"><span class="keyword">const</span> NotificationConstructor = Vue.extend(Main);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> instance;</span><br><span class="line"><span class="keyword">let</span> instances = [];</span><br><span class="line"><span class="keyword">let</span> seed = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Notification = <span class="function"><span class="keyword">function</span>(<span class="params">options</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (Vue.prototype.$isServer) <span class="keyword">return</span>;</span><br><span class="line">  options = merge(&#123;&#125;, options);</span><br><span class="line">  <span class="keyword">const</span> userOnClose = options.onClose;</span><br><span class="line">  <span class="keyword">const</span> id = <span class="string">'notification_'</span> + seed++;</span><br><span class="line">  <span class="keyword">const</span> position = options.position || <span class="string">'top-right'</span>;</span><br><span class="line"></span><br><span class="line">  options.onClose = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    Notification.close(id, userOnClose);</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  instance = <span class="keyword">new</span> NotificationConstructor(&#123;</span><br><span class="line">    data: options</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (isVNode(options.message)) &#123;</span><br><span class="line">    instance.$slots.default = [options.message];</span><br><span class="line">    options.message = <span class="string">'REPLACED_BY_VNODE'</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  instance.id = id;</span><br><span class="line">  instance.$mount();</span><br><span class="line">  <span class="built_in">document</span>.body.appendChild(instance.$el);</span><br><span class="line">  instance.visible = <span class="literal">true</span>;</span><br><span class="line">  instance.dom = instance.$el;</span><br><span class="line">  instance.dom.style.zIndex = PopupManager.nextZIndex();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> verticalOffset = options.offset || <span class="number">0</span>;</span><br><span class="line">  instances.filter(<span class="function"><span class="params">item</span> =&gt;</span> item.position === position).forEach(<span class="function"><span class="params">item</span> =&gt;</span> &#123;</span><br><span class="line">    verticalOffset += item.$el.offsetHeight + <span class="number">16</span>;</span><br><span class="line">  &#125;);</span><br><span class="line">  verticalOffset += <span class="number">16</span>;</span><br><span class="line">  instance.verticalOffset = verticalOffset;</span><br><span class="line">  instances.push(instance);</span><br><span class="line">  <span class="keyword">return</span> instance;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">[<span class="string">'success'</span>, <span class="string">'warning'</span>, <span class="string">'info'</span>, <span class="string">'error'</span>].forEach(<span class="function"><span class="params">type</span> =&gt;</span> &#123;</span><br><span class="line">  Notification[type] = <span class="function"><span class="params">options</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> options === <span class="string">'string'</span> || isVNode(options)) &#123;</span><br><span class="line">      options = &#123;</span><br><span class="line">        message: options</span><br><span class="line">      &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    options.type = type;</span><br><span class="line">    <span class="keyword">return</span> Notification(options);</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">Notification.close = <span class="function"><span class="keyword">function</span>(<span class="params">id, userOnClose</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> index = <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">const</span> len = instances.length;</span><br><span class="line">  <span class="keyword">const</span> instance = instances.filter(<span class="function">(<span class="params">instance, i</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (instance.id === id) &#123;</span><br><span class="line">      index = i;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;)[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">if</span> (!instance) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> userOnClose === <span class="string">'function'</span>) &#123;</span><br><span class="line">    userOnClose(instance);</span><br><span class="line">  &#125;</span><br><span class="line">  instances.splice(index, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (len &lt;= <span class="number">1</span>) <span class="keyword">return</span>;</span><br><span class="line">  <span class="keyword">const</span> position = instance.position;</span><br><span class="line">  <span class="keyword">const</span> removedHeight = instance.dom.offsetHeight;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = index; i &lt; len - <span class="number">1</span>; i++) &#123;</span><br><span class="line">    <span class="keyword">if</span> (instances[i].position === position) &#123;</span><br><span class="line">      instances[i].dom.style[instance.verticalProperty] =</span><br><span class="line">        <span class="built_in">parseInt</span>(instances[i].dom.style[instance.verticalProperty], <span class="number">10</span>) - removedHeight - <span class="number">16</span> + <span class="string">'px'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Notification.closeAll = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = instances.length - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</span><br><span class="line">    instances[i].close();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> Notification;</span><br></pre></td></tr></table></figure></p>
+<p>这个逻辑也不难理解，主要分一下几个步骤：</p>
+<ol>
+<li><p>之前创建的 vue 组件，通过 <code>Vue.extend</code> 生成一个 <code>子类</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> NotificationConstructor = Vue.extend(Main);</span><br></pre></td></tr></table></figure>
+<p>这个可以理解为 <code>notification</code> 的构造函数，只要 <code>new</code> 初始化这个函数，就可以生成一个 <code>notification</code> 的实例化对象:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">instance = <span class="keyword">new</span> NotificationConstructor(&#123;</span><br><span class="line">  data: options</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>所以 <code>Notification</code> 这个对象其实就是工厂函数，只要被调用，那么就会实例化一个拥有 notification vue 组件的全新的对象。</p>
+</li>
+<li><p>实例化对象进行挂载，并且添加到 body 中，显示出来</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">instance.$mount();  <span class="comment">//没有 el 参数，就会挂载到一个未挂载的实例,模板将被渲染为文档之外的的元素</span></span><br><span class="line"><span class="built_in">document</span>.body.appendChild(instance.$el); <span class="comment">// 这时候必须使用原生 DOM API 把它插入文档中</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>接下来就是这个 <code>Notification</code> 这个对象的其他方法，比如 <code>close</code> 之类的，同时还有一个处于闭包状态的全局对象 <code>instances</code> 来存放这些实例化的对象，并通过 id 对这些实例进行操作</p>
+</li>
+</ol>
+<p>总的来说，逻辑其实并不复杂。</p>
+<h3 id="最后的-index-js"><a href="#最后的-index-js" class="headerlink" title="最后的 index.js"></a>最后的 index.js</h3><p>最后的 index.js 其实就是导出这个结构体对象，<code>notification/index.js</code>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Notification <span class="keyword">from</span> <span class="string">'./src/main.js'</span>;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> Notification;</span><br></pre></td></tr></table></figure></p>
+<h3 id="挂载到-vue-原型"><a href="#挂载到-vue-原型" class="headerlink" title="挂载到 vue 原型"></a>挂载到 vue 原型</h3><p>接下来就是挂载了，一样写在 <code>components/index.js</code> 的 install 方法中，不过这一次不用 <code>component 语法</code> 而是直接挂载到 vue 原型上:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Button <span class="keyword">from</span> <span class="string">'./button'</span></span><br><span class="line"><span class="keyword">import</span> ButtonGroup <span class="keyword">from</span> <span class="string">'./button-group'</span></span><br><span class="line"><span class="keyword">import</span> Notification <span class="keyword">from</span> <span class="string">'./notification'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> components = &#123;</span><br><span class="line">  Button,</span><br><span class="line">  ButtonGroup</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> install = <span class="function"><span class="keyword">function</span> (<span class="params">Vue</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">Object</span>.keys(components).forEach(<span class="function"><span class="params">key</span> =&gt;</span> &#123;</span><br><span class="line">    Vue.component(components[key].name, components[key])</span><br><span class="line">  &#125;)</span><br><span class="line">  Vue.prototype.$notify = Notification</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  install</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>当然也不能忽略了他的 scss 文件，所以 <code>src/styles/index.scss</code> 也要加上:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@<span class="keyword">import</span> <span class="string">"./base.scss"</span>;</span><br><span class="line">@<span class="keyword">import</span> <span class="string">"./button.scss"</span>;</span><br><span class="line">@<span class="keyword">import</span> <span class="string">"./button-group.scss"</span>;</span><br><span class="line">@<span class="keyword">import</span> <span class="string">"./notification.scss"</span>;</span><br></pre></td></tr></table></figure></p>
+<h3 id="写例子了"><a href="#写例子了" class="headerlink" title="写例子了"></a>写例子了</h3><p>接下来就是写例子了，在 <code>home.vue</code> 补上例子:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">air-button</span> <span class="attr">plain</span> @<span class="attr">click</span>=<span class="string">"open1"</span>&gt;</span>可自动关闭<span class="tag">&lt;/<span class="name">air-button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">air-button</span> <span class="attr">plain</span> @<span class="attr">click</span>=<span class="string">"open2"</span>&gt;</span>不会自动关闭<span class="tag">&lt;/<span class="name">air-button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">air-button</span> <span class="attr">plain</span> @<span class="attr">click</span>=<span class="string">"open3"</span>&gt;</span>成功<span class="tag">&lt;/<span class="name">air-button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">air-button</span> <span class="attr">plain</span> @<span class="attr">click</span>=<span class="string">"open4"</span>&gt;</span>警告<span class="tag">&lt;/<span class="name">air-button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">air-button</span> <span class="attr">plain</span> @<span class="attr">click</span>=<span class="string">"open5"</span>&gt;</span>消息<span class="tag">&lt;/<span class="name">air-button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">air-button</span> <span class="attr">plain</span> @<span class="attr">click</span>=<span class="string">"open6"</span>&gt;</span>错误<span class="tag">&lt;/<span class="name">air-button</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>script 补上对应的触发方法:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">  <span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">    data () &#123;</span><br><span class="line">      <span class="keyword">return</span> &#123;</span><br><span class="line">        msg: <span class="string">`AIR-UI  -  基于vue2.x，可复用UI组件`</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    methods: &#123;</span><br><span class="line">      open1() &#123;</span><br><span class="line">        <span class="keyword">const</span> h = <span class="keyword">this</span>.$createElement;</span><br><span class="line">        <span class="keyword">this</span>.$notify(&#123;</span><br><span class="line">          title: <span class="string">'标题名称'</span>,</span><br><span class="line">          message: h(<span class="string">'i'</span>, &#123; <span class="attr">style</span>: <span class="string">'color: teal'</span>&#125;, <span class="string">'这是一条会消失的提示文案'</span>)</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;,</span><br><span class="line">      open2() &#123;</span><br><span class="line">        <span class="keyword">this</span>.$notify(&#123;</span><br><span class="line">          title: <span class="string">'提示'</span>,</span><br><span class="line">          message: <span class="string">'这是一条不会自动关闭的消息'</span>,</span><br><span class="line">          duration: <span class="number">0</span></span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;,</span><br><span class="line">      open3() &#123;</span><br><span class="line">        <span class="keyword">this</span>.$notify(&#123;</span><br><span class="line">          title: <span class="string">'成功'</span>,</span><br><span class="line">          message: <span class="string">'这是一条成功的提示消息'</span>,</span><br><span class="line">          type: <span class="string">'success'</span></span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;,</span><br><span class="line">      open4() &#123;</span><br><span class="line">        <span class="keyword">this</span>.$notify(&#123;</span><br><span class="line">          title: <span class="string">'警告'</span>,</span><br><span class="line">          message: <span class="string">'这是一条警告的提示消息'</span>,</span><br><span class="line">          type: <span class="string">'warning'</span></span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;,</span><br><span class="line">      open5() &#123;</span><br><span class="line">        <span class="keyword">this</span>.$notify.info(&#123;</span><br><span class="line">          title: <span class="string">'消息'</span>,</span><br><span class="line">          message: <span class="string">'这是一条消息的提示消息'</span></span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;,</span><br><span class="line">      open6() &#123;</span><br><span class="line">        <span class="keyword">this</span>.$notify.error(&#123;</span><br><span class="line">          title: <span class="string">'错误'</span>,</span><br><span class="line">          message: <span class="string">'这是一条错误的提示消息'</span></span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>注意调用的方式: <code>this.$nofify</code> ,接下来就可以看效果了:</p>
+<p><img src="/2019/12/12/air-ui-6/1.png" alt="1"></p>
+<p>这样子一个内置服务的组件，就创建成功了。</p>
+<h2 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h2><p>这边要注意一点的是，内置服务的组件，不能使用 <code>Vue.use()</code> 来调用，否则项目运行会默认执行一次，即使没有使用它们，举个例子，比如我在 <code>src/main.js</code> 改成换成对 <code>notification</code> 显示挂载和 use 的引用：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Notification <span class="keyword">from</span> <span class="string">'./components/notification'</span></span><br><span class="line"></span><br><span class="line">Vue.prototype.$notify = Notification</span><br><span class="line">Vue.use(Notification)</span><br></pre></td></tr></table></figure></p>
+<p>这样子，编译是没问题的，但是我加载页面的时候，会默认弹出一个空的弹出框？？</p>
+<p><img src="/2019/12/12/air-ui-6/2.png" alt="1"></p>
+<p>这个是因为我调用 <code>use</code> 的时候，就会默认执行一次 <code>Notification</code> 对象，从而实例化一个 <code>notification</code> 的对象，但是因为没有传入任何参数，所以是一个空的弹出框。 所以对于这种内置服务组件，比如 <code>Notification</code>, <code>Message</code>, <code>MessageBox</code>, 只要有绑定到 <code>vue 原型对象</code>就行了，不用 <code>use</code> 来引入。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>内置服务组件的创建，大概就这样。下节我们讲怎么创建一个指令组件。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</a><br><a href="/2019/12/03/air-ui-2/" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">自建vue组件 air-ui (2) -- 先分析一下 element ui 项目</a><br><a href="/2019/12/05/air-ui-3/" title="自建vue组件 air-ui (3) -- css 开发规范">自建vue组件 air-ui (3) -- css 开发规范</a><br><a href="/2019/12/07/air-ui-4/" title="自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构">自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构</a><br><a href="/2019/12/09/air-ui-5/" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">自建vue组件 air-ui (5) -- 创建第一个组件 Button</a><br><a href="/2019/12/12/air-ui-6/" title="自建vue组件 air-ui (6) -- 创建内置服务组件">自建vue组件 air-ui (6) -- 创建内置服务组件</a><br><a href="/2019/12/15/air-ui-7/" title="自建vue组件 air-ui (7) -- 创建指令组件">自建vue组件 air-ui (7) -- 创建指令组件</a><br><a href="/2019/12/18/air-ui-8/" title="自建vue组件 air-ui (8) -- 实现部分引入组件">自建vue组件 air-ui (8) -- 实现部分引入组件</a><br><a href="/2019/12/22/air-ui-9/" title="自建vue组件 air-ui (9) -- 用 vuepress 写文档">自建vue组件 air-ui (9) -- 用 vuepress 写文档</a><br><a href="/2019/12/26/air-ui-10/" title="自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)">自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)</a><br><a href="/2020/01/02/air-ui-11/" title="自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)">自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)</a><br><a href="/2020/01/04/air-ui-12/" title="自建vue组件 air-ui (12) -- 国际化机制">自建vue组件 air-ui (12) -- 国际化机制</a><br><a href="/2020/01/06/air-ui-13/" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">自建vue组件 air-ui (13) -- 国际化机制(进阶版)</a><br><a href="/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</a><br><a href="/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">自建vue组件 air-ui (15) -- 主题定制</a><br><a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a><br><a href="/2020/01/16/air-ui-17/" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">自建vue组件 air-ui (17) -- 开发爬坑篇以及总结</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/12/12/air-ui-6/" title="自建vue组件 air-ui (6) -- 创建内置服务组件">http://kebingzao.com/2019/12/12/air-ui-6/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/09/air-ui-5/" rel="next" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">
+                <i class="fa fa-chevron-left"></i> 自建vue组件 air-ui (5) -- 创建第一个组件 Button
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/15/air-ui-7/" rel="prev" title="自建vue组件 air-ui (7) -- 创建指令组件">
+                自建vue组件 air-ui (7) -- 创建指令组件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建服务类型的组件"><span class="nav-number">2.</span> <span class="nav-text">创建服务类型的组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建一个-vue-组件"><span class="nav-number">2.1.</span> <span class="nav-text">创建一个 vue 组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构建-notification-的结构体"><span class="nav-number">2.2.</span> <span class="nav-text">构建 notification 的结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最后的-index-js"><span class="nav-number">2.3.</span> <span class="nav-text">最后的 index.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#挂载到-vue-原型"><span class="nav-number">2.4.</span> <span class="nav-text">挂载到 vue 原型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写例子了"><span class="nav-number">2.5.</span> <span class="nav-text">写例子了</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意"><span class="nav-number">3.</span> <span class="nav-text">注意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/12/12/air-ui-6/';
+          this.page.identifier = '2019/12/12/air-ui-6/';
+          this.page.title = '自建vue组件 air-ui (6) -- 创建内置服务组件';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

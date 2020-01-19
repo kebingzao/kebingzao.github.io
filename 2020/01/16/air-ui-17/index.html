@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前面讲了很多关于 air-ui 组件的东西，包括多语言，主题定制，构建等等。但是其实一个组件库包含那么多的组件，在开发的时候，难免会遇到很多奇奇怪怪的问题，本节就讲一下在开发这些组件的时候，遇到的一些问题，以及怎么解决。(虽然很大程度上复用了 element-ui 的组件逻辑代码，但是难免还会有其他的坑)。 兼容 jsx 语法之前在处理 jsx 语法的时候，有报错：12345678910con">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">
+<meta property="og:url" content="http://kebingzao.com/2020/01/16/air-ui-17/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前面讲了很多关于 air-ui 组件的东西，包括多语言，主题定制，构建等等。但是其实一个组件库包含那么多的组件，在开发的时候，难免会遇到很多奇奇怪怪的问题，本节就讲一下在开发这些组件的时候，遇到的一些问题，以及怎么解决。(虽然很大程度上复用了 element-ui 的组件逻辑代码，但是难免还会有其他的坑)。 兼容 jsx 语法之前在处理 jsx 语法的时候，有报错：12345678910con">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/01/16/air-ui-17/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/16/air-ui-17/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/16/air-ui-17/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/16/air-ui-17/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/16/air-ui-17/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/16/air-ui-17/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/16/air-ui-17/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/01/16/air-ui-17/8.png">
+<meta property="og:updated_time" content="2020-01-19T13:31:29.079Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">
+<meta name="twitter:description" content="前言前面讲了很多关于 air-ui 组件的东西，包括多语言，主题定制，构建等等。但是其实一个组件库包含那么多的组件，在开发的时候，难免会遇到很多奇奇怪怪的问题，本节就讲一下在开发这些组件的时候，遇到的一些问题，以及怎么解决。(虽然很大程度上复用了 element-ui 的组件逻辑代码，但是难免还会有其他的坑)。 兼容 jsx 语法之前在处理 jsx 语法的时候，有报错：12345678910con">
+<meta name="twitter:image" content="http://kebingzao.com/2020/01/16/air-ui-17/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/01/16/air-ui-17/"/>
+
+
+
+
+
+  <title>自建vue组件 air-ui (17) -- 开发爬坑篇以及总结 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/01/16/air-ui-17/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">自建vue组件 air-ui (17) -- 开发爬坑篇以及总结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-01-16T13:53:14+08:00">
+                2020-01-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/自建vue组件-air-ui/" itemprop="url" rel="index">
+                    <span itemprop="name">自建vue组件 air-ui</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/01/16/air-ui-17/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/01/16/air-ui-17/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/01/16/air-ui-17/" class="leancloud_visitors" data-flag-title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前面讲了很多关于 <code>air-ui</code> 组件的东西，包括多语言，主题定制，构建等等。但是其实一个组件库包含那么多的组件，在开发的时候，难免会遇到很多奇奇怪怪的问题，本节就讲一下在开发这些组件的时候，遇到的一些问题，以及怎么解决。(虽然很大程度上复用了 <code>element-ui</code> 的组件逻辑代码，但是难免还会有其他的坑)。</p>
+<h2 id="兼容-jsx-语法"><a href="#兼容-jsx-语法" class="headerlink" title="兼容 jsx 语法"></a>兼容 jsx 语法</h2><p>之前在处理 jsx 语法的时候，有报错：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> wrap = (</span><br><span class="line">  &lt;div</span><br><span class="line">    ref=<span class="string">"wrap"</span></span><br><span class="line">    style=&#123; style &#125;</span><br><span class="line">    onScroll=&#123; <span class="keyword">this</span>.handleScroll &#125;</span><br><span class="line">    <span class="class"><span class="keyword">class</span></span>=&#123;[<span class="keyword">this</span>.wrapClass, <span class="string">'air-scrollbar__wrap'</span>, gutter ? <span class="string">''</span> : <span class="string">'air-scrollbar__wrap--hidden-default'</span>]&#125;</span><br><span class="line">  &gt;</span><br><span class="line">    &#123; [view] &#125;</span><br><span class="line">  &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>导致编译的时候报错了，后面查了一下，发现是 <code>.babelrc</code> 并没有兼容 jsx， 所以 <code>.babelrc</code> 要改下, <code>plugins</code> 数组要加上 <code>transform-vue-jsx</code><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"plugins"</span>: [<span class="string">"transform-runtime"</span>,<span class="string">"transform-vue-jsx"</span>],</span><br></pre></td></tr></table></figure></p>
+<p>然后安装对应的依赖：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"babel-plugin-syntax-jsx"</span>: <span class="string">"^6.18.0"</span>,</span><br><span class="line"><span class="string">"babel-plugin-transform-vue-jsx"</span>: <span class="string">"^3.7.0"</span>,</span><br></pre></td></tr></table></figure></p>
+<p>这样就可以了。</p>
+<blockquote>
+<p>后面发现原来 vue-cli 安装的初始项目配置就有兼容 jsx 语法了，只不过我那时候将之去掉了，导致报错了，所以又加上去了。</p>
+</blockquote>
+<h2 id="没法触发-transition-类"><a href="#没法触发-transition-类" class="headerlink" title="没法触发 transition 类"></a>没法触发 transition 类</h2><p>还出现一个很神奇的情况，之前在做 <code>collapse-transition</code> 这个组件的时候，跟 <code>element-ui</code> 一样的代码，就是一直没法触发到 <code>Transition</code> 类里面的自定义方法。找了很多方式都解决不了，也不知道是不是跟 vue 的版本有关，到最后才用了另外一种方式去处理才可以：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  name: <span class="string">'AirCollapseTransition'</span>,</span><br><span class="line">  functional: <span class="literal">true</span>,</span><br><span class="line">  render(h, &#123; children &#125;) &#123;</span><br><span class="line">    <span class="keyword">let</span> transitionModel = <span class="keyword">new</span> Transition();</span><br><span class="line">    <span class="keyword">const</span> data = &#123;</span><br><span class="line">      on: &#123;</span><br><span class="line">        beforeEnter: transitionModel.beforeEnter,</span><br><span class="line">        enter: transitionModel.enter,</span><br><span class="line">        afterEnter: transitionModel.afterEnter,</span><br><span class="line">        beforeLeave: transitionModel.beforeLeave,</span><br><span class="line">        leave: transitionModel.leave,</span><br><span class="line">        afterLeave: transitionModel.afterLeave</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">/** 这边真是日了狗，element 的这种写法，到我这边竟然没法触发到类里面的方法，只能用上面那种拆分的方式来处理才行 -- by zachke</span></span><br><span class="line"><span class="comment">    const data = &#123;</span></span><br><span class="line"><span class="comment">      on: new Transition()</span></span><br><span class="line"><span class="comment">    &#125;;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">return</span> h(<span class="string">'transition'</span>, data, children);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h2 id="css-样式会相互覆盖的情况"><a href="#css-样式会相互覆盖的情况" class="headerlink" title="css 样式会相互覆盖的情况"></a>css 样式会相互覆盖的情况</h2><p>之前有发现一个问题，就是在 <code>index.scss</code> 里面的 <code>scss</code> 排列还不能随便排列？比如如果把 <code>@import &quot;./date-picker.scss&quot;</code>  排在 <code>@import &quot;./cascader-panel.scss&quot;</code> 这个后面，就会出现 css 优先级被覆盖的情况（<code>element-ui</code> 也是一样的情况）：</p>
+<p><img src="/2020/01/16/air-ui-17/1.png" alt="png"></p>
+<p>这个是因为他们都有导入 <code>@import &quot;./scrollbar&quot;</code>  这 css。如果 <code>data-picker</code> 在后面加载引入的话，就会导致同及层下， <code>el-scrollbar__warp</code>  又再一次的覆盖了 <code>el-cascader-minu__wrap</code> 这个类，导致界面出问题了：</p>
+<p><img src="/2020/01/16/air-ui-17/2.png" alt="png"></p>
+<p>所以写 scss 的时候，一定要注意相互覆盖的问题，因为 <code>BEM</code> 规则一般只有一层，如果这个组件被其他组件引用的话，就很有可能会出现优先级覆盖的问题。</p>
+<h2 id="inline-block-的问题"><a href="#inline-block-的问题" class="headerlink" title="inline-block 的问题"></a>inline-block 的问题</h2><p>之前遇到了一个非常奇怪的问题，就是在做 <code>time-picker</code> 的时候，demo 代码是这样子的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;air-time-picker</span><br><span class="line">    is-range</span><br><span class="line">    v-model=<span class="string">"value1"</span></span><br><span class="line">    range-separator=<span class="string">"至"</span></span><br><span class="line">    start-placeholder=<span class="string">"开始时间"</span></span><br><span class="line">    end-placeholder=<span class="string">"结束时间"</span></span><br><span class="line">    placeholder=<span class="string">"选择时间范围"</span>&gt;</span><br><span class="line">  &lt;<span class="regexp">/air-time-picker&gt;</span></span><br><span class="line"><span class="regexp">  &lt;air-time-picker</span></span><br><span class="line"><span class="regexp">    is-range</span></span><br><span class="line"><span class="regexp">    arrow-control</span></span><br><span class="line"><span class="regexp">    v-model="value2"</span></span><br><span class="line"><span class="regexp">    range-separator="至"</span></span><br><span class="line"><span class="regexp">    start-placeholder="开始时间"</span></span><br><span class="line"><span class="regexp">    end-placeholder="结束时间"</span></span><br><span class="line"><span class="regexp">    placeholder="选择时间范围"&gt;</span></span><br><span class="line"><span class="regexp">  &lt;/</span>air-time-picker&gt;<span class="xml"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span></span><br><span class="line">&lt;script&gt;</span><br><span class="line">  <span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">    data() &#123;</span><br><span class="line">      <span class="keyword">return</span> &#123;</span><br><span class="line">        value1: [<span class="keyword">new</span> <span class="built_in">Date</span>(<span class="number">2016</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">8</span>, <span class="number">40</span>), <span class="keyword">new</span> <span class="built_in">Date</span>(<span class="number">2016</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">9</span>, <span class="number">40</span>)],</span><br><span class="line">        value2: [<span class="keyword">new</span> <span class="built_in">Date</span>(<span class="number">2016</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">8</span>, <span class="number">40</span>), <span class="keyword">new</span> <span class="built_in">Date</span>(<span class="number">2016</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">9</span>, <span class="number">40</span>)]</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>然后 css 是默认设置宽度各 50%的:</p>
+<p><img src="/2020/01/16/air-ui-17/3.png" alt="png"></p>
+<p>但是却被分成两行:</p>
+<p><img src="/2020/01/16/air-ui-17/4.png" alt="png"></p>
+<p>调成 49% 就一行，一旦换成 50% 就两行。 而且 <code>element-ui</code> 设置为 50% 不会变成两行。而且我查了一下， css 全部都一样，并没有存在覆盖的问题？？？<br>直到我设置了一个背景颜色才发现端倪:</p>
+<p><img src="/2020/01/16/air-ui-17/5.png" alt="png"></p>
+<p>发现两个中间竟然有一个间隙。后面查了一下，发现是因为 <code>inline-block</code> 引起的？？ 间隙产生的原因是<code>inline-block</code>对外是<code>inline</code>，对内是<code>block</code>。而<code>inline</code> 会将连续的空白符解析为一个空格（如：下面示例的两个<code>div</code>之间的后面的换行空格）。<br>之前是写成这样子的：</p>
+<p><img src="/2020/01/16/air-ui-17/6.png" alt="png"></p>
+<p>所以两个 div 之间的换行就变成空格了。所以只要把换行去掉，写成一行就行了：</p>
+<p><img src="/2020/01/16/air-ui-17/7.png" alt="png"></p>
+<p>这样之后设置为 50%， 就没有问题了。当然这个只是在开发环境下有问题， 打包因为有压缩，所以这个空格会被压缩掉，所以是正常的。</p>
+<p><img src="/2020/01/16/air-ui-17/8.png" alt="png"></p>
+<h2 id="provide-inject"><a href="#provide-inject" class="headerlink" title="provide/inject"></a>provide/inject</h2><p>这个不是 bug，而是我看 <code>element-ui</code> 源码的时候，有用了非常多的这个特性。尤其是表单和表单组件之间的联动。都是通过这两个来进行。<br>具体文档:<a href="https://cn.vuejs.org/v2/api/#provide-inject" target="_blank" rel="noopener">provide / inject</a>, 文档也说的很清楚:</p>
+<blockquote>
+<p>provide 和 inject 主要在开发高阶插件/组件库时使用。并不推荐用于普通应用程序代码中。</p>
+</blockquote>
+<p>简单的来说，就是在父组件中通过provider来提供变量，然后在子组件中通过inject来注入变量。</p>
+<blockquote>
+<p>需要注意的是这里不论子组件有多深，只要调用了inject那么就可以注入provider中的数据。而不是局限于只能从当前父组件的prop属性来获取数据。</p>
+</blockquote>
+<p>举一下 <code>air-ui</code> 里面的例子:</p>
+<p><code>air-form</code> 这个组件就会提供 provider 这个属性:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">provide() &#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    elForm: <span class="keyword">this</span></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>然后 <code>air-form-item</code> 就会用 inject 属性引入 elForm 对象，同时将自己的 elFormItem 对象 provider 出来:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">provide() &#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    elFormItem: <span class="keyword">this</span></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;,</span><br><span class="line"></span><br><span class="line">inject: [<span class="string">'elForm'</span>],</span><br></pre></td></tr></table></figure></p>
+<p>接下来只要在 <code>air-form-item</code> 里面的表单组件，比如 <code>air-checkbox</code>, <code>air-button</code>, <code>air-input</code> 的 vue 定义文件里面都会有这个:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">inject: &#123;</span><br><span class="line">  elForm: &#123;</span><br><span class="line">    <span class="keyword">default</span>: <span class="string">''</span></span><br><span class="line">  &#125;,</span><br><span class="line">  elFormItem: &#123;</span><br><span class="line">    <span class="keyword">default</span>: <span class="string">''</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>然后就可以跟 form 或者 form-item 进行联系了，比如一些计算属性：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">computed: &#123;</span><br><span class="line">  _elFormItemSize() &#123;</span><br><span class="line">    <span class="keyword">return</span> (<span class="keyword">this</span>.elFormItem || &#123;&#125;).elFormItemSize;</span><br><span class="line">  &#125;,</span><br><span class="line">  validateState() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.elFormItem ? <span class="keyword">this</span>.elFormItem.validateState : <span class="string">''</span>;</span><br><span class="line">  &#125;,</span><br><span class="line">  needStatusIcon() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.elForm ? <span class="keyword">this</span>.elForm.statusIcon : <span class="literal">false</span>;</span><br><span class="line">  &#125;,</span><br><span class="line">  isDisabled() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.isGroup</span><br><span class="line">      ? <span class="keyword">this</span>._checkboxGroup.disabled || <span class="keyword">this</span>.disabled || (<span class="keyword">this</span>.elForm || &#123;&#125;).disabled || <span class="keyword">this</span>.isLimitDisabled</span><br><span class="line">      : <span class="keyword">this</span>.disabled || (<span class="keyword">this</span>.elForm || &#123;&#125;).disabled;</span><br><span class="line">  &#125;,</span><br></pre></td></tr></table></figure></p>
+<p>这样就可以跟表单的状态联系在一起了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>因为有 <code>element-ui</code> 的代码珠玉在前，所以老实说 <code>air-ui</code> 的同样组件的逻辑代码几乎不需要太多的修改。当然该爬的坑还是要爬出来。<br>到现在，<code>air-ui</code> 其实总体的框架已经很完善了。除了一些 <code>element-ui</code> 没有的组件的继续开发，当然还有一些缺少, 比如:</p>
+<ol>
+<li>webpack 打包升级到 4.x</li>
+<li>vue 版本升级到 3.x</li>
+<li>真正按需加载的优化</li>
+<li>ts 定义文件的开发</li>
+<li>各种主题定制的颗粒度细化，以及出对应的设计规范文档</li>
+</ol>
+<p>尤其是第五点，其实我们现在就在继续做了，从主题定制，再到出对应的 ui 设计规范，然后后面让 ui 出图的时候，严格按照这一份设计规范来处理。 当然这些免不了我可爱的组员们的添砖加瓦，事实上当我将 <code>air-ui</code> 的第一版搭出来之后，其实后面的新组件开发，主题定制，出设计规范，都是他们在处理，我又变成甩手掌柜了。 谢谢 <code>志杰</code>,<code>涵涵</code>，<code>鸿鑫</code>，<code>皓宇</code>, <code>韫毅</code> 接下来对 <code>air-ui</code> 组件库的继续添砖加瓦和持续优化。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/12/01/air-ui-1/" title="自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件">自建vue组件 air-ui (1) -- 为啥我要自建一个类 element ui 的组件</a><br><a href="/2019/12/03/air-ui-2/" title="自建vue组件 air-ui (2) -- 先分析一下 element ui 项目">自建vue组件 air-ui (2) -- 先分析一下 element ui 项目</a><br><a href="/2019/12/05/air-ui-3/" title="自建vue组件 air-ui (3) -- css 开发规范">自建vue组件 air-ui (3) -- css 开发规范</a><br><a href="/2019/12/07/air-ui-4/" title="自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构">自建vue组件 air-ui (4) -- air-ui 环境搭建和目录结构</a><br><a href="/2019/12/09/air-ui-5/" title="自建vue组件 air-ui (5) -- 创建第一个组件 Button">自建vue组件 air-ui (5) -- 创建第一个组件 Button</a><br><a href="/2019/12/12/air-ui-6/" title="自建vue组件 air-ui (6) -- 创建内置服务组件">自建vue组件 air-ui (6) -- 创建内置服务组件</a><br><a href="/2019/12/15/air-ui-7/" title="自建vue组件 air-ui (7) -- 创建指令组件">自建vue组件 air-ui (7) -- 创建指令组件</a><br><a href="/2019/12/18/air-ui-8/" title="自建vue组件 air-ui (8) -- 实现部分引入组件">自建vue组件 air-ui (8) -- 实现部分引入组件</a><br><a href="/2019/12/22/air-ui-9/" title="自建vue组件 air-ui (9) -- 用 vuepress 写文档">自建vue组件 air-ui (9) -- 用 vuepress 写文档</a><br><a href="/2019/12/26/air-ui-10/" title="自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)">自建vue组件 air-ui (10) -- vuepress 写文档 (进阶版)</a><br><a href="/2020/01/02/air-ui-11/" title="自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)">自建vue组件 air-ui (11) -- vuepress 写文档 (爬坑版)</a><br><a href="/2020/01/04/air-ui-12/" title="自建vue组件 air-ui (12) -- 国际化机制">自建vue组件 air-ui (12) -- 国际化机制</a><br><a href="/2020/01/06/air-ui-13/" title="自建vue组件 air-ui (13) -- 国际化机制(进阶版)">自建vue组件 air-ui (13) -- 国际化机制(进阶版)</a><br><a href="/2020/01/09/air-ui-14/" title="自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)">自建vue组件 air-ui (14) -- 打包构建(dev 和 dist)</a><br><a href="/2020/01/11/air-ui-15/" title="自建vue组件 air-ui (15) -- 主题定制">自建vue组件 air-ui (15) -- 主题定制</a><br><a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a><br><a href="/2020/01/16/air-ui-17/" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">自建vue组件 air-ui (17) -- 开发爬坑篇以及总结</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/01/16/air-ui-17/" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">http://kebingzao.com/2020/01/16/air-ui-17/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/13/air-ui-16/" rel="next" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">
+                <i class="fa fa-chevron-left"></i> 自建vue组件 air-ui (16) -- 打包构建 pub 任务
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">164</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#兼容-jsx-语法"><span class="nav-number">2.</span> <span class="nav-text">兼容 jsx 语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#没法触发-transition-类"><span class="nav-number">3.</span> <span class="nav-text">没法触发 transition 类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#css-样式会相互覆盖的情况"><span class="nav-number">4.</span> <span class="nav-text">css 样式会相互覆盖的情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#inline-block-的问题"><span class="nav-number">5.</span> <span class="nav-text">inline-block 的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#provide-inject"><span class="nav-number">6.</span> <span class="nav-text">provide/inject</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/01/16/air-ui-17/';
+          this.page.identifier = '2020/01/16/air-ui-17/';
+          this.page.title = '自建vue组件 air-ui (17) -- 开发爬坑篇以及总结';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

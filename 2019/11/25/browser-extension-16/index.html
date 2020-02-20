@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,浏览器插件,Firefox 插件," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言本节主要是讲了一下 Firefox extension 在开发的时候，遇到的一些问题，大的问题会在之前的系列会提到。小的问题会在这边提。 如何找到现有的 extension 的代码开发一个东西，一个很快的捷径就是参考别人的代码，尤其是一些界面细节的时候，所以当我们找到了一个值得我们参考的 extension 的时候，怎么样得到这个插件的源代码，这个也是很重要的。">
+<meta name="keywords" content="js,浏览器插件,Firefox 插件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题">
+<meta property="og:url" content="http://kebingzao.com/2019/11/25/browser-extension-16/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言本节主要是讲了一下 Firefox extension 在开发的时候，遇到的一些问题，大的问题会在之前的系列会提到。小的问题会在这边提。 如何找到现有的 extension 的代码开发一个东西，一个很快的捷径就是参考别人的代码，尤其是一些界面细节的时候，所以当我们找到了一个值得我们参考的 extension 的时候，怎么样得到这个插件的源代码，这个也是很重要的。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-16/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-16/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-16/3.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-16/4.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-16/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-16/6.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-16/7.png">
+<meta property="og:updated_time" content="2020-02-20T16:35:39.073Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题">
+<meta name="twitter:description" content="前言本节主要是讲了一下 Firefox extension 在开发的时候，遇到的一些问题，大的问题会在之前的系列会提到。小的问题会在这边提。 如何找到现有的 extension 的代码开发一个东西，一个很快的捷径就是参考别人的代码，尤其是一些界面细节的时候，所以当我们找到了一个值得我们参考的 extension 的时候，怎么样得到这个插件的源代码，这个也是很重要的。">
+<meta name="twitter:image" content="http://kebingzao.com/2019/11/25/browser-extension-16/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/11/25/browser-extension-16/"/>
+
+
+
+
+
+  <title>浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/11/25/browser-extension-16/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-25T13:28:16+08:00">
+                2019-11-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/浏览器-extension-插件开发系列/" itemprop="url" rel="index">
+                    <span itemprop="name">浏览器 extension 插件开发系列</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/25/browser-extension-16/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/11/25/browser-extension-16/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/11/25/browser-extension-16/" class="leancloud_visitors" data-flag-title="浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本节主要是讲了一下 Firefox extension 在开发的时候，遇到的一些问题，大的问题会在之前的系列会提到。小的问题会在这边提。</p>
+<h2 id="如何找到现有的-extension-的代码"><a href="#如何找到现有的-extension-的代码" class="headerlink" title="如何找到现有的 extension 的代码"></a>如何找到现有的 extension 的代码</h2><p>开发一个东西，一个很快的捷径就是参考别人的代码，尤其是一些界面细节的时候，所以当我们找到了一个值得我们参考的 extension 的时候，怎么样得到这个插件的源代码，这个也是很重要的。<br><a id="more"></a><br>以这个应用 <code>pushbullet</code> 来说，当安装了 <code>pushbullet</code> 的 <code>Firefox extension</code>, 接下来当前要找到插件所在的文件，从而看到代码。</p>
+<p>注意，<code>Firefox extension</code>的代码存在两个地方，一个是本身浏览器自带的<code>extension</code>，这个就放在<code>Firefox</code>的安装目录里面:</p>
+<p><img src="/2019/11/25/browser-extension-16/1.png" alt="png"></p>
+<p>而如果是自己去下载的<code>extension</code>，那就不是放在这边了。而是放在个人的文件夹中，以 <code>windows</code> 来说，就是<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\admin\AppData\Roaming\Mozilla\Firefox\Profiles\<span class="number">0</span>p5aekfy.default\extensions</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2019/11/25/browser-extension-16/2.png" alt="png"></p>
+<p>这时候，就可以看到你下载的所有<code>Firefox extension</code>。但是我们发现有些<code>extension</code>是以<code>xpi</code>后缀，那怎么看？其实只要把<code>xpi</code>重命名为 <code>zip</code>，然后解压<code>zip</code>包，然后就可以看到了,最后就可以看到<code>pushbullet</code>的源码了</p>
+<p><img src="/2019/11/25/browser-extension-16/3.png" alt="png"></p>
+<h2 id="popup-页面没办法做文件拖拽的原因"><a href="#popup-页面没办法做文件拖拽的原因" class="headerlink" title="popup 页面没办法做文件拖拽的原因"></a>popup 页面没办法做文件拖拽的原因</h2><p>通过 <a href="/2019/11/25/browser-extension-15/" title="浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）">浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）</a>我们知道 Chrome 可以在插件的 popup 上做文件拖拽上传。 但是 <code>Firefox</code> 却不行，就是因为在点击上传文件的时候，当文件选择框弹出来的时候，该<code>panel</code> 框会关闭:</p>
+<p><img src="/2019/11/25/browser-extension-16/4.png" alt="png"></p>
+<p>后面查了一下资料，发现如果是用 <code>add-on</code> 初始化的<code>panel</code>(我们就是这一种)，是不能保持显示的，他一旦焦点失去（第三方登录也是一样），就会关闭掉。只有使用 <code>xul</code> 形式的<code>extension</code>，才有一个属性是可以保持显示的。 即这一种才行：</p>
+<p><img src="/2019/11/25/browser-extension-16/5.png" alt="png"></p>
+<p>具体可以看这边: <a href="http://stackoverflow.com/questions/16012885/firefox-addon-builder-how-to-keep-a-panel-shown" target="_blank" rel="noopener">firefox-addon-builder-how-to-keep-a-panel-shown</a></p>
+<p>以下是对应的文档:</p>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/Add-ons/SDK/High-Level_APIs/panel" target="_blank" rel="noopener">add-on sdk panel</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/panel#a-panel.noautohide" target="_blank" rel="noopener">xul panel</a></li>
+</ul>
+<p>这边就涉及到一个问题，那就是为啥我们要选用 addon 的方式来做扩展?</p>
+<h2 id="为啥选用-addon-的方式来做扩展"><a href="#为啥选用-addon-的方式来做扩展" class="headerlink" title="为啥选用 addon 的方式来做扩展"></a>为啥选用 addon 的方式来做扩展</h2><p>一个很重要的原因是如果选用 <code>xul</code> 的方式，这个 ui 的界面的开发会非常不习惯，因为是另外一种语法，跟 <code>Chrome extension</code> 的写法差太多了，在界面上根本没办法重用。所以才要做这种自引导性的扩展，而且它还有以下好处:</p>
+<ol>
+<li>可以手动添加用户界面， 这样就不用担心做一些适应<code>Firefox extension</code>的<code>xul</code>页面了，比如： 您需要在相关应用程序中调用 <code>document.getElementById()</code>，通过 <code>UI</code> 元素的 <code>ID</code> 来查找它们，然后操纵它们来注入您的 <code>UI</code>。例如，您可以通过 <code>document.getElementById(&quot;main-menubar&quot;)</code> 来访问 <code>Firefox</code> 的菜单栏。</li>
+<li><p>可以像<code>Chrome extension</code> 开发那样，引入一些js进去。<br>要做到自引导型扩展，添加下列元素到它的安装清单，即 <code>install.rdf</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;em:bootstrap&gt;<span class="literal">true</span>&lt;<span class="regexp">/em:bootstrap&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>不需要 <code>Chrome.manifest</code> 文件<br>不过没有这个文件，但也多了其他的文件。</p>
+</li>
+</ol>
+<h2 id="怎么在浏览器打开这个插件的目录索引"><a href="#怎么在浏览器打开这个插件的目录索引" class="headerlink" title="怎么在浏览器打开这个插件的目录索引"></a>怎么在浏览器打开这个插件的目录索引</h2><p>很简单，找到这个插件名字，然后在地址栏输入 <code>resource://extension-id</code> 这样就可以了。</p>
+<p><img src="/2019/11/25/browser-extension-16/6.png" alt="png"></p>
+<p>甚至可以通过这种方式来调整页面细节</p>
+<p><img src="/2019/11/25/browser-extension-16/7.png" alt="png"></p>
+<h2 id="对-cookie-的操作"><a href="#对-cookie-的操作" class="headerlink" title="对 cookie 的操作"></a>对 cookie 的操作</h2><p>Firefox 对 cookie 的操作，不像 Chrome 那样，还有一个专门的对象来读取:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chrome.cookies</span><br></pre></td></tr></table></figure></p>
+<p>而是要在中转页 main.js 那边去设置的，所以抽象出来是这样子的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> COOKIE_URL = <span class="string">"http://*.airdroid.com"</span>;</span><br><span class="line">Cookies = &#123;</span><br><span class="line">    get: <span class="function"><span class="keyword">function</span>(<span class="params">name, cb</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> uniqId = _.uniqueId(<span class="string">"cookie_"</span>);</span><br><span class="line">        Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.get_cookie,&#123;</span><br><span class="line">            uid: uniqId,</span><br><span class="line">            name: name,</span><br><span class="line">            domain: COOKIE_URL</span><br><span class="line">        &#125;);</span><br><span class="line">        Airdroid.Event.addEventListener(uniqId, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">            Airdroid.log(<span class="string">"cookie 为"</span> + data.detail);</span><br><span class="line">            _.isFunction(cb) &amp;&amp; cb((data.detail ? &#123;</span><br><span class="line">                name: data.detail,</span><br><span class="line">                domain: COOKIE_URL</span><br><span class="line">            &#125; : <span class="literal">null</span>));</span><br><span class="line">        &#125;,<span class="literal">true</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    set: <span class="function"><span class="keyword">function</span>(<span class="params">opt, cb</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> uniqId = _.uniqueId(<span class="string">"cookie_"</span>);</span><br><span class="line">        Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.set_cookie,&#123;</span><br><span class="line">            uid: uniqId,</span><br><span class="line">            opt: opt,</span><br><span class="line">            domain: COOKIE_URL</span><br><span class="line">        &#125;);</span><br><span class="line">        Airdroid.Event.addEventListener(uniqId, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">            _.isFunction(cb) &amp;&amp; cb(data);</span><br><span class="line">        &#125;,<span class="literal">true</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    remove: <span class="function"><span class="keyword">function</span>(<span class="params">name, cb</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> uniqId = _.uniqueId(<span class="string">"cookie_"</span>);</span><br><span class="line">        Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.remove_cookie,&#123;</span><br><span class="line">            uid: uniqId,</span><br><span class="line">            name: name,</span><br><span class="line">            <span class="comment">// 这边要 .airdroid.com 不能加星号</span></span><br><span class="line">            domain: COOKIE_URL.split(<span class="string">"//"</span>)[<span class="number">1</span>].substr(<span class="number">1</span>)</span><br><span class="line">        &#125;);</span><br><span class="line">        Airdroid.Event.addEventListener(uniqId, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">            _.isFunction(cb) &amp;&amp; cb(data);</span><br><span class="line">        &#125;,<span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>而具体的操作其实在 <code>main.js</code>, 这边也是用到了之前将的事件驱动模型: <a href="/2019/11/25/browser-extension-10/" title="浏览器 extension 插件开发系列(10) -- 事件驱动模型">浏览器 extension 插件开发系列(10) -- 事件驱动模型</a><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> &#123;Cc, Ci&#125; = <span class="built_in">require</span>(<span class="string">'chrome'</span>);</span><br><span class="line"><span class="keyword">var</span> ioSvc = Cc[<span class="string">'@mozilla.org/network/io-service;1'</span>].getService(Ci.nsIIOService);</span><br><span class="line"><span class="keyword">var</span> cookieSvc = Cc[<span class="string">'@mozilla.org/cookieService;1'</span>].getService(Ci.nsICookieService);</span><br><span class="line"><span class="keyword">var</span> cookieMgr = Cc[<span class="string">'@mozilla.org/cookiemanager;1'</span>].getService(Ci.nsICookieManager);</span><br><span class="line"></span><br><span class="line"><span class="comment">// cookie operate</span></span><br><span class="line"><span class="keyword">var</span> getCookie = <span class="function"><span class="keyword">function</span>(<span class="params">name, domain</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> cookieString = cookieSvc.getCookieString(ioSvc.newURI(domain, <span class="literal">null</span>, <span class="literal">null</span>), <span class="literal">null</span>);</span><br><span class="line">    <span class="keyword">if</span> (cookieString != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> cookies = cookieString.split(<span class="string">';'</span>);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>, cookiesLength = cookies.length; i &lt; cookiesLength; i++) &#123;</span><br><span class="line">            <span class="keyword">var</span> cookie = cookies[i];</span><br><span class="line">            <span class="keyword">if</span> (cookie.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">var</span> parts = cookie.split(<span class="string">'='</span>);</span><br><span class="line">                <span class="keyword">if</span> (trim(parts[<span class="number">0</span>]) == name) &#123;</span><br><span class="line">                    <span class="keyword">return</span> trim(parts[<span class="number">1</span>]);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">page.port.on(<span class="string">"get_cookie"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">    data = data.detail;</span><br><span class="line">    <span class="keyword">var</span> str = getCookie(data.name, data.domain);</span><br><span class="line">    page.port.emit(data.uid, &#123;<span class="attr">detail</span>: str&#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">page.port.on(<span class="string">"set_cookie"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">    data = data.detail;</span><br><span class="line">    <span class="keyword">var</span> opt = data.opt;</span><br><span class="line">    cookieSvc.setCookieString(ioSvc.newURI(data.domain, <span class="literal">null</span>, <span class="literal">null</span>), <span class="literal">null</span>, opt.name + <span class="string">'='</span> + opt.value, <span class="literal">null</span>);</span><br><span class="line">    page.port.emit(data.uid, &#123;<span class="attr">detail</span>: cookieSvc.getCookieString(ioSvc.newURI(data.domain, <span class="literal">null</span>, <span class="literal">null</span>), <span class="literal">null</span>)&#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">page.port.on(<span class="string">"remove_cookie"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">    data = data.detail;</span><br><span class="line">    cookieMgr.remove(data.domain, data.name, <span class="string">'/'</span>, <span class="literal">false</span>);</span><br><span class="line">    page.port.emit(data.uid, &#123;&#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这样才能得到 cookie</p>
+<h2 id="进行跨域请求的时候"><a href="#进行跨域请求的时候" class="headerlink" title="进行跨域请求的时候"></a>进行跨域请求的时候</h2><p><code>Firefox</code> 在进行跨域请求的时候，也很奇葩，如果服务端没有添加跨域头部的话，会失败，哪怕用 <code>jsonp get</code> 请求也不行。 所以要用它自带的网络请求，也是在 <code>main.js</code> 里面处理, 当然我们先在背景页先封装方法:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 最基本的get方法</span></span><br><span class="line">baseGetRequest: <span class="function"><span class="keyword">function</span> (<span class="params">url, data, type</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(Airdroid.Util.Browser.firefox)&#123;</span><br><span class="line">        <span class="comment">// Firefox 比较特殊，有限制，如果服务端没有添加跨域头部的话，就会请求失败, 所有要用自带的请求</span></span><br><span class="line">        <span class="keyword">var</span> defer = $.Deferred();</span><br><span class="line">        url = url + <span class="string">"?"</span> + $.param(data);</span><br><span class="line">        <span class="keyword">var</span> uid = _.uniqueId(<span class="string">"request_"</span>);</span><br><span class="line">        type = type || <span class="string">'json'</span>;</span><br><span class="line">        Airdroid.Event.addEventListener(uid, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> status = data.status;</span><br><span class="line">            <span class="keyword">if</span> (status == <span class="number">200</span>) &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">// 请求成功</span></span><br><span class="line">                    <span class="keyword">if</span>(type == <span class="string">'json'</span>)&#123;</span><br><span class="line">                        defer.resolve(data.json || &#123;&#125;);</span><br><span class="line">                    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                        defer.resolve(data.text || <span class="string">""</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">                    <span class="built_in">console</span>.log(e);</span><br><span class="line">                    defer.reject();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (status === <span class="number">401</span>) &#123;</span><br><span class="line">                defer.reject();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                defer.reject();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="literal">true</span>);</span><br><span class="line">        Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.request_get,&#123;</span><br><span class="line">            url: url,</span><br><span class="line">            uid: uid</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="keyword">return</span> defer;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> $.ajax(&#123;</span><br><span class="line">            type: <span class="string">"GET"</span>,</span><br><span class="line">            timeout: <span class="number">10000</span>,</span><br><span class="line">            url: url,</span><br><span class="line">            data: data,</span><br><span class="line">            dataType: type || <span class="string">'json'</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>具体的实现是在 <code>main.js</code> 里面:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">page.port.on(<span class="string">"request_get"</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123;</span><br><span class="line">    data = data.detail;</span><br><span class="line">    Request(&#123;</span><br><span class="line">        <span class="string">'url'</span>: data.url,</span><br><span class="line">        <span class="string">'onComplete'</span>: <span class="function"><span class="keyword">function</span>(<span class="params">response</span>) </span>&#123;</span><br><span class="line">            page.port.emit(data.uid, &#123;</span><br><span class="line">                json: response.json,</span><br><span class="line">                text: response.text,</span><br><span class="line">                status: response.status,</span><br><span class="line">                statusText: response.statusText</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).get();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>通过最后回调 uid 来回到背景页的回调。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/11/25/browser-extension-1/" title="浏览器 extension 插件开发系列(01) -- 前言和确认需求">浏览器 extension 插件开发系列(01) -- 前言和确认需求</a><br><a href="/2019/11/25/browser-extension-2/" title="浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试">浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-3/" title="浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试">浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-4/" title="浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试">浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试</a><br><a href="/2019/11/25/browser-extension-5/" title="浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书">浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书</a><br><a href="/2019/11/25/browser-extension-6/" title="浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel">浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel</a><br><a href="/2019/11/25/browser-extension-7/" title="浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页">浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页</a><br><a href="/2019/11/25/browser-extension-8/" title="浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化">浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化</a><br><a href="/2019/11/25/browser-extension-9/" title="浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动">浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动</a><br><a href="/2019/11/25/browser-extension-10/" title="浏览器 extension 插件开发系列(10) -- 事件驱动模型">浏览器 extension 插件开发系列(10) -- 事件驱动模型</a><br><a href="/2019/11/25/browser-extension-11/" title="浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)">浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)</a><br><a href="/2019/11/25/browser-extension-12/" title="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息</a><br><a href="/2019/11/25/browser-extension-13/" title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知</a><br><a href="/2019/11/25/browser-extension-14/" title="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口</a><br><a href="/2019/11/25/browser-extension-15/" title="浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）">浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）</a><br><a href="/2019/11/25/browser-extension-16/" title="浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题">浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题</a><br><a href="/2019/11/25/browser-extension-17/" title="浏览器 extension 插件开发系列(17) -- Safari 遇到的问题">浏览器 extension 插件开发系列(17) -- Safari 遇到的问题</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/11/25/browser-extension-16/" title="浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题">http://kebingzao.com/2019/11/25/browser-extension-16/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/浏览器插件/" rel="tag"># 浏览器插件</a>
+          
+            <a href="/tags/Firefox-插件/" rel="tag"># Firefox 插件</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-15/" rel="next" title="浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）">
+                <i class="fa fa-chevron-left"></i> 浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-17/" rel="prev" title="浏览器 extension 插件开发系列(17) -- Safari 遇到的问题">
+                浏览器 extension 插件开发系列(17) -- Safari 遇到的问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">182</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何找到现有的-extension-的代码"><span class="nav-number">2.</span> <span class="nav-text">如何找到现有的 extension 的代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#popup-页面没办法做文件拖拽的原因"><span class="nav-number">3.</span> <span class="nav-text">popup 页面没办法做文件拖拽的原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为啥选用-addon-的方式来做扩展"><span class="nav-number">4.</span> <span class="nav-text">为啥选用 addon 的方式来做扩展</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#怎么在浏览器打开这个插件的目录索引"><span class="nav-number">5.</span> <span class="nav-text">怎么在浏览器打开这个插件的目录索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对-cookie-的操作"><span class="nav-number">6.</span> <span class="nav-text">对 cookie 的操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进行跨域请求的时候"><span class="nav-number">7.</span> <span class="nav-text">进行跨域请求的时候</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/11/25/browser-extension-16/';
+          this.page.identifier = '2019/11/25/browser-extension-16/';
+          this.page.title = '浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

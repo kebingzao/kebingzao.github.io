@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,浏览器插件,Safari 插件," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试 和 浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试 可以看到Chrome和Firefox的安装和调试方式。接下来就是Safari了, 本节看下 Safari 怎么创建插件。 在Safari 扩展创建器导入一个新的扩展首先要在 Safari 扩展创建器 导入">
+<meta name="keywords" content="js,浏览器插件,Safari 插件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试">
+<meta property="og:url" content="http://kebingzao.com/2019/11/25/browser-extension-4/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试 和 浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试 可以看到Chrome和Firefox的安装和调试方式。接下来就是Safari了, 本节看下 Safari 怎么创建插件。 在Safari 扩展创建器导入一个新的扩展首先要在 Safari 扩展创建器 导入">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/3.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/4.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/6.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/7.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/8.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/9.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/10.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/11.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/12.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/13.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/14.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/15.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/16.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/17.png">
+<meta property="og:updated_time" content="2020-02-20T16:35:39.099Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试">
+<meta name="twitter:description" content="前言通过 浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试 和 浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试 可以看到Chrome和Firefox的安装和调试方式。接下来就是Safari了, 本节看下 Safari 怎么创建插件。 在Safari 扩展创建器导入一个新的扩展首先要在 Safari 扩展创建器 导入">
+<meta name="twitter:image" content="http://kebingzao.com/2019/11/25/browser-extension-4/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/11/25/browser-extension-4/"/>
+
+
+
+
+
+  <title>浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/11/25/browser-extension-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-25T13:28:04+08:00">
+                2019-11-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/浏览器-extension-插件开发系列/" itemprop="url" rel="index">
+                    <span itemprop="name">浏览器 extension 插件开发系列</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/25/browser-extension-4/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/11/25/browser-extension-4/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/11/25/browser-extension-4/" class="leancloud_visitors" data-flag-title="浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2019/11/25/browser-extension-2/" title="浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试">浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试</a> 和 <a href="/2019/11/25/browser-extension-3/" title="浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试">浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试</a> 可以看到<code>Chrome</code>和<code>Firefox</code>的安装和调试方式。接下来就是<code>Safari</code>了, 本节看下 <code>Safari</code> 怎么创建插件。</p>
+<h2 id="在Safari-扩展创建器导入一个新的扩展"><a href="#在Safari-扩展创建器导入一个新的扩展" class="headerlink" title="在Safari 扩展创建器导入一个新的扩展"></a>在Safari 扩展创建器导入一个新的扩展</h2><p>首先要在 <code>Safari 扩展创建器</code> 导入一个新的扩展,必须要把这个文件夹，命名为 <code>safariextensiton</code> 后缀名的才行，比如<code>airdroid.safariextension</code>, 这样扩展器才能识别，并载入。<br><a id="more"></a><br>即要把 <code>resources\airdroid\data</code> 的<code>data</code> 目录 改成 <code>safariextension</code> 后缀的，比如 <code>airdroid.safariextension</code>, 有了这个文件之后，就要导入这个插件包了, 操作是<code>Safari -&gt; 开发 --&gt; 显示扩展创建器</code>：</p>
+<p><img src="/2019/11/25/browser-extension-4/1.png" alt="png"></p>
+<p>点击添加按钮，然后选择添加扩展。选择 <code>airdroid.safariextension</code> 这个目录</p>
+<p><img src="/2019/11/25/browser-extension-4/2.png" alt="png"></p>
+<p>这时候就添加进去了。就可以在导航栏看到了:</p>
+<p><img src="/2019/11/25/browser-extension-4/3.png" alt="png"></p>
+<p>但是这边可以看到，会有一个警告:</p>
+<p><img src="/2019/11/25/browser-extension-4/4.png" alt="png"></p>
+<p>显示你没有<code>Safari 扩展证书</code>。如果没有这个证书的话，那么就不能上<code>Safari</code>的<code>store商店</code>。 我们可以参照这个教程 <a href="/2019/11/25/browser-extension-5/" title="浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书">浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书</a> 来操作。</p>
+<h2 id="扩展器参数"><a href="#扩展器参数" class="headerlink" title="扩展器参数"></a>扩展器参数</h2><p>接下来就详细了解一下。扩展创建器的一些参数。<br>我们知道 , 在 Safari 扩展中 , 是由如下几个部分来提供扩展功能 :</p>
+<ol>
+<li>工具栏按钮</li>
+<li>扩展工具条</li>
+<li>上下文关联菜单</li>
+<li>注入 (JavaScript) 脚本</li>
+<li>注入样式表单</li>
+</ol>
+<p>而 Safari 扩展框架中其实是存在了一条分割线 , 将整个体系结构分为了两个部分 :</p>
+<ol>
+<li>Safari 应用层 (背景页) : 包含工具条按钮 , 扩展工具条 , 页面标签 , 页面窗口 , 上下文菜单等</li>
+<li>页面内容层 : 包含修改页面内容的 JavaScript 和 CSS</li>
+</ol>
+<p>而这两部分不能直接调用对方的代码 , 需要通过给对方发送消息 , 再由对方的消息处理方法来调用所需的代码。 当然 , 不是每一个 Safari 扩展都需要做这样的消息调用 , 例如简单的”关闭网页”按钮扩展就不需要和页面内容层交互 , 也就不需要消息调用及代理等处理逻辑了。</p>
+<p>而以上这些的配置都是在 Info.plist 文件读取的。是一行key，一行value的方式，所以完整的 <code>Info.plist</code> 如下:<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span><br><span class="line"><span class="meta">&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">plist</span> <span class="attr">version</span>=<span class="string">"1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>Author<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 对应作者</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>AirDroid Inc<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>Builder Version<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 对应版本</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>10600.1.25<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>CFBundleDisplayName<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 对应显示名称</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>AirDroid<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>CFBundleIdentifier<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 对应包标识符</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>com.airdroid.safari<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>CFBundleInfoDictionaryVersion<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 扩展器版本</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>6.0<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>CFBundleShortVersionString<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 显示版本</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>CFBundleVersion<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 包版本</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>1<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>Chrome<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 扩展chrome选项</span><br><span class="line">    <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">key</span>&gt;</span>Global Page<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 扩展全局页面</span><br><span class="line">      <span class="tag">&lt;<span class="name">string</span>&gt;</span>global.html<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">key</span>&gt;</span>Popovers<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 弹出窗口配置</span><br><span class="line">      <span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">key</span>&gt;</span>Filename<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 弹出窗口的文件名</span><br><span class="line">          <span class="tag">&lt;<span class="name">string</span>&gt;</span>popup.html<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">key</span>&gt;</span>Height<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 弹出窗口的高</span><br><span class="line">          <span class="tag">&lt;<span class="name">string</span>&gt;</span><span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">key</span>&gt;</span>Identifier<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 弹出窗口的标识符</span><br><span class="line">          <span class="tag">&lt;<span class="name">string</span>&gt;</span>toolbar-popover<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">key</span>&gt;</span>Width<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 弹出窗口的宽</span><br><span class="line">          <span class="tag">&lt;<span class="name">string</span>&gt;</span><span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">key</span>&gt;</span>Toolbar Items<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 工具栏按钮配置</span><br><span class="line">      <span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">key</span>&gt;</span>Identifier<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ----------- 工具栏按钮标识符</span><br><span class="line">          <span class="tag">&lt;<span class="name">string</span>&gt;</span>toolbar-button<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">key</span>&gt;</span>Image<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ----------- 按钮图标</span><br><span class="line">          <span class="tag">&lt;<span class="name">string</span>&gt;</span>images/safari_logo.png<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">key</span>&gt;</span>Label<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 工具栏的标签名</span><br><span class="line">          <span class="tag">&lt;<span class="name">string</span>&gt;</span>Pushbullet<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">key</span>&gt;</span>Popover<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ------- 对应弹出窗口的标识符</span><br><span class="line">          <span class="tag">&lt;<span class="name">string</span>&gt;</span>toolbar-popover<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>Content<span class="tag">&lt;/<span class="name">key</span>&gt;</span> --------- 扩展内容配置，即在页面中注入的脚本</span><br><span class="line">    <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">key</span>&gt;</span>Scripts<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>End<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 结束脚本文件名</span><br><span class="line">        <span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">string</span>&gt;</span>js/sys/safari-end-script.js<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">key</span>&gt;</span>Whitelist<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 白名单配置</span><br><span class="line">      <span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">string</span>&gt;</span>http://*/*<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">string</span>&gt;</span>https://*/*<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>Description<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ----------- 应用的描述</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>Access Android phone/tablet from computer remotely and securely. <span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>DeveloperIdentifier<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ----------- 开发者id (这个要改成我们自己的)</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>J294WP5P2Y<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>ExtensionInfoDictionaryVersion<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>1.0<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>Permissions<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ------------ 权限配置</span><br><span class="line">    <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">key</span>&gt;</span>Website Access<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ------------ 访问权限配置</span><br><span class="line">      <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>Include Secure Pages<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ---------- 包括安全页面</span><br><span class="line">        <span class="tag">&lt;<span class="name">true</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>Level<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ----------- 访问级别</span><br><span class="line">        <span class="tag">&lt;<span class="name">string</span>&gt;</span>All<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>Update Manifest URL<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ----------- 更新清单地址</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>https://update.pushbullet.com/Safari.plist<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">key</span>&gt;</span>Website<span class="tag">&lt;/<span class="name">key</span>&gt;</span> ----------- 应用对应站点</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span>&gt;</span>https://www.airdroid.com<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plist</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>完整的截图如下：</p>
+<p><img src="/2019/11/25/browser-extension-4/5.png" alt="png"><br><img src="/2019/11/25/browser-extension-4/6.png" alt="png"><br><img src="/2019/11/25/browser-extension-4/7.png" alt="png"><br><img src="/2019/11/25/browser-extension-4/8.png" alt="png"><br><img src="/2019/11/25/browser-extension-4/9.png" alt="png"></p>
+<p>这边有几个细节:</p>
+<ol>
+<li><code>popup.html</code> 的高宽度，可以不用在plist里面指定</li>
+<li>有一个全局文件。叫 <code>global.html</code> 这个其实就是<code>chrome</code>的<code>manifest.json</code>的<code>background</code>选项。只不过<code>chrome</code>是自己生成的<code>global</code>页面。即背景页</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-4/10.png" alt="png"></p>
+<p>而<code>Safari</code>是要自己建的。只不过是一模一样的: <code>global.html</code>:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">    &lt;head&gt;</span><br><span class="line">        &lt;meta charset=<span class="string">"utf-8"</span>&gt;</span><br><span class="line">    &lt;<span class="regexp">/head&gt;</span></span><br><span class="line"><span class="regexp">    &lt;title&gt;AirDroid&lt;/</span>title&gt;</span><br><span class="line">    &lt;body&gt;</span><br><span class="line">    &lt;script src=<span class="string">"js/lib/underscore/underscore.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/jquery/jquery.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/md5/md5.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/des/tripledes.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/des/mode.ecb.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.IO.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.Text.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.Convert.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.BitConverter.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.BigInt.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.Security.Cryptography.SHA1.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.Security.Cryptography.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.Security.Cryptography.RSA.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.Security.Cryptography.HMACSHA1.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/lib/e2ee/System.Security.Cryptography.RijndaelManaged.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/util/util.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/util/tabs.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/util/e2ee.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/util/des.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/util/localstorage.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/util/browser_os.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/model/account.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/model/file.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/model/device.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/model/contextmenus.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/model/notification.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/sys/cache.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/sys/events.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/sys/baseSocket.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/sys/subSocket.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/sys/pushManage.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/sys/notificationManage.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/sys/server.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;script src=<span class="string">"js/sys/background.js"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line">    &lt;<span class="regexp">/body&gt;</span></span><br><span class="line"><span class="regexp">&lt;/</span>html&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p><code>Safari</code> 跟<code>chrome</code>一样。一个是跟<code>chrome</code>一样的在后台运行的界面, 即<code>global页面</code>,一个是普通页面。</p>
+<p>而调试也是差不多。对于背景页面。<code>chrome</code> 是在 插件页面点击弹出的。</p>
+<p><img src="/2019/11/25/browser-extension-4/11.png" alt="png"></p>
+<p>而<code>Safari</code> 也是在扩展创建器点击弹出的。</p>
+<p><img src="/2019/11/25/browser-extension-4/12.png" alt="png"></p>
+<p><img src="/2019/11/25/browser-extension-4/13.png" alt="png"></p>
+<p>对于普通页面的话。就直接右击选择就行了。</p>
+<p><img src="/2019/11/25/browser-extension-4/14.png" alt="png"></p>
+<p><img src="/2019/11/25/browser-extension-4/15.png" alt="png"></p>
+<p>如果文件有改变的话。直接点击重新载入即可:</p>
+<p><img src="/2019/11/25/browser-extension-4/16.png" alt="png"></p>
+<p>背景页重新载入。是在扩展器处理的。</p>
+<p><img src="/2019/11/25/browser-extension-4/17.png" alt="png"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这样子<code>Safari</code>插件的添加和调试就差不多这样了。接下来我们就要开始接入具体的业务了。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/11/25/browser-extension-1/" title="浏览器 extension 插件开发系列(01) -- 前言和确认需求">浏览器 extension 插件开发系列(01) -- 前言和确认需求</a><br><a href="/2019/11/25/browser-extension-2/" title="浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试">浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-3/" title="浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试">浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-4/" title="浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试">浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试</a><br><a href="/2019/11/25/browser-extension-5/" title="浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书">浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书</a><br><a href="/2019/11/25/browser-extension-6/" title="浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel">浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel</a><br><a href="/2019/11/25/browser-extension-7/" title="浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页">浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页</a><br><a href="/2019/11/25/browser-extension-8/" title="浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化">浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化</a><br><a href="/2019/11/25/browser-extension-9/" title="浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动">浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动</a><br><a href="/2019/11/25/browser-extension-10/" title="浏览器 extension 插件开发系列(10) -- 事件驱动模型">浏览器 extension 插件开发系列(10) -- 事件驱动模型</a><br><a href="/2019/11/25/browser-extension-11/" title="浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)">浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)</a><br><a href="/2019/11/25/browser-extension-12/" title="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息</a><br><a href="/2019/11/25/browser-extension-13/" title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知</a><br><a href="/2019/11/25/browser-extension-14/" title="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口</a><br><a href="/2019/11/25/browser-extension-15/" title="浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）">浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）</a><br><a href="/2019/11/25/browser-extension-16/" title="浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题">浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题</a><br><a href="/2019/11/25/browser-extension-17/" title="浏览器 extension 插件开发系列(17) -- Safari 遇到的问题">浏览器 extension 插件开发系列(17) -- Safari 遇到的问题</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/11/25/browser-extension-4/" title="浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试">http://kebingzao.com/2019/11/25/browser-extension-4/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/浏览器插件/" rel="tag"># 浏览器插件</a>
+          
+            <a href="/tags/Safari-插件/" rel="tag"># Safari 插件</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-3/" rel="next" title="浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试">
+                <i class="fa fa-chevron-left"></i> 浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-5/" rel="prev" title="浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书">
+                浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">182</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在Safari-扩展创建器导入一个新的扩展"><span class="nav-number">2.</span> <span class="nav-text">在Safari 扩展创建器导入一个新的扩展</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#扩展器参数"><span class="nav-number">3.</span> <span class="nav-text">扩展器参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调试"><span class="nav-number">4.</span> <span class="nav-text">调试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/11/25/browser-extension-4/';
+          this.page.identifier = '2019/11/25/browser-extension-4/';
+          this.page.title = '浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,浏览器插件,Chrome 插件,Firefox 插件,Safari 插件," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言在做插件的时候，如果消息或者通知过来的时候，就会出现桌面通知，如果点击会有一些操作，比如直接回复，或者打开聊天窗口。但是不同的浏览器的实现和展示不一样。 但是总的要实现的过程如下:(这边以chrome插件的实现过程来截图,其他浏览器的截图会在各自的小节里面): 主要是有三种： 1. 通知消息">
+<meta name="keywords" content="js,浏览器插件,Chrome 插件,Firefox 插件,Safari 插件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">
+<meta property="og:url" content="http://kebingzao.com/2019/11/25/browser-extension-13/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言在做插件的时候，如果消息或者通知过来的时候，就会出现桌面通知，如果点击会有一些操作，比如直接回复，或者打开聊天窗口。但是不同的浏览器的实现和展示不一样。 但是总的要实现的过程如下:(这边以chrome插件的实现过程来截图,其他浏览器的截图会在各自的小节里面): 主要是有三种： 1. 通知消息">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/3.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/4.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/6.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/7.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/8.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/9.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/10.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/11.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/12.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/13.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/14.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/15.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/16.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/17.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/18.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/19.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/20.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/21.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/22.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/23.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/24.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/25.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/26.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/27.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/28.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/29.png">
+<meta property="og:updated_time" content="2020-02-20T16:35:39.054Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">
+<meta name="twitter:description" content="前言在做插件的时候，如果消息或者通知过来的时候，就会出现桌面通知，如果点击会有一些操作，比如直接回复，或者打开聊天窗口。但是不同的浏览器的实现和展示不一样。 但是总的要实现的过程如下:(这边以chrome插件的实现过程来截图,其他浏览器的截图会在各自的小节里面): 主要是有三种： 1. 通知消息">
+<meta name="twitter:image" content="http://kebingzao.com/2019/11/25/browser-extension-13/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/11/25/browser-extension-13/"/>
+
+
+
+
+
+  <title>浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/11/25/browser-extension-13/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-25T13:28:13+08:00">
+                2019-11-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/浏览器-extension-插件开发系列/" itemprop="url" rel="index">
+                    <span itemprop="name">浏览器 extension 插件开发系列</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/25/browser-extension-13/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/11/25/browser-extension-13/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/11/25/browser-extension-13/" class="leancloud_visitors" data-flag-title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在做插件的时候，如果消息或者通知过来的时候，就会出现桌面通知，如果点击会有一些操作，比如直接回复，或者打开聊天窗口。但是不同的浏览器的实现和展示不一样。</p>
+<p>但是总的要实现的过程如下:(这边以chrome插件的实现过程来截图,其他浏览器的截图会在各自的小节里面):</p>
+<p>主要是有三种：</p>
+<h3 id="1-通知消息"><a href="#1-通知消息" class="headerlink" title="1. 通知消息"></a>1. 通知消息</h3><a id="more"></a>
+<p><img src="/2019/11/25/browser-extension-13/1.png" alt="png"></p>
+<p>桌面通知如下：</p>
+<p><img src="/2019/11/25/browser-extension-13/2.png" alt="png"></p>
+<h3 id="2-文本消息"><a href="#2-文本消息" class="headerlink" title="2. 文本消息"></a>2. 文本消息</h3><p><img src="/2019/11/25/browser-extension-13/3.png" alt="png"></p>
+<p>点击<code>reply</code>, 出现小小的回复框</p>
+<p><img src="/2019/11/25/browser-extension-13/4.png" alt="png"></p>
+<p>输入之后，直接按回车，就发送</p>
+<h3 id="3-发送文件消息"><a href="#3-发送文件消息" class="headerlink" title="3. 发送文件消息"></a>3. 发送文件消息</h3><p><img src="/2019/11/25/browser-extension-13/5.png" alt="png"></p>
+<p>点击reply</p>
+<p><img src="/2019/11/25/browser-extension-13/6.png" alt="png"></p>
+<p>也可以在 <code>receive</code> 里面看到</p>
+<p><img src="/2019/11/25/browser-extension-13/7.png" alt="png"></p>
+<p>点击上面的“点击下载“，就会调用一个显示页面去</p>
+<p><img src="/2019/11/25/browser-extension-13/8.png" alt="png"></p>
+<p>以上这三种都是在 websocket 通道传过来的。而 websocket 通道是在用户登录之后连接上的。</p>
+<p><img src="/2019/11/25/browser-extension-13/9.png" alt="png"></p>
+<p>这个具体代码太具有业务了。这边不细讲了。只要知道这些消息的推送都是由服务端通过 websocket 通道推送给这个插件端，然后插件端再去处理，不管是显示还是回复。上面的操作涉及到的要点非常多。一节讲不完，本节主要讲当插件接收到消息推送的时候，怎么显示桌面通知，比如这个效果:</p>
+<p><img src="/2019/11/25/browser-extension-13/2.png" alt="png"></p>
+<p>包括下面的选项对应的点击操作等等。还是一样，每个浏览器分析一遍。</p>
+<h2 id="1-Chrome-实现消息过来出现桌面通知"><a href="#1-Chrome-实现消息过来出现桌面通知" class="headerlink" title="1. Chrome 实现消息过来出现桌面通知"></a>1. Chrome 实现消息过来出现桌面通知</h2><p>从业务我们可以知道，当 websocket 通道收到通知或者文本，文件消息的时候，就要弹出桌面通知。 所以这边是有三种类型的，对应下面的三种桌面通知的显示效果：</p>
+<ol>
+<li>通知</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-13/2.png" alt="png"></p>
+<ol start="2">
+<li>文本信息</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-13/10.png" alt="png"></p>
+<ol start="3">
+<li>文件消息</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-13/5.png" alt="png"></p>
+<p>所以我们这边针对 websocket 通道过来的信息，是有进行分类的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> notificationObj = <span class="keyword">new</span> Airdroid.Notification(dataMsgBody);</span><br><span class="line">Airdroid.NotificationManage.create(notificationObj);</span><br></pre></td></tr></table></figure></p>
+<p>而这个 <code>create</code> 方法就是:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建一个桌面通知</span></span><br><span class="line">create: <span class="function"><span class="keyword">function</span>(<span class="params">notificationObj</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(!<span class="keyword">this</span>._listenersSetUp)&#123;</span><br><span class="line">        <span class="keyword">this</span>.setUpNotificationListeners();</span><br><span class="line">        <span class="keyword">this</span>._listenersSetUp = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 加入到对象中</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">window</span>.chrome)&#123;</span><br><span class="line">        <span class="keyword">this</span>.createInChrome(notificationObj);</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(<span class="built_in">window</span>.safari)&#123;</span><br><span class="line">        <span class="keyword">this</span>.createInSafari(notificationObj);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.createInFirefox(notificationObj);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>这边有用一个 model 类来管理 <code>model/notification.js</code><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 管理推送过来的消息</span></span><br><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> AirdroidNotification = <span class="function"><span class="keyword">function</span> (<span class="params">data</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">        <span class="keyword">var</span> obj = $.extend(<span class="literal">true</span>,&#123;&#125;, <span class="keyword">this</span>._defaultOptions);</span><br><span class="line">        obj.webuid = data.webuid;</span><br><span class="line">        obj.pushType = data.pushType;</span><br><span class="line">        <span class="keyword">switch</span> (data.pushType)&#123;</span><br><span class="line">            <span class="keyword">case</span> Airdroid.PUSH_TYPE.NOTE:</span><br><span class="line">                <span class="comment">// 文本消息</span></span><br><span class="line">                obj = $.extend(obj,&#123;</span><br><span class="line">                    iconUrl: <span class="string">'images/msg.png'</span>,</span><br><span class="line">                    title: <span class="string">'Push Note via AirDroid'</span>,</span><br><span class="line">                    message: data.msg,</span><br><span class="line">                    deviceId: data.channel_id,</span><br><span class="line">                    time: data.pid</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="comment">// 加上回复选项</span></span><br><span class="line">                obj.buttons.push(&#123;</span><br><span class="line">                    <span class="string">'title'</span>: <span class="string">'reply'</span>,</span><br><span class="line">                    <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_sms.png'</span>,</span><br><span class="line">                    <span class="string">'type'</span>: <span class="string">'3'</span>,</span><br><span class="line">                    <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                        <span class="built_in">console</span>.log(<span class="string">"点击回复"</span>);</span><br><span class="line">                        <span class="comment">// 打开回复窗口</span></span><br><span class="line">                        self.quickReply();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="comment">// 如果是Firefox，点击就会出现回复</span></span><br><span class="line">                <span class="keyword">if</span>(Airdroid.Util.Browser.firefox || Airdroid.Util.Browser.safari)&#123;</span><br><span class="line">                    obj.onclick = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                        <span class="comment">// 跳转到相应地址</span></span><br><span class="line">                        self.quickReply();</span><br><span class="line">                    &#125;;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> Airdroid.PUSH_TYPE.FILE:</span><br><span class="line">                <span class="comment">// 文件消息</span></span><br><span class="line">                obj = $.extend(obj,&#123;</span><br><span class="line">                    iconUrl: data.thumbnail,</span><br><span class="line">                    title: <span class="string">'Push File via AirDroid'</span>,</span><br><span class="line">                    message: data.filename,</span><br><span class="line">                    deviceId: data.channel_id,</span><br><span class="line">                    time: data.webuid,</span><br><span class="line">                    <span class="comment">//特有的 下载地址</span></span><br><span class="line">                    url: data.url</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="comment">// 加上回复选项</span></span><br><span class="line">                obj.buttons.push(&#123;</span><br><span class="line">                    <span class="string">'title'</span>: <span class="string">'reply'</span>,</span><br><span class="line">                    <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_sms.png'</span>,</span><br><span class="line">                    <span class="string">'type'</span>: <span class="string">'3'</span>,</span><br><span class="line">                    <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                        <span class="built_in">console</span>.log(<span class="string">"点击回复"</span>);</span><br><span class="line">                        <span class="comment">// 打开回复窗口</span></span><br><span class="line">                        self.quickReply();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="comment">// 如果是Firefox，点击就会出现回复</span></span><br><span class="line">                <span class="keyword">if</span>(Airdroid.Util.Browser.firefox || Airdroid.Util.Browser.safari)&#123;</span><br><span class="line">                    <span class="built_in">console</span>.log(<span class="string">"点击回复"</span>);</span><br><span class="line">                    obj.onclick = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                        <span class="comment">// 跳转到相应地址</span></span><br><span class="line">                        self.quickReply();</span><br><span class="line">                    &#125;;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> Airdroid.PUSH_TYPE.NOTIFICATION:</span><br><span class="line">                <span class="comment">// 手机通知</span></span><br><span class="line">                <span class="keyword">var</span> appinfo = <span class="built_in">JSON</span>.parse(data.appinfo);</span><br><span class="line">                    <span class="comment">//data.actionTitles = ["test1", "test2"];</span></span><br><span class="line">                obj = $.extend(obj,&#123;</span><br><span class="line">                    iconUrl: data.icon,</span><br><span class="line">                    title: data.title,</span><br><span class="line">                    message: data.content,</span><br><span class="line">                    deviceId: data.deviceId,</span><br><span class="line">                    time: data.time,</span><br><span class="line">                    <span class="comment">// 特有的</span></span><br><span class="line">                    id: data.id,</span><br><span class="line">                    nid: data.nid,</span><br><span class="line">                    appName: appinfo.name,</span><br><span class="line">                    apkId: data.apkid</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="comment">// 判断是否可回复</span></span><br><span class="line">                <span class="keyword">if</span>(data.quick_reply)&#123;</span><br><span class="line">                    obj.buttons.push(&#123;</span><br><span class="line">                        <span class="string">'title'</span>: <span class="string">'reply'</span>,</span><br><span class="line">                        <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_sms.png'</span>,</span><br><span class="line">                        <span class="string">'type'</span>: <span class="string">'3'</span>,</span><br><span class="line">                        <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                            <span class="built_in">console</span>.log(<span class="string">"点击回复"</span>);</span><br><span class="line">                            <span class="comment">// 打开回复窗口</span></span><br><span class="line">                            self.quickReply();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 加上勿扰选项</span></span><br><span class="line">                obj.buttons.push(&#123;</span><br><span class="line">                    <span class="string">'title'</span>: <span class="string">'Mute '</span> + obj.appName,</span><br><span class="line">                    <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_halt.png'</span>,</span><br><span class="line">                    <span class="string">'type'</span>: <span class="string">'2'</span>,</span><br><span class="line">                    <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                        <span class="built_in">console</span>.log(<span class="string">"点击勿扰"</span>);</span><br><span class="line">                        self.mute();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="comment">// 接下来加上 quickaction</span></span><br><span class="line">                <span class="keyword">if</span>(data.actionTitles &amp;&amp; _.isArray(data.actionTitles))&#123;</span><br><span class="line">                    _.each(data.actionTitles,<span class="function"><span class="keyword">function</span>(<span class="params">title</span>)</span>&#123;</span><br><span class="line">                        obj.buttons.push(&#123;</span><br><span class="line">                            <span class="string">'title'</span>: <span class="string">"Android: "</span> + title,</span><br><span class="line">                            <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_android.png'</span>,</span><br><span class="line">                            <span class="string">'type'</span>: <span class="string">'4'</span>,</span><br><span class="line">                            <span class="string">'short_title'</span>: title,</span><br><span class="line">                            <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                                <span class="built_in">console</span>.log(<span class="string">"点击quickaction选项"</span>);</span><br><span class="line">                                self.quickAction(title);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;);</span><br><span class="line">                    &#125;)</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 加上点击事件</span></span><br><span class="line">                obj.onclick = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                    <span class="comment">// 跳转到相应地址</span></span><br><span class="line">                    <span class="keyword">if</span>(Airdroid.AndroidMapping[data.apkid])&#123;</span><br><span class="line">                        Airdroid.Util.Tab.openTab(Airdroid.AndroidMapping[data.apkid]);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;;</span><br><span class="line">                <span class="comment">// 加上一个擦除的选项</span></span><br><span class="line">                obj.buttons.push(&#123;</span><br><span class="line">                    <span class="string">'title'</span>: <span class="string">'dismiss'</span>,</span><br><span class="line">                    <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_cancel.png'</span>,</span><br><span class="line">                    <span class="string">'type'</span>: <span class="string">'1'</span>,</span><br><span class="line">                    <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                        self.dismiss();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 加上描述</span></span><br><span class="line">        <span class="keyword">if</span>(obj.deviceId)&#123;</span><br><span class="line">            <span class="keyword">var</span> deviceObj = Airdroid.Account.getDeviceObjById(obj.deviceId);</span><br><span class="line">            obj.contextMessage = <span class="string">"&#123;0&#125; via AirDroid at &#123;1&#125;"</span>.format(deviceObj.getModel(),</span><br><span class="line">                    <span class="keyword">new</span> <span class="built_in">Date</span>().toLocaleTimeString().replace(<span class="regexp">/:\d+ /</span>, <span class="string">' '</span>));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.options = obj;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    AirdroidNotification.prototype = &#123;</span><br><span class="line">        <span class="comment">// 默认的属性</span></span><br><span class="line">        _defaultOptions : &#123;</span><br><span class="line">            webuid: <span class="string">''</span>,</span><br><span class="line">            buttons:[],</span><br><span class="line">            iconUrl: <span class="string">''</span>,</span><br><span class="line">            message: <span class="string">''</span>,</span><br><span class="line">            priority: <span class="number">2</span>,</span><br><span class="line">            title: <span class="string">''</span>,</span><br><span class="line">            contextMessage: <span class="string">""</span>,</span><br><span class="line">            type: <span class="string">"basic"</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 触发变化</span></span><br><span class="line">        triggerChange: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">            setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                Airdroid.Event.dispatchEvent(self.options.pushType == Airdroid.PUSH_TYPE.NOTIFICATION ? Airdroid.Event.TYPE.notification_change : Airdroid.Event.TYPE.push_change);</span><br><span class="line">            &#125;,<span class="number">200</span>);</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 设置勿扰</span></span><br><span class="line">        mute: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            Airdroid.NotificationManage.setAddBlockList(<span class="keyword">this</span>.getId());</span><br><span class="line">            <span class="keyword">this</span>.triggerChange();</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 清除手机操作</span></span><br><span class="line">        dismiss: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            Airdroid.NotificationManage.setDismiss(<span class="keyword">this</span>.getId());</span><br><span class="line">            <span class="keyword">this</span>.triggerChange();</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 通知项点击回复</span></span><br><span class="line">        quickReply: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">            Airdroid.NotificationManage.showQuickReply(<span class="keyword">this</span>.getId());</span><br><span class="line">            <span class="keyword">this</span>.triggerChange();</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// quickaction操作</span></span><br><span class="line">        quickAction: <span class="function"><span class="keyword">function</span>(<span class="params">title</span>)</span>&#123;</span><br><span class="line">            Airdroid.NotificationManage.setQuickAction(<span class="keyword">this</span>.getId(), title);</span><br><span class="line">            <span class="keyword">this</span>.triggerChange();</span><br><span class="line">        &#125;,</span><br><span class="line">        getTimeOnScreen: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.options.priority &gt; <span class="number">0</span> ? <span class="number">25</span> * <span class="number">1000</span> : <span class="number">8</span> * <span class="number">1000</span>;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 获取唯一id</span></span><br><span class="line">        getId: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.options.webuid;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 获取属性值</span></span><br><span class="line">        getOptions: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.options;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 销毁时触发的事件</span></span><br><span class="line">        destroy: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">"消息关闭，id为："</span> + <span class="keyword">this</span>.getId())</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 显示的时候</span></span><br><span class="line">        display: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    Airdroid.Notification = AirdroidNotification;</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，这个 <code>model</code> 对不同消息的处理不一样，甚至针对不同浏览器还有差别的， 因为本节讲的是 <code>Chrome</code>，所以看看 <code>Chrome</code> 是怎么创建通知的? 所有通知的创建和管理都在 <code>notificationManage.js</code> 这个对象中, 在 <code>Chrome</code> 上创建一个通知的代码如下：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在chrome上创建一个通知</span></span><br><span class="line">createInChrome: <span class="function"><span class="keyword">function</span>(<span class="params">notificationObj</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> n_options = notificationObj.getOptions();</span><br><span class="line">        <span class="keyword">var</span> options = <span class="keyword">this</span>.getNotificationOptions(n_options);</span><br><span class="line">        <span class="comment">// 这时候要进行去重判断, 条件是如果包名一样，并且是普通通知</span></span><br><span class="line">        <span class="comment">// 如果是普通通知，那么弹出框的id就是包名</span></span><br><span class="line">        <span class="keyword">var</span> key = n_options.pushType == Airdroid.PUSH_TYPE.NOTIFICATION ? n_options.apkId : notificationObj.getId();</span><br><span class="line">        <span class="comment">// 获取当前存在的通知</span></span><br><span class="line">        chrome.notifications.getAll(<span class="function"><span class="keyword">function</span>(<span class="params">active</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> exists = active &amp;&amp; active[key];</span><br><span class="line">            <span class="comment">// 如果存在</span></span><br><span class="line">            <span class="keyword">if</span> (exists) &#123;</span><br><span class="line">                self._notificationsObj[key] = notificationObj;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">// 更新</span></span><br><span class="line">                    chrome.notifications.update(key, options, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                        notificationObj.display();</span><br><span class="line">                    &#125;);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (e.message.indexOf(<span class="string">'contextMessage'</span>) &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="keyword">delete</span> options.contextMessage;</span><br><span class="line">                        chrome.notifications.update(key, options, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                            notificationObj.display();</span><br><span class="line">                        &#125;);</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="keyword">throw</span> e;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 创建成功之后的回调</span></span><br><span class="line">                <span class="keyword">var</span> notificationCreated = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                    self._notificationsObj[key] = notificationObj;</span><br><span class="line">                    notificationObj.display();</span><br><span class="line">                    <span class="built_in">console</span>.log(<span class="string">"通知过来了====="</span>);</span><br><span class="line">                &#125;;</span><br><span class="line">                <span class="comment">// 开始创建</span></span><br><span class="line">                <span class="keyword">var</span> createNotification = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        chrome.notifications.create(key, options, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                            <span class="keyword">if</span> (chrome.runtime.lastError) &#123;</span><br><span class="line">                                <span class="built_in">console</span>.log(chrome.runtime.lastError);</span><br><span class="line">                            &#125;</span><br><span class="line">                            notificationCreated();</span><br><span class="line">                        &#125;);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (e.message.indexOf(<span class="string">'contextMessage'</span>) &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                            <span class="keyword">delete</span> options.contextMessage;</span><br><span class="line">                            chrome.notifications.create(key, options, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                                notificationCreated();</span><br><span class="line">                            &#125;);</span><br><span class="line">                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                            <span class="keyword">throw</span> e;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;;</span><br><span class="line">                createNotification();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;<span class="keyword">catch</span>(e)&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"出错了"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 7秒后关闭</span></span><br><span class="line"><span class="comment">//            setTimeout(function()&#123;</span></span><br><span class="line"><span class="comment">//                notification.close();</span></span><br><span class="line"><span class="comment">//            &#125;,7000);</span></span><br><span class="line">&#125;,</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置监听项</span></span><br><span class="line">setUpNotificationListeners: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">window</span>.chrome)&#123;</span><br><span class="line">        <span class="comment">// 监听整体的点击事件</span></span><br><span class="line">        chrome.notifications.onClicked.addListener(<span class="function"><span class="keyword">function</span>(<span class="params">key</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> notificationObj = self._notificationsObj[key];</span><br><span class="line">            <span class="keyword">var</span> options = notificationObj.getOptions();</span><br><span class="line">            chrome.notifications.clear(key, <span class="function"><span class="keyword">function</span>(<span class="params">wasCleared</span>) </span>&#123;</span><br><span class="line">                notificationObj.destroy();</span><br><span class="line">            &#125;);</span><br><span class="line">            <span class="keyword">if</span> (options) &#123;</span><br><span class="line">                <span class="keyword">if</span> (options.onclick) &#123;</span><br><span class="line">                    options.onclick();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="comment">// 监听关闭事件</span></span><br><span class="line">        chrome.notifications.onClosed.addListener(<span class="function"><span class="keyword">function</span>(<span class="params">key, byUser</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> notificationObj = self._notificationsObj[key];</span><br><span class="line">            <span class="keyword">var</span> options = notificationObj.getOptions();</span><br><span class="line">            <span class="keyword">if</span> (options) &#123;</span><br><span class="line">                <span class="keyword">if</span> (options.onclose) &#123;</span><br><span class="line">                    options.onclose();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            notificationObj.destroy();</span><br><span class="line">            <span class="comment">// 删掉</span></span><br><span class="line">            <span class="keyword">delete</span> self._notificationsObj[key];</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="comment">// 监听按钮的点击事件</span></span><br><span class="line">        chrome.notifications.onButtonClicked.addListener(<span class="function"><span class="keyword">function</span>(<span class="params">key, index</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> notificationObj = self._notificationsObj[key];</span><br><span class="line">            <span class="keyword">var</span> options = notificationObj.getOptions();</span><br><span class="line">            chrome.notifications.clear(key, <span class="function"><span class="keyword">function</span>(<span class="params">wasCleared</span>) </span>&#123;</span><br><span class="line"></span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (options) &#123;</span><br><span class="line">                options.buttons[index].onclick();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(<span class="built_in">window</span>.safari)&#123;</span><br><span class="line"></span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">// firefox 桌面通知点击事件</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>注意，这边有个变量<code>_notificationsObj</code> 用来存储所有的桌面通知，然后在通知关闭的时候，再把这条通知从数组里面去掉。而且<code>Chrome</code>还支持对通知进行内容更新，如果该通知存在的话。 同时要绑定通知的点击事件，按钮的点击事件和关闭事件，在<code>options</code>参数里面已经绑定好了，只要直接触发<code>onclick</code>事件就行了。</p>
+<p>从上面的代码可以看到，之所以3种消息的类型不一样，是因为传入的<code>options</code>不一样，这个是在<code>notification.js</code> 设置的:</p>
+<h3 id="1-1-应用通知"><a href="#1-1-应用通知" class="headerlink" title="1.1. 应用通知"></a>1.1. 应用通知</h3><p>当消息为应用通知的时候，代码是这样的<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> appinfo = <span class="built_in">JSON</span>.parse(data.appinfo);</span><br><span class="line"><span class="comment">//data.actionTitles = ["test1", "test2"];</span></span><br><span class="line">obj = $.extend(obj,&#123;</span><br><span class="line">    iconUrl: data.icon,</span><br><span class="line">    title: data.title,</span><br><span class="line">    message: data.content,</span><br><span class="line">    deviceId: data.deviceId,</span><br><span class="line">    time: data.time,</span><br><span class="line">    <span class="comment">// 特有的</span></span><br><span class="line">    id: data.id,</span><br><span class="line">    nid: data.nid,</span><br><span class="line">    appName: appinfo.name,</span><br><span class="line">    apkId: data.apkid</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 判断是否可回复</span></span><br><span class="line"><span class="keyword">if</span>(data.quick_reply)&#123;</span><br><span class="line">    obj.buttons.push(&#123;</span><br><span class="line">        <span class="string">'title'</span>: <span class="string">'reply'</span>,</span><br><span class="line">        <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_sms.png'</span>,</span><br><span class="line">        <span class="string">'type'</span>: <span class="string">'3'</span>,</span><br><span class="line">        <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">"点击回复"</span>);</span><br><span class="line">            <span class="comment">// 打开回复窗口</span></span><br><span class="line">            self.quickReply();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 加上勿扰选项</span></span><br><span class="line">obj.buttons.push(&#123;</span><br><span class="line">    <span class="string">'title'</span>: <span class="string">'Mute '</span> + obj.appName,</span><br><span class="line">    <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_halt.png'</span>,</span><br><span class="line">    <span class="string">'type'</span>: <span class="string">'2'</span>,</span><br><span class="line">    <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"点击勿扰"</span>);</span><br><span class="line">        self.mute();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 接下来加上 quickaction</span></span><br><span class="line"><span class="keyword">if</span>(data.actionTitles &amp;&amp; _.isArray(data.actionTitles))&#123;</span><br><span class="line">    _.each(data.actionTitles,<span class="function"><span class="keyword">function</span>(<span class="params">title</span>)</span>&#123;</span><br><span class="line">        obj.buttons.push(&#123;</span><br><span class="line">            <span class="string">'title'</span>: <span class="string">"Android: "</span> + title,</span><br><span class="line">            <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_android.png'</span>,</span><br><span class="line">            <span class="string">'type'</span>: <span class="string">'4'</span>,</span><br><span class="line">            <span class="string">'short_title'</span>: title,</span><br><span class="line">            <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(<span class="string">"点击quickaction选项"</span>);</span><br><span class="line">                self.quickAction(title);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 加上点击事件</span></span><br><span class="line">obj.onclick = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 跳转到相应地址</span></span><br><span class="line">    <span class="keyword">if</span>(Airdroid.AndroidMapping[data.apkid])&#123;</span><br><span class="line">        Airdroid.Util.Tab.openTab(Airdroid.AndroidMapping[data.apkid]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 加上一个擦除的选项</span></span><br><span class="line">obj.buttons.push(&#123;</span><br><span class="line">    <span class="string">'title'</span>: <span class="string">'dismiss'</span>,</span><br><span class="line">    <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_cancel.png'</span>,</span><br><span class="line">    <span class="string">'type'</span>: <span class="string">'1'</span>,</span><br><span class="line">    <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        self.dismiss();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>对于应用通知，有两个最基本的，就是 <code>勿扰</code>和<code>擦除</code> 这两个操作按钮</p>
+<p><img src="/2019/11/25/browser-extension-13/11.png" alt="png"></p>
+<p>还有两个可用选项，就看推送过来的消息有没有这个配置，一个是<code>快速回复</code>，比如<code>WhatsApp</code>之类的应用，可用直接回复。</p>
+<p><img src="/2019/11/25/browser-extension-13/12.png" alt="png"></p>
+<p>另外一个是是否允许<code>quickaction</code>操作(也是一种快捷操作)。</p>
+<p><img src="/2019/11/25/browser-extension-13/13.png" alt="png"></p>
+<p>然后每一个<code>button</code>都会绑定对应的<code>onclick</code>事件</p>
+<h3 id="1-2-文本消息"><a href="#1-2-文本消息" class="headerlink" title="1.2. 文本消息"></a>1.2. 文本消息</h3><p>文件消息就比较简单，只有一个回复选项<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">obj = $.extend(obj,&#123;</span><br><span class="line">    iconUrl: <span class="string">'images/msg.png'</span>,</span><br><span class="line">    title: <span class="string">'Push Note via AirDroid'</span>,</span><br><span class="line">    message: data.msg,</span><br><span class="line">    deviceId: data.channel_id,</span><br><span class="line">    time: data.pid</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 加上回复选项</span></span><br><span class="line">obj.buttons.push(&#123;</span><br><span class="line">    <span class="string">'title'</span>: <span class="string">'reply'</span>,</span><br><span class="line">    <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_sms.png'</span>,</span><br><span class="line">    <span class="string">'type'</span>: <span class="string">'3'</span>,</span><br><span class="line">    <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"点击回复"</span>);</span><br><span class="line">        <span class="comment">// 打开回复窗口</span></span><br><span class="line">        self.quickReply();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>点击直接打开回复窗口。</p>
+<h3 id="1-3-发送文件消息"><a href="#1-3-发送文件消息" class="headerlink" title="1.3. 发送文件消息"></a>1.3. 发送文件消息</h3><p>跟文本消息很像<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">obj = $.extend(obj,&#123;</span><br><span class="line">    iconUrl: data.thumbnail,</span><br><span class="line">    title: <span class="string">'Push File via AirDroid'</span>,</span><br><span class="line">    message: data.filename,</span><br><span class="line">    deviceId: data.channel_id,</span><br><span class="line">    time: data.webuid,</span><br><span class="line">    <span class="comment">//特有的 下载地址</span></span><br><span class="line">    url: data.url</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 加上回复选项</span></span><br><span class="line">obj.buttons.push(&#123;</span><br><span class="line">    <span class="string">'title'</span>: <span class="string">'reply'</span>,</span><br><span class="line">    <span class="string">'iconUrl'</span>: <span class="string">'images/ic_action_sms.png'</span>,</span><br><span class="line">    <span class="string">'type'</span>: <span class="string">'3'</span>,</span><br><span class="line">    <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"点击回复"</span>);</span><br><span class="line">        <span class="comment">// 打开回复窗口</span></span><br><span class="line">        self.quickReply();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>不过左边的那个图片，要换成对应文件的缩略图。</p>
+<p>最后<code>manifest.json</code> 要有 <code>notifications</code> 权限:</p>
+<p><img src="/2019/11/25/browser-extension-13/14.png" alt="png"></p>
+<h2 id="2-Firefox实现消息过来出现桌面通知"><a href="#2-Firefox实现消息过来出现桌面通知" class="headerlink" title="2. Firefox实现消息过来出现桌面通知"></a>2. Firefox实现消息过来出现桌面通知</h2><p><code>Firefox</code> 浏览器的实现流程如下，也是有3种类型:</p>
+<ol>
+<li>通知消息</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-13/15.png" alt="png"></p>
+<ol start="2">
+<li>文本消息</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-13/16.png" alt="png"></p>
+<p>不过这边有个细节，这边没有<code>reply</code> 操作按钮(这个跟 <code>Chrome</code> 不一样)， 只有 popup 页面上的那个才有， 但是点击的桌面通知的时候，还是相当于点击<code>reply</code></p>
+<p><img src="/2019/11/25/browser-extension-13/17.png" alt="png"></p>
+<p>就会出现小小的回复框</p>
+<p><img src="/2019/11/25/browser-extension-13/18.png" alt="png"></p>
+<p>输入之后，直接按回车，就发送</p>
+<ol start="3">
+<li>文件消息</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-13/19.png" alt="png"></p>
+<p>也没有<code>reply</code>操作按钮，但是点击整个桌面通知，就相当于<code>reply</code>操作，即弹出一个回复窗口。 也可以在 <code>popup</code> 页面的 <code>receive tab</code> 里面看到</p>
+<p><img src="/2019/11/25/browser-extension-13/20.png" alt="png"></p>
+<p>点击上面的“点击下载“，就会调用一个显示页面去。</p>
+<p><img src="/2019/11/25/browser-extension-13/21.png" alt="png"></p>
+<p>不过可以看出一个差别，就是 <code>Firefox</code> 的桌面通知是没有像 <code>Chrome</code> 那样下面可以设置一些操作按钮，他只有一个针对这个通知的点击事件。 这些都会在 <code>notification.js</code> 这个 <code>model</code> 类继续处理，比如这样子:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果是Firefox，点击就会出现回复</span></span><br><span class="line"><span class="keyword">if</span>(Airdroid.Util.Browser.firefox || Airdroid.Util.Browser.safari)&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"点击回复"</span>);</span><br><span class="line">    obj.onclick = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="comment">// 跳转到相应地址</span></span><br><span class="line">        self.quickReply();</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果是 <code>Firefox</code> 或者是 <code>Safari</code>， 就只绑定通知的绑定事件了，没有那么多花里胡哨的按钮了。这边的封装跟 <code>Chrome</code> 是一样的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> notificationObj = <span class="keyword">new</span> Airdroid.Notification(dataMsgBody);</span><br><span class="line">Airdroid.NotificationManage.create(notificationObj);</span><br></pre></td></tr></table></figure></p>
+<p>接下来看看<code>Firefox</code>是怎么创建通知的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// firefox 出桌面通知</span></span><br><span class="line">createInFirefox: <span class="function"><span class="keyword">function</span>(<span class="params">notificationObj</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">var</span> n_options = notificationObj.getOptions();</span><br><span class="line">    <span class="comment">// 这时候要进行去重判断, 条件是如果包名一样，并且是普通通知</span></span><br><span class="line">    <span class="comment">// 如果是普通通知，那么弹出框的id就是包名</span></span><br><span class="line">    <span class="keyword">var</span> key = n_options.pushType == Airdroid.PUSH_TYPE.NOTIFICATION ? n_options.apkId : notificationObj.getId();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> spec = &#123;</span><br><span class="line">        <span class="string">'key'</span>: key,</span><br><span class="line">        <span class="string">'title'</span>: n_options.title,</span><br><span class="line">        <span class="string">'message'</span>: n_options.message,</span><br><span class="line">        <span class="string">'contextMessage'</span>: n_options.contextMessage,</span><br><span class="line">        <span class="string">'iconUrl'</span>: n_options.iconUrl</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (spec.message.length &gt; <span class="number">500</span>) &#123;</span><br><span class="line">        spec.message = spec.message.substring(<span class="number">0</span>, <span class="number">500</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 添加</span></span><br><span class="line">    self._notificationsObj[key] = notificationObj;</span><br><span class="line"></span><br><span class="line">    Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.show_notification, spec);</span><br><span class="line"></span><br><span class="line">    Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.notifications_changed, _.keys(self._notificationsObj));</span><br><span class="line">&#125;,</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置监听项</span></span><br><span class="line">setUpNotificationListeners: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">window</span>.chrome)&#123;</span><br><span class="line">        <span class="comment">// chrome ..</span></span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(<span class="built_in">window</span>.safari)&#123;</span><br><span class="line"></span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">// firefox 桌面通知点击事件</span></span><br><span class="line">        Airdroid.Event.addEventListener(Airdroid.Event.FireFoxEvent.notification_clicked, <span class="function"><span class="keyword">function</span>(<span class="params">key</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> notificationObj = self._notificationsObj[key];</span><br><span class="line">            <span class="keyword">var</span> options = notificationObj.getOptions();</span><br><span class="line">            _.isFunction(options.onclick) &amp;&amp; options.onclick();</span><br><span class="line">            <span class="keyword">delete</span> self._notificationsObj[key];</span><br><span class="line">            <span class="comment">// 清除角标</span></span><br><span class="line">            Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.notifications_changed, _.keys(self._notificationsObj));</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>从上面代码可以看到，<code>Firefox</code>触发<code>show_notification</code>这个事件来显示通知，同时监听<code>notification_clicked</code>这个事件当桌面通知被点击的时候。那么这两个事件是怎么运行的呢，其实都在中转页面（<code>main.js</code>）中来操作的，也就是说，其实<code>Firefox</code>创建桌面通知是在中转页面来做的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通知过来，显示桌面图标</span></span><br><span class="line">page.port.on(<span class="string">'show_notification'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> notification = data.detail;</span><br><span class="line">    <span class="keyword">if</span> (notification.iconUrl.lastIndexOf(<span class="string">''</span>, <span class="number">0</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        notification.iconUrl = self.data.url(notification.iconUrl);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (notification.contextMessage) &#123;</span><br><span class="line">        notification.message = notification.contextMessage + <span class="string">'\n'</span> + notification.message;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (prefs.dont_show_mirrors) &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'Not showing notification, disabled in preferences'</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> notifications = <span class="built_in">require</span>(<span class="string">'sdk/notifications'</span>);</span><br><span class="line">    notifications.notify(&#123;</span><br><span class="line">        <span class="string">'title'</span>: notification.title,</span><br><span class="line">        <span class="string">'text'</span>: notification.message,</span><br><span class="line">        <span class="string">'iconURL'</span>: notification.iconUrl,</span><br><span class="line">        <span class="string">'onClick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="comment">// 通知点击事件</span></span><br><span class="line">            page.port.emit(<span class="string">'notification_clicked'</span>, notification.key);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通知条数改变，就在图标上面显示小红点</span></span><br><span class="line">page.port.on(<span class="string">'notifications_changed'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> notifications = data.detail;</span><br><span class="line">    <span class="keyword">if</span> (firefoxVersion &gt;= <span class="number">36</span> &amp;&amp; widget) &#123;</span><br><span class="line">        <span class="keyword">var</span> count = notifications.length;</span><br><span class="line">        <span class="keyword">if</span> (count &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            widget.badge = count;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            widget.badge = <span class="string">''</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>同时还有一个很有意思的地方，就是可以清掉或者设置上面的小红点 <code>notifications_changed</code></p>
+<p><img src="/2019/11/25/browser-extension-13/22.png" alt="png"></p>
+<p>上面代码的<code>widget</code> 就是那个小图标对应的对象。 从上面的截图来看，无论是应用通知，还是文件，文本消息。都是没有操作栏，最多绑定整体的点击事件，对于文本，文件，点击就会出现回复窗口:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果是Firefox，点击就会出现回复</span></span><br><span class="line"><span class="keyword">if</span>(Airdroid.Util.Browser.firefox || Airdroid.Util.Browser.safari)&#123;</span><br><span class="line">  obj.onclick = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 跳转到相应地址</span></span><br><span class="line">    self.quickReply();</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="3-Safari-实现消息过来出现桌面通知"><a href="#3-Safari-实现消息过来出现桌面通知" class="headerlink" title="3. Safari 实现消息过来出现桌面通知"></a>3. Safari 实现消息过来出现桌面通知</h2><p><code>Safari</code> 浏览器的实现流程:</p>
+<ol>
+<li>通知消息</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-13/23.png" alt="png"></p>
+<ol start="2">
+<li>文本消息</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-13/24.png" alt="png"></p>
+<p>也是没有<code>reply</code>， 只有组件上的那个才有， 但是点击的桌面通知的时候，还是相当于点击<code>reply</code></p>
+<p><img src="/2019/11/25/browser-extension-13/25.png" alt="png"></p>
+<p>出现小小的回复框</p>
+<p><img src="/2019/11/25/browser-extension-13/26.png" alt="png"></p>
+<p>输入之后，直接按回车，就发送</p>
+<ol start="3">
+<li>文件消息</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-13/27.png" alt="png"></p>
+<p>也没有<code>reply</code>操作按钮，但是点击整个桌面通知，就相当于<code>reply</code>操作，即弹出一个回复窗口, 也可以在 <code>popup</code> 页面的 <code>receive tab</code>里面看到:</p>
+<p><img src="/2019/11/25/browser-extension-13/28.png" alt="png"></p>
+<p>点击上面的“点击下载“，就会调用一个显示页面去</p>
+<p><img src="/2019/11/25/browser-extension-13/29.png" alt="png"></p>
+<p>封装的方式，跟之前一样， 我们看下 <code>Safari</code> 是怎么创建通知的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// safari出现桌面通知</span></span><br><span class="line">createInSafari: <span class="function"><span class="keyword">function</span>(<span class="params">notificationObj</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="keyword">if</span> (!Notification) &#123;</span><br><span class="line">        Airdroid.log(<span class="string">'Notifications not available'</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">var</span> n_options = notificationObj.getOptions();</span><br><span class="line">    <span class="comment">// 这时候要进行去重判断, 条件是如果包名一样，并且是普通通知</span></span><br><span class="line">    <span class="comment">// 如果是普通通知，那么弹出框的id就是包名</span></span><br><span class="line">    <span class="keyword">var</span> key = n_options.pushType == Airdroid.PUSH_TYPE.NOTIFICATION ? n_options.apkId : notificationObj.getId();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> notification = <span class="keyword">new</span> Notification(n_options.title, &#123;</span><br><span class="line">        <span class="string">'body'</span>: n_options.message,</span><br><span class="line">        <span class="string">'tag'</span>: key</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    self._notificationsObj[key] = notificationObj;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    notification.onclick = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"点击通知＝＝＝"</span>);</span><br><span class="line">        <span class="keyword">if</span> (n_options.onclick) &#123;</span><br><span class="line">            n_options.onclick();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        notification.close();</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    notification.onclose = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"关闭通知＝＝＝"</span>);</span><br><span class="line">        <span class="keyword">if</span> (n_options.onclose) &#123;</span><br><span class="line">            n_options.onclose();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">delete</span> self._notificationsObj[key];</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>跟 <code>Firefox</code> 一样，无论是应用通知，还是文件，文本消息。都是都是每一操作栏，最多绑定整体的点击事件:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果是Firefox，点击就会出现回复</span></span><br><span class="line"><span class="keyword">if</span>(Airdroid.Util.Browser.firefox || Airdroid.Util.Browser.safari)&#123;</span><br><span class="line">  obj.onclick = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 跳转到相应地址</span></span><br><span class="line">    self.quickReply();</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本节主要是讲了这三个浏览器是怎么显示桌面通知的</p>
+<hr>
+<p>系列文章:<br><a href="/2019/11/25/browser-extension-1/" title="浏览器 extension 插件开发系列(01) -- 前言和确认需求">浏览器 extension 插件开发系列(01) -- 前言和确认需求</a><br><a href="/2019/11/25/browser-extension-2/" title="浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试">浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-3/" title="浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试">浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-4/" title="浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试">浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试</a><br><a href="/2019/11/25/browser-extension-5/" title="浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书">浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书</a><br><a href="/2019/11/25/browser-extension-6/" title="浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel">浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel</a><br><a href="/2019/11/25/browser-extension-7/" title="浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页">浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页</a><br><a href="/2019/11/25/browser-extension-8/" title="浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化">浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化</a><br><a href="/2019/11/25/browser-extension-9/" title="浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动">浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动</a><br><a href="/2019/11/25/browser-extension-10/" title="浏览器 extension 插件开发系列(10) -- 事件驱动模型">浏览器 extension 插件开发系列(10) -- 事件驱动模型</a><br><a href="/2019/11/25/browser-extension-11/" title="浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)">浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)</a><br><a href="/2019/11/25/browser-extension-12/" title="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息</a><br><a href="/2019/11/25/browser-extension-13/" title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知</a><br><a href="/2019/11/25/browser-extension-14/" title="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口</a><br><a href="/2019/11/25/browser-extension-15/" title="浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）">浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）</a><br><a href="/2019/11/25/browser-extension-16/" title="浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题">浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题</a><br><a href="/2019/11/25/browser-extension-17/" title="浏览器 extension 插件开发系列(17) -- Safari 遇到的问题">浏览器 extension 插件开发系列(17) -- Safari 遇到的问题</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/11/25/browser-extension-13/" title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">http://kebingzao.com/2019/11/25/browser-extension-13/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/浏览器插件/" rel="tag"># 浏览器插件</a>
+          
+            <a href="/tags/Chrome-插件/" rel="tag"># Chrome 插件</a>
+          
+            <a href="/tags/Firefox-插件/" rel="tag"># Firefox 插件</a>
+          
+            <a href="/tags/Safari-插件/" rel="tag"># Safari 插件</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-12/" rel="next" title="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">
+                <i class="fa fa-chevron-left"></i> 浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-14/" rel="prev" title="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">
+                浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">182</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-通知消息"><span class="nav-number">1.1.</span> <span class="nav-text">1. 通知消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-文本消息"><span class="nav-number">1.2.</span> <span class="nav-text">2. 文本消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-发送文件消息"><span class="nav-number">1.3.</span> <span class="nav-text">3. 发送文件消息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Chrome-实现消息过来出现桌面通知"><span class="nav-number">2.</span> <span class="nav-text">1. Chrome 实现消息过来出现桌面通知</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-应用通知"><span class="nav-number">2.1.</span> <span class="nav-text">1.1. 应用通知</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-文本消息"><span class="nav-number">2.2.</span> <span class="nav-text">1.2. 文本消息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-发送文件消息"><span class="nav-number">2.3.</span> <span class="nav-text">1.3. 发送文件消息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Firefox实现消息过来出现桌面通知"><span class="nav-number">3.</span> <span class="nav-text">2. Firefox实现消息过来出现桌面通知</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Safari-实现消息过来出现桌面通知"><span class="nav-number">4.</span> <span class="nav-text">3. Safari 实现消息过来出现桌面通知</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/11/25/browser-extension-13/';
+          this.page.identifier = '2019/11/25/browser-extension-13/';
+          this.page.title = '浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

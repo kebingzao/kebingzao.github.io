@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言最近打算把服务端的一些 Go 服务升级到 1.13, 并且用上 Go Module 这个 Go 的第三方包管理机制。 虽然早在 Go 1.11 版本发布的时候，就推出了 Go Module 这个机制了，但是毕竟那时候还在跟 Go dep 撕逼呢, 而且是第一个版本出来的新机制，有点不敢用，怕入坑之后爬不出来。 一直等到了 1.13 版本，这个机制已经相对成熟了，而且几乎取代了 vendor 机">
+<meta name="keywords" content="golang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初试 Go Module">
+<meta property="og:url" content="http://kebingzao.com/2020/02/20/go-module/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言最近打算把服务端的一些 Go 服务升级到 1.13, 并且用上 Go Module 这个 Go 的第三方包管理机制。 虽然早在 Go 1.11 版本发布的时候，就推出了 Go Module 这个机制了，但是毕竟那时候还在跟 Go dep 撕逼呢, 而且是第一个版本出来的新机制，有点不敢用，怕入坑之后爬不出来。 一直等到了 1.13 版本，这个机制已经相对成熟了，而且几乎取代了 vendor 机">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/8.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/9.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/10.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/11.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/12.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/13.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/14.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/15.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/16.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/17.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/18.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/19.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/20.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/21.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/22.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/23.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/24.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/25.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/26.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/27.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/28.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/29.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/30.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/31.png">
+<meta property="og:image" content="http://kebingzao.com/2020/02/20/go-module/32.png">
+<meta property="og:updated_time" content="2020-02-20T16:35:39.141Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="初试 Go Module">
+<meta name="twitter:description" content="前言最近打算把服务端的一些 Go 服务升级到 1.13, 并且用上 Go Module 这个 Go 的第三方包管理机制。 虽然早在 Go 1.11 版本发布的时候，就推出了 Go Module 这个机制了，但是毕竟那时候还在跟 Go dep 撕逼呢, 而且是第一个版本出来的新机制，有点不敢用，怕入坑之后爬不出来。 一直等到了 1.13 版本，这个机制已经相对成熟了，而且几乎取代了 vendor 机">
+<meta name="twitter:image" content="http://kebingzao.com/2020/02/20/go-module/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/02/20/go-module/"/>
+
+
+
+
+
+  <title>初试 Go Module | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/02/20/go-module/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">初试 Go Module</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-02-20T13:54:12+08:00">
+                2020-02-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang相关/" itemprop="url" rel="index">
+                    <span itemprop="name">golang相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/02/20/go-module/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/02/20/go-module/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/02/20/go-module/" class="leancloud_visitors" data-flag-title="初试 Go Module">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近打算把服务端的一些 Go 服务升级到 <code>1.13</code>, 并且用上 <code>Go Module</code> 这个 Go 的第三方包管理机制。 虽然早在 <code>Go 1.11</code> 版本发布的时候，就推出了 <code>Go Module</code> 这个机制了，但是毕竟那时候还在跟 <code>Go dep</code> 撕逼呢, 而且是第一个版本出来的新机制，有点不敢用，怕入坑之后爬不出来。 一直等到了 <code>1.13</code> 版本，这个机制已经相对成熟了，而且几乎取代了 <code>vendor</code> 机制了，也被广大 gopher 接受了，所以是时候升级上来了。而且升级的代价其实不高，因为 Go 的版本发布几乎都遵守<a href="https://golang.org/doc/go1compat" target="_blank" rel="noopener">Go1兼容协议</a>, 也就是说我们几乎不需要改代码依然有很大的概率可以编译成功(事实上改动的确实不多，无非就是针对 <code>Go Module</code> 机制，将一些第三方依赖的引用进行调整，具体的业务逻辑几乎不用动)。改动成本那么低，又可以告别 <code>Go path</code>, 采用更加优雅的 <code>Go Module</code>, 何乐而不为，所以本文主要是讲一下 <code>Go Module</code> 的一些简单试用。</p>
+<a id="more"></a>
+<h2 id="环境搭起来"><a href="#环境搭起来" class="headerlink" title="环境搭起来"></a>环境搭起来</h2><p>操作环境： windows 7， docker 环境<br>ps: 之所以不在 linux 上实操，一个是因为我的本地开发环境是 windows 7，而且有权限可以下载内部库的代码。 一旦换了我在腾讯云上私有机器，没有权限下载内部库。所以考量了一下，反正 windows 7 也可以操作，就直接用 windows 7，不过操作起来肯定没有 linux 那么好用就是了，还得配一下对应的工具。</p>
+<p>首先在 docker 上，安装一个 <code>1.13</code> 的 Go 版本的镜像, 这一块就不说了，具体看我之前的文章:</p>
+<ul>
+<li><a href="/2019/02/28/docker-multiple-golang/" title="使用 docker 来让多个 golang 环境并存并实现多版本打包和编译">使用 docker 来让多个 golang 环境并存并实现多版本打包和编译</a></li>
+<li><a href="/2019/03/01/windows7-docker-multiple-golang/" title="windows7 通过 docker 来实现多个 golang 版本并存">windows7 通过 docker 来实现多个 golang 版本并存</a>
+</li>
+</ul>
+<p>打开 <code>docker toolbox</code>, 找到对应的目录，里面的 <code>dockerfile</code> 的内容是这样子的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FROM golang:1.13</span><br><span class="line">RUN mkdir /app</span><br><span class="line">ADD . /app/</span><br><span class="line">WORKDIR /app</span><br></pre></td></tr></table></figure></p>
+<p>然后在这个目录下执行:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build --rm -t kbz/golang-1.13 .</span><br></pre></td></tr></table></figure></p>
+<p>这时候就可以生成一个镜像，然后镜像名字为: <code>kbz/golang-1.13</code></p>
+<p><img src="/2020/02/20/go-module/1.png" alt="png"></p>
+<p>我们不用线上的原始 <code>1.13</code> 的镜像，而是 <code>dockerfile</code> 自己装的 <code>kbz/golang-1.13</code> 镜像 (事实上后续我们还会对这个镜像做一些额外参数的处理)</p>
+<p>接下来我们就要生成容器，并挂载 <code>/go/src/</code> 目录了。 (最好在生成容器的时候，就要把目录挂载好，不然等容器创建了，再挂载目录就很麻烦了，只能到这个docker 容器的配置文件去修改，而且还很容易出错，最后还要重启 docker)</p>
+<p>对于 windows 7 来说 (linux 或者 mac OS 根本不用这一步)，要挂载目录之前，要先把这个目录通过 <code>Oracle VM VirualBox</code> 设置成共享文件</p>
+<p><img src="/2020/02/20/go-module/2.png" alt="png"></p>
+<p><img src="/2020/02/20/go-module/3.png" alt="png"></p>
+<p>这边要注意两个细节:</p>
+<ol>
+<li>一定要先设置成共享目录成功，才能挂载生成容器。不能颠倒顺序，颠倒顺序就没法生效。</li>
+<li>设置的时候，key 一定要跟挂载目录的 key 一样的，不然会找不到，也没法生效，比如本例中，我共享文件夹的名称是 <code>/f/docker-golang-src/go-1.13</code> 这个名称，那么我 run 容器挂载的时候，也是用这个名称</li>
+</ol>
+<p>最后设置好之后，要重启 <code>docker-machine.exe</code> 来使得测试生效。 </p>
+<p><img src="/2020/02/20/go-module/4.png" alt="png"></p>
+<p>接下来就开始生成容器并且挂载目录，将 docker 容器的 <code>/go/src</code> 挂载到宿主机的 <code>/f/docker-golang-src/go-1.13</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it -v /f/docker-golang-src/go-1.13:/go/src --name golang-1.13 kbz/golang-1.13</span><br></pre></td></tr></table></figure></p>
+<p>随便建一个文件，可以看到目录同步了:</p>
+<p><img src="/2020/02/20/go-module/5.png" alt="png"></p>
+<p><img src="/2020/02/20/go-module/6.png" alt="png"></p>
+<p>这样子，基本环境就好了。接下来就可以这个容器里面进行实操了。</p>
+<h2 id="初始化-go-mod"><a href="#初始化-go-mod" class="headerlink" title="初始化 go mod"></a>初始化 go mod</h2><p>接下来将一些 go 项目的代码挪到了宿主机对应的共享目录。 </p>
+<p><img src="/2020/02/20/go-module/7.png" alt="png"></p>
+<p>在啥依赖都没有安装的情况下，我们试着 <code>go build</code> 去编译看看，果然报错了:</p>
+<p><img src="/2020/02/20/go-module/8.png" alt="png"></p>
+<p>这个报错其实是正常的，因为我们并没有在 <code>GOPATH</code> 的目录安装任何依赖。所以编译的时候，会去 <code>GOPATH</code> 目录找依赖，肯定找不到。</p>
+<p>接下来我们用 go mod 来初始化这个项目:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go mod init goworker</span><br></pre></td></tr></table></figure></p>
+<p>可以看到在目录下，多了一个文件 <code>go.mod</code>, 打开这个文件只有 3 行代码:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">module goworker</span><br><span class="line"></span><br><span class="line">go 1.13</span><br></pre></td></tr></table></figure></p>
+<p>这时候并没有安装任何的依赖。 同时通过:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go list -m -json all</span><br></pre></td></tr></table></figure></p>
+<p>查看这个项目的所有的依赖安装包，结果发现只有这个项目:</p>
+<p><img src="/2020/02/20/go-module/9.png" alt="png"></p>
+<p>接下来我们要开始安装依赖了，可以通过 <code>go mod download</code> 来显示下载依赖，也可以直接用 <code>go build</code> 编译的时候，会直接下载依赖:</p>
+<p><img src="/2020/02/20/go-module/10.png" alt="png"></p>
+<p>编译成功之后，依赖也加载完了，这时候除了原来的 <code>go.mod</code> 之外，有多了一个 <code>go.sum</code> 文件:</p>
+<p><img src="/2020/02/20/go-module/11.png" alt="png"></p>
+<p>同时也多了一个编译好的二进制文件，接下来我们执行一下这个二进制文件，看看是否正常:</p>
+<p><img src="/2020/02/20/go-module/12.png" alt="png"></p>
+<p>是正常的，接下来我们看下 <code>go list</code> 有没有变化:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go list -m -json all</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2020/02/20/go-module/13.png" alt="png"></p>
+<p>可以看到依赖就变得很多了。</p>
+<h2 id="go-mod-的依赖存放位置"><a href="#go-mod-的依赖存放位置" class="headerlink" title="go mod 的依赖存放位置"></a>go mod 的依赖存放位置</h2><p>我们知道没有用 <code>Go Module</code>, 依赖都会放在 <code>$GOPATH/src</code> 这个目录下，那么用了 <code>Go Module</code> 机制之后，依赖的安装位置就会跑到 <code>GOPATH/pkg/mod</code> 这个目录下面:</p>
+<p><img src="/2020/02/20/go-module/14.png" alt="png"></p>
+<p>这样的一个好处就是，不用每次代码都跟依赖放同一个目录了，保证了 workspace 的干净。(以前密密麻麻的一堆依赖和一堆项目。每次找项目都要找很久)，而且因为有安装依赖了，<code>go.mod</code> 内容也变了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">module goworker</span><br><span class="line"></span><br><span class="line">go 1.13</span><br><span class="line"></span><br><span class="line">require (</span><br><span class="line">    github.com/benmanns/goworker v0.1.3</span><br><span class="line">    github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect</span><br><span class="line">    github.com/garyburd/redigo v1.6.0 // indirect</span><br><span class="line">    github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect</span><br><span class="line">    github.com/youtube/vitess v2.1.1+incompatible // indirect</span><br><span class="line">    golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect</span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<p>通过观察我们可以看到有些依赖后面是有标记 <code>indirect</code>, 这个是因为同样都是依赖， 但是有些依赖是直接依赖，比如本例的 <code>github.com/benmanns/goworker</code> 就是直接依赖，因为会在项目的代码里面直接引用，而这种<code>github.com/cihub/seelog</code> 就是间接依赖，也就是直接依赖的依赖，项目代码里面不会引用到。 </p>
+<p>而且我们可以通过:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go mod why -m xxx</span><br></pre></td></tr></table></figure></p>
+<p>来查看某一个包是否有被项目依赖，而且可以查看依赖的顺序</p>
+<p><img src="/2020/02/20/go-module/15.png" alt="png"></p>
+<p>如果两者之间不存在任何依赖。就会提示没有依赖。</p>
+<p>接下来去 <code>/go/pkg/mod</code> 目录看一下这个依赖的存放位置:</p>
+<p><img src="/2020/02/20/go-module/16.png" alt="png"></p>
+<p>可以看到这个版本是 <code>0.1.3</code>, 说明这个版本是单纯存放的。那么有没有可能我降级成 <code>0.1.2</code> 的时候，还会下载另一个依赖呢？？</p>
+<h2 id="go-mod-的升级和降级"><a href="#go-mod-的升级和降级" class="headerlink" title="go mod 的升级和降级"></a>go mod 的升级和降级</h2><p>接下来我们试下对 <code>benmanns/goworker</code> 这个包的版本进行降级，查了一下，发现这个库的上一个版本是 <code>0.1.2</code>, 所以我们直接将当前的 <code>0.1.3</code> 版本降为 <code>0.1.2</code> 版本<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get  github.com/benmanns/goworker@v0.1.2</span><br></pre></td></tr></table></figure></p>
+<p>语法很简单，后面跟上具体的版本，如果比当前使用的版本低，就是降级，如果比当前使用的版本高，那么就是升级，所以现在就是降级:</p>
+<p><img src="/2020/02/20/go-module/17.png" alt="png"></p>
+<p>可以看到下载完成了。 而且可以看到 <code>go.mod</code> 文件变了， 由 <code>0.1.3</code> 变成 <code>0.1.2</code> 了:</p>
+<p><img src="/2020/02/20/go-module/18.png" alt="png"></p>
+<p>而且 <code>go.sum</code> 也变了，增加了 <code>0.1.2</code> 的校验信息:</p>
+<p><img src="/2020/02/20/go-module/19.png" alt="png"></p>
+<p>但是我们还注意一个细节，就是他并没有像 <code>go.mod</code> 那样把 <code>0.1.3</code> 的信息覆盖掉，而是新增条目，<code>0.1.3</code> 的校验信息还在。 对于这种情况，我们可以通过执行:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go mod tidy</span><br></pre></td></tr></table></figure></p>
+<p>来清除多余的条目。</p>
+<p><img src="/2020/02/20/go-module/20.png" alt="png"></p>
+<p>这时候就可以看到 <code>0.1.3</code> 在 <code>go.sum</code> 的那两条就不见了。 接下来我们看下构建是否正常:</p>
+<p><img src="/2020/02/20/go-module/21.png" alt="png"></p>
+<p>这边构建失败了，说明确实是 <code>0.1.2</code> 版本，因为旧版本因为少了两个引用的参数，导致会报错。 </p>
+<p>接下来我们看下 <code>/go/pkg/mod</code> 里面是不是这两个版本的代码都有呢？</p>
+<p><img src="/2020/02/20/go-module/22.png" alt="png"></p>
+<p>可以看到 <code>0.1.2</code> 和 <code>0.1.3</code> 的版本都有。所以我们后面要用哪个版本，直接通过 <code>go mod</code> 来进行调整即可。也就是说，只要我们想要重新更新为 <code>0.1.3</code>, 只要执行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get  github.com/benmanns/goworker@v0.1.3</span><br></pre></td></tr></table></figure></p>
+<p>这样就升级上来了。</p>
+<h2 id="更新依赖"><a href="#更新依赖" class="headerlink" title="更新依赖"></a>更新依赖</h2><p>除了升级和降级之后，我们还可以用更新的方式，来更新依赖。比如我再把他降到  <code>0.1.2</code>, 然后通过:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get -u github.com/benmanns/goworker</span><br></pre></td></tr></table></figure></p>
+<p>升级到最新版。最新版就是 <code>0.1.3</code>:</p>
+<p><img src="/2020/02/20/go-module/23.png" alt="png"></p>
+<p>可以看到先降级到 <code>0.1.2</code>， 然后通过 <code>go get -u</code> 又升级到最新版了。</p>
+<p>如果仅仅要升级<code>patch</code>号，而不升级<code>minor</code>号，可以使用<code>go get -u=patch A</code> 。比如：如果<code>golang.org/x/text</code>有<code>v0.1.1</code>版本，那么<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get -u=patch golang.org/x/text</span><br></pre></td></tr></table></figure></p>
+<p>会将<code>go.mod</code>中的<code>text</code>后面的版本号变为<code>v0.1.1</code>，而不是<code>v0.3.0</code>。</p>
+<p>如果<code>go get</code>后面不接具体<code>package</code>，则<code>go get</code>仅针对于<code>main package</code>。处于<code>module-aware</code>工作模式下的<code>go get</code>更新某个依赖(无论是升版本还是降版本)时，会自动计算并更新其间接依赖的包的版本。</p>
+<h2 id="verify-校验"><a href="#verify-校验" class="headerlink" title="verify 校验"></a>verify 校验</h2><p><code>go.sum</code> 记录每个依赖库的版本和对应的内容的校验和(一个哈希值)。每当增加一个依赖项时，如果<code>go.sum</code>中没有，则会将该依赖项的版本和内容校验和添加到<code>go.sum</code>中。go命令会使用这些校验和与缓存在本地的依赖包副本元信息(比如：<code>$GOPATH/pkg/mod/cache/download/golang.org/x/text/@v</code> 下面的<code>v0.3.0.ziphash</code>)进行比对校验。如果我修改了<code>$GOPATH/pkg/mod/cache/download/golang.org/x/text/@v/v0.3.0.ziphash</code> 中的值，那么当我执行下面<code>verify</code> 命令时会报错。</p>
+<p>当然正常情况下，执行是没问题的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@xxxxxx:/go/src/go_learn_demo/goworker# go mod verify</span><br><span class="line">all modules verified</span><br></pre></td></tr></table></figure></p>
+<p>但是一旦我将某一个改了,将上面的斜杠去掉， 就会报错:</p>
+<p><img src="/2020/02/20/go-module/24.png" alt="png"></p>
+<p><img src="/2020/02/20/go-module/25.png" alt="png"></p>
+<p>补上之后，就又正常了。</p>
+<h2 id="replace-语法"><a href="#replace-语法" class="headerlink" title="replace 语法"></a>replace 语法</h2><p><code>Go Module</code> 对大陆 Gopher 的一个不友好的方式就是获取某些第三方包的时候，会被墙，这其中最常见的就是<code>golang.org/x</code>下面的各种优秀的包。但是在传统的<code>GOPATH mode</code>下，我们可以先从<code>golang.org/x/xxx</code>的<code>mirror</code>站点<code>github.com/golang/xxx</code>上<code>git clone</code>这些包，然后将其重命名为<code>golang.org/x/xxx</code>。这样也能勉强通过开发者本地的编译。又或将这些包放入<code>vendor</code>目录并提交到<code>repo</code> 中，也能实现正确的构建。</p>
+<p>但是<code>go module</code>引入后，一旦工作在<code>module-aware mode</code>下，<code>go build</code>将不 care GOPATH 下或是 vendor 下的包，而是到 <code>GOPATH/pkg/mod</code> 查询是否有<code>module</code>的<code>cache</code>，如果没有，则会去下载某个版本的<code>module</code>，而对于<code>golang.org/x/xxx</code>下面的<code>module</code>，在大陆地区往往会<code>get</code>失败。</p>
+<p>当然一种常见的情况就是通过 replace 语法，将这个包指向另一个包，最后编译的时候，其实编译的就是指向的包。 但是代码可以不用改。这时候就可以解决下载不了的情况。因为你可以到 <code>github.com/golang/xxx</code> 把包下载下来，然后将 <code>golang.org/x/xxx</code> 用 replace 指向过去，就可以了。代码都不用改。 当然如果遇到被墙的情况，最好就直接配置 <code>go proxy</code>,  你可以这样配置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export GOPROXY=https://goproxy.io</span><br></pre></td></tr></table></figure></p>
+<p>这样就不用担心被墙了。</p>
+<p>另外一种用 replace 的场景就是，如果有一些包本地还有，但是网上已经被迁移了，会导致找不到，这时候在不改代码的情况下，可以将这个包用 replace 语法指向这个包新的地址。 </p>
+<p>为了演示 replace 这个语法，我举个例子:<br>比如 <code>benmanns/goworker</code> 并没有下载下来，或者是说我们有对这个进行了修改。首先我把这个项目进行了 <code>fork</code> 了。这样子地址就是 <a href="https://github.com/kebingzao/goworker" target="_blank" rel="noopener">https://github.com/kebingzao/goworker</a> ，接下来我不直接对代码进行修改，而是将这个第三方库的资源换成我 <code>fork</code> 过来的这个地址。 (而且要说明的是，为了让效果有变化，我 fork 的版本其实是有问题的 <code>0.1.2</code> 的版本)。</p>
+<p>原来的 <code>go.mod</code> 长这样子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">module goworker</span><br><span class="line"></span><br><span class="line">go 1.13</span><br><span class="line"></span><br><span class="line">require (</span><br><span class="line">    github.com/benmanns/goworker v0.1.3</span><br><span class="line">    github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect</span><br><span class="line">    github.com/garyburd/redigo v1.6.0 // indirect</span><br><span class="line">    github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect</span><br><span class="line">    github.com/youtube/vitess v2.1.1+incompatible // indirect</span><br><span class="line">    golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect</span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<p>看一下语法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go mod edit -replace=old[@v]=new[@v]</span><br></pre></td></tr></table></figure></p>
+<p>我们执行这个试下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go mod edit -replace=github.com/benmanns/goworker@v0.1.3=github.com/kebingzao/goworker</span><br></pre></td></tr></table></figure></p>
+<p>发现报错了:</p>
+<p><img src="/2020/02/20/go-module/26.png" alt="png"></p>
+<p>可以看到报错了。这个是说明 <code>github.com/kebingzao/goworker</code> 这个必须的是本地下载的资源才行。所以我们要下载一下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get github.com/kebingzao/goworker</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2020/02/20/go-module/27.png" alt="png"></p>
+<p>可以看到已经下载下来了。 而且 <code>go.mod</code> 也变了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">module goworker</span><br><span class="line"></span><br><span class="line">go 1.13</span><br><span class="line"></span><br><span class="line">require (</span><br><span class="line">    github.com/benmanns/goworker v0.1.3</span><br><span class="line">    github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect</span><br><span class="line">    github.com/garyburd/redigo v1.6.0 // indirect</span><br><span class="line">    github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect</span><br><span class="line">    github.com/kebingzao/goworker v0.1.2 // indirect   &lt;----这一行</span><br><span class="line">    github.com/youtube/vitess v2.1.1+incompatible // indirect</span><br><span class="line">    golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect</span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
+<p>多了这一行，而且版本是我们 <code>fork</code> 的版本，就是 <code>0.1.2</code> 这个旧版，但是其实这个第三方包并没有被我们这个项目所依赖，我们可以用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go mod why  -m  github.com/kebingzao/goworker</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2020/02/20/go-module/28.png" alt="png"></p>
+<p>可以看到这个模块其实并没有被依赖。这时候如果我们执行 <code>go mod tidy</code> 指令的话，<code>go.mod</code> 和 <code>go.sum</code> 就会把不需要的依赖记录清理掉。 但是因为等下我们要替换，所以就先不执行了。</p>
+<p>接下来继续替换:</p>
+<p><img src="/2020/02/20/go-module/29.png" alt="png"></p>
+<p>还是报这个错误，很显然后面要跟上具体的版本, 所以改成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go mod edit -replace=github.com/benmanns/goworker@v0.1.3=github.com/kebingzao/goworker@v0.1.2</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2020/02/20/go-module/30.png" alt="png"></p>
+<p>这样子就替换成功了。 我们可以看到 <code>go.mod</code> 也变了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">module goworker</span><br><span class="line"></span><br><span class="line">go 1.13</span><br><span class="line"></span><br><span class="line">require (</span><br><span class="line">    github.com/benmanns/goworker v0.1.3</span><br><span class="line">    github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect</span><br><span class="line">    github.com/garyburd/redigo v1.6.0 // indirect</span><br><span class="line">    github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect</span><br><span class="line">    github.com/kebingzao/goworker v0.1.2 // indirect</span><br><span class="line">    github.com/youtube/vitess v2.1.1+incompatible // indirect</span><br><span class="line">    golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">replace github.com/benmanns/goworker v0.1.3 =&gt; github.com/kebingzao/goworker v0.1.2</span><br></pre></td></tr></table></figure></p>
+<p>可以看到多了一行 replace 记录。也就是虽然代码没有变。但是引入的 <code>goworker</code> 库已经变成我 <code>fork</code> 的这个 <code>0.1.2</code> 版本了。 这时候如果 <code>build</code> 失败。说明确实是用的我 <code>fork</code> 的库。因为 <code>0.1.2</code> 版本构建的时候，会报错:</p>
+<p><img src="/2020/02/20/go-module/31.png" alt="png"></p>
+<p>可以看到 build 的时候，报错了，但是这个错误非常奇怪：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go: github.com/kebingzao/goworker@v0.1.2 used for two different module paths (github.com/benmanns/goworker and github.com/kebingzao/goworker)</span><br></pre></td></tr></table></figure></p>
+<p>看起来是因为 <code>go.mod</code> 有两个不同的 <code>kebingzao/goworker</code> 的路径导致的。所以我用 <code>go mod tidy</code> 清理了一下。 所以 <code>go.mod</code> 就变成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">module goworker</span><br><span class="line"></span><br><span class="line">go 1.13</span><br><span class="line"></span><br><span class="line">require (</span><br><span class="line">    github.com/benmanns/goworker v0.1.3</span><br><span class="line">    github.com/cihub/seelog v0.0.0-20170130134532-f561c5e57575 // indirect</span><br><span class="line">    github.com/garyburd/redigo v1.6.0 // indirect</span><br><span class="line">    github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect</span><br><span class="line">    github.com/youtube/vitess v2.1.1+incompatible // indirect</span><br><span class="line">    golang.org/x/net v0.0.0-20200202094626-16171245cfb2 // indirect</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">replace github.com/benmanns/goworker v0.1.3 =&gt; github.com/kebingzao/goworker v0.1.2</span><br></pre></td></tr></table></figure></p>
+<p>可以看到原先在 <code>require</code> 中的这一条<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">github.com/kebingzao/goworker v0.1.2 // indirect</span><br></pre></td></tr></table></figure></p>
+<p>已经清掉了。接下来再进行 <code>go build</code>，就可以看到，这下子真的报参数错误。所以确实用的是我 <code>fork</code> 的 <code>0.1.2</code> 版本。这样就没问题了。 所以以上的方式总结一下就是:<br>这里有几点要注意：</p>
+<ul>
+<li><code>replace</code>应该在引入新的依赖后立即执行，以免<code>go tools</code>自动更新<code>mod</code>文件时使用了<code>old package</code>导致可能的失败</li>
+<li><code>package</code>后面的<code>version</code>不可省略。（<code>edit</code>所有操作都需要版本<code>tag</code>）</li>
+</ul>
+<p>基于以上原因，我们替换一个package的步骤应该是这样的：</p>
+<ol>
+<li>首先<code>go get new-package</code>（如果你知道package的版本tag，那么这一步其实可以省略，如果想使用最新的版本而不想确认版本号，则需要这一步）</li>
+<li>然后查看<code>go.mod</code>，手动复制<code>new-package</code>的版本号（如果你知道版本号，则跳过，这一步十分得不人性化，也许以后会改进）</li>
+<li>接着<code>go mod tidy</code>或者<code>go build</code>或者使用其他的<code>go tools</code>，他们会去获取<code>new-package</code>然后替换掉<code>old-package</code></li>
+<li>最后，在你的代码里直接使用<code>old-package</code>的名字，<code>golang</code>会自动识别出<code>replace</code>，然后实际你的程序将会使用<code>new-package</code>，替换成功</li>
+</ol>
+<p>如果我不想要 <code>replace</code> 了，那么怎么办？？ 一个简单的方式，就是直接在 <code>go.mod</code> 将这个 <code>replace</code> 的引用这一行去掉。 然后重新执行 <code>go build</code> 看下</p>
+<p><img src="/2020/02/20/go-module/32.png" alt="png"></p>
+<p>可以看到这种方式是可行的。 而且编译是没问题的。不过要注意一点的是，我们只去掉了 <code>go.mod</code> 里面的 <code>replace</code> ， 但是 <code>go.sum</code> 里面还保留这个 <code>github.com/kebingzao/goworker v0.1.2</code> 这个版本的校验， 所以我们还要再执行一下 <code>go mod tidy</code> 来清掉这些信息。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>基本上关于 <code>Go Module</code> 的使用就这样了。不过我后面还遇到一个新的情况，就是在 docker 里面使用 Go Module 下载内部库遇到的问题。这个后面会说。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/02/20/go-module/" title="初试 Go Module">http://kebingzao.com/2020/02/20/go-module/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/16/air-ui-17/" rel="next" title="自建vue组件 air-ui (17) -- 开发爬坑篇以及总结">
+                <i class="fa fa-chevron-left"></i> 自建vue组件 air-ui (17) -- 开发爬坑篇以及总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">182</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#环境搭起来"><span class="nav-number">2.</span> <span class="nav-text">环境搭起来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化-go-mod"><span class="nav-number">3.</span> <span class="nav-text">初始化 go mod</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#go-mod-的依赖存放位置"><span class="nav-number">4.</span> <span class="nav-text">go mod 的依赖存放位置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#go-mod-的升级和降级"><span class="nav-number">5.</span> <span class="nav-text">go mod 的升级和降级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新依赖"><span class="nav-number">6.</span> <span class="nav-text">更新依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#verify-校验"><span class="nav-number">7.</span> <span class="nav-text">verify 校验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#replace-语法"><span class="nav-number">8.</span> <span class="nav-text">replace 语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/02/20/go-module/';
+          this.page.identifier = '2020/02/20/go-module/';
+          this.page.title = '初试 Go Module';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

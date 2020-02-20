@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,浏览器插件,Chrome 插件,Firefox 插件,Safari 插件," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知 我们知道在收到文本消息，或者文件消息的时候，这时候会有一个回复操作。点击，就会弹出一个回复小窗口">
+<meta name="keywords" content="js,浏览器插件,Chrome 插件,Firefox 插件,Safari 插件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">
+<meta property="og:url" content="http://kebingzao.com/2019/11/25/browser-extension-14/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知 我们知道在收到文本消息，或者文件消息的时候，这时候会有一个回复操作。点击，就会弹出一个回复小窗口">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-14/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-14/2.png">
+<meta property="og:updated_time" content="2020-02-20T16:35:39.070Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">
+<meta name="twitter:description" content="前言通过 浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知 我们知道在收到文本消息，或者文件消息的时候，这时候会有一个回复操作。点击，就会弹出一个回复小窗口">
+<meta name="twitter:image" content="http://kebingzao.com/2019/11/25/browser-extension-14/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/11/25/browser-extension-14/"/>
+
+
+
+
+
+  <title>浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/11/25/browser-extension-14/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-25T13:28:14+08:00">
+                2019-11-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/浏览器-extension-插件开发系列/" itemprop="url" rel="index">
+                    <span itemprop="name">浏览器 extension 插件开发系列</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/25/browser-extension-14/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/11/25/browser-extension-14/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/11/25/browser-extension-14/" class="leancloud_visitors" data-flag-title="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2019/11/25/browser-extension-13/" title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知</a> 我们知道在收到文本消息，或者文件消息的时候，这时候会有一个回复操作。点击，就会弹出一个回复小窗口</p>
+<p><img src="/2019/11/25/browser-extension-14/1.png" alt="png"><br><a id="more"></a><br><img src="/2019/11/25/browser-extension-14/2.png" alt="png"></p>
+<p>然后输入要回复的消息，按<code>enter</code>直接回复。 所以我们要在打开这个<code>reply</code>窗体的时候，还要把这一条消息的内容传过去。 接下来我们讲讲怎么实现这个过程。</p>
+<h2 id="打开-reply-页面"><a href="#打开-reply-页面" class="headerlink" title="打开 reply 页面"></a>打开 reply 页面</h2><p>打开回复窗口的代码在 <code>notificationsManage.js</code> 中:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 打开回复窗口</span></span><br><span class="line">openQuickReply: <span class="function"><span class="keyword">function</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 打开回复窗口</span></span><br><span class="line">    <span class="keyword">var</span> spec = &#123;</span><br><span class="line">        <span class="string">'url'</span>: <span class="string">'reply.html?webuid='</span> + obj.webuid,</span><br><span class="line">        <span class="string">'width'</span>: <span class="number">320</span>,</span><br><span class="line">        <span class="string">'height'</span>: <span class="number">420</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> lastScreenX = Airdroid.Util.LocalStorage.getLocalStorageItem(<span class="string">'quickReplyScreenX'</span>);</span><br><span class="line">    <span class="keyword">var</span> lastScreenY = Airdroid.Util.LocalStorage.getLocalStorageItem(<span class="string">'quickReplyScreenY'</span>);</span><br><span class="line">    <span class="keyword">if</span> (lastScreenX &amp;&amp; lastScreenY) &#123;</span><br><span class="line">        spec.top = <span class="built_in">parseInt</span>(lastScreenY);</span><br><span class="line">        spec.left = <span class="built_in">parseInt</span>(lastScreenX);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        spec.top = <span class="built_in">Math</span>.floor((<span class="built_in">window</span>.screen.availHeight / <span class="number">2</span>) - (spec.height / <span class="number">2</span>)) - <span class="number">100</span>;</span><br><span class="line">        spec.left = <span class="built_in">Math</span>.floor((<span class="built_in">window</span>.screen.availWidth / <span class="number">2</span>) - (spec.width / <span class="number">2</span>)) + <span class="number">100</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">window</span>.chrome) &#123;</span><br><span class="line">        spec.type = <span class="string">'popup'</span>;</span><br><span class="line">        spec.focused = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> listener = <span class="function"><span class="keyword">function</span>(<span class="params">message, sender, sendResponse</span>) </span>&#123;</span><br><span class="line">            chrome.runtime.onMessage.removeListener(listener);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (message.webuid == obj.webuid) &#123;</span><br><span class="line">                sendResponse(obj);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        chrome.runtime.onMessage.addListener(listener);</span><br><span class="line"></span><br><span class="line">        chrome.windows.create(spec, <span class="function"><span class="keyword">function</span>(<span class="params">window</span>) </span>&#123;</span><br><span class="line">            chrome.windows.update(<span class="built_in">window</span>.id, &#123; <span class="string">'focused'</span>: <span class="literal">true</span> &#125;, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">window</span>.safari) &#123;</span><br><span class="line">        <span class="keyword">var</span> listener = <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (e.name == <span class="string">'request_conversation_push'</span>) &#123;</span><br><span class="line">                <span class="comment">// 这边要去掉里面的数组</span></span><br><span class="line">                <span class="keyword">delete</span> obj.buttons;</span><br><span class="line">                <span class="built_in">console</span>.log(<span class="string">"接受其他页面的数据请求==&gt;"</span> + <span class="built_in">JSON</span>.stringify(obj));</span><br><span class="line">                e.target.page.dispatchMessage(<span class="string">'conversation_push'</span>, <span class="built_in">JSON</span>.stringify(obj));</span><br><span class="line">                safari.application.removeEventListener(<span class="string">'message'</span>, listener, <span class="literal">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        safari.application.addEventListener(<span class="string">'message'</span>, listener, <span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> w = safari.application.openBrowserWindow();</span><br><span class="line">        w.activeTab.url = safari.extension.baseURI + spec.url + <span class="string">'&amp;width='</span> + spec.width + <span class="string">'&amp;height='</span> + spec.height;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        spec.notification = obj;</span><br><span class="line">        <span class="comment">// firefox</span></span><br><span class="line">        Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.open_quickreply, spec);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>可以看到不同浏览器的打开处理方式又是不一样的。这个稍后分析，反正实现的效果肯定是一样。 当打开 <code>reply.html</code> 这个页面之后，接下来就进行一些逻辑操作，主要是在 <code>reply.js</code> 上:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"start reply"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">getUrlParam</span> (<span class="params">key, url</span>) </span>&#123;</span><br><span class="line">        key = key</span><br><span class="line">                .replace(<span class="regexp">/[\[]/</span>, <span class="string">"\\\["</span>)</span><br><span class="line">                .replace(<span class="regexp">/[\]]/</span>, <span class="string">"\\\]"</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">var</span> r = <span class="keyword">new</span> <span class="built_in">RegExp</span>(<span class="string">"[\\?&amp;]"</span> + key + <span class="string">"=([^&amp;#]*)"</span>);</span><br><span class="line">        <span class="keyword">var</span> values = r.exec(url || <span class="built_in">window</span>.location.href);</span><br><span class="line">        <span class="keyword">return</span> values == <span class="literal">null</span> ? <span class="string">""</span> : <span class="built_in">decodeURIComponent</span>(values[<span class="number">1</span>]);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(getUrlParam(<span class="string">"height"</span>))&#123;</span><br><span class="line">        <span class="built_in">window</span>.resizeTo(<span class="built_in">parseInt</span>(getUrlParam(<span class="string">"width"</span>)), <span class="built_in">parseInt</span>(getUrlParam(<span class="string">"height"</span>)));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 主程序</span></span><br><span class="line">    <span class="keyword">var</span> Reply = BasePage.extend(&#123;</span><br><span class="line">        <span class="comment">// 绑定事件</span></span><br><span class="line">        events: &#123;</span><br><span class="line">            <span class="string">"keydown #reply"</span>: <span class="string">"replyHandle"</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 初始化程序</span></span><br><span class="line">        afterInit: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">            $(<span class="string">"body"</span>).prepend(<span class="keyword">new</span> Tpl(<span class="string">'reply/reply'</span>).render());</span><br><span class="line">            <span class="comment">// 获取消息的id</span></span><br><span class="line">            <span class="keyword">var</span> webuid = getUrlParam(<span class="string">"webuid"</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">window</span>.chrome) &#123;</span><br><span class="line">                chrome.runtime.sendMessage(&#123; <span class="string">'webuid'</span>: webuid &#125;, <span class="function"><span class="keyword">function</span>(<span class="params">response</span>) </span>&#123;</span><br><span class="line">                    self.render(response);</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">window</span>.safari) &#123;</span><br><span class="line">                <span class="keyword">var</span> listener = <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">if</span> (e.name == <span class="string">'conversation_push'</span>) &#123;</span><br><span class="line">                        self.render(<span class="built_in">JSON</span>.parse(e.message));</span><br><span class="line">                        safari.self.removeEventListener(<span class="string">'message'</span>, listener, <span class="literal">false</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;;</span><br><span class="line">                safari.self.addEventListener(<span class="string">'message'</span>, listener, <span class="literal">false</span>);</span><br><span class="line">                safari.self.tab.dispatchMessage(<span class="string">'request_conversation_push'</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// 触发请求数据事件</span></span><br><span class="line">                self.eventObj.emit(<span class="string">'request_conversation_push'</span>);</span><br><span class="line">                self.eventObj.on(<span class="string">'conversation_push'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">push</span>) </span>&#123;</span><br><span class="line">                    self.render(push);</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 渲染界面</span></span><br><span class="line">        render: <span class="function"><span class="keyword">function</span>(<span class="params">obj</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.options = obj;</span><br><span class="line">            <span class="built_in">document</span>.getElementById(<span class="string">'container'</span>).style.display = <span class="string">'block'</span>;</span><br><span class="line"></span><br><span class="line">            <span class="built_in">document</span>.getElementById(<span class="string">'title'</span>).textContent = obj.title;</span><br><span class="line">            <span class="built_in">document</span>.getElementById(<span class="string">'desc'</span>).textContent = <span class="string">'Via AirDroid'</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> message = <span class="built_in">document</span>.getElementById(<span class="string">'message'</span>);</span><br><span class="line">            message.textContent = obj.message;</span><br><span class="line">            message.scrollTop = message.scrollHeight;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> heightNeeded = <span class="built_in">document</span>.getElementById(<span class="string">'container'</span>).offsetHeight - <span class="built_in">window</span>.innerHeight;</span><br><span class="line">            <span class="built_in">window</span>.resizeBy(<span class="number">0</span>, heightNeeded);</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 回复操作</span></span><br><span class="line">        replyHandle: <span class="function"><span class="keyword">function</span>(<span class="params">e</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">            <span class="keyword">if</span> (e.keyCode == <span class="number">13</span> &amp;&amp; !e.shiftKey) &#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">document</span>.getElementById(<span class="string">'reply'</span>).value.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">var</span> msg = <span class="built_in">document</span>.getElementById(<span class="string">'reply'</span>).value;</span><br><span class="line">                    <span class="keyword">var</span> cb = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                        setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                            <span class="keyword">if</span>(<span class="built_in">window</span>.chrome || <span class="built_in">window</span>.safari)&#123;</span><br><span class="line">                                <span class="built_in">window</span>.close();</span><br><span class="line">                            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                                <span class="comment">// 关闭窗口</span></span><br><span class="line">                                self.eventObj.emit(<span class="string">"close"</span>);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;, <span class="number">120</span>);</span><br><span class="line">                    &#125;;</span><br><span class="line">                    <span class="keyword">if</span>(<span class="keyword">this</span>.options.pushType == self.Airdroid.PUSH_TYPE.NOTIFICATION)&#123;</span><br><span class="line">                        <span class="comment">// 发送信息</span></span><br><span class="line">                        self.server.sendIMMsg(<span class="keyword">this</span>.options, msg).done(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                            cb();</span><br><span class="line">                        &#125;);</span><br><span class="line">                    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                        <span class="comment">// 发送信息</span></span><br><span class="line">                        self.server.sendNotePushMsg(msg, <span class="keyword">this</span>.options.deviceId).done(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                            cb();</span><br><span class="line">                        &#125;);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    Reply.init();</span><br><span class="line">    <span class="comment">// 关掉的时候，释放资源</span></span><br><span class="line">    <span class="built_in">window</span>.onunload = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;;</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure></p>
+<p>其实逻辑非常简单，除了渲染页面之外，就只有一个回复操作的监听。</p>
+<h2 id="Chrome-打开小窗口并请求数据"><a href="#Chrome-打开小窗口并请求数据" class="headerlink" title="Chrome 打开小窗口并请求数据"></a>Chrome 打开小窗口并请求数据</h2><p>对于<code>Chrome</code> 来说，打开一个新窗口直接用 <code>chrome.windows.create</code>。 然后在背景页开启一个监听，如果过来的<code>webuid</code>一样，就把消息内容传过去, 这样就可以在 <code>reply</code> 页面初始化的时候，请求数据的时候，背景页就可以将一些内容传过去了:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> listener = <span class="function"><span class="keyword">function</span>(<span class="params">message, sender, sendResponse</span>) </span>&#123;</span><br><span class="line">    chrome.runtime.onMessage.removeListener(listener);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (message.webuid == obj.webuid) &#123;</span><br><span class="line">        sendResponse(obj);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">chrome.runtime.onMessage.addListener(listener);</span><br></pre></td></tr></table></figure></p>
+<p>然后在 <code>reply.js</code> 初始化完成之后，就开始请求数据:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">chrome.runtime.sendMessage(&#123; <span class="string">'webuid'</span>: webuid &#125;, <span class="function"><span class="keyword">function</span>(<span class="params">response</span>) </span>&#123;</span><br><span class="line">    self.render(response);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h2 id="Safari-打开小窗口并请求数据"><a href="#Safari-打开小窗口并请求数据" class="headerlink" title="Safari 打开小窗口并请求数据"></a>Safari 打开小窗口并请求数据</h2><p>对于<code>Safari</code>来说，调用<code>safari.application.openBrowserWindow()</code> 来开一个新窗口，然后触发<code>request_conversation_push</code>并监听<code>conversation_push</code> 从而实现数据交换，所以在背景页是这样子的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> listener = <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (e.name == <span class="string">'request_conversation_push'</span>) &#123;</span><br><span class="line">        <span class="comment">// 这边要去掉里面的数组</span></span><br><span class="line">        <span class="keyword">delete</span> obj.buttons;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"接受其他页面的数据请求==&gt;"</span> + <span class="built_in">JSON</span>.stringify(obj));</span><br><span class="line">        e.target.page.dispatchMessage(<span class="string">'conversation_push'</span>, <span class="built_in">JSON</span>.stringify(obj));</span><br><span class="line">        safari.application.removeEventListener(<span class="string">'message'</span>, listener, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">safari.application.addEventListener(<span class="string">'message'</span>, listener, <span class="literal">false</span>);</span><br></pre></td></tr></table></figure></p>
+<p>然后前端页面在初始化之后，直接触发<code>request_conversation_push</code>来像背景页请求数据,并且通过监听<code>conversation_push</code>来得到背景页返回的数据:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> listener = <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (e.name == <span class="string">'conversation_push'</span>) &#123;</span><br><span class="line">        self.render(<span class="built_in">JSON</span>.parse(e.message));</span><br><span class="line">        safari.self.removeEventListener(<span class="string">'message'</span>, listener, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line">safari.self.addEventListener(<span class="string">'message'</span>, listener, <span class="literal">false</span>);</span><br><span class="line">safari.self.tab.dispatchMessage(<span class="string">'request_conversation_push'</span>);</span><br></pre></td></tr></table></figure></p>
+<h2 id="Firefox-打开小窗口并请求数据"><a href="#Firefox-打开小窗口并请求数据" class="headerlink" title="Firefox 打开小窗口并请求数据"></a>Firefox 打开小窗口并请求数据</h2><p>对于<code>Firefox</code>来说，打开窗口也是在中转页面（<code>main.js</code>）进行的<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.open_quickreply, spec);</span><br></pre></td></tr></table></figure></p>
+<p>具体代码如下:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 打开快速回复窗口</span></span><br><span class="line"><span class="comment">// http://stackoverflow.com/questions/22002010/addon-sdk-way-to-make-a-dialog</span></span><br><span class="line">page.port.on(<span class="string">'open_quickreply'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> info = data.detail;</span><br><span class="line">    <span class="keyword">var</span> url = info.url;</span><br><span class="line">    <span class="keyword">if</span> (url.indexOf(<span class="string">'http'</span>) == <span class="number">-1</span>) &#123;</span><br><span class="line">        url = self.data.url(url);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> size = <span class="string">''</span>;</span><br><span class="line">    <span class="keyword">if</span> (info.width &amp;&amp; info.height) &#123;</span><br><span class="line">        size = <span class="string">',width='</span> + info.width + <span class="string">',height='</span> + info.height;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> popup = <span class="built_in">require</span>(<span class="string">'sdk/window/utils'</span>).openDialog(&#123;</span><br><span class="line">        <span class="string">'features'</span>: <span class="built_in">Object</span>.keys(&#123;</span><br><span class="line">            <span class="string">'chrome'</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="string">'centerscreen'</span>: <span class="literal">true</span>,</span><br><span class="line">            <span class="string">'resizable'</span>: <span class="literal">false</span>,</span><br><span class="line">            <span class="string">'scrollbars'</span>: <span class="literal">true</span></span><br><span class="line">        &#125;).join() + size,</span><br><span class="line">        name: info.notification.webuid</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    popup.addEventListener(<span class="string">'load'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        tabs.activeTab.on(<span class="string">'ready'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">tab</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> worker = tab.attach(&#123;</span><br><span class="line">                <span class="string">'contentScriptFile'</span>: [</span><br><span class="line">                    self.data.url(<span class="string">'js/lib/jquery/jquery.js'</span>),</span><br><span class="line">                    self.data.url(<span class="string">'js/lib/jquery/jquery.toast.js'</span>),</span><br><span class="line">                    self.data.url(<span class="string">'js/lib/underscore/underscore.js'</span>),</span><br><span class="line">                    self.data.url(<span class="string">'js/util/tplHelper.js'</span>),</span><br><span class="line">                    self.data.url(<span class="string">'js/web/base.js'</span>),</span><br><span class="line">                    self.data.url(<span class="string">'js/web/reply.js'</span>)</span><br><span class="line">                ]</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            attachListeners(worker);</span><br><span class="line">            <span class="comment">// 请求对应的数据</span></span><br><span class="line">            worker.port.on(<span class="string">'request_conversation_push'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">                worker.port.emit(<span class="string">'conversation_push'</span>, info.notification);</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            worker.port.on(<span class="string">'close'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">reply</span>) </span>&#123;</span><br><span class="line">                popup.close();</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        tabs.activeTab.url = url;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这边还要重新加载跟<code>reply.html</code>一样的js文件。 通信方式开始在这个方法里面设置的：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 请求对应的数据</span></span><br><span class="line">worker.port.on(<span class="string">'request_conversation_push'</span>, <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    worker.port.emit(<span class="string">'conversation_push'</span>, info.notification);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">worker.port.on(<span class="string">'close'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">reply</span>) </span>&#123;</span><br><span class="line">    popup.close();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>前端页面只要触发就行了:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">self.eventObj.emit(<span class="string">'request_conversation_push'</span>);</span><br><span class="line">self.eventObj.on(<span class="string">'conversation_push'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">push</span>) </span>&#123;</span><br><span class="line">    self.render(push);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>而 <code>eventObj</code> 就是 <code>Firefox</code> 的 <code>self.port</code>。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本节实现了怎么在各个浏览器打开一个新的窗体页面，并且实现数据交换。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/11/25/browser-extension-1/" title="浏览器 extension 插件开发系列(01) -- 前言和确认需求">浏览器 extension 插件开发系列(01) -- 前言和确认需求</a><br><a href="/2019/11/25/browser-extension-2/" title="浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试">浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-3/" title="浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试">浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-4/" title="浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试">浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试</a><br><a href="/2019/11/25/browser-extension-5/" title="浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书">浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书</a><br><a href="/2019/11/25/browser-extension-6/" title="浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel">浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel</a><br><a href="/2019/11/25/browser-extension-7/" title="浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页">浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页</a><br><a href="/2019/11/25/browser-extension-8/" title="浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化">浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化</a><br><a href="/2019/11/25/browser-extension-9/" title="浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动">浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动</a><br><a href="/2019/11/25/browser-extension-10/" title="浏览器 extension 插件开发系列(10) -- 事件驱动模型">浏览器 extension 插件开发系列(10) -- 事件驱动模型</a><br><a href="/2019/11/25/browser-extension-11/" title="浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)">浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)</a><br><a href="/2019/11/25/browser-extension-12/" title="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息</a><br><a href="/2019/11/25/browser-extension-13/" title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知</a><br><a href="/2019/11/25/browser-extension-14/" title="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口</a><br><a href="/2019/11/25/browser-extension-15/" title="浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）">浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）</a><br><a href="/2019/11/25/browser-extension-16/" title="浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题">浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题</a><br><a href="/2019/11/25/browser-extension-17/" title="浏览器 extension 插件开发系列(17) -- Safari 遇到的问题">浏览器 extension 插件开发系列(17) -- Safari 遇到的问题</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/11/25/browser-extension-14/" title="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">http://kebingzao.com/2019/11/25/browser-extension-14/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/浏览器插件/" rel="tag"># 浏览器插件</a>
+          
+            <a href="/tags/Chrome-插件/" rel="tag"># Chrome 插件</a>
+          
+            <a href="/tags/Firefox-插件/" rel="tag"># Firefox 插件</a>
+          
+            <a href="/tags/Safari-插件/" rel="tag"># Safari 插件</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-13/" rel="next" title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">
+                <i class="fa fa-chevron-left"></i> 浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-15/" rel="prev" title="浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）">
+                浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">182</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#打开-reply-页面"><span class="nav-number">2.</span> <span class="nav-text">打开 reply 页面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Chrome-打开小窗口并请求数据"><span class="nav-number">3.</span> <span class="nav-text">Chrome 打开小窗口并请求数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Safari-打开小窗口并请求数据"><span class="nav-number">4.</span> <span class="nav-text">Safari 打开小窗口并请求数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Firefox-打开小窗口并请求数据"><span class="nav-number">5.</span> <span class="nav-text">Firefox 打开小窗口并请求数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/11/25/browser-extension-14/';
+          this.page.identifier = '2019/11/25/browser-extension-14/';
+          this.page.title = '浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

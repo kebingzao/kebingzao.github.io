@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js,浏览器插件,Chrome 插件,Firefox 插件,Safari 插件," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言在这个插件有一个功能，挺有趣的，就是登陆完之后，就在网页上，右键菜单有一个airdroid的推送选项，通过可以选取文字，图片，网址来推送到手机端。点击之后，就会把这个东西推送到手机端，并且在网页上提示推送成功。 以 Chrome 的截图:  直接在网页空白处点击，将当前网页的网址传送过去">
+<meta name="keywords" content="js,浏览器插件,Chrome 插件,Firefox 插件,Safari 插件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">
+<meta property="og:url" content="http://kebingzao.com/2019/11/25/browser-extension-12/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言在这个插件有一个功能，挺有趣的，就是登陆完之后，就在网页上，右键菜单有一个airdroid的推送选项，通过可以选取文字，图片，网址来推送到手机端。点击之后，就会把这个东西推送到手机端，并且在网页上提示推送成功。 以 Chrome 的截图:  直接在网页空白处点击，将当前网页的网址传送过去">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/1.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/2.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/3.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/4.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/6.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/7.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/8.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/9.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/10.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/11.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/12.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/13.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/14.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/15.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/16.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/17.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/18.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/19.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/5.png">
+<meta property="og:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/20.png">
+<meta property="og:updated_time" content="2020-02-20T16:35:39.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">
+<meta name="twitter:description" content="前言在这个插件有一个功能，挺有趣的，就是登陆完之后，就在网页上，右键菜单有一个airdroid的推送选项，通过可以选取文字，图片，网址来推送到手机端。点击之后，就会把这个东西推送到手机端，并且在网页上提示推送成功。 以 Chrome 的截图:  直接在网页空白处点击，将当前网页的网址传送过去">
+<meta name="twitter:image" content="http://kebingzao.com/2019/11/25/browser-extension-12/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2019/11/25/browser-extension-12/"/>
+
+
+
+
+
+  <title>浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2019/11/25/browser-extension-12/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-25T13:28:12+08:00">
+                2019-11-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/浏览器-extension-插件开发系列/" itemprop="url" rel="index">
+                    <span itemprop="name">浏览器 extension 插件开发系列</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/25/browser-extension-12/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/11/25/browser-extension-12/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/11/25/browser-extension-12/" class="leancloud_visitors" data-flag-title="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在这个插件有一个功能，挺有趣的，就是登陆完之后，就在网页上，右键菜单有一个<code>airdroid的推送选项</code>，通过可以选取文字，图片，网址来推送到手机端。点击之后，就会把这个东西推送到手机端，并且在网页上提示推送成功。 以 <code>Chrome</code> 的截图:</p>
+<ol>
+<li>直接在网页空白处点击，将当前网页的网址传送过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/1.png" alt="png"><br><a id="more"></a></p>
+<ol start="2">
+<li>在图片上点击会把图片的url传过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/2.png" alt="png"></p>
+<ol start="3">
+<li>选择文字，会把所选的文字传过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/3.png" alt="png"></p>
+<ol start="4">
+<li>在链接上右键点击选择，会把链接发过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/4.png" alt="png"></p>
+<ol start="5">
+<li>推送成功，就会在当前的网页中显示的标记</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/5.png" alt="png"></p>
+<ol start="6">
+<li>然后推送到手机上，在手机上的截图就是:</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/6.png" alt="png"></p>
+<p>接下来讲一下这三个浏览器怎么实现右键菜单的情况。其中在 <code>Chrome</code> 还实现了一个给当前页面发送信息的功能(就是上图 <code>Pushed successfully</code> 这个提示)。</p>
+<h2 id="各浏览器实现右键菜单"><a href="#各浏览器实现右键菜单" class="headerlink" title="各浏览器实现右键菜单"></a>各浏览器实现右键菜单</h2><p>在 <code>contextmenus.js</code> 中有定义，完整的代码如下:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化右键推送菜单</span></span><br><span class="line">(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    Airdroid.ContextMenus = &#123;</span><br><span class="line">        _devicesObj: <span class="string">""</span>,</span><br><span class="line">        <span class="comment">// 初始化</span></span><br><span class="line">        init: <span class="function"><span class="keyword">function</span>(<span class="params">deviceObjList</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">            <span class="keyword">this</span>._devicesObj = deviceObjList;</span><br><span class="line">            <span class="keyword">if</span>(<span class="built_in">window</span>.chrome)&#123;</span><br><span class="line"></span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(<span class="built_in">window</span>.safari)&#123;</span><br><span class="line"></span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">// firefox 桌面右键快捷菜单点击项</span></span><br><span class="line">                Airdroid.Event.addEventListener(Airdroid.Event.FireFoxEvent.context_menu_item_clicked, <span class="function"><span class="keyword">function</span>(<span class="params">info</span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">var</span> msg = <span class="string">""</span>;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">var</span> message = info.message;</span><br><span class="line">                    <span class="keyword">if</span> (message.url) &#123;</span><br><span class="line">                        msg = message.url;</span><br><span class="line">                    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (message.selection) &#123;</span><br><span class="line">                        msg = message.selection;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="comment">// 最后推送</span></span><br><span class="line">                    self.sendPush(msg, info.entry.id);</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 更新右键菜单</span></span><br><span class="line">            <span class="keyword">this</span>.updateContextMenu();</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 移除右键菜单</span></span><br><span class="line">        removeContextMenu: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">window</span>.safari) &#123;</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">window</span>.chrome) &#123;</span><br><span class="line">                <span class="built_in">window</span>.chrome.contextMenus.removeAll();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 更新右键菜单</span></span><br><span class="line">        updateContextMenu: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="comment">// 根据不同的浏览器来区分</span></span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">window</span>.safari) &#123;</span><br><span class="line">                <span class="keyword">this</span>.setUpSafariMenu();</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">window</span>.chrome) &#123;</span><br><span class="line">                <span class="keyword">this</span>.setUpChromeMenu();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">this</span>.setUpFirefoxMenu();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// safari 桌面右键菜单</span></span><br><span class="line">        setUpSafariMenu: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">            <span class="comment">// 防止多次</span></span><br><span class="line">            <span class="keyword">if</span> (Airdroid.safariListenerAdded) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            Airdroid.safariListenerAdded = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">            safari.application.addEventListener(<span class="string">'contextmenu'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">                <span class="comment">// 显示菜单项</span></span><br><span class="line">                _.each(self._devicesObj, <span class="function"><span class="keyword">function</span>(<span class="params">deviceObj</span>)</span>&#123;</span><br><span class="line">                    e.contextMenu.appendContextMenuItem(<span class="string">'push:'</span> + deviceObj.getId(), <span class="string">'Push to '</span> + deviceObj.getModel());</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;, <span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">            safari.application.addEventListener(<span class="string">'command'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">if</span> (e <span class="keyword">instanceof</span> SafariExtensionContextMenuItemCommandEvent) &#123;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">var</span> device_id = e.target.command.split(<span class="string">':'</span>)[<span class="number">1</span>];</span><br><span class="line">                    <span class="keyword">var</span> msg = <span class="string">''</span>;</span><br><span class="line">                    <span class="keyword">var</span> userInfo = e.userInfo;</span><br><span class="line">                    <span class="keyword">if</span> (userInfo.selection.length &gt; <span class="number">0</span> &amp;&amp; userInfo.tagName != <span class="string">'A'</span>) &#123;</span><br><span class="line">                        msg = userInfo.selection;</span><br><span class="line">                    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (userInfo.src) &#123;</span><br><span class="line">                        msg = userInfo.src;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        msg = userInfo.url;</span><br><span class="line">                    &#125;</span><br><span class="line">                    self.sendPush(msg, device_id);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;, <span class="literal">false</span>);</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// firefox</span></span><br><span class="line">        setUpFirefoxMenu: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">            Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.update_context_menu);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> entries = [];</span><br><span class="line"></span><br><span class="line">            _.each(self._devicesObj, <span class="function"><span class="keyword">function</span>(<span class="params">deviceObj</span>)</span>&#123;</span><br><span class="line">                entries.push(&#123;</span><br><span class="line">                    <span class="string">'type'</span>: <span class="string">'device'</span>,</span><br><span class="line">                    <span class="string">'label'</span>: deviceObj.getModel(),</span><br><span class="line">                    <span class="string">'id'</span>: deviceObj.getId()</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;);</span><br><span class="line">            Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.update_context_menu, entries);</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// chrome</span></span><br><span class="line">        setUpChromeMenu: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">            <span class="comment">// 先清掉之前的</span></span><br><span class="line">            self.removeContextMenu();</span><br><span class="line">            <span class="keyword">var</span> contextMenuItemClicked = <span class="function"><span class="keyword">function</span>(<span class="params">deviceObj, info, tab</span>) </span>&#123;</span><br><span class="line">                <span class="keyword">var</span> msg = <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (info.srcUrl) &#123;</span><br><span class="line">                    msg = info.srcUrl;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (info.linkUrl) &#123;</span><br><span class="line">                    msg = info.linkUrl;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (info.selectionText) &#123;</span><br><span class="line">                    msg = info.selectionText;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    msg = info.pageUrl;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 最后推送</span></span><br><span class="line">                self.sendPush(msg, deviceObj.getId());</span><br><span class="line">            &#125;;</span><br><span class="line">            <span class="comment">// 要抓取的类型</span></span><br><span class="line">            <span class="keyword">var</span> contexts = [<span class="string">'page'</span>, <span class="string">'link'</span>, <span class="string">'selection'</span>, <span class="string">'image'</span>];</span><br><span class="line"></span><br><span class="line">            _.each(self._devicesObj, <span class="function"><span class="keyword">function</span>(<span class="params">deviceObj</span>)</span>&#123;</span><br><span class="line">                <span class="built_in">window</span>.chrome.contextMenus.create(&#123;</span><br><span class="line">                    <span class="string">'title'</span>: deviceObj.getModel(),</span><br><span class="line">                    <span class="string">'contexts'</span>: contexts,</span><br><span class="line">                    <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params">info, tab</span>) </span>&#123;</span><br><span class="line">                        contextMenuItemClicked(deviceObj, info, tab);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;)</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 推送信息</span></span><br><span class="line">        sendPush: <span class="function"><span class="keyword">function</span>(<span class="params">msg, deviceId</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">            Airdroid.Server.sendNotePushMsg(msg, deviceId).done(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                <span class="built_in">console</span>.log(<span class="string">"contextmenu push success"</span>);</span><br><span class="line">                self.showToast(<span class="string">"Pushed successfully"</span>);</span><br><span class="line">            &#125;).fail(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                self.showToast(<span class="string">"Pushed failed"</span>);</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="comment">// 在网页上显示推送结果</span></span><br><span class="line">        showToast: <span class="function"><span class="keyword">function</span> (<span class="params">text</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">window</span>.chrome) &#123;</span><br><span class="line">                <span class="built_in">window</span>.chrome.tabs.query(&#123; <span class="string">'active'</span>: <span class="literal">true</span>, <span class="string">'lastFocusedWindow'</span>: <span class="literal">true</span> &#125;, <span class="function"><span class="keyword">function</span>(<span class="params">tabs</span>) </span>&#123;</span><br><span class="line">                    <span class="keyword">if</span> (tabs &amp;&amp; tabs.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="keyword">var</span> tab = tabs[<span class="number">0</span>];</span><br><span class="line">                        <span class="built_in">console</span>.log(<span class="string">"show page toast"</span>);</span><br><span class="line">                        <span class="built_in">window</span>.chrome.tabs.sendMessage(tab.id, &#123;</span><br><span class="line">                            <span class="string">'type'</span>: <span class="string">'show_toast'</span>,</span><br><span class="line">                            <span class="string">'text'</span>: text</span><br><span class="line">                        &#125;);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure></p>
+<h2 id="Chrome-实现右键菜单功能"><a href="#Chrome-实现右键菜单功能" class="headerlink" title="Chrome 实现右键菜单功能"></a>Chrome 实现右键菜单功能</h2><p>主要是这个函数 <code>window.chrome.contextMenus</code>, 对应的代码是:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// chrome</span></span><br><span class="line">setUpChromeMenu: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="comment">// 先清掉之前的</span></span><br><span class="line">    self.removeContextMenu();</span><br><span class="line">    <span class="keyword">var</span> contextMenuItemClicked = <span class="function"><span class="keyword">function</span>(<span class="params">deviceObj, info, tab</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">var</span> msg = <span class="string">''</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (info.srcUrl) &#123;</span><br><span class="line">            msg = info.srcUrl;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (info.linkUrl) &#123;</span><br><span class="line">            msg = info.linkUrl;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (info.selectionText) &#123;</span><br><span class="line">            msg = info.selectionText;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            msg = info.pageUrl;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 最后推送</span></span><br><span class="line">        self.sendPush(msg, deviceObj.getId());</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="comment">// 要抓取的类型</span></span><br><span class="line">    <span class="keyword">var</span> contexts = [<span class="string">'page'</span>, <span class="string">'link'</span>, <span class="string">'selection'</span>, <span class="string">'image'</span>];</span><br><span class="line"></span><br><span class="line">    _.each(self._devicesObj, <span class="function"><span class="keyword">function</span>(<span class="params">deviceObj</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">window</span>.chrome.contextMenus.create(&#123;</span><br><span class="line">            <span class="string">'title'</span>: deviceObj.getModel(),</span><br><span class="line">            <span class="string">'contexts'</span>: contexts,</span><br><span class="line">            <span class="string">'onclick'</span>: <span class="function"><span class="keyword">function</span>(<span class="params">info, tab</span>) </span>&#123;</span><br><span class="line">                contextMenuItemClicked(deviceObj, info, tab);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>这边可以看到，它有四种类型，对应上面的四张图 (网址，图片，文字， 链接)， 这边还有一个细节。如果<code>create</code> 超过一个的话，就会变成二级菜单的方式:</p>
+<p><img src="/2019/11/25/browser-extension-12/7.png" alt="png"></p>
+<p>如果只有一个的话，就会只有一个设备名:</p>
+<p><img src="/2019/11/25/browser-extension-12/8.png" alt="png"></p>
+<p>同时 <code>manifest.json</code> 要有 <code>contextMenus</code> 的权限</p>
+<p><img src="/2019/11/25/browser-extension-12/9.png" alt="png"></p>
+<h2 id="Safari-实现右键菜单操作"><a href="#Safari-实现右键菜单操作" class="headerlink" title="Safari 实现右键菜单操作"></a>Safari 实现右键菜单操作</h2><p>如果是在 <code>Safari</code> 中，实现右键菜单的功能的效果图如下:</p>
+<ol>
+<li>直接在网页空白处点击，将当前网页的网址传送过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/10.png" alt="png"></p>
+<ol start="2">
+<li>在图片上点击会把图片的url传过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/11.png" alt="png"></p>
+<ol start="3">
+<li>选择文字，会把所选的文字传过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/12.png" alt="png"></p>
+<ol start="4">
+<li>在链接上右键点击选择，会把链接发过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/13.png" alt="png"></p>
+<p>代码片段如下:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// safari 桌面右键菜单</span></span><br><span class="line">setUpSafariMenu: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    <span class="comment">// 防止多次</span></span><br><span class="line">    <span class="keyword">if</span> (Airdroid.safariListenerAdded) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Airdroid.safariListenerAdded = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    safari.application.addEventListener(<span class="string">'contextmenu'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// 显示菜单项</span></span><br><span class="line">        _.each(self._devicesObj, <span class="function"><span class="keyword">function</span>(<span class="params">deviceObj</span>)</span>&#123;</span><br><span class="line">            e.contextMenu.appendContextMenuItem(<span class="string">'push:'</span> + deviceObj.getId(), <span class="string">'Push to '</span> + deviceObj.getModel());</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;, <span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line">    safari.application.addEventListener(<span class="string">'command'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (e <span class="keyword">instanceof</span> SafariExtensionContextMenuItemCommandEvent) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">var</span> device_id = e.target.command.split(<span class="string">':'</span>)[<span class="number">1</span>];</span><br><span class="line">            <span class="keyword">var</span> msg = <span class="string">''</span>;</span><br><span class="line">            <span class="keyword">var</span> userInfo = e.userInfo;</span><br><span class="line">            <span class="keyword">if</span> (userInfo.selection.length &gt; <span class="number">0</span> &amp;&amp; userInfo.tagName != <span class="string">'A'</span>) &#123;</span><br><span class="line">                msg = userInfo.selection;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (userInfo.src) &#123;</span><br><span class="line">                msg = userInfo.src;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                msg = userInfo.url;</span><br><span class="line">            &#125;</span><br><span class="line">            self.sendPush(msg, device_id);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, <span class="literal">false</span>);</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>首先是监听 <code>contextmenu</code> 事件，也就是说，当用户在网页上点击右键的时候，就会将设备列表添加进去。接下来就监听一个事件<code>command</code>，也就是当用户点击右键菜单列表的时候会触发，那么是怎样触发的呢？</p>
+<p>其实这个事件是从网页上传过来的，<code>Safari</code>可以在<code>plist</code>文件里面设置可以在网页上注入的js脚本的文件（这一点跟chrome还有点像）,如果在 <code>Info.plist</code> 文件中，有这一行:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;string&gt;js/sys/safari-end-script.js&lt;<span class="regexp">/string&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>其实就是注入了这个脚本，<code>safari-end-script.js</code>, 内容如下:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.addEventListener(<span class="string">'contextmenu'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> userInfo = &#123;</span><br><span class="line">        <span class="string">'selection'</span>: <span class="built_in">window</span>.getSelection().toString(),</span><br><span class="line">        <span class="string">'tagName'</span>: e.target.tagName</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (e.target.tagName == <span class="string">'IMG'</span>) &#123;</span><br><span class="line">        userInfo.src = e.target.src;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (e.target.tagName == <span class="string">'A'</span>) &#123;</span><br><span class="line">        userInfo.url = e.target.href;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        userInfo.title = <span class="built_in">window</span>.document.title;</span><br><span class="line">        userInfo.url = <span class="built_in">window</span>.location.href;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    safari.self.tab.setContextMenuEventUserInfo(e, userInfo);</span><br><span class="line">&#125;, <span class="literal">false</span>);</span><br></pre></td></tr></table></figure></p>
+<p>也就是如果用户在页面上点击右键菜单的话，就会触发<code>contextmenu</code>，然后传递到背景页，然后在背景页中的监听事件判断这个是由<code>extension</code>生成的菜单点击过来的。</p>
+<p>从调试窗口也可以看出来。</p>
+<p><img src="/2019/11/25/browser-extension-12/14.png" alt="png"></p>
+<h2 id="Firefox-实现右键菜单操作"><a href="#Firefox-实现右键菜单操作" class="headerlink" title="Firefox 实现右键菜单操作"></a>Firefox 实现右键菜单操作</h2><p>效果如下:</p>
+<ol>
+<li>直接在网页空白处点击，将当前网页的网址传送过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/15.png" alt="png"></p>
+<ol start="2">
+<li>选择文字，会把所选的文字传过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/16.png" alt="png"></p>
+<ol start="3">
+<li>在链接上右键点击选择，会把链接发过去</li>
+</ol>
+<p><img src="/2019/11/25/browser-extension-12/17.png" alt="png"></p>
+<p>如果只有一个设备的话，那就是：</p>
+<p><img src="/2019/11/25/browser-extension-12/18.png" alt="png"></p>
+<p>多个设备就是：</p>
+<p><img src="/2019/11/25/browser-extension-12/19.png" alt="png"></p>
+<p>具体代码片段如下:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// firefox</span></span><br><span class="line">setUpFirefoxMenu: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.update_context_menu);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> entries = [];</span><br><span class="line"></span><br><span class="line">    _.each(self._devicesObj, <span class="function"><span class="keyword">function</span>(<span class="params">deviceObj</span>)</span>&#123;</span><br><span class="line">        entries.push(&#123;</span><br><span class="line">            <span class="string">'type'</span>: <span class="string">'device'</span>,</span><br><span class="line">            <span class="string">'label'</span>: deviceObj.getModel(),</span><br><span class="line">            <span class="string">'id'</span>: deviceObj.getId()</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">    Airdroid.Event.dispatchEvent(Airdroid.Event.FireFoxEvent.update_context_menu, entries);</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></p>
+<p>同时在初始化的时候，监听从中转页面过来的右键菜单点击事件：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// firefox 桌面右键快捷菜单点击项</span></span><br><span class="line">Airdroid.Event.addEventListener(Airdroid.Event.FireFoxEvent.context_menu_item_clicked, <span class="function"><span class="keyword">function</span>(<span class="params">info</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> msg = <span class="string">""</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> message = info.message;</span><br><span class="line">    <span class="keyword">if</span> (message.url) &#123;</span><br><span class="line">        msg = message.url;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (message.selection) &#123;</span><br><span class="line">        msg = message.selection;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 最后推送</span></span><br><span class="line">    self.sendPush(msg, info.entry.id);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>而这个<code>update_context_menu</code> 事件其实就是在 中转页面（<code>main.js</code>）操作的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 显示桌面右键菜单</span></span><br><span class="line"><span class="keyword">var</span> menus = [];</span><br><span class="line">page.port.on(<span class="string">'update_context_menu'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> entries = data.detail;</span><br><span class="line">    menus.map(<span class="function"><span class="keyword">function</span>(<span class="params">menu</span>) </span>&#123;</span><br><span class="line">        menu.destroy();</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    menu = [];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!entries || entries.length == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> pageMenu = contextMenu.Menu(&#123;</span><br><span class="line">        <span class="string">'label'</span>: <span class="string">'AirDroid'</span>,</span><br><span class="line">        <span class="string">'image'</span>: self.data.url(<span class="string">'images/icon_32.png'</span>),</span><br><span class="line">        <span class="string">'context'</span>: contextMenu.PageContext()</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> linkMenu = contextMenu.Menu(&#123;</span><br><span class="line">        <span class="string">'label'</span>: <span class="string">'AirDroid'</span>,</span><br><span class="line">        <span class="string">'image'</span>: self.data.url(<span class="string">'images/icon_32.png'</span>),</span><br><span class="line">        <span class="string">'context'</span>: contextMenu.SelectorContext(<span class="string">'a[href]'</span>)</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> selectionMenu = contextMenu.Menu(&#123;</span><br><span class="line">        <span class="string">'label'</span>: <span class="string">'AirDroid'</span>,</span><br><span class="line">        <span class="string">'image'</span>: self.data.url(<span class="string">'images/icon_32.png'</span>),</span><br><span class="line">        <span class="string">'context'</span>: contextMenu.SelectionContext()</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    menus.push(pageMenu);</span><br><span class="line">    menus.push(linkMenu);</span><br><span class="line">    menus.push(selectionMenu);</span><br><span class="line"></span><br><span class="line">    entries.map(<span class="function"><span class="keyword">function</span>(<span class="params">entry</span>) </span>&#123;</span><br><span class="line">        pageMenu.addItem(contextMenu.Item(&#123;</span><br><span class="line">            <span class="string">'label'</span>: entry.label,</span><br><span class="line">            <span class="string">'image'</span>: entry.imageUrl,</span><br><span class="line">            <span class="string">'contentScript'</span>: <span class="string">'self.on("click", function(node, data) &#123;'</span> +</span><br><span class="line">                    <span class="string">'    self.postMessage(&#123; "title": document.title, "url": document.URL &#125;);'</span> +</span><br><span class="line">                    <span class="string">'&#125;);'</span>,</span><br><span class="line">            <span class="string">'onMessage'</span>: <span class="function"><span class="keyword">function</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">                page.port.emit(<span class="string">'context_menu_item_clicked'</span>, &#123; <span class="string">'entry'</span>: entry, <span class="string">'message'</span>: message &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;));</span><br><span class="line"></span><br><span class="line">        linkMenu.addItem(contextMenu.Item(&#123;</span><br><span class="line">            <span class="string">'label'</span>: entry.label,</span><br><span class="line">            <span class="string">'image'</span>: entry.imageUrl,</span><br><span class="line">            <span class="string">'contentScript'</span>: <span class="string">'self.on("click", function(node, data) &#123;'</span> +</span><br><span class="line">                    <span class="string">'    self.postMessage(&#123; "title": node.textContent, "url": node.href &#125;);'</span> +</span><br><span class="line">                    <span class="string">'&#125;);'</span>,</span><br><span class="line">            <span class="string">'onMessage'</span>: <span class="function"><span class="keyword">function</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">                page.port.emit(<span class="string">'context_menu_item_clicked'</span>, &#123; <span class="string">'entry'</span>: entry, <span class="string">'message'</span>: message &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;));</span><br><span class="line"></span><br><span class="line">        selectionMenu.addItem(contextMenu.Item(&#123;</span><br><span class="line">            <span class="string">'label'</span>: entry.label,</span><br><span class="line">            <span class="string">'image'</span>: entry.imageUrl,</span><br><span class="line">            <span class="string">'contentScript'</span>: <span class="string">'self.on("context", function (node) &#123;'</span> +</span><br><span class="line">                    <span class="string">'    return node.nodeName != "A";'</span> +</span><br><span class="line">                    <span class="string">'&#125;);'</span> +</span><br><span class="line">                    <span class="string">'self.on("click", function(node, data) &#123;'</span> +</span><br><span class="line">                    <span class="string">'    self.postMessage(&#123; "selection": window.getSelection().toString() &#125;);'</span> +</span><br><span class="line">                    <span class="string">'&#125;);'</span>,</span><br><span class="line">            <span class="string">'onMessage'</span>: <span class="function"><span class="keyword">function</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">                page.port.emit(<span class="string">'context_menu_item_clicked'</span>, &#123; <span class="string">'entry'</span>: entry, <span class="string">'message'</span>: message &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;));</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这样子在点击右键菜单的时候，就触发<code>context_menu_item_clicked</code>这个事件，然后把对应的内容传过去。</p>
+<h2 id="Chrome-实现网页端脚本注入"><a href="#Chrome-实现网页端脚本注入" class="headerlink" title="Chrome 实现网页端脚本注入"></a>Chrome 实现网页端脚本注入</h2><p>在 <code>Chrome</code> 下如果在网页端用右键菜单推送消息的话，如果消息成功的话，就有回执到网页端的。 效果就是:</p>
+<p><img src="/2019/11/25/browser-extension-12/5.png" alt="png"></p>
+<p>这个是因为<code>extension</code>有在网页上嵌入一段脚本，当推送成功的时候，就会把消息传到当前的页面。然后将<code>ui</code>渲染到当前的<code>tab</code>页面。</p>
+<p><img src="/2019/11/25/browser-extension-12/20.png" alt="png"></p>
+<p>具体的代码片段如下:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 推送信息</span></span><br><span class="line">sendPush: <span class="function"><span class="keyword">function</span>(<span class="params">msg, deviceId</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">var</span> self = <span class="keyword">this</span>;</span><br><span class="line">    Airdroid.Server.sendNotePushMsg(msg, deviceId).done(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"contextmenu push success"</span>);</span><br><span class="line">        self.showToast(<span class="string">"Pushed successfully"</span>);</span><br><span class="line">    &#125;).fail(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        self.showToast(<span class="string">"Pushed failed"</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;,</span><br><span class="line"><span class="comment">// 在网页上显示推送结果</span></span><br><span class="line">showToast: <span class="function"><span class="keyword">function</span> (<span class="params">text</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">window</span>.chrome) &#123;</span><br><span class="line">        <span class="built_in">window</span>.chrome.tabs.query(&#123; <span class="string">'active'</span>: <span class="literal">true</span>, <span class="string">'lastFocusedWindow'</span>: <span class="literal">true</span> &#125;, <span class="function"><span class="keyword">function</span>(<span class="params">tabs</span>) </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (tabs &amp;&amp; tabs.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">var</span> tab = tabs[<span class="number">0</span>];</span><br><span class="line">                <span class="built_in">console</span>.log(<span class="string">"show page toast"</span>);</span><br><span class="line">                <span class="built_in">window</span>.chrome.tabs.sendMessage(tab.id, &#123;</span><br><span class="line">                    <span class="string">'type'</span>: <span class="string">'show_toast'</span>,</span><br><span class="line">                    <span class="string">'text'</span>: text</span><br><span class="line">                &#125;);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后这个注入的脚本 <code>inject.js</code> 内容为:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Airdroid = <span class="built_in">window</span>.Airdroid || &#123;&#125;;</span><br><span class="line"></span><br><span class="line">chrome.runtime.onMessage.addListener(<span class="function"><span class="keyword">function</span>(<span class="params">message, sender, sendResponse</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (message.type == <span class="string">'show_toast'</span>) &#123;</span><br><span class="line">        Airdroid.showToast(message.text);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">Airdroid.showToast = <span class="function"><span class="keyword">function</span>(<span class="params">text</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> toast = <span class="built_in">document</span>.createElement(<span class="string">'div'</span>);</span><br><span class="line">    toast.setAttribute(<span class="string">'style'</span>, <span class="string">'-webkit-transition:opacity .2s ease-in;opacity:0;position:absolute;bottom:50px;left:50%;width:300px;margin-left:-150px;z-index:16777270;color:white;text-align:center;background-color:rgba(0,0,0,.5);border-radius:30px;padding:10px;font-size:16px;'</span>);</span><br><span class="line">    toast.textContent = text;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">document</span>.body.insertBefore(toast, <span class="built_in">document</span>.body.firstChild);</span><br><span class="line"></span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        toast.style.opacity = <span class="number">1</span>;</span><br><span class="line">    &#125;, <span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        toast.style.opacity = <span class="number">0</span>;</span><br><span class="line">    &#125;, <span class="number">2000</span>);</span><br><span class="line"></span><br><span class="line">    setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">document</span>.body.removeChild(toast);</span><br><span class="line">    &#125;, <span class="number">2200</span>);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">Airdroid.log = <span class="function"><span class="keyword">function</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">    chrome.runtime.sendMessage(&#123; <span class="string">'type'</span>: <span class="string">'log'</span>, <span class="string">'message'</span>: message &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>而且这个还要在<code>manifest.json</code> 中配置:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"content_security_policy"</span>: <span class="string">"script-src 'self' 'unsafe-eval'; object-src 'self'"</span>,</span><br><span class="line"><span class="string">"content_scripts"</span>: [&#123;</span><br><span class="line"><span class="string">"matches"</span>: [ <span class="string">"http://*/*"</span>, <span class="string">"https://*/*"</span> ],</span><br><span class="line"><span class="string">"js"</span>: [<span class="string">"js/sys/inject.js"</span>]</span><br><span class="line">&#125;],</span><br></pre></td></tr></table></figure></p>
+<p>这样就可以了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我们实现在浏览器中操作右键菜单，并发送 push 的功能。</p>
+<hr>
+<p>系列文章:<br><a href="/2019/11/25/browser-extension-1/" title="浏览器 extension 插件开发系列(01) -- 前言和确认需求">浏览器 extension 插件开发系列(01) -- 前言和确认需求</a><br><a href="/2019/11/25/browser-extension-2/" title="浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试">浏览器 extension 插件开发系列(02) -- Chrome 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-3/" title="浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试">浏览器 extension 插件开发系列(03) -- Firefox 插件的启动以及调试</a><br><a href="/2019/11/25/browser-extension-4/" title="浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试">浏览器 extension 插件开发系列(04) -- Safari 插件的添加以及调试</a><br><a href="/2019/11/25/browser-extension-5/" title="浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书">浏览器 extension 插件开发系列(05) -- Safari 插件申请开发者证书</a><br><a href="/2019/11/25/browser-extension-6/" title="浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel">浏览器 extension 插件开发系列(06) -- 各浏览器导航栏按钮的配置的点击出现的panel</a><br><a href="/2019/11/25/browser-extension-7/" title="浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页">浏览器 extension 插件开发系列(07) -- 获取各浏览器端的背景页</a><br><a href="/2019/11/25/browser-extension-8/" title="浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化">浏览器 extension 插件开发系列(08) -- 背景页启动和登录持久化</a><br><a href="/2019/11/25/browser-extension-9/" title="浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动">浏览器 extension 插件开发系列(09) -- popup以及其他前端页面的启动</a><br><a href="/2019/11/25/browser-extension-10/" title="浏览器 extension 插件开发系列(10) -- 事件驱动模型">浏览器 extension 插件开发系列(10) -- 事件驱动模型</a><br><a href="/2019/11/25/browser-extension-11/" title="浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)">浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)</a><br><a href="/2019/11/25/browser-extension-12/" title="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息</a><br><a href="/2019/11/25/browser-extension-13/" title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知</a><br><a href="/2019/11/25/browser-extension-14/" title="浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口">浏览器 extension 插件开发系列(14) -- 点击reply出现回复小窗口</a><br><a href="/2019/11/25/browser-extension-15/" title="浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）">浏览器 extension 插件开发系列(15) -- chrome多文件上传（拖拽上传或者点击上传）</a><br><a href="/2019/11/25/browser-extension-16/" title="浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题">浏览器 extension 插件开发系列(16) -- Firefox 遇到的问题</a><br><a href="/2019/11/25/browser-extension-17/" title="浏览器 extension 插件开发系列(17) -- Safari 遇到的问题">浏览器 extension 插件开发系列(17) -- Safari 遇到的问题</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2019/11/25/browser-extension-12/" title="浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息">http://kebingzao.com/2019/11/25/browser-extension-12/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+            <a href="/tags/浏览器插件/" rel="tag"># 浏览器插件</a>
+          
+            <a href="/tags/Chrome-插件/" rel="tag"># Chrome 插件</a>
+          
+            <a href="/tags/Firefox-插件/" rel="tag"># Firefox 插件</a>
+          
+            <a href="/tags/Safari-插件/" rel="tag"># Safari 插件</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-11/" rel="next" title="浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)">
+                <i class="fa fa-chevron-left"></i> 浏览器 extension 插件开发系列(11) -- 登录模块(包括第三方登录和弹框)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/25/browser-extension-13/" rel="prev" title="浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知">
+                浏览器 extension 插件开发系列(13) -- 实现消息过来出现桌面通知 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">182</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#各浏览器实现右键菜单"><span class="nav-number">2.</span> <span class="nav-text">各浏览器实现右键菜单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Chrome-实现右键菜单功能"><span class="nav-number">3.</span> <span class="nav-text">Chrome 实现右键菜单功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Safari-实现右键菜单操作"><span class="nav-number">4.</span> <span class="nav-text">Safari 实现右键菜单操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Firefox-实现右键菜单操作"><span class="nav-number">5.</span> <span class="nav-text">Firefox 实现右键菜单操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Chrome-实现网页端脚本注入"><span class="nav-number">6.</span> <span class="nav-text">Chrome 实现网页端脚本注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2019/11/25/browser-extension-12/';
+          this.page.identifier = '2019/11/25/browser-extension-12/';
+          this.page.title = '浏览器 extension 插件开发系列(12) -- 实现右键菜单推送消息';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

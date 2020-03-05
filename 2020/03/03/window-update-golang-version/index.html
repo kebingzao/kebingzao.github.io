@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang,windows," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言虽然在之前的文章有写过，怎么在 windows 7 上通过 docker 来实现多个 golang 环境, 并使用了 Go Module:  windows7 通过 docker 来实现多个 golang 版本并存 初试 Go Module   但是事实上在本机进行开发的时候，还是本地环境装的 golang 环境开发起来更方便 (macOS 还好，差别不大，但是 windows 7 的 doc">
+<meta name="keywords" content="golang,windows">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windows 7 升级 golang 版本到 1.13">
+<meta property="og:url" content="http://kebingzao.com/2020/03/03/window-update-golang-version/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言虽然在之前的文章有写过，怎么在 windows 7 上通过 docker 来实现多个 golang 环境, 并使用了 Go Module:  windows7 通过 docker 来实现多个 golang 版本并存 初试 Go Module   但是事实上在本机进行开发的时候，还是本地环境装的 golang 环境开发起来更方便 (macOS 还好，差别不大，但是 windows 7 的 doc">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/8.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/9.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/10.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/11.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/12.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/13.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/14.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/15.png">
+<meta property="og:updated_time" content="2020-03-05T16:09:39.393Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="windows 7 升级 golang 版本到 1.13">
+<meta name="twitter:description" content="前言虽然在之前的文章有写过，怎么在 windows 7 上通过 docker 来实现多个 golang 环境, 并使用了 Go Module:  windows7 通过 docker 来实现多个 golang 版本并存 初试 Go Module   但是事实上在本机进行开发的时候，还是本地环境装的 golang 环境开发起来更方便 (macOS 还好，差别不大，但是 windows 7 的 doc">
+<meta name="twitter:image" content="http://kebingzao.com/2020/03/03/window-update-golang-version/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/03/03/window-update-golang-version/"/>
+
+
+
+
+
+  <title>windows 7 升级 golang 版本到 1.13 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/03/03/window-update-golang-version/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">windows 7 升级 golang 版本到 1.13</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-03T15:14:31+08:00">
+                2020-03-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang相关/" itemprop="url" rel="index">
+                    <span itemprop="name">golang相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/03/03/window-update-golang-version/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/03/03/window-update-golang-version/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/03/03/window-update-golang-version/" class="leancloud_visitors" data-flag-title="windows 7 升级 golang 版本到 1.13">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>虽然在之前的文章有写过，怎么在 windows 7 上通过 docker 来实现多个 golang 环境, 并使用了 Go Module:</p>
+<ul>
+<li><a href="/2019/03/01/windows7-docker-multiple-golang/" title="windows7 通过 docker 来实现多个 golang 版本并存">windows7 通过 docker 来实现多个 golang 版本并存</a></li>
+<li><a href="/2020/02/20/go-module/" title="初试 Go Module">初试 Go Module</a>
+</li>
+</ul>
+<p>但是事实上在本机进行开发的时候，还是本地环境装的 golang 环境开发起来更方便 (macOS 还好，差别不大，但是 windows 7 的 docker 实在不怎么友好)， 所以就打算将本机环境的 golang 版本升级到 1.13 版本。</p>
+<h2 id="升级-golang-版本"><a href="#升级-golang-版本" class="headerlink" title="升级 golang 版本"></a>升级 golang 版本</h2><p>查看了一下，发现本机环境装的 golang 还是 <code>1.7.6</code> 这个版本，太老了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\go\src\resque-worker-server&gt;go version</span><br><span class="line">go version go1.7.4 windows/amd64</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>查看了一下，原环境的 GOROOT 和 GOPATH 路径:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">set GOPATH=F:\airdroid_code\go</span><br><span class="line">set GORACE=</span><br><span class="line">set GOROOT=C:\Go</span><br></pre></td></tr></table></figure></p>
+<p>接下来去下载新的版本的安装包: <a href="https://studygolang.com/dl" target="_blank" rel="noopener">下载地址</a>, 不过最新版是 <code>1.14</code> 版本，而我们只要 <code>1.13</code> 版本的，所以就下载了一个 <code>1.13.8</code> 的 <code>msi</code>, 然后双击直接安装，刚开始会提示你本机已经有一个 golang 版本，会提示你是否要卸载掉：</p>
+<p><img src="/2020/03/03/window-update-golang-version/1.png" alt="png"></p>
+<p>点击 <code>yes</code>, 直接卸掉旧版本，然后选择同样的安装目录来覆盖安装:</p>
+<p><img src="/2020/03/03/window-update-golang-version/2.png" alt="png"></p>
+<p>最后安装完之后，执行一下命令:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\web-readme&gt;go version</span><br><span class="line">go version go1.13.8 windows/amd64</span><br></pre></td></tr></table></figure></p>
+<p>发现已经升级上来了。 但是发现他的 GOPATH 路径已经不是原来的 <code>F:\airdroid_code\go</code>, 而是变成用户目录下的 go 目录:</p>
+<p><img src="/2020/03/03/window-update-golang-version/3.png" alt="png"></p>
+<p>而我们看了一下， admin 下的用户变量，确实是用户目录下的目录。 所以这个要改一下，改过来</p>
+<p><img src="/2020/03/03/window-update-golang-version/4.png" alt="png"></p>
+<p>改成</p>
+<p><img src="/2020/03/03/window-update-golang-version/5.png" alt="png"></p>
+<p>这时候用 <code>go env</code> 就显示正常了。</p>
+<p><img src="/2020/03/03/window-update-golang-version/6.png" alt="png"></p>
+<h2 id="找个项目试一下"><a href="#找个项目试一下" class="headerlink" title="找个项目试一下"></a>找个项目试一下</h2><p>接下来就找一个项目试一下，go module 是否正常。 之前的  GOPATH 目录下的 pkg 只有这两个目录:</p>
+<p><img src="/2020/03/03/window-update-golang-version/7.png" alt="png"></p>
+<p>当用 go module 安装之后：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\go\src\resque-worker-server&gt;go build</span><br><span class="line">go: downloading github.com/robfig/cron v1.2.0</span><br><span class="line">go: downloading gitlab.airdroid.com/airdroid-utils/goworker v0.0.0-20200219070700-6eb070ff12d8</span><br><span class="line">go: downloading gitlab.airdroid.com/airdroid-utils/iGong v1.3.5</span><br><span class="line">...</span><br><span class="line">go: finding golang.org/x/sys v0.0.0-20190507160741-ecd444e8653b</span><br><span class="line">build gitlab.airdroid.com/airdroid_background/resque-worker-server: cannot load github.com/youtube/vitess/go/pools: github.com/youtube/vitess@v2.1.1+incompatible: read tcp 192.168.40.51:56366-&gt;172.217.160.80:443: wsarecv: An esta</span><br><span class="line">blished connection was aborted by the software in your host machine.</span><br></pre></td></tr></table></figure></p>
+<p>这边有个报错，下载 <code>github.com/youtube/vitess/go/pools</code> 下载失败。这边有两种解决情况：</p>
+<ul>
+<li>一种就是打开全局的 vpn 下载。                                     </li>
+<li>一种就是修改 <code>goproxy</code> 的配置，改成国内的下载地址</li>
+</ul>
+<p>我用的第二种，就是修改 proxy 地址, 原先设置的默认地址是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ go env | grep proxy</span><br><span class="line">set GOPROXY=https://proxy.golang.org,direct</span><br></pre></td></tr></table></figure></p>
+<p>后面改成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go env -w GOPROXY=https://goproxy.cn,direct</span><br></pre></td></tr></table></figure></p>
+<p>这样就修改成功了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ go env | grep proxy</span><br><span class="line">set GOPROXY=https://goproxy.cn,direct</span><br></pre></td></tr></table></figure></p>
+<p>然后重新 go build 编译一下，这时候就正常了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\go\src\resque-worker-server&gt;go build</span><br><span class="line">go: downloading github.com/youtube/vitess v2.1.1+incompatible</span><br><span class="line">go: extracting github.com/youtube/vitess v2.1.1+incompatible</span><br><span class="line">go: downloading github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b</span><br><span class="line">go: extracting github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b</span><br><span class="line">go: finding github.com/youtube/vitess v2.1.1+incompatible</span><br><span class="line">go: finding github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b</span><br></pre></td></tr></table></figure></p>
+<p>同时生成 <code>.exe</code> 文件了:</p>
+<p><img src="/2020/03/03/window-update-golang-version/8.png" alt="png"></p>
+<p>并且可以执行成功。 而且 <code>$GOPATH/pkg/mod</code> 也可以看到 mod 依赖:</p>
+<p><img src="/2020/03/03/window-update-golang-version/9.png" alt="png"></p>
+<p>这边有个细节就是，因为这个项目有拉取内部库的包，正常情况下是要配置 GOPRIVATE 这个配置，让 go 在拉包的时候， 直接采用直连去拉包, 之前在 <a href="/2020/02/21/docker-git-ssh/" title="docker 容器配置 gitlab ssh 遇到的问题">docker 容器配置 gitlab ssh 遇到的问题</a> 就是这样配的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go env -w GOPRIVATE=*.airdroid.com</span><br></pre></td></tr></table></figure></p>
+<p>但是这次并不需要这样配(所以我这个配置还是空的)：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ go env | grep PRIVATE</span><br><span class="line">set GOPRIVATE=</span><br></pre></td></tr></table></figure></p>
+<p>这个是因为我用了另外一个机制，就是 git 配置了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --global url.&quot;git@gitlab.airdroid.com:&quot;.insteadOf &quot;http://gitlab.airdroid.com/&quot;</span><br></pre></td></tr></table></figure></p>
+<p>这时候只要是内部包的拉取，都会从 http 下载方式转换为 ssh 的下载方式，直接通过本机的 ssh 配置进行请求。从而绕过了 GOPRIVATE 设置。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git config --list | grep url</span><br><span class="line">url.git@gitlab.airdroid.com:.insteadof=http://gitlab.airdroid.com/</span><br></pre></td></tr></table></figure></p>
+<p>而且通过这种方式还可以避免内部库是 http 的问题，因为下载包的时候，只能是 https 协议，如果是 http 协议，那么拉包的时候，就会报错。</p>
+<h2 id="IDE-识别当前项目的-GO-Module-依赖路径"><a href="#IDE-识别当前项目的-GO-Module-依赖路径" class="headerlink" title="IDE 识别当前项目的 GO Module 依赖路径"></a>IDE 识别当前项目的 GO Module 依赖路径</h2><p>虽然可以进行构建了。但是我发现在我的 IDE 中 (用的是 IntelliJ IDEA), 如果是其他项目的依赖还好，可以识别，但是如果是本项目的内部依赖，这时候就会识别不了:</p>
+<p><img src="/2020/03/03/window-update-golang-version/10.png" alt="png"></p>
+<p>这个项目在 go.mod 中的名字就是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">module gitlab.airdroid.com/airdroid_background/resque-worker-server</span><br></pre></td></tr></table></figure></p>
+<p>但是这个 IDE 在加载这个依赖的时候，没办法认出这其实是本项目的代码。而是去 pkg/mod 中去找，那肯定是找不到。 而且发现 setting 中也没有关于 GO Module 的相关配置:</p>
+<p><img src="/2020/03/03/window-update-golang-version/11.png" alt="png"></p>
+<p>后面打算换同系列中，但是专门用于 golang 项目的 <a href="https://www.jetbrains.com/go/" target="_blank" rel="noopener">Goland IDE</a>。 安装完之后，发现还是爆红，不过我发现他有在 拉包，可能在加载索引吧:</p>
+<p><img src="/2020/03/03/window-update-golang-version/12.png" alt="png"></p>
+<p>看了一下 setting， 终于发现有 Go Module 相关的配置了，不过发现proxy 竟然设置的是直连， 难怪会慢了。</p>
+<p><img src="/2020/03/03/window-update-golang-version/13.png" alt="png"></p>
+<p>而且这边跟 cmd 里面的 GOPROXY 设置的不一样。 所以我就改成一样了：</p>
+<p><img src="/2020/03/03/window-update-golang-version/14.png" alt="png"></p>
+<p>最后重启了一下机子，发现下载也正常了，本项目依赖包的识别也正常了， 代码跳转也正常了:</p>
+<p><img src="/2020/03/03/window-update-golang-version/15.png" alt="png"></p>
+<p>所以后面 golang 项目，只能用 Goland 这个 IDE 了。 不过也有可能是我用的 IDEA 的版本太旧了。新版本可能有兼容 GO Module 的配置，这个后面有空再试下。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/03/03/window-update-golang-version/" title="windows 7 升级 golang 版本到 1.13">http://kebingzao.com/2020/03/03/window-update-golang-version/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/windows/" rel="tag"># windows</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/02/what-leadership/" rel="next" title="包打天下的领导真的是好领导吗">
+                <i class="fa fa-chevron-left"></i> 包打天下的领导真的是好领导吗
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">186</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">47</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#升级-golang-版本"><span class="nav-number">2.</span> <span class="nav-text">升级 golang 版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#找个项目试一下"><span class="nav-number">3.</span> <span class="nav-text">找个项目试一下</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IDE-识别当前项目的-GO-Module-依赖路径"><span class="nav-number">4.</span> <span class="nav-text">IDE 识别当前项目的 GO Module 依赖路径</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/03/03/window-update-golang-version/';
+          this.page.identifier = '2020/03/03/window-update-golang-version/';
+          this.page.title = 'windows 7 升级 golang 版本到 1.13';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

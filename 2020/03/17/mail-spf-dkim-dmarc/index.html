@@ -109,7 +109,7 @@
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/19.png">
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/22.png">
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/20.png">
-<meta property="og:updated_time" content="2020-03-17T12:43:49.564Z">
+<meta property="og:updated_time" content="2020-03-17T13:08:43.633Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="电子邮件欺诈防护之 SPF+DKIM+DMARC">
 <meta name="twitter:description" content="前言早在之前，有收到一个白客的邮件，说我们发送电子邮件的域名缺少安全检查，让我们最好补上对应的安全检查：1234567891011121314151617181920212223I&amp;apos;m an independent cyber security researcher i have found multiple issues in your website.Vulnerability :">
@@ -532,7 +532,7 @@
 <p>如果是冒充的，那么就不会是 PASS，而是 FAIL。</p>
 <p>而且这边要注意一个细节的就是: 所有 DKIM 密钥存储在一个子域，命名为“_domainkey”。</p>
 <p>上面截图中，给定DKIM签名字段 <code>d=xxx.com，s=google</code>，DNS查询为：<code>google.domainkey.xxx.com</code> (或者是 ses 对应的 domainkey 域名)，<code>google.domainkey.xxx.com</code> 这条 txt 记录会在我们 route 53 完成解析, 通过邮件表头，通过DNS查询公钥信息，如果和发送邮件的私钥进行匹配，通过了，那可能就不是垃圾邮件，没有通过，那邮件有可能是垃圾邮件，或邮件内容被篡改了。</p>
-<h2 id="DMARC-设置"><a href="#DMARC-设置" class="headerlink" title="DMARC 设置"></a>DMARC 设置</h2><p>一般来讲，通过设定 SPF 和 DKIM,可以有效的阻挡伪造邮件了，但是，因为不同的邮件厂商，处理垃圾邮件的策略不同，会存在一定的风险，比如，一封伪造邮件，腾讯和网易处理的方式，可能是直接拒绝，而 gmail 通常还是会正常进入垃圾箱，只是通过？提示，无法确定邮件来源。 这样的话，风险提示容易被忽视，会有极大的隐患，导致部分用户被欺骗,考虑到我们大多数用户对 gmail 的使用范围,这个问题还是要彻底解决，通过进一步了解邮件服务安全设定问题，发现 DMARC 恰好能解决我们的问题，我们期望最终的效果就是，伪造邮件为通过验证后，进入垃圾箱或直接拒收。</p>
+<h2 id="DMARC-设置"><a href="#DMARC-设置" class="headerlink" title="DMARC 设置"></a>DMARC 设置</h2><p>一般来讲，通过设定 SPF 和 DKIM,可以有效的阻挡伪造邮件了，但是，因为不同的邮件厂商，处理垃圾邮件的策略不同，会存在一定的风险，比如，一封伪造邮件，腾讯和网易处理的方式，可能是直接拒绝，而 gmail 通常还是会正常进入信箱，只不过会通过 ？提示，因为无法确定邮件来源。 这样的话，风险提示容易被忽视，会有极大的隐患，导致部分用户被欺骗,考虑到我们大多数用户对 gmail 的使用范围,这个问题还是要彻底解决，通过进一步了解邮件服务安全设定问题，发现 DMARC 恰好能解决我们的问题，我们期望最终的效果就是，伪造邮件为通过验证后，进入垃圾箱或直接拒收。</p>
 <p>也就是之前哪怕我们设置了 SPF 和 DKIM, 但是不通过的邮件，可能因为不同的邮件厂商的关系，有可能是留在垃圾箱，也有可能留在收件箱，只不过带有问号。这个还是有一定的风险的。所以我们需要一种策略来告诉邮件接收端，如果收到伪造邮件，直接按照我指定的策略走。不要根据你们自己的喜好来走。这个就是 DMARC 设置。</p>
 <h3 id="DMARC-概念"><a href="#DMARC-概念" class="headerlink" title="DMARC 概念"></a>DMARC 概念</h3><p>SPF 和 DKIM 中共同存在的问题是缺少有效的策略和反馈机制, 这两个协议并未定义如何处理来自声称为某域的未经身份验证的电子邮件, 如何处理第三方声称托管的某域的未经身份验证的邮件, 如何反馈和统计声称是某域的身份认证成功或失败的电子邮件。</p>
 <p>DMARC 以域名为基础的邮件认证、报告和一致性标准(<code>Domain-based Message Authentication, Reporting, and Conformance</code>) 就是用来解决 SPF 和 DKIM 中存在的这些问题, DMARC 的主要用途在于设置“策略”, 这个策略包含接收到来自某个域未通过身份验证的邮件时应执行什么操作、该域授权的第三方提供商发送了未经身份验证的邮件时该如何处理. DMARC 还会让 ISP 发送有关某个域身份验证成功或失败的报告, 这些报告将发送至“rua”(汇总报告)和“ruf”(取证报告)中定义的地址中. 同时, DMARC 依靠出站邮件流配置的 SPF 记录和 DKIM 密钥来确保邮件来源及签名的完整性, 当未通过 SPF 或 DKIM 检查的邮件时便会触发 DMARC 策略。 </p>

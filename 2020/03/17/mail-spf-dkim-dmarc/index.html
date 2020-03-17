@@ -98,6 +98,7 @@
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/8.png">
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/9.png">
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/10.png">
+<meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/23.jpeg">
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/11.png">
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/12.png">
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/13.png">
@@ -109,7 +110,7 @@
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/19.png">
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/22.png">
 <meta property="og:image" content="http://kebingzao.com/2020/03/17/mail-spf-dkim-dmarc/20.png">
-<meta property="og:updated_time" content="2020-03-17T13:08:43.633Z">
+<meta property="og:updated_time" content="2020-03-17T14:07:37.445Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="电子邮件欺诈防护之 SPF+DKIM+DMARC">
 <meta name="twitter:description" content="前言早在之前，有收到一个白客的邮件，说我们发送电子邮件的域名缺少安全检查，让我们最好补上对应的安全检查：1234567891011121314151617181920212223I&amp;apos;m an independent cyber security researcher i have found multiple issues in your website.Vulnerability :">
@@ -524,7 +525,16 @@
 <p>这样子 SES 的 DKIM 就配置好了。</p>
 <h4 id="Gmail-DKIM-配置"><a href="#Gmail-DKIM-配置" class="headerlink" title="Gmail DKIM 配置"></a>Gmail DKIM 配置</h4><p>接下来我们配置 Gmail 的，Gmail 默认会有默认的DKIM设置,但是官方建议使用自己的域名，目前 Gmail 也是通过我们自己的域名做的验证，直接一行 TXT 记录:</p>
 <p><img src="/2020/03/17/mail-spf-dkim-dmarc/10.png" alt="png"></p>
-<p>其中 p 字段后面就是一大段的私钥。</p>
+<p>其中 p 字段后面就是一大段的公钥。 这一大串也是自动生成的，就在 gmail 后台：</p>
+<ol>
+<li>去<code>admin.google.com</code>用你的<code>Google App</code>账号登陆进入后台，选择<code>Google App</code>→<code>Gmail</code>→<code>Authenticate email</code>。选择你的域名生成公钥。如下图</li>
+</ol>
+<p><img src="/2020/03/17/mail-spf-dkim-dmarc/23.jpeg" alt="png"></p>
+<ol start="2">
+<li>按照生成的信息，去你的 DNS 添加一条 TXT 记录。</li>
+<li>回到<code>admin.google.com</code>上次的页面点击 “Start Authentication”。</li>
+</ol>
+<p>这样就生成了公钥，并且生效了。</p>
 <h3 id="测试-DKIM-是否生效"><a href="#测试-DKIM-是否生效" class="headerlink" title="测试 DKIM 是否生效"></a>测试 DKIM 是否生效</h3><p>一样发送一封正常的邮件到我的邮箱，如果 DKIM 有设置，并且成功的话，再邮箱详情中就会出现 PASS</p>
 <p><img src="/2020/03/17/mail-spf-dkim-dmarc/11.png" alt="png"></p>
 <p>以上截图说明我们有设置 DKIM，并且通过正确源发送的邮件 DKIM 的校验是正常的。</p>
@@ -605,6 +615,7 @@
 <h3 id="DMARC-测试-SPF-和-DKIM-是否正常"><a href="#DMARC-测试-SPF-和-DKIM-是否正常" class="headerlink" title="DMARC 测试 SPF 和 DKIM 是否正常"></a>DMARC 测试 SPF 和 DKIM 是否正常</h3><p>我们知道在配置 DMARC 的时候， SPF 和 DKIM 一定要配好。虽然可以通过 <code>nslookup</code>。 但是也可以通过 外部的一些 第三方的站点来判断，比如这个 <a href="https://dmarcian.com/dmarc-inspector/?domain=google.com#" target="_blank" rel="noopener">DMARC Record Checker</a>, 输入你的域名，就可以检查你的 DMARC 是否配置正常。</p>
 <p><img src="/2020/03/17/mail-spf-dkim-dmarc/20.png" alt="png"></p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过 SPF + DKIM + DMARC, 我们的站点可以很好的解决电子邮件欺诈的问题了。</p>
+<p>最后感谢树礼的测试和对应的测试数据。</p>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
 <li><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/send-email-authentication-spf.html" target="_blank" rel="noopener">在 Amazon SES 中使用 SPF 对电子邮件进行身份验证</a></li>
 <li><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/DeveloperGuide/send-email-authentication-dkim.html" target="_blank" rel="noopener">在 Amazon SES 中使用 DKIM 对电子邮件进行身份验证</a></li>
@@ -613,6 +624,8 @@
 <li><a href="http://www.c-s-a.org.cn/html/2018/7/6427.html" target="_blank" rel="noopener">基于DANE的电子邮件安全研究</a></li>
 <li><a href="https://service.mail.qq.com/cgi-bin/help?subtype=1&amp;&amp;no=1001508&amp;&amp;id=16" target="_blank" rel="noopener">DMARC指引</a></li>
 <li><a href="https://support.google.com/a/answer/2466563?hl=zh-Hans" target="_blank" rel="noopener">启用 DMARC</a></li>
+<li><a href="https://tools.ietf.org/html/rfc6376" target="_blank" rel="noopener">rfc6376</a></li>
+<li><a href="http://www.dkim.org/" target="_blank" rel="noopener">http://www.dkim.org/</a></li>
 </ul>
 <h3 id="SPF-的测试工具"><a href="#SPF-的测试工具" class="headerlink" title="SPF 的测试工具"></a>SPF 的测试工具</h3><ul>
 <li><a href="http://tools.wordtothewise.com/spf" target="_blank" rel="noopener">http://tools.wordtothewise.com/spf</a> (将显示所有能使用域名发送的ip的概述)</li>

@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前段时间有位好心的白客有发了一封邮件过来，内容如下：12345678910111213141516171819Hi Team,        This time I found this vulnerability in https://www.example.com/        Vulnerability Type: Missing Certificate Authority Autho">
+<meta name="keywords" content="security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="给站点添加 DNS CAA 保护">
+<meta property="og:url" content="http://kebingzao.com/2020/04/11/ssl-caa/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前段时间有位好心的白客有发了一封邮件过来，内容如下：12345678910111213141516171819Hi Team,        This time I found this vulnerability in https://www.example.com/        Vulnerability Type: Missing Certificate Authority Autho">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/04/11/ssl-caa/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/04/11/ssl-caa/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/04/11/ssl-caa/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/04/11/ssl-caa/4.png">
+<meta property="og:updated_time" content="2020-04-17T17:57:42.131Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="给站点添加 DNS CAA 保护">
+<meta name="twitter:description" content="前言前段时间有位好心的白客有发了一封邮件过来，内容如下：12345678910111213141516171819Hi Team,        This time I found this vulnerability in https://www.example.com/        Vulnerability Type: Missing Certificate Authority Autho">
+<meta name="twitter:image" content="http://kebingzao.com/2020/04/11/ssl-caa/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/04/11/ssl-caa/"/>
+
+
+
+
+
+  <title>给站点添加 DNS CAA 保护 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/04/11/ssl-caa/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">给站点添加 DNS CAA 保护</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-11T14:15:27+08:00">
+                2020-04-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/04/11/ssl-caa/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/04/11/ssl-caa/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/04/11/ssl-caa/" class="leancloud_visitors" data-flag-title="给站点添加 DNS CAA 保护">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有位好心的白客有发了一封邮件过来，内容如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">Hi Team,</span><br><span class="line">    </span><br><span class="line">    This time I found this vulnerability in https://www.example.com/</span><br><span class="line">    </span><br><span class="line">    Vulnerability Type: Missing Certificate Authority Authorization Rule</span><br><span class="line">    </span><br><span class="line">    Description:</span><br><span class="line">    </span><br><span class="line">    Certificate Authority Authorization (supported by LetsEncrypt and other CAs) allows a domain owner to specify which Certificate Authorities should be allowed to issue certificates for the domain. All CAA-compliant certificate authorities should refuse to issue a certificate unless they are the CA of record for the target site. This helps reduce the threat of a bad guy tricking a Certificate Authority into issuing a phony certificate for your site.</span><br><span class="line">    </span><br><span class="line">    The CAA rule is stored as a DNS resource record of type 257. You can view a domain&apos;s CAA rule using a DNS lookup service:</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    https://dns.google.com/query?name=example.com&amp;type=A&amp;dnssec=true    </span><br><span class="line">     </span><br><span class="line">     </span><br><span class="line">    Vulnerable Location: https://caatest.co.uk/example.com</span><br><span class="line">     </span><br><span class="line">    ...</span><br></pre></td></tr></table></figure></p>
+<p>简单的来说，就是我们的站点并没有添加 DNS CAA 保护。 具有被中间人劫持的风险。 不过确实是这样子，那时候确实并没有为我们的站点添加 CAA 的 DNS 记录，这个是他的站点检测截图：</p>
+<p><img src="/2020/04/11/ssl-caa/1.png" alt="png"><br><a id="more"></a></p>
+<h2 id="什么是-CAA-记录？"><a href="#什么是-CAA-记录？" class="headerlink" title="什么是 CAA 记录？"></a>什么是 CAA 记录？</h2><p>证书颁发机构授权（全称Certificate Authority Authorization，简称CAA）为改善PKI（Public Key Infrastructure：公钥基础设施）生态系统强度，减少证书意外错误发布的风险，通过DNS机制创建CAA资源记录，从而限定了特定域名颁发的证书和CA（证书颁发机构）之间的联系。</p>
+<p>譬如说，你的站点已经启用了 <a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank" rel="noopener">HSTS</a>，甚至已经被<a href="https://hstspreload.org/" target="_blank" rel="noopener">固化到了浏览器内部</a>。但是一个中间人仍然劫持了你的连接。你走了 HTTPS 协议？没问题，我也搞到了一个你所访问域名的 SSL 证书。要知道 SSL 连接使用的证书是服务端决定的，但是这个证书未必就是真正的域名所有人申请的。虽然普通人未必能搞到不属于你的域名的证书，但是证书颁发机构就不一样——虽然基于信誉的原因他们不太可能会这样做，但是没有任何外在的保护防止他们颁发并非由域名所有人申请的证书。</p>
+<p>简而言之，一个有效的证书未必就是域名所有人申请的证书。就好比普通人造不出能过验钞机的假钞，但是再强大的验钞机也不能阻止造币厂监守自盗(尤其是合法的造币厂还有好几家)。这时就需要一个更上层的服务去验证这个“有效的证书”的合法性，这就是 DNS CAA 的作用。</p>
+<p><a href="https://zh.wikipedia.org/wiki/DNS%E8%AF%81%E4%B9%A6%E9%A2%81%E5%8F%91%E6%9C%BA%E6%9E%84%E6%8E%88%E6%9D%83" target="_blank" rel="noopener">DNS Certification Authority Authorization</a>（DNS证书颁发机构授权，简称 CAA）是一项借助互联网的域名系统（DNS），使域持有人可以指定允许为其域签发证书的数字证书认证机构（CA）的技术。它会在 DNS 下发 IP 的同时，同时下发一条资源记录，标记该域名下使用的证书必须由某证书颁发机构颁发。</p>
+<p>比如我们的站点使用了 godaddy 的证书，我可以同时使用 CAA 技术标记 我们的官网域名 <a href="http://www.xxx.com" target="_blank" rel="noopener">www.xxx.com</a> 使用的 SSL 证书由 godaddy 颁发，这样就可以（在一定程度上）解决上面所述的问题。</p>
+<h2 id="在-DNS-服务器启用-CAA-记录"><a href="#在-DNS-服务器启用-CAA-记录" class="headerlink" title="在 DNS 服务器启用 CAA 记录"></a>在 DNS 服务器启用 CAA 记录</h2><p>首先不是所有的 DNS 服务器都支持 CAA 资源记录，具体可以到这个站点去查: <a href="https://sslmate.com/caa/support" target="_blank" rel="noopener">谁支持 CAA</a>, 刚好我们用的 AWS 的 router 53 是有支持的。所以就可以直接在上面配置就行了。</p>
+<p><img src="/2020/04/11/ssl-caa/2.png" alt="png"></p>
+<h2 id="CAA资源记录详解"><a href="#CAA资源记录详解" class="headerlink" title="CAA资源记录详解"></a>CAA资源记录详解</h2><p>CAA记录可以控制单域名SSL证书的发行，也可以控制通配符证书。当域名存在CAA记录时，则只允许在记录中列出的CA颁发针对该域名（或子域名）的证书。</p>
+<p>在域名解析配置中，咱们可以为整个域（如example.com）或者特定的子域（如subzone.example.com）设置CAA策略。当为整域设置CAA资源记录时，该CAA策略将同时应用于该域名下的任一子域，除非被已设置的子域策略覆盖。</p>
+<h3 id="CAA记录格式"><a href="#CAA记录格式" class="headerlink" title="CAA记录格式"></a>CAA记录格式</h3><p>根据规范（<a href="https://www.rfc-editor.org/rfc/rfc6844.txt" target="_blank" rel="noopener">RFC 6844</a>），CAA记录格式由以下元素组成：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CAA &lt;flags&gt; &lt;tag&gt; &lt;value&gt;</span><br></pre></td></tr></table></figure></p>
+<p>解释:</p>
+<ul>
+<li><strong>CAA</strong> -&gt; DNS资源记录类型</li>
+<li><strong>flags</strong> -&gt; 认证机构限制标志</li>
+<li><strong>tag</strong> -&gt; 证书属性标签</li>
+<li><strong>value</strong> -&gt; 证书颁发机构、策略违规报告邮件地址等</li>
+</ul>
+<h4 id="flags"><a href="#flags" class="headerlink" title="flags"></a>flags</h4><p>flags 定义为0~255无符号整型，取值：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Issuer Critical Flag：0</span><br><span class="line"></span><br><span class="line">1~7为保留标记</span><br></pre></td></tr></table></figure></p>
+<h4 id="tag"><a href="#tag" class="headerlink" title="tag"></a>tag</h4><p>tag 定义为US-ASCII和0~9，取值：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CA授权任何类型的域名证书（Authorization Entry by Domain） : issue</span><br><span class="line"></span><br><span class="line">CA授权通配符域名证书（Authorization Entry by Wildcard Domain） : issuewild</span><br><span class="line"></span><br><span class="line">指定CA可报告策略违规（Report incident by IODEF report） : iodef</span><br><span class="line"></span><br><span class="line">auth、path和policy为保留标签</span><br></pre></td></tr></table></figure></p>
+<h4 id="value"><a href="#value" class="headerlink" title="value"></a>value</h4><p>value 定义为八位字节序列的二进制编码字符串，一般填写格式为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[domain] [&quot;;&quot; * 参数]</span><br></pre></td></tr></table></figure></p>
+<h3 id="CAA资源记录示例"><a href="#CAA资源记录示例" class="headerlink" title="CAA资源记录示例"></a>CAA资源记录示例</h3><p>当需要限制域名 example.com 及其子域名可由机构 letsencrypt 颁发不限类型的证书，同时可由 Comodo 颁发通配符证书，其他一律禁止，并且当违反配置规则时，发送通知邮件到 <a href="mailto:example@example.com" target="_blank" rel="noopener">example@example.com</a> 。</p>
+<p>配置如下（为便于理解，二进制Value值已经过转码，下同）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">example.com.  CAA 0 issue &quot;letsencrypt.org&quot;</span><br><span class="line">example.com.  CAA 0 issuewild &quot;comodoca.com&quot;</span><br><span class="line">example.com.  CAA 0 iodef &quot;mailto:example@example.com&quot;</span><br></pre></td></tr></table></figure></p>
+<p>如果子域名有单独列出证书颁发要求，例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">example.com.  CAA 0 issue &quot;letsencrypt.org&quot;</span><br><span class="line">alpha.example.com.  CAA 0 issue &quot;comodoca.com&quot;</span><br></pre></td></tr></table></figure></p>
+<p>那么，因子域策略优先，所以只有Comodo可以为域名alpha.example.com.颁发证书。</p>
+<h2 id="具体实作"><a href="#具体实作" class="headerlink" title="具体实作"></a>具体实作</h2><p>知道规则了，那么就很简单了，直接去 router 53 添加一个 CAA 记录, 并且将 CA 指定为 godaddy 就行了:</p>
+<p><img src="/2020/04/11/ssl-caa/3.png" alt="png"></p>
+<h2 id="检测"><a href="#检测" class="headerlink" title="检测"></a>检测</h2><p>可以通过这个站点来检测: <a href="https://caatest.co.uk/airdroid.com" target="_blank" rel="noopener">DNS CAA Tester</a></p>
+<p><img src="/2020/04/11/ssl-caa/4.png" alt="png"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过这种方式就可以为你的站点更加的安全了。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://segmentfault.com/a/1190000011097942" target="_blank" rel="noopener">给你的站点添加 DNS CAA 保护</a></li>
+<li><a href="https://www.trustauth.cn/wiki/24242.html" target="_blank" rel="noopener">正确设置DNS CAA记录，提升HTTPS站点安全</a></li>
+<li><a href="http://www.cloudxns.net/Support/detail/id/3065.html" target="_blank" rel="noopener">SSL证书颁发机构将对域名强制CAA检查，到底什么是CAA？CAA记录详解</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/04/11/ssl-caa/" title="给站点添加 DNS CAA 保护">http://kebingzao.com/2020/04/11/ssl-caa/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/01/mysql-archive/" rel="next" title="浅谈 - mysql 数据库表归档策略">
+                <i class="fa fa-chevron-left"></i> 浅谈 - mysql 数据库表归档策略
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/11/login-csrf-referer/" rel="prev" title="web 登录接口通过校验 referer 头部来防止 CSRF 攻击">
+                web 登录接口通过校验 referer 头部来防止 CSRF 攻击 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">191</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">47</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是-CAA-记录？"><span class="nav-number">2.</span> <span class="nav-text">什么是 CAA 记录？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在-DNS-服务器启用-CAA-记录"><span class="nav-number">3.</span> <span class="nav-text">在 DNS 服务器启用 CAA 记录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAA资源记录详解"><span class="nav-number">4.</span> <span class="nav-text">CAA资源记录详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAA记录格式"><span class="nav-number">4.1.</span> <span class="nav-text">CAA记录格式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#flags"><span class="nav-number">4.1.1.</span> <span class="nav-text">flags</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#tag"><span class="nav-number">4.1.2.</span> <span class="nav-text">tag</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#value"><span class="nav-number">4.1.3.</span> <span class="nav-text">value</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAA资源记录示例"><span class="nav-number">4.2.</span> <span class="nav-text">CAA资源记录示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体实作"><span class="nav-number">5.</span> <span class="nav-text">具体实作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检测"><span class="nav-number">6.</span> <span class="nav-text">检测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/04/11/ssl-caa/';
+          this.page.identifier = '2020/04/11/ssl-caa/';
+          this.page.title = '给站点添加 DNS CAA 保护';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

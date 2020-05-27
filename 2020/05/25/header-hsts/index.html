@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前段时间一位好心的白帽子发了一封邮件过来:123456Hi team,    I found another potential bug on your site.    Description    The application fails to prevent users from connecting to it over unencrypted connections. An att">
+<meta name="keywords" content="security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="web 安全之 - 开启HSTS让浏览器强制跳转HTTPS访问">
+<meta property="og:url" content="http://kebingzao.com/2020/05/25/header-hsts/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前段时间一位好心的白帽子发了一封邮件过来:123456Hi team,    I found another potential bug on your site.    Description    The application fails to prevent users from connecting to it over unencrypted connections. An att">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/8.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/9.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/10.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/11.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/12.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/13.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/14.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/header-hsts/5.png">
+<meta property="og:updated_time" content="2020-05-27T16:41:58.329Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="web 安全之 - 开启HSTS让浏览器强制跳转HTTPS访问">
+<meta name="twitter:description" content="前言前段时间一位好心的白帽子发了一封邮件过来:123456Hi team,    I found another potential bug on your site.    Description    The application fails to prevent users from connecting to it over unencrypted connections. An att">
+<meta name="twitter:image" content="http://kebingzao.com/2020/05/25/header-hsts/6.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/05/25/header-hsts/"/>
+
+
+
+
+
+  <title>web 安全之 - 开启HSTS让浏览器强制跳转HTTPS访问 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/05/25/header-hsts/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">web 安全之 - 开启HSTS让浏览器强制跳转HTTPS访问</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-25T10:55:57+08:00">
+                2020-05-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/05/25/header-hsts/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/05/25/header-hsts/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/05/25/header-hsts/" class="leancloud_visitors" data-flag-title="web 安全之 - 开启HSTS让浏览器强制跳转HTTPS访问">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间一位好心的白帽子发了一封邮件过来:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Hi team,</span><br><span class="line">    I found another potential bug on your site.</span><br><span class="line">    Description</span><br><span class="line">    The application fails to prevent users from connecting to it over unencrypted connections. An attacker able to modify a legitimate user's network traffic could bypass the application's use of SSL/TLS encryption, and use the application as a platform for attacks against its users. This attack is performed by rewriting HTTPS links as HTTP so that if a targeted user follows a link to the site from an HTTP page, their browser never attempts to use an encrypted connection. The sslstrip tool automates this process.</span><br><span class="line">    </span><br><span class="line">    To exploit this vulnerability, an attacker must be suitably positioned to intercept and modify the victim's network traffic. This scenario typically occurs when a client communicates with the server over an insecure connection such as public Wi-Fi, or a corporate or home network that is shared with a compromised computer. Common defences such as switched networks are not sufficient to prevent this. An attacker situated in the user's ISP or the application's hosting infrastructure could also perform this attack. Note that an advanced adversary could potentially target any connection made over the Internet's core infrastructure.</span><br></pre></td></tr></table></figure></p>
+<p>大意就是说我们的站点虽然有强制 https 请求，但是并没有添加 <code>Strict-Transport-Security</code>，所以有可能会遭受 SSL 剥离攻击。 建议我们赶紧加上。 </p>
+<p>最后 POC 附上 <a href="https://hstspreload.org/" target="_blank" rel="noopener">hstspreload</a> 检测截图</p>
+<p><img src="/2020/05/25/header-hsts/6.png" alt="png"></p>
+<a id="more"></a>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>查看了一下，确实在请求的时候，并没有下发 <code>Strict-Transport-Security</code> 这个头部。 在说明危害性的时候，按照惯例，先科普一下什么是 HSTS。</p>
+<h2 id="启用-HTTPS-也不够安全"><a href="#启用-HTTPS-也不够安全" class="headerlink" title="启用 HTTPS 也不够安全"></a>启用 HTTPS 也不够安全</h2><p>在解释什么是 HSTS, 先了解一个场景， 现在已经是全站 HTTPS 的年代了，但用户在访问某个网站的时候，在浏览器里却往往直接输入网站域名 ( 例如 <a href="http://www.example.com" target="_blank" rel="noopener">www.example.com</a> )，而不是输入完整的URL ( 例如<a href="https://www.example.com" target="_blank" rel="noopener">https://www.example.com</a> )，不过浏览器依然能正确的使用HTTPS发起请求。这背后多亏了服务器和浏览器的协作，如下图所示(服务器和浏览器在背后帮用户做了很多工作):</p>
+<p><img src="/2020/05/25/header-hsts/7.png" alt="png"></p>
+<p>具体步骤就是:</p>
+<ol>
+<li>浏览器使用 http 协议请求到底 web server</li>
+<li>web server 发现是 http 协议，就返回 301 状态码，并带上 https 协议的 url</li>
+<li>浏览器发现 301 状态，直接取 response 中的 Location 头部中的地址，然后直接跳转</li>
+</ol>
+<p>当然在用户眼里看来，在浏览器里直接输入域名却依然可以用HTTPS协议和网站进行安全的通信，是个不错的用户体验。但是有一个安全隐患，由于在建立起HTTPS连接之前存在一次明文的HTTP请求和重定向（上图中的第1、2步），使得攻击者可以以中间人的方式劫持这次请求，从而进行后续的攻击，例如窃听数据，篡改请求和响应，跳转到钓鱼网站等。</p>
+<p><img src="/2020/05/25/header-hsts/8.png" alt="png"></p>
+<p>具体步骤就是:</p>
+<ol>
+<li>浏览器发起一次明文HTTP请求，但实际上会被攻击者拦截下来</li>
+<li>攻击者作为代理，把当前请求转发给钓鱼网站</li>
+<li>钓鱼网站返回假冒的网页内容</li>
+<li>攻击者把假冒的网页内容返回给浏览器</li>
+</ol>
+<p>这个攻击的精妙之处在于，攻击者直接劫持了HTTP请求，并返回了内容给浏览器，根本不给浏览器同真实网站建立HTTPS连接的机会，因此浏览器会误以为真实网站通过HTTP对外提供服务，自然也就不会向用户报告当前的连接不安全。于是乎攻击者几乎可以神不知鬼不觉的对请求和响应动手脚。</p>
+<h2 id="使用-HSTS-来解决"><a href="#使用-HSTS-来解决" class="headerlink" title="使用 HSTS 来解决"></a>使用 HSTS 来解决</h2><p>既然建立HTTPS连接之前的这一次HTTP明文请求和重定向有可能被攻击者劫持，那么解决这一问题的思路自然就变成了如何避免出现这样的HTTP请求。我们期望的浏览器行为是，当用户让浏览器发起HTTP请求的时候，浏览器将其转换为HTTPS请求，直接略过上述的HTTP请求和重定向，从而使得中间人攻击失效，规避风险。其大致流程如下(略过HTTP请求和重定向，直接发送HTTPS请求)：</p>
+<p><img src="/2020/05/25/header-hsts/9.png" alt="png"></p>
+<p>具体步骤就是:</p>
+<ol>
+<li>用户在浏览器地址栏里输入网站域名，浏览器得知该域名应该使用HTTPS进行通信</li>
+<li>浏览器直接向网站发起HTTPS请求</li>
+<li>网站返回相应的内容</li>
+</ol>
+<p>当然浏览器不可能自己去知道这个流程，肯定是有东西告诉它要这么做，这个就是 HSTS 了。</p>
+<p>HSTS(HTTP Strict Transport Security)是国际互联网工程组织 IETF 发布的一种互联网安全策略机制。采用HSTS策略的网站将保证浏览器始终连接到该网站的HTTPS加密版本，不需要用户手动在URL地址栏中输入加密地址，以减少会话劫持风险。</p>
+<p>HSTS 最早于2015年被纳入到 ThoughtWorks 技术雷达，并且在2016年的最新一期技术雷达里，它直接从“评估（Trial）”阶段进入到了“采用（Adopt）“阶段，这意味着ThoughtWorks强烈主张业界积极采用这项安全防御措施，并且ThoughtWorks已经将其应用于自己的项目。</p>
+<p>HSTS 最为核心的是一个HTTP响应头（HTTP Response Header）。正是它可以让浏览器得知，在接下来的一段时间内，当前域名只能通过HTTPS进行访问，并且在浏览器发现当前连接不安全的情况下，强制拒绝用户的后续访问要求。</p>
+<h2 id="HSTS-语法介绍"><a href="#HSTS-语法介绍" class="headerlink" title="HSTS 语法介绍"></a>HSTS 语法介绍</h2><p>HSTS Header的语法如下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Strict-Transport-Security: max-age=expireTime [; includeSubDomains] [; preload]</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><code>max-age</code>，单位是秒，用来告诉浏览器在指定时间内，这个网站必须通过HTTPS协议来访问。也就是对于这个网站的HTTP地址，浏览器需要先在本地替换为HTTPS之后再发送请求。</li>
+<li><code>includeSubDomains</code>，可选参数，如果指定这个参数，表明这个网站所有子域名也必须通过HTTPS协议来访问。</li>
+<li><code>preload</code>，可选参数，一个浏览器内置的使用HTTPS的域名列表。</li>
+</ul>
+<p>所以只要让你的服务器在返回给浏览器的响应头中，增加 <code>Strict-Transport-Security</code> 这个HTTP Header:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Strict-Transport-Security: max-age=31536000; includeSubDomains</span><br></pre></td></tr></table></figure></p>
+<p>就可以告诉浏览器，在接下来的 31536000秒内（1年），对于当前域名及其子域名的后续通信应该强制性的只使用HTTPS，直到超过有效期为止。 完整的流程如下:</p>
+<p><img src="/2020/05/25/header-hsts/10.png" alt="png"></p>
+<p>只要是在有效期内，浏览器都将直接强制性的发起HTTPS请求，但是问题又来了，有效期过了怎么办？其实不用为此过多担心，因为HSTS Header 存在于每个响应中，随着用户和网站的交互，这个有效时间时刻都在刷新，再加上有效期通常都被设置成了1年，所以只要用户的前后两次请求之间的时间间隔没有超过1年，则基本上不会出现安全风险。更何况，就算超过了有效期，但是只要用户和网站再进行一次新的交互，用户的浏览器又将开启有效期为1年的HSTS保护。</p>
+<h2 id="HSTS-下浏览器强制拒绝不安全的连接"><a href="#HSTS-下浏览器强制拒绝不安全的连接" class="headerlink" title="HSTS 下浏览器强制拒绝不安全的连接"></a>HSTS 下浏览器强制拒绝不安全的连接</h2><p>在没有 HSTS 保护的情况下，当浏览器发现当前网站的证书出现错误，或者浏览器和服务器之间的通信不安全，无法建立HTTPS连接的时候，浏览器通常会警告用户，但是却又允许用户继续不安全的访问。如下图所示，用户可以点击图中红色方框中的链接，继续在不安全的连接下进行访问。</p>
+<p><img src="/2020/05/25/header-hsts/11.png" alt="png"></p>
+<p>理论上而言，用户看到这个警告之后就应该提高警惕，意识到自己和网站之间的通信不安全，可能被劫持也可能被窃听，如果访问的恰好是银行、金融类网站的话后果更是不堪设想，理应终止后续操作。然而现实很残酷，就我的实际观察来看，有不少用户在遇到这样的警告之后依然选择了继续访问。</p>
+<p>不过随着HSTS的出现，事情有了转机。对于启用了浏览器 HSTS 保护的网站，如果浏览器发现当前连接不安全，它将仅仅警告用户，而不再给用户提供是否继续访问的选择，从而避免后续安全问题的发生。例如，当访问Google搜索引擎的时候，如果当前通信连接存在安全问题，浏览器将会彻底阻止用户继续访问Google，如下图所示:</p>
+<p><img src="/2020/05/25/header-hsts/12.png" alt="png"></p>
+<h2 id="使用-preload-list-防止首次劫持风险"><a href="#使用-preload-list-防止首次劫持风险" class="headerlink" title="使用 preload list 防止首次劫持风险"></a>使用 preload list 防止首次劫持风险</h2><p>虽然 HSTS 可以很好的解决 HTTPS 降级攻击，但是对于 HSTS 生效前的首次 HTTP 请求或者当浏览器没有当前网站的 HSTS 信息的时候，依然无法避免被劫持。浏览器厂商们为了解决这个问题，提出了 HSTS Preload List 方案：内置一份可以定期更新的列表，对于列表中的域名，即使用户之前没有访问过，也会使用HTTPS协议。</p>
+<p>目前这个 Preload List 由 Google Chrome 维护，Chrome、Firefox、Safari、IE 11和Microsoft Edge都在使用。如果要想把自己的域名加进这个列表，首先需要满足以下条件：</p>
+<ol>
+<li>拥有合法的证书(如果使用SHA-1证书，过期时间必须早于2016年)；</li>
+<li>将所有HTTP流量重定向到HTTPS；</li>
+<li>确保所有子域名都启用了HTTPS；</li>
+<li>输出HSTS响应头：</li>
+<li>max-age不能低于18周(10886400秒)；</li>
+<li>必须指定includeSubdomains参数；</li>
+<li>必须指定preload参数；</li>
+</ol>
+<p>即便满足了上述所有条件，也不一定能进入 HSTS Preload List，更多信息可以查看：<a href="https://hstspreload.org/。" target="_blank" rel="noopener">https://hstspreload.org/。</a> </p>
+<p>通过 Chrome 的 chrome://net-internals/#hsts 工具，可以查询某个网站是否在 Preload List 之中，还可以手动把某个域名加到本机 Preload List。</p>
+<p><img src="/2020/05/25/header-hsts/13.png" alt="png"></p>
+<h2 id="HSTS-缺点"><a href="#HSTS-缺点" class="headerlink" title="HSTS 缺点"></a>HSTS 缺点</h2><p>HSTS 并不是 HTTP会话劫持的完美解决方案。用户首次访问某网站是不受 HSTS 保护的。这是因为首次访问时，浏览器还未收到HSTS，所以仍有可能通过明文HTTP来访问。 如果用户通过 HTTP 访问 HSTS 保护的网站时，以下几种情况存在 SSL 剥离劫持的可能性：</p>
+<ol>
+<li>以前从未访问过该网站</li>
+<li>最近重新安装了其操作系统</li>
+<li>最近重新安装了其浏览器</li>
+<li>切换到新的浏览器</li>
+<li>切换到一个新的设备，如：移动电话</li>
+<li>删除浏览器的缓存</li>
+<li>最近没访问过该站并且max-age过期了</li>
+</ol>
+<p>解决这个问题目前有两种方案：</p>
+<ol>
+<li><p>在浏览器预置HSTS域名列表，就是上面提到的 HSTS Preload List 方案。该域名列表被分发和硬编码到主流的Web浏览器。客户端访问此列表中的域名将主动的使用HTTPS，并拒绝使用HTTP访问该站点。</p>
+</li>
+<li><p>将HSTS信息加入到域名系统记录中。但这需要保证DNS的安全性，也就是需要部署域名系统安全扩展。</p>
+</li>
+</ol>
+<h3 id="还有其它可能存在的问题"><a href="#还有其它可能存在的问题" class="headerlink" title="还有其它可能存在的问题"></a>还有其它可能存在的问题</h3><p>由于HSTS会在一定时间后失效(有效期由max-age指定)，所以浏览器是否强制 HSTS 策略取决于当前系统时间。大部分操作系统经常通过网络时间协议更新系统时间，如Ubuntu每次连接网络时，OS X Lion每隔9分钟会自动连接时间服务器。攻击者可以通过伪造NTP信息，设置错误时间来绕过HSTS。</p>
+<p>解决方法是认证NTP信息，或者禁止NTP大幅度增减时间。比如：Windows 8 每7天更新一次时间，并且要求每次NTP设置的时间与当前时间不得超过15小时。</p>
+<h2 id="支持-HSTS-的浏览器"><a href="#支持-HSTS-的浏览器" class="headerlink" title="支持 HSTS 的浏览器"></a>支持 HSTS 的浏览器</h2><p>目前主流浏览器都已经支持HSTS特性，具体可参考下面列表：</p>
+<ol>
+<li>Google Chrome 4及以上版本</li>
+<li>Firefox 4及以上版本</li>
+<li>Opera 12及以上版本</li>
+<li>Safari从OS X Mavericks起</li>
+<li>Internet Explorer及以上版本</li>
+</ol>
+<h2 id="CVSS-3-0-的评分"><a href="#CVSS-3-0-的评分" class="headerlink" title="CVSS 3.0 的评分"></a>CVSS 3.0 的评分</h2><p>我们知道如果没有 HSTS 加持的话，就有可能会出现 SSL 剥离攻击，导致 HTTP 的会话被劫持。 那么他的危害性是属于哪一个级别呢，如果是按照 CVSS 3.0 的评分，大概是多少分？ (关于 CVSS, 可以看 <a href="/2020/05/25/cvss/" title="web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性">web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性</a>)</p>
+<p>以 <code>Missing HTTP Strict Transport Security Policy</code>  可以在这两个站点找到对应的 CVSS 3.0 的评分</p>
+<ul>
+<li><a href="https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/http-strict-transport-security-hsts-policy-not-enabled/" target="_blank" rel="noopener">netsparker</a> -&gt; medium</li>
+<li><a href="https://www.tenable.com/plugins/was/98056" target="_blank" rel="noopener">tenable</a> -&gt; medium</li>
+</ul>
+<p><img src="/2020/05/25/header-hsts/14.png" alt="png"></p>
+<p>评分的时候，危险级就是 medium。</p>
+<h2 id="HSTS-部署"><a href="#HSTS-部署" class="headerlink" title="HSTS 部署"></a>HSTS 部署</h2><p>HSTS 策略只能在 HTTPS 响应中进行设置，网站必须使用默认的443端口；必须使用域名，不能是IP。因此需要把HTTP重定向到HTTPS，如果明文响应中允许设置HSTS头，中间人攻击者就可以通过在普通站点中注入HSTS信息来执行DoS攻击。</p>
+<h3 id="1-Nginx-上启用-HSTS"><a href="#1-Nginx-上启用-HSTS" class="headerlink" title="1. Nginx 上启用 HSTS"></a>1. Nginx 上启用 HSTS</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add_header Strict-Transport-Security "max-age=63072000; includeSubdomains; preload";</span><br></pre></td></tr></table></figure>
+<p>启用之后要重启:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ service nginx restart</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-Apache-上启用-HSTS"><a href="#2-Apache-上启用-HSTS" class="headerlink" title="2. Apache 上启用 HSTS"></a>2. Apache 上启用 HSTS</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Header always set Strict-Transport-Security "max-age=63072000; includeSubdomains; preload"</span><br></pre></td></tr></table></figure>
+<p>启用之后要重启:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ service apche2 restart</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-IIS启用HSTS"><a href="#3-IIS启用HSTS" class="headerlink" title="3. IIS启用HSTS"></a>3. IIS启用HSTS</h3><p>要在IIS上启用HSTS需要用到第三方模块，具体可参考：<a href="https://hstsiis.codeplex.com/" target="_blank" rel="noopener">https://hstsiis.codeplex.com/</a></p>
+<h3 id="4-其他云平台"><a href="#4-其他云平台" class="headerlink" title="4. 其他云平台"></a>4. 其他云平台</h3><h4 id="腾讯云"><a href="#腾讯云" class="headerlink" title="腾讯云"></a>腾讯云</h4><p>如果是腾讯云，那么提个工单，让他们后台帮我们配就行了。</p>
+<h4 id="aws-cloudfront"><a href="#aws-cloudfront" class="headerlink" title="aws cloudfront"></a>aws cloudfront</h4><p>关于在 cloudfront 添加安全头部，可以参考之前写的这个: <a href="/2020/04/26/cloudfront-add-x-frame-options/" title="web 安全之 - cloudfront 添加 x-frame-options 防止 Clickjacking">web 安全之 - cloudfront 添加 x-frame-options 防止 Clickjacking</a>, 只不过 node 的脚本换成:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">exports.handler = (event, context, callback) =&gt; &#123;</span><br><span class="line">    //Get contents of response</span><br><span class="line">    const response = event.Records[0].cf.response;</span><br><span class="line">    const headers = response.headers;</span><br><span class="line">    //Set new headers</span><br><span class="line">    headers['strict-transport-security'] = [&#123;key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubdomains; preload'&#125;];</span><br><span class="line">    //Return modified response</span><br><span class="line">    callback(null, response);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>当然如果你的站点由于某些其他原因，也要允许 http 请求存在，那么配置的时候，就不能加上 <code>includeSubdomains</code> 和 <code>preload</code> 这个配置项。</p>
+<h2 id="开启之后的测试"><a href="#开启之后的测试" class="headerlink" title="开启之后的测试"></a>开启之后的测试</h2><p>假设我通过 nginx 开启了 HSTS 的配置:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add_header Strict-Transport-Security "max-age=300";</span><br></pre></td></tr></table></figure></p>
+<p>最简单的测试当然是直接 curl 来测试:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[kbz@centos156 ~]$ curl -I https://www.example.com</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Server: openresty</span><br><span class="line">Date: Wed, 27 May 2020 12:10:36 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 30759</span><br><span class="line">Last-Modified: Wed, 20 May 2020 07:10:44 GMT</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Keep-Alive: timeout=30</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">ETag: "5ec4d7f4-7827"</span><br><span class="line">X-Frame-Options: SAMEORIGIN</span><br><span class="line">Strict-Transport-Security: max-age=300</span><br><span class="line">Accept-Ranges: bytes</span><br></pre></td></tr></table></figure></p>
+<p>当然也可以直接在站点实测一下完整流程，直接用 http 的协议输入, 可以看到有进行了一次 301 跳转：</p>
+<p><img src="/2020/05/25/header-hsts/1.png" alt="png"></p>
+<p>这个是 nginx 配置的，如果是 http 的请求，那么就会进行 301 重定向到 https， 所以也可以看到 nginx 有两条记录，先是 301， 然后再是 200 :<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">www.xxx.com 125.xx.xx.xxx "125.xx.xx.xxx" - - [25/May/2020:03:06:57 +0000] "GET / HTTP/1.1" "301" 182 "-" "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36" 0.000 477 1439 [-]</span><br><span class="line">www.xxx.com 125.xx.xx.xxx "125.xx.xx.xxx" - - [25/May/2020:03:06:57 +0000] "GET / HTTP/2.0" "200" 6072 "-" "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36" 0.000 6269 56 [-]</span><br></pre></td></tr></table></figure></p>
+<p>这时候可以看到在 https 请求的 response，就会返回这个头部了:<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strict-transport-security: max-age=300</span><br></pre></td></tr></table></figure></p>
+<p>然后接下来我们再请求一次，还是依然输入 http 协议的网址，然后看看是什么效果:</p>
+<p><img src="/2020/05/25/header-hsts/2.png" alt="png"></p>
+<p>可以看到还是有一个 3xx 开头的跳转，307 跳转到 https 的协议:</p>
+<p><img src="/2020/05/25/header-hsts/3.png" alt="png"></p>
+<p>而且很神奇的是，这个 307 的跳转我并没有在 nginx 的配置上看到过，而且 nginx 的 access log 也只有 200 的状态值这一条，没有 307 跳转这一条。 所以答案就很明显了， 这个 307 跳转其实是浏览器自己处理的，并没有到达 nginx 的服务端层面。 其实就是服务端检测到这个域名有配置 HSTS, 所以就将 http 协议自动转为 https 协议，然后再发送到服务端，这也是为啥服务端只看到一条 access log 的原因，因为 http 协议根本就没有到达服务器。</p>
+<h2 id="HSTS-缓存的清除"><a href="#HSTS-缓存的清除" class="headerlink" title="HSTS 缓存的清除"></a>HSTS 缓存的清除</h2><p>在测试 HSTS 的时候，我们需要经常对 HSTS 的配置进行清除，最常规的有两种:</p>
+<ol>
+<li>将 max-age 设置一个很短的时间，然后等待它过期，再测试</li>
+<li>清除浏览器缓存</li>
+<li>每次都开启一个隐身模式(无痕模式)的 tab 页</li>
+</ol>
+<p>其中前两种都不方便，尤其是第二种，清除浏览器缓存，因为很多密码的记住密码的保存都放在缓存中，一旦清除了浏览器的整体缓存，这些密码后面又要重新输入了。 第三种倒是可以接受，不过每次测试都得重新再开一个窗口，不能一直用。 其实一些现代浏览器，比如 Chrome，Firefox 都有针对清除 HSTS 缓存的功能。</p>
+<h3 id="1-Chrome-清除-HSTS"><a href="#1-Chrome-清除-HSTS" class="headerlink" title="1. Chrome 清除 HSTS"></a>1. Chrome 清除 HSTS</h3><ol>
+<li>在 tab 页打开 chrome://net-internals/#hsts</li>
+<li>在 <code>Query HSTS/PKP domain</code> 输入要检测的域名，如果存在 HSTS 缓存，下面会列出来，如果不存在，下面就会变成 <code>Not found</code></li>
+</ol>
+<p><img src="/2020/05/25/header-hsts/4.png" alt="png"></p>
+<p>请注意，这是一个非常敏感的搜索。请只输入主机名，比如 <a href="http://www.example.com" target="_blank" rel="noopener">www.example.com</a> 或 example.com，不要输入任何相关的协议或路径。</p>
+<ol start="3">
+<li>如果存在的话，到最下面的 <code>Delete domain security policies</code> 然后输入这个域名，最后点击 delete 按钮，就可以清除了</li>
+</ol>
+<p><img src="/2020/05/25/header-hsts/5.png" alt="png"></p>
+<h3 id="2-Firefox-清除-hsts"><a href="#2-Firefox-清除-hsts" class="headerlink" title="2. Firefox 清除 hsts"></a>2. Firefox 清除 hsts</h3><ol>
+<li>关闭 Firefox 中所有打开的标签。</li>
+<li>利用键盘快捷键 Ctrl + Shift + H（Mac上为Cmd + Shift + H）打开完整的历史窗口。在以下步骤中，你必须使用到这一窗口或侧边栏。</li>
+<li>找到你想要为之删除HSTS设置的网站——如果需要，你可以在右上角搜索该网站。</li>
+<li>从项目列表中右键点击该网站，并点击忘记这个网站。这将会清除这个域名的HSTS设置（以及其他缓存数据）。</li>
+<li>重启Firefox并访问该网站。</li>
+</ol>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>HSTS 从 web 安全的角度来看，还是非常有必要的，尤其是现在全站 HTTPS 的时代，更要防止这种因为首次请求 http 而被劫持的 SSL 剥离攻击。</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://blog.csdn.net/u014311799/article/details/79037717" target="_blank" rel="noopener">HSTS详解</a></li>
+<li><a href="https://www.cnblogs.com/luckcs/articles/6944535.html" target="_blank" rel="noopener">开启HSTS让浏览器强制跳转HTTPS访问</a></li>
+<li><a href="https://www.racent.com/blog/clear-hsts-settings-chrome-firefox" target="_blank" rel="noopener">如何清除Chrome和Firefox中的HSTS设置？</a></li>
+<li><a href="https://hstspreload.org/" target="_blank" rel="noopener">hstspreload</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/05/25/header-hsts/" title="web 安全之 - 开启HSTS让浏览器强制跳转HTTPS访问">http://kebingzao.com/2020/05/25/header-hsts/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/14/a-target-blank/" rel="next" title="web 安全之 - A 标签target=”_blank”的安全问题及解决办法">
+                <i class="fa fa-chevron-left"></i> web 安全之 - A 标签target=”_blank”的安全问题及解决办法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/25/cvss/" rel="prev" title="web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性">
+                web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">198</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">47</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#启用-HTTPS-也不够安全"><span class="nav-number">3.</span> <span class="nav-text">启用 HTTPS 也不够安全</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-HSTS-来解决"><span class="nav-number">4.</span> <span class="nav-text">使用 HSTS 来解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HSTS-语法介绍"><span class="nav-number">5.</span> <span class="nav-text">HSTS 语法介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HSTS-下浏览器强制拒绝不安全的连接"><span class="nav-number">6.</span> <span class="nav-text">HSTS 下浏览器强制拒绝不安全的连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-preload-list-防止首次劫持风险"><span class="nav-number">7.</span> <span class="nav-text">使用 preload list 防止首次劫持风险</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HSTS-缺点"><span class="nav-number">8.</span> <span class="nav-text">HSTS 缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#还有其它可能存在的问题"><span class="nav-number">8.1.</span> <span class="nav-text">还有其它可能存在的问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#支持-HSTS-的浏览器"><span class="nav-number">9.</span> <span class="nav-text">支持 HSTS 的浏览器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CVSS-3-0-的评分"><span class="nav-number">10.</span> <span class="nav-text">CVSS 3.0 的评分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HSTS-部署"><span class="nav-number">11.</span> <span class="nav-text">HSTS 部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Nginx-上启用-HSTS"><span class="nav-number">11.1.</span> <span class="nav-text">1. Nginx 上启用 HSTS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Apache-上启用-HSTS"><span class="nav-number">11.2.</span> <span class="nav-text">2. Apache 上启用 HSTS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-IIS启用HSTS"><span class="nav-number">11.3.</span> <span class="nav-text">3. IIS启用HSTS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-其他云平台"><span class="nav-number">11.4.</span> <span class="nav-text">4. 其他云平台</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#腾讯云"><span class="nav-number">11.4.1.</span> <span class="nav-text">腾讯云</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#aws-cloudfront"><span class="nav-number">11.4.2.</span> <span class="nav-text">aws cloudfront</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开启之后的测试"><span class="nav-number">12.</span> <span class="nav-text">开启之后的测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HSTS-缓存的清除"><span class="nav-number">13.</span> <span class="nav-text">HSTS 缓存的清除</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Chrome-清除-HSTS"><span class="nav-number">13.1.</span> <span class="nav-text">1. Chrome 清除 HSTS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Firefox-清除-hsts"><span class="nav-number">13.2.</span> <span class="nav-text">2. Firefox 清除 hsts</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">14.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/05/25/header-hsts/';
+          this.page.identifier = '2020/05/25/header-hsts/';
+          this.page.title = 'web 安全之 - 开启HSTS让浏览器强制跳转HTTPS访问';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

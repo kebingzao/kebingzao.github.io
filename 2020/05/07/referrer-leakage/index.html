@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前有个好心的白帽子有发了一个邮件过来:123456789101112131415i am a security researcher and i founded this vulnerability in your website.I have found that you are leaking via the referrer the reset password link. I am">
+<meta name="keywords" content="security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="web 安全之 - 页面禁用 referer(第三方站点的 referer 头部泄露重置密码链接)">
+<meta property="og:url" content="http://kebingzao.com/2020/05/07/referrer-leakage/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前有个好心的白帽子有发了一个邮件过来:123456789101112131415i am a security researcher and i founded this vulnerability in your website.I have found that you are leaking via the referrer the reset password link. I am">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/05/07/referrer-leakage/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/07/referrer-leakage/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/07/referrer-leakage/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/07/referrer-leakage/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/07/referrer-leakage/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/07/referrer-leakage/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/07/referrer-leakage/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/07/referrer-leakage/8.png">
+<meta property="og:updated_time" content="2020-05-27T16:41:58.338Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="web 安全之 - 页面禁用 referer(第三方站点的 referer 头部泄露重置密码链接)">
+<meta name="twitter:description" content="前言之前有个好心的白帽子有发了一个邮件过来:123456789101112131415i am a security researcher and i founded this vulnerability in your website.I have found that you are leaking via the referrer the reset password link. I am">
+<meta name="twitter:image" content="http://kebingzao.com/2020/05/07/referrer-leakage/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/05/07/referrer-leakage/"/>
+
+
+
+
+
+  <title>web 安全之 - 页面禁用 referer(第三方站点的 referer 头部泄露重置密码链接) | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/05/07/referrer-leakage/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">web 安全之 - 页面禁用 referer(第三方站点的 referer 头部泄露重置密码链接)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-07T19:33:41+08:00">
+                2020-05-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/05/07/referrer-leakage/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/05/07/referrer-leakage/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/05/07/referrer-leakage/" class="leancloud_visitors" data-flag-title="web 安全之 - 页面禁用 referer(第三方站点的 referer 头部泄露重置密码链接)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有个好心的白帽子有发了一个邮件过来:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">i am a security researcher and i founded this vulnerability in your website.</span><br><span class="line"></span><br><span class="line">I have found that you are leaking via the referrer the reset password link. I am attaching the photo as proof of concept that the site is indeed leaking the reset password link via the referrer.</span><br><span class="line"></span><br><span class="line">Proof of concept:       </span><br><span class="line">图片1</span><br><span class="line">图片2</span><br><span class="line">图片3</span><br><span class="line">    Thats when someone loads the reset password link and decided to click on external links.</span><br><span class="line"></span><br><span class="line">Impact</span><br><span class="line"></span><br><span class="line">Password Reset Token will be leaked by the Server to that third party site and that token can be used by third parties to reset the password and take over the account.</span><br><span class="line"></span><br><span class="line">Thanks</span><br></pre></td></tr></table></figure></p>
+<p>他说我们的忘记密码功能的重置密码链接，会加载第三方统计，这时候带过去的 referer 头部就会将这个页面的 url 带过去，从而暴露了重置密码的 token。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>我分析了一下，发现重置密码这个页面，确实在加载第三方统计的时候，referer 头部会将整个 url 当做值带过去, 也就是这些第三方程序是可以在用户进入这个重置密码页面的时候，通过 referer 头部来得到这个重置密码的链接，比如下图：<br><a id="more"></a></p>
+<p><img src="/2020/05/07/referrer-leakage/1.png" alt="png"></p>
+<h3 id="危害性"><a href="#危害性" class="headerlink" title="危害性"></a>危害性</h3><p>危害性一定程度上是有的，不过当初在做重置密码的时候，本身 token 就存在有效性了，比如半小时。 并且在重置密码的时候，还要输入正确的邮箱，才能重置成功。 所以还是比较安全。</p>
+<p>但是总归是一个隐患，所以还是要解决掉。</p>
+<h2 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h2><h3 id="直接不加载第三方统计"><a href="#直接不加载第三方统计" class="headerlink" title="直接不加载第三方统计"></a>直接不加载第三方统计</h3><p>这种是最简单的，不加载第三方统计，就不会有暴露问题。 但是有时候我们又需要第三方统计的一些数据来帮助我们了解用户的一些活跃数据和 talking data。所以这个不是最优解。</p>
+<h3 id="禁止-referer-头部"><a href="#禁止-referer-头部" class="headerlink" title="禁止 referer 头部"></a>禁止 referer 头部</h3><p>最好的方式就是这个页面在加载外部资源的时候，禁止 referer 头部。 后面我们也是用这种方式来处理的。</p>
+<h2 id="论页面禁止-referer-的-6-种方式"><a href="#论页面禁止-referer-的-6-种方式" class="headerlink" title="论页面禁止 referer 的 6 种方式"></a>论页面禁止 referer 的 6 种方式</h2><h3 id="1-head-标签中添加-meta属性"><a href="#1-head-标签中添加-meta属性" class="headerlink" title="1. head 标签中添加 meta属性"></a>1. head 标签中添加 meta属性</h3><p>可以在 head 标签中添加 meta 属性，设置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">name=&apos;referrer&apos; content=&apos;never&apos;</span><br></pre></td></tr></table></figure></p>
+<p>referer 的 metedata 参数可以设置为以下几种类型的值：</p>
+<ul>
+<li>never</li>
+<li>always</li>
+<li>origin</li>
+<li>default</li>
+</ul>
+<p>如果在文档中插入 meta 标签，并且 name 属性的值为 referrer，浏览器客户端将按照如下步骤处理这个标签：</p>
+<ol>
+<li>如果 meta 标签中没有 content 属性，则终止下面所有操作</li>
+<li>将 content 的值复制给 referrer-policy ，并转换为小写</li>
+<li>检查 content 的值是否为上面 list 中的一个，如果不是，则将值置为 default</li>
+</ol>
+<p>接下来浏览器后续发起 http 请求的时候，会按照 content 的值，做出如下反应 (下面 referer-policy 的值即 meta 标签中 content 的值):</p>
+<ol>
+<li>如果 referer-policy 的值为 never：删除 http head 中的 referer</li>
+<li>如果 referer-policy 的值为 default：如果当前页面使用的是 https 协议，而正要加载的资源使用的是普通的 http 协议，则将 http header 中的 referer 置为空</li>
+<li>如果 referer-policy 的值为 origin：只发送 origin 部分</li>
+<li>如果 referer-policy 的值为 always：不改变http header 中的 referer 的值，注意：这种情况下，如果当前页面使用了 https 协议，而要加载的资源使用的是 http 协议，加载资源的请求头中也会携带 referer</li>
+</ol>
+<h4 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h4><p>举个例子，如果你的页面是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;meta name=&quot;referrer&quot; content=&quot;never&quot;&gt;</span><br></pre></td></tr></table></figure></p>
+<p>那么加载的第三方资源将不会带上 referer 头部:</p>
+<p><img src="/2020/05/07/referrer-leakage/2.png" alt="png"></p>
+<p>而且可以看到请求的 <code>Referrer Policy</code> 变成 <code>no-referrer</code>。</p>
+<p>然后如果是换成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;meta name=&quot;referrer&quot; content=&quot;origin&quot;&gt;</span><br></pre></td></tr></table></figure></p>
+<p>就换变成只带 host 域名， 跟 origin 头部几乎一样 (多了最外面一个斜杠)</p>
+<p><img src="/2020/05/07/referrer-leakage/3.png" alt="png"></p>
+<p>然后对应请求的 <code>Referrer Policy</code> 变成 <code>origin</code>:</p>
+<p><img src="/2020/05/07/referrer-leakage/4.png" alt="png"></p>
+<h4 id="兼容性"><a href="#兼容性" class="headerlink" title="兼容性"></a>兼容性</h4><p>这个标准还是比较老的，不过通过 <a href="https://caniuse.com/#search=meta%20referrer" target="_blank" rel="noopener">can i use meta:referrer</a> 还是可以看到大部分的主流浏览器 (Edge, Firefox, Chrome) 都有支持 (我亲测过了)</p>
+<p><img src="/2020/05/07/referrer-leakage/5.png" alt="png"></p>
+<h3 id="2-添加ReferrerPolicy属性"><a href="#2-添加ReferrerPolicy属性" class="headerlink" title="2. 添加ReferrerPolicy属性"></a>2. 添加ReferrerPolicy属性</h3><p>添加 meta 标签相当于对文档中的所有链接都取消了 referer ，而 ReferrerPolicy 则更精确的指定了某一个资源的 referer 策略。关于这个策略的定义可以参照 MDN。比如我想只对某一个图片取消referrer，如下编写即可:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;img src=&quot;xxxx.jpg&quot;  referrerPolicy=&quot;no-referrer&quot; /&gt;</span><br></pre></td></tr></table></figure></p>
+<p>A 标签也支持这个属性:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a href=&quot;xxxx.html&quot;  referrerPolicy=&quot;no-referrer&quot; /&gt;</span><br></pre></td></tr></table></figure></p>
+<h4 id="兼容性-1"><a href="#兼容性-1" class="headerlink" title="兼容性"></a>兼容性</h4><p>通过 <a href="https://caniuse.com/#search=ReferrerPolicy" target="_blank" rel="noopener">can i use referrerPolicy</a>， 可以看到除了 IE 和 少部分手机浏览器， 大部分的主流浏览器还是支持的:</p>
+<p><img src="/2020/05/07/referrer-leakage/6.png" alt="png"></p>
+<h3 id="3-通过-rel-’noreferrer‘"><a href="#3-通过-rel-’noreferrer‘" class="headerlink" title="3. 通过 rel=’noreferrer‘"></a>3. 通过 rel=’noreferrer‘</h3><p>还可以通过标签的 rel 属性来禁止 referer 头部:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;a href=&quot;xxxx.html&quot;  rel=&quot;noreferrer&quot; /&gt;</span><br></pre></td></tr></table></figure></p>
+<p>当然目前兼容的有限, 只支持  <code>&lt;a&gt;</code>, <code>&lt;area&gt;</code>, <code>&lt;form&gt;</code> 这三个元素:<br><blockquote><p>The noreferrer keyword for the rel attribute of the <code>&lt;a&gt;</code>, <code>&lt;area&gt;</code>, and <code>&lt;form&gt;</code> elements instructs the browser, when navigating to the target resource, to omit the Referer header and otherwise leak no referrer information — and additionally to behave as if the noopener keyword were also specified.</p>
+<footer><strong>mozilla</strong><cite><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Link_types/noreferrer" target="_blank" rel="noopener">developer.mozilla.org/en-US/docs/Web/HTML/Link_types/noreferrer</a></cite></footer></blockquote></p>
+<p>通过 <a href="https://caniuse.com/#search=noreferrer" target="_blank" rel="noopener">can i use noreferrer</a> 可以看到支持的浏览器版本:</p>
+<p><img src="/2020/05/07/referrer-leakage/7.png" alt="png"></p>
+<h3 id="4-代理模式"><a href="#4-代理模式" class="headerlink" title="4. 代理模式"></a>4. 代理模式</h3><p>这个就比较好理解了，把自己的服务器当做代理服务器, 请求先经过自己服务器, 修改referer头, 再反向代理到真正的服务器地址。</p>
+<h3 id="5-外链-通过-iframe-来打开"><a href="#5-外链-通过-iframe-来打开" class="headerlink" title="5. 外链 通过 iframe 来打开"></a>5. 外链 通过 iframe 来打开</h3><p>如果是通过外链的话，那么可以通过 iframe 的方式来打开:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function open_without_referrer(link)&#123;</span><br><span class="line">  document.body.appendChild(document.createElement(&apos;iframe&apos;)).src = &apos;javascript:&quot;&lt;script&gt;top.location.replace(\&apos;&apos;+link+&apos;\&apos;)&lt;\/script&gt;&quot;&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个其实就是通过 <code>top.location.replace</code> 方法替换当前的页面，从而丢失掉 referer 来源，这时候如果点击浏览器的回退按钮，就会发现已经回退不过去了。</p>
+<h3 id="6-外链通过新窗口打开"><a href="#6-外链通过新窗口打开" class="headerlink" title="6. 外链通过新窗口打开"></a>6. 外链通过新窗口打开</h3><p>如果是通过 window.open 打开的方式，也可以这样做:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">function open_new_window(full_link)&#123; </span><br><span class="line">    window.open(&apos;javascript:window.name;&apos;, &apos;&lt;script&gt;location.replace(&quot;&apos;+full_link+&apos;&quot;)&lt;\/script&gt;&apos;);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个跟上面的 iframe 差不多，也是通过 <code>location.replace</code> 方法来更新新打开窗口的文档。从而丢失掉 referer 来源。</p>
+<h3 id="推荐一个第三方库-noreferrer-js"><a href="#推荐一个第三方库-noreferrer-js" class="headerlink" title="推荐一个第三方库 noreferrer.js"></a>推荐一个第三方库 noreferrer.js</h3><p>提供跨浏览器支持的更好的办法是使用一个第三方的库 <a href="https://github.com/knu/noreferrer/blob/master/noreferrer.js" target="_blank" rel="noopener">noreferrer.js</a>，它可以自动识别浏览器并选择最优方案。</p>
+<p>不过这边需要注意一点的是, 对于某些几乎不支持的特性浏览器，比如 Opera，<code>noreferrer.js</code> 的解决方案是利用 google 的url中转。在国内的网络环境下，你懂的。。。 所以可以自己搭建一个跳转的页面，或者用其他站点的url跳转接口。</p>
+<h2 id="最后的解决方案"><a href="#最后的解决方案" class="headerlink" title="最后的解决方案"></a>最后的解决方案</h2><p>当然回到本次的应用场景，后面我还是采用 meta 标签的方式，然后将 content 设置为 origin， 让其只传 origin，这样也是为了方便某些第三方统计的数据收集和跟踪。</p>
+<p>不过后面还发现一个问题，我发现有些第三方统计，还会有自己的自定义头部，然后还是带上整个页面的 url:</p>
+<p><img src="/2020/05/07/referrer-leakage/8.png" alt="png"></p>
+<p>针对这种情况，那就整个的第三方统计都不要加载了。</p>
+<hr>
+<p>参考文章:</p>
+<ul>
+<li><a href="https://blog.csdn.net/weixin_43627766/article/details/90311889" target="_blank" rel="noopener">html禁用referer</a></li>
+<li><a href="https://segmentfault.com/q/1010000000123441" target="_blank" rel="noopener">如何让浏览器在访问链接时不要带上referer</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/05/07/referrer-leakage/" title="web 安全之 - 页面禁用 referer(第三方站点的 referer 头部泄露重置密码链接)">http://kebingzao.com/2020/05/07/referrer-leakage/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/29/reset-pwd-security/" rel="next" title="web 安全之 - 关于重置密码链接的几个安全问题">
+                <i class="fa fa-chevron-left"></i> web 安全之 - 关于重置密码链接的几个安全问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/14/a-target-blank/" rel="prev" title="web 安全之 - A 标签target=”_blank”的安全问题及解决办法">
+                web 安全之 - A 标签target=”_blank”的安全问题及解决办法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">198</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">47</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#危害性"><span class="nav-number">2.1.</span> <span class="nav-text">危害性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方式"><span class="nav-number">3.</span> <span class="nav-text">解决方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#直接不加载第三方统计"><span class="nav-number">3.1.</span> <span class="nav-text">直接不加载第三方统计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#禁止-referer-头部"><span class="nav-number">3.2.</span> <span class="nav-text">禁止 referer 头部</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#论页面禁止-referer-的-6-种方式"><span class="nav-number">4.</span> <span class="nav-text">论页面禁止 referer 的 6 种方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-head-标签中添加-meta属性"><span class="nav-number">4.1.</span> <span class="nav-text">1. head 标签中添加 meta属性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#例子"><span class="nav-number">4.1.1.</span> <span class="nav-text">例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#兼容性"><span class="nav-number">4.1.2.</span> <span class="nav-text">兼容性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-添加ReferrerPolicy属性"><span class="nav-number">4.2.</span> <span class="nav-text">2. 添加ReferrerPolicy属性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#兼容性-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">兼容性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-通过-rel-’noreferrer‘"><span class="nav-number">4.3.</span> <span class="nav-text">3. 通过 rel=’noreferrer‘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-代理模式"><span class="nav-number">4.4.</span> <span class="nav-text">4. 代理模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-外链-通过-iframe-来打开"><span class="nav-number">4.5.</span> <span class="nav-text">5. 外链 通过 iframe 来打开</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-外链通过新窗口打开"><span class="nav-number">4.6.</span> <span class="nav-text">6. 外链通过新窗口打开</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#推荐一个第三方库-noreferrer-js"><span class="nav-number">4.7.</span> <span class="nav-text">推荐一个第三方库 noreferrer.js</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后的解决方案"><span class="nav-number">5.</span> <span class="nav-text">最后的解决方案</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/05/07/referrer-leakage/';
+          this.page.identifier = '2020/05/07/referrer-leakage/';
+          this.page.title = 'web 安全之 - 页面禁用 referer(第三方站点的 referer 头部泄露重置密码链接)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

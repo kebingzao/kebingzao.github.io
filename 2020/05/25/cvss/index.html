@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言作为一个站点，肯定少不了那些好心的 researcher 给你的站点或者服务提出各种各样的安全缺陷, 让你去修改，并且适当的给他们一点奖励。 所以如何评价安全漏洞的危害性就显得很重要, 毕竟你也不希望一个小安全问题就给一大笔现金奖励吧，钱多也不是这么花的。 而且除了对安全漏洞评分之外， 还需要根据不同的危害性给予不同的奖励。 比如我们就是以 CVSS 3.0 标准来对安全漏洞进行级别划分，并且">
+<meta name="keywords" content="security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性">
+<meta property="og:url" content="http://kebingzao.com/2020/05/25/cvss/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言作为一个站点，肯定少不了那些好心的 researcher 给你的站点或者服务提出各种各样的安全缺陷, 让你去修改，并且适当的给他们一点奖励。 所以如何评价安全漏洞的危害性就显得很重要, 毕竟你也不希望一个小安全问题就给一大笔现金奖励吧，钱多也不是这么花的。 而且除了对安全漏洞评分之外， 还需要根据不同的危害性给予不同的奖励。 比如我们就是以 CVSS 3.0 标准来对安全漏洞进行级别划分，并且">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/cvss/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/cvss/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/05/25/cvss/2.png">
+<meta property="og:updated_time" content="2020-05-27T16:41:58.324Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性">
+<meta name="twitter:description" content="前言作为一个站点，肯定少不了那些好心的 researcher 给你的站点或者服务提出各种各样的安全缺陷, 让你去修改，并且适当的给他们一点奖励。 所以如何评价安全漏洞的危害性就显得很重要, 毕竟你也不希望一个小安全问题就给一大笔现金奖励吧，钱多也不是这么花的。 而且除了对安全漏洞评分之外， 还需要根据不同的危害性给予不同的奖励。 比如我们就是以 CVSS 3.0 标准来对安全漏洞进行级别划分，并且">
+<meta name="twitter:image" content="http://kebingzao.com/2020/05/25/cvss/3.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/05/25/cvss/"/>
+
+
+
+
+
+  <title>web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/05/25/cvss/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-25T15:48:37+08:00">
+                2020-05-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/05/25/cvss/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/05/25/cvss/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/05/25/cvss/" class="leancloud_visitors" data-flag-title="web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>作为一个站点，肯定少不了那些好心的 researcher 给你的站点或者服务提出各种各样的安全缺陷, 让你去修改，并且适当的给他们一点奖励。 所以如何评价安全漏洞的危害性就显得很重要, 毕竟你也不希望一个小安全问题就给一大笔现金奖励吧，钱多也不是这么花的。 而且除了对安全漏洞评分之外， 还需要根据不同的危害性给予不同的奖励。 比如我们就是以 CVSS 3.0 标准来对安全漏洞进行级别划分，并且根据以下级别进行奖励:</p>
+<ol>
+<li>无危害性 –&gt; <code>0</code>  –&gt; 没有奖励</li>
+<li>低危害性 –&gt; <code>0.1 - 3.9</code> –&gt; 我们产品的一年 vip 使用权限</li>
+<li>中危害性 –&gt; <code>4.0 - 6.9</code> –&gt; $xxx 现金奖励</li>
+<li>高危害性 –&gt; <code>7 - 10</code> –&gt; $xxxx 现金奖励</li>
+</ol>
+<p>接下来接下来讲一下 CVSS 3.0 是一个怎么样的标准:<br><a id="more"></a></p>
+<h2 id="安全漏洞评分系统（CVSS）"><a href="#安全漏洞评分系统（CVSS）" class="headerlink" title="安全漏洞评分系统（CVSS）"></a>安全漏洞评分系统（CVSS）</h2><p>CVSS : Common Vulnerability Scoring System， 即“通用漏洞评分系统”，是一个“行业公开标准，其被设计用来评测漏洞的严重程度，并帮助确定所需反应的紧急度和重要度”。</p>
+<p>CVSS的研究是由美国国家基础建设咨询委员会 (National Infrastructure Advisory Council, NIAC)从2003年发起的，並在2005年2月完成第一版CVSS (CVSSv1)，后续则转由 <a href="https://www.first.org/cvss/" target="_blank" rel="noopener">FIRST</a> 进行进一步改善和发展，FIRST也因此建立一个CVSS特别兴趣群 (CVSS Special Interest Group, CVSS SIG)，负责以现行 CVSS 为基准，研发下一版本的 CVSS 应如何进行修正和改善。在采纳各方意见后，2007年6月第二版的CVSS (CVSSv2)正式发布，而随着各界持续提供许多意见，在2015年6月则发布了目前正在使用的第三版 CVSS (CVSSv3.0)。</p>
+<p>CVSS 采用了模块化评分体系，包含三个部分：基本维度（Base Metric Group），时间维度（Temporal Metric Group）和环境维度（Environmental Metric Group）。由这三个部分分别计算所得的分数，组成了一个0到10分的漏洞总体得分，10分代表最严重。</p>
+<ol>
+<li>基本维度奠定了漏洞得分的基础, 他的核心特性不会随时间而改变，即使添加了不同的目标环境，它们也不会改变。</li>
+<li>时间维度会随着时间推移而影响一个漏洞的紧迫程度。</li>
+<li>环境维度决定了被发现的漏洞对组织机构和其利益相关者可能产生什么样的影响。这一维度根据漏洞潜在附带损害和目标分布来评估其风险。</li>
+</ol>
+<p>顾名思义，基本维度是漏洞得分的基础，时间维度和环境维度在此基础上起到提高或降低分数的作用。 想测试一下的话，可以到<a href="https://www.first.org/cvss/calculator/3.0" target="_blank" rel="noopener">CVSS 3.0 计算器</a> 这个站点尝试一下打分。</p>
+<p>因为我们用的是 CVSSv3.0，所以我们接下来简单介绍一下基础维度的一些标准。因为一般评分也都是只会在基础维度进行评分， 除非是要更细的或者更复杂的安全漏洞，才会用到另外两个维度一起评分。</p>
+<h2 id="CVSS-V3-0-的基础维度"><a href="#CVSS-V3-0-的基础维度" class="headerlink" title="CVSS V3.0 的基础维度"></a>CVSS V3.0 的基础维度</h2><p>基础维度有8个方向来进行评分，并得出一个 0.0 - 10.0 的分数， 分数越高就代表漏洞维护程度越高</p>
+<h3 id="1-攻击向量-Attack-Vector-AV"><a href="#1-攻击向量-Attack-Vector-AV" class="headerlink" title="1. 攻击向量 (Attack Vector, AV)"></a>1. 攻击向量 (Attack Vector, AV)</h3><ul>
+<li>Network (N)：通过网络进行攻击</li>
+<li>Adjacent (A)： 通过受限制的网络进行攻击，比如局域网或者蓝牙等</li>
+<li>Local (L)：在不连接网络的情况下进行攻击</li>
+<li>Physical (P)：需要接触到实体机器才能攻击</li>
+</ul>
+<h3 id="2-攻击复杂度-Attack-Complexity-AC"><a href="#2-攻击复杂度-Attack-Complexity-AC" class="headerlink" title="2. 攻击复杂度  (Attack Complexity, AC)"></a>2. 攻击复杂度  (Attack Complexity, AC)</h3><ul>
+<li>Low (L)：低，攻击可被轻易重现</li>
+<li>High (H)：高，需攻击者达成数项条件才能成功</li>
+</ul>
+<h3 id="3-是否需要提权-Privileges-Required-PR"><a href="#3-是否需要提权-Privileges-Required-PR" class="headerlink" title="3. 是否需要提权 (Privileges Required, PR)"></a>3. 是否需要提权 (Privileges Required, PR)</h3><ul>
+<li>None (N)：不需要</li>
+<li>Low (L)：需要一般使用者权限</li>
+<li>High (H)：需要管理者权限</li>
+</ul>
+<h3 id="4-是否需要使用者操作-User-Interaction-UI"><a href="#4-是否需要使用者操作-User-Interaction-UI" class="headerlink" title="4. 是否需要使用者操作 (User Interaction, UI)"></a>4. 是否需要使用者操作 (User Interaction, UI)</h3><ul>
+<li>None (N)：不需要</li>
+<li>Required (R)：需要使用者操作某些动作才能让攻击成功</li>
+</ul>
+<h3 id="5-影响范围-Scope-S"><a href="#5-影响范围-Scope-S" class="headerlink" title="5. 影响范围 (Scope, S)"></a>5. 影响范围 (Scope, S)</h3><ul>
+<li>Unchanged (U) ：僅影響含有漏洞的元件本身 仅影响含有漏洞的元件本身</li>
+<li>Changed (C)：会影响到含有漏洞的元件以外的元件</li>
+</ul>
+<h3 id="6-机密性影响-Confidentiality-C"><a href="#6-机密性影响-Confidentiality-C" class="headerlink" title="6. 机密性影响 (Confidentiality, C)"></a>6. 机密性影响 (Confidentiality, C)</h3><ul>
+<li>None (N)：无影响</li>
+<li>Low (L)：攻击者可以取到资料，但没法使用该资料</li>
+<li>High (H)：攻击者可以取到资料并使用</li>
+</ul>
+<h3 id="7-完整性影响-Integrity-I"><a href="#7-完整性影响-Integrity-I" class="headerlink" title="7. 完整性影响(Integrity, I)"></a>7. 完整性影响(Integrity, I)</h3><ul>
+<li>None (N) ：无影响</li>
+<li>Low (L) ：攻击者有部分权限修改某些资料，但对漏洞本身的元件影响较小</li>
+<li>High (H)：攻击者有权限修改所有资料，并且对漏洞本身的元件有严重影响</li>
+</ul>
+<h3 id="8-可用性影响-Availability-A"><a href="#8-可用性影响-Availability-A" class="headerlink" title="8. 可用性影响 (Availability, A)"></a>8. 可用性影响 (Availability, A)</h3><ul>
+<li>None (N)：无影响</li>
+<li>Low (L)：可用性受到影响，导致元件或者服务可被部分取得</li>
+<li>High (H)：可用性受到严重影响，导致元件或者服务完全不可被取得</li>
+</ul>
+<p>举个例子，以 <code>WannaCry</code> 使用的漏洞 <a href="https://nvd.nist.gov/vuln/detail/CVE-2017-0144" target="_blank" rel="noopener">CVE-2017-0144</a> 的 CVSS v3.0 分数是 <a href="https://www.first.org/cvss/calculator/3.0#CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H/E:F/RL:T/RC:R" target="_blank" rel="noopener">8.1</a>，其中8个选项如下：</p>
+<ul>
+<li>Attack Vector (AV): Network</li>
+<li>Attack Complexity (AC): High</li>
+<li>Privileges Required (PR): None</li>
+<li>User Interaction (UI): None</li>
+<li>Scope (S): Unchanged</li>
+<li>Confidentiality (C): High</li>
+<li>Integrity (I): High</li>
+<li>Availability (A): High</li>
+</ul>
+<p><img src="/2020/05/25/cvss/3.png" alt="png"></p>
+<h2 id="关于-CVE"><a href="#关于-CVE" class="headerlink" title="关于 CVE"></a>关于 CVE</h2><p>既然有安全漏洞，那么就会有一个存放一些披露出来的安全漏洞的地方，其实就是 CVE。</p>
+<p>CVE的英文全称是 Common Vulnerabilities &amp; Exposures（公共漏洞和暴露）。CVE就好像是一个字典表，为广泛认同的信息安全漏洞或者已经暴露出来的弱点给出一个公共的名称。使用一个共同的名字，可以帮助用户在各自独立的各种漏洞数据库中和漏洞评估工具中共享数据，虽然这些工具很难整合在一起。这样就使得CVE成为了安全信息共享的“关键字”。如果在一个漏洞报告中指明的一个漏洞，如果有CVE名称，你就可以快速地在任何其它CVE兼容的数据库中找到相应修补的信息，解决安全问题。</p>
+<p>而且获得CVE编号并不等于这个漏洞是有价值的，甚至说这个漏洞都不一定是真实存在的。这主要源于CVE编号颁发机构开放式的工作模式。</p>
+<p>CVE开始是由MITRE Corporation负责日常工作的。但是随着漏洞数量的增加，MITRE将漏洞编号的赋予工作转移到了其CNA（CVE Numbering Authorities）成员。CNA涵盖5类成员。目前共有69家成员单位。</p>
+<ol>
+<li>MITRE：可为所有漏洞赋予CVE编号；</li>
+<li>软件或设备厂商：如Apple、Check Point、ZTE为所报告的他们自身的漏洞分配CVE ID。该类成员目前占总数的80%以上。</li>
+<li>研究机构：如Airbus，可以为第三方产品漏洞分配编号；</li>
+<li>漏洞奖金项目：如HackerOne，为其覆盖的漏洞赋予CVE编号；</li>
+<li>国家级或行业级CERT：如ICS-CERT、CERT/CC，与其漏洞协调角色相关的漏洞。</li>
+</ol>
+<p>这些机构都可以赋予 cve 编号，所以 cve 本身就没啥价值的，有价值的是这个安全漏洞本身。可以说危害性越大，范围越广的漏洞，那么价值就越大。</p>
+<h2 id="关于-CVSS-3-0-的评分原则以及一些站点参考"><a href="#关于-CVSS-3-0-的评分原则以及一些站点参考" class="headerlink" title="关于 CVSS 3.0 的评分原则以及一些站点参考"></a>关于 CVSS 3.0 的评分原则以及一些站点参考</h2><p>一些 researcher 报的安全漏洞，比如是那种比较常见的安全问题，比如以下两种:</p>
+<ul>
+<li>Missing ‘X-Frame-Options’ Header</li>
+<li>Missing HTTP Strict Transport Security Policy</li>
+</ul>
+<p>他们本身就是因为缺少一些安全的 header 字段，导致会出现一些安全问题，比如 Clickjacking 之类的。 但是这种安全问题在 cve 中是找不到具体的安全漏洞编号的，或者说可以找到好多个相关的。 这个是因为本身这种安全缺陷是要结合具体的环境才能产生安全漏洞问题，而 cve 里面才会有收录了具有这个安全缺陷的安全漏洞。比如这个 <code>CVE-2017-5782</code>, 他的描述就是:</p>
+<blockquote><p>A missing HSTS Header vulnerability in HPE Matrix Operating Environment version v7.6 was found.</p>
+<footer><strong>nvd</strong><cite><a href="https://nvd.nist.gov/vuln/detail/CVE-2017-5782" target="_blank" rel="noopener">nvd.nist.gov/vuln/detail/CVE-2017-5782</a></cite></footer></blockquote>
+<p>他要结合到具体的环境中，才能产生安全问题，所以他本身就是一个具有安全缺陷的诱因。</p>
+<p>那么怎么对这种安全缺陷进行评分呢，一种就是老老实实的根据你自己的业务情况去评估风险。 但是这种有时候主观性可能就比较大，比如你认为是级别是 low， 但是 research 认为是 medium， 这时候就会有争议。 另一种就是有一些比较专业的关于这种安全缺陷的站点，里面就有关于这个安全缺陷的评分，可以直接采用他们的，这样也比较有公信力。</p>
+<p>以 <code>Missing &#39;X-Frame-Options&#39; Header</code> 为例，我可以在这三个站点找到关于这个安全缺陷对应的 CVSS 3.0 的评分</p>
+<ul>
+<li><a href="https://www.acunetix.com/vulnerabilities/web/clickjacking-x-frame-options-header-missing/" target="_blank" rel="noopener">acunetix</a> -&gt; low</li>
+<li><a href="https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-x-frame-options-header/" target="_blank" rel="noopener">netsparker</a> -&gt; low</li>
+<li><a href="https://www.tenable.com/plugins/was/98060" target="_blank" rel="noopener">tenable</a> -&gt; low</li>
+</ul>
+<p><img src="/2020/05/25/cvss/1.png" alt="png"></p>
+<p>上面三个都认为是 low， 所以我们评分的时候，危险级就是 low</p>
+<p>以 <code>Missing HTTP Strict Transport Security Policy</code> 也可以在这两个站点找到对应的 CVSS 3.0 的评分</p>
+<ul>
+<li><a href="https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/http-strict-transport-security-hsts-policy-not-enabled/" target="_blank" rel="noopener">netsparker</a> -&gt; medium</li>
+<li><a href="https://www.tenable.com/plugins/was/98056" target="_blank" rel="noopener">tenable</a> -&gt; medium</li>
+</ul>
+<p><img src="/2020/05/25/cvss/2.png" alt="png"></p>
+<p>评分的时候，危险级就是 medium。</p>
+<p>所以我现在对这些缺陷的评分原则就是，先去这些站点查一下是否已经有存在，如果存在就直接用，如果不存在，再自己根据项目的情况进行评分。</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://www.aqniu.com/learn/45706.html" target="_blank" rel="noopener">给漏洞打分 介绍一下CVSS与Tripwire的差异</a></li>
+<li><a href="http://blog.nsfocus.net/cve-vulnerability-numbers-officially-disclose/#more-9054" target="_blank" rel="noopener">聊聊CVE漏洞编号和正式公开那些事</a> </li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/05/25/cvss/" title="web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性">http://kebingzao.com/2020/05/25/cvss/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/25/header-hsts/" rel="next" title="web 安全之 - 开启HSTS让浏览器强制跳转HTTPS访问">
+                <i class="fa fa-chevron-left"></i> web 安全之 - 开启HSTS让浏览器强制跳转HTTPS访问
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">198</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">47</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全漏洞评分系统（CVSS）"><span class="nav-number">2.</span> <span class="nav-text">安全漏洞评分系统（CVSS）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CVSS-V3-0-的基础维度"><span class="nav-number">3.</span> <span class="nav-text">CVSS V3.0 的基础维度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-攻击向量-Attack-Vector-AV"><span class="nav-number">3.1.</span> <span class="nav-text">1. 攻击向量 (Attack Vector, AV)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-攻击复杂度-Attack-Complexity-AC"><span class="nav-number">3.2.</span> <span class="nav-text">2. 攻击复杂度  (Attack Complexity, AC)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-是否需要提权-Privileges-Required-PR"><span class="nav-number">3.3.</span> <span class="nav-text">3. 是否需要提权 (Privileges Required, PR)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-是否需要使用者操作-User-Interaction-UI"><span class="nav-number">3.4.</span> <span class="nav-text">4. 是否需要使用者操作 (User Interaction, UI)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-影响范围-Scope-S"><span class="nav-number">3.5.</span> <span class="nav-text">5. 影响范围 (Scope, S)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-机密性影响-Confidentiality-C"><span class="nav-number">3.6.</span> <span class="nav-text">6. 机密性影响 (Confidentiality, C)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-完整性影响-Integrity-I"><span class="nav-number">3.7.</span> <span class="nav-text">7. 完整性影响(Integrity, I)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-可用性影响-Availability-A"><span class="nav-number">3.8.</span> <span class="nav-text">8. 可用性影响 (Availability, A)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于-CVE"><span class="nav-number">4.</span> <span class="nav-text">关于 CVE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于-CVSS-3-0-的评分原则以及一些站点参考"><span class="nav-number">5.</span> <span class="nav-text">关于 CVSS 3.0 的评分原则以及一些站点参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/05/25/cvss/';
+          this.page.identifier = '2020/05/25/cvss/';
+          this.page.title = 'web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

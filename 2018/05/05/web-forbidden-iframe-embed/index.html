@@ -89,7 +89,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://kebingzao.com/2018/05/05/web-forbidden-iframe-embed/1.png">
 <meta property="og:image" content="http://kebingzao.com/2018/05/05/web-forbidden-iframe-embed/2.png">
-<meta property="og:updated_time" content="2018-05-07T16:26:51.032Z">
+<meta property="og:updated_time" content="2020-05-27T16:41:58.343Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="web 页面防iframe嵌入（防止点击劫持Clickjacking）">
 <meta name="twitter:description" content="之前我们项目的官网有反馈一个问题，就是用户将我们的官网的页面嵌入到他自己的站点。 通过这种方式，可以用来做点击劫持 Clickjacking 因此我们要防止 页面内嵌 方法1： 通过js来防止：123if (window.location != window.parent.location) &amp;#123; window.parent.location = window.location;&amp;#125">
@@ -356,8 +356,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/前端相关/" itemprop="url" rel="index">
-                    <span itemprop="name">前端相关</span>
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
                   </a>
                 </span>
 
@@ -438,6 +438,21 @@
 <li>SAMEORIGIN：frame页面的地址只能为同源域名下的页面</li>
 <li>ALLOW-FROM：允许frame加载的页面地址</li>
 </ul>
+<p>注意这边有个细节: <code>ALLOW-FROM</code> 这个参数其实新版的浏览器已经不再支持了。所以就不要用了:</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/10658435/x-frame-options-allow-from-in-firefox-and-chrome" target="_blank" rel="noopener">X-Frame-Options: ALLOW-FROM in firefox and chrome</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options" target="_blank" rel="noopener">X-Frame-Options</a></li>
+</ul>
+<blockquote><p>ALLOW-FROM uri (obsolete)<br>This is an obsolete directive that no longer works in modern browsers. Don’t use it. In supporting legacy browsers, a page can only be displayed in a frame on the specified origin uri. Note that in the legacy Firefox implementation this still suffered from the same problem as SAMEORIGIN did — it doesn’t check the frame ancestors to see if they are in the same origin. The Content-Security-Policy HTTP header has a frame-ancestors directive which you can use instead.</p>
+<footer><strong>mozilla</strong><cite><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options" target="_blank" rel="noopener">developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options</a></cite></footer></blockquote>
+<p>也就是说，如果需要用到 <code>allow-from</code> 来指定固定的域名的话，可以用 <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP" target="_blank" rel="noopener">Content-Security-Policy</a> 这个头部的 <code>frame-ancestors</code> 来代替。 </p>
+<p>而且如果已经存在 <code>frame-ancestors</code> 这个值了，那么<code>X-Frame-Options</code> 这个头部将会被忽略:</p>
+<ul>
+<li><a href="https://www.w3.org/TR/CSP2/#frame-ancestors-and-frame-options" target="_blank" rel="noopener">https://www.w3.org/TR/CSP2/#frame-ancestors-and-frame-options</a></li>
+</ul>
+<blockquote><p>7.7.1. Relation to X-Frame-Options<br>This directive is similar to the X-Frame-Options header that several user agents have implemented. The ‘none’ source expression is roughly equivalent to that header’s DENY, ‘self’ to SAMEORIGIN, and so on. The major difference is that many user agents implement SAMEORIGIN such that it only matches against the top-level document’s location. This directive checks each ancestor. If any ancestor doesn’t match, the load is cancelled. [RFC7034]</p>
+<p>The frame-ancestors directive obsoletes the X-Frame-Options header. If a resource has both policies, the frame-ancestors policy SHOULD be enforced and the X-Frame-Options policy SHOULD be ignored.</p>
+<footer><strong>mozilla</strong><cite><a href="https://www.w3.org/TR/CSP2/#frame-ancestors-and-frame-options" target="_blank" rel="noopener">www.w3.org/TR/CSP2/#frame-ancestors-and-frame-options</a></cite></footer></blockquote>
 <hr>
 <h4 id="除了X-Frame-Options之外，Firefox的”Content-Security-Policy”以及Firefox的NoScript扩展也能够有效防御ClickJacking，这些方案为我们提供了更多的选择"><a href="#除了X-Frame-Options之外，Firefox的”Content-Security-Policy”以及Firefox的NoScript扩展也能够有效防御ClickJacking，这些方案为我们提供了更多的选择" class="headerlink" title="除了X-Frame-Options之外，Firefox的”Content Security Policy”以及Firefox的NoScript扩展也能够有效防御ClickJacking，这些方案为我们提供了更多的选择"></a>除了X-Frame-Options之外，Firefox的”Content Security Policy”以及Firefox的NoScript扩展也能够有效防御ClickJacking，这些方案为我们提供了更多的选择</h4>
       
@@ -590,7 +605,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">191</span>
+                  <span class="site-state-item-count">198</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

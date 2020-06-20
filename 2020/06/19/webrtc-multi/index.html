@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="webrtc," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言我们通常用的 webrtc 技术其实是一对一的 call，也就是 peer to peer。  ClientA 和 ClientB 如果能够顺利建立 P2P 的连接，则可直接通过 P2P 互相交换数据。如果由于某些网络环境原因，无法成功打通 P2P 连接的话，则可以通过一台 TURN Server 来中转数据给对方。 但是有时候我们会有一对多的情况，比如视频直播之类的(视频直播还有另一种技术:">
+<meta name="keywords" content="webrtc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多方 webrtc 的选择">
+<meta property="og:url" content="http://kebingzao.com/2020/06/19/webrtc-multi/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言我们通常用的 webrtc 技术其实是一对一的 call，也就是 peer to peer。  ClientA 和 ClientB 如果能够顺利建立 P2P 的连接，则可直接通过 P2P 互相交换数据。如果由于某些网络环境原因，无法成功打通 P2P 连接的话，则可以通过一台 TURN Server 来中转数据给对方。 但是有时候我们会有一对多的情况，比如视频直播之类的(视频直播还有另一种技术:">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-multi/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-multi/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-multi/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-multi/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-multi/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-multi/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-multi/7.png">
+<meta property="og:updated_time" content="2020-06-20T03:40:39.270Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="多方 webrtc 的选择">
+<meta name="twitter:description" content="前言我们通常用的 webrtc 技术其实是一对一的 call，也就是 peer to peer。  ClientA 和 ClientB 如果能够顺利建立 P2P 的连接，则可直接通过 P2P 互相交换数据。如果由于某些网络环境原因，无法成功打通 P2P 连接的话，则可以通过一台 TURN Server 来中转数据给对方。 但是有时候我们会有一对多的情况，比如视频直播之类的(视频直播还有另一种技术:">
+<meta name="twitter:image" content="http://kebingzao.com/2020/06/19/webrtc-multi/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/06/19/webrtc-multi/"/>
+
+
+
+
+
+  <title>多方 webrtc 的选择 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/06/19/webrtc-multi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">多方 webrtc 的选择</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-19T16:20:27+08:00">
+                2020-06-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
+                    <span itemprop="name">webrtc相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/19/webrtc-multi/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/06/19/webrtc-multi/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/06/19/webrtc-multi/" class="leancloud_visitors" data-flag-title="多方 webrtc 的选择">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们通常用的 webrtc 技术其实是一对一的 call，也就是 peer to peer。</p>
+<p><img src="/2020/06/19/webrtc-multi/1.png" alt=""></p>
+<p>ClientA 和 ClientB 如果能够顺利建立 P2P 的连接，则可直接通过 P2P 互相交换数据。如果由于某些网络环境原因，无法成功打通 P2P 连接的话，则可以通过一台 TURN Server 来中转数据给对方。</p>
+<p>但是有时候我们会有一对多的情况，比如视频直播之类的(视频直播还有另一种技术: 推流 <code>rtmp - cdn</code>)， 甚至是多对多的情况，比如多方会议。 这时候是没法满足的。所以我们需要对 webrtc 技术延伸出 一对多，甚至 多对多的 架构形式。结合网上的资料 (以下的资料和总结大量参考了文章底部列出的参考资料)。 要实现多方的 webrtc，有以下三种选择：</p>
+<ul>
+<li>Mesh</li>
+<li>MCU</li>
+<li>SFU</li>
+</ul>
+<a id="more"></a>
+<p>接下来一一介绍一下。</p>
+<h2 id="Mesh"><a href="#Mesh" class="headerlink" title="Mesh"></a><a href="https://webrtc.org.cn/20180805-codecs-webrtc-p2p/" target="_blank" rel="noopener">Mesh</a></h2><p>有了WebRTC,对于为了建立多方视频通话而向连接中添加不止一个用户这件事你有很多种选择。Mesh可能是其中最明显的解决方法。就像你已经知道的，为了使连接成为可能，每一个使用 RTCPeerConnectionAPI 的 peer 必须创建一个连接对象。这个连接对象加入了所有相关信息，例如视频和音频流。</p>
+<p>API接着使用中间发信过程传递的所有数据建立连接。</p>
+<p>我们接着对于所有被加入通话的 peers 重复这个过程。换句话说，我们对于每一个建立了另外的 RTCPeerConnection 对象。</p>
+<p>因此，如果我们使用这种策略向上面的图片中加入另一个peer的话，总体效果将是这样。</p>
+<p><img src="/2020/06/19/webrtc-multi/2.png" alt=""></p>
+<p>现在，让我们看看如果我们添加更多的 peers 会发生什么。当用户数量保持增长时，过程和带宽开始过渡消耗，在移动设备上这种情况更明显可见，资源更加有限，在宽带连接方面，通常与一个每月限制使用量的合约有关。</p>
+<p>伴随这些，我们可以说 Mesh 是实现多方视频通话的最简单方式，因为它不需要任何基础结构的改变。所有的工作都是在浏览器完成的。唯一的问题就是它只对小数量的用户有效。</p>
+<p><img src="/2020/06/19/webrtc-multi/3.png" alt=""></p>
+<p>如果我们想要支持更多用户，我们需要寻找另一种策略，一种允许我们混合所有这些由 Mesh 建立的连接的策略，为了避免客户端的大量CPU和带宽消耗。</p>
+<h2 id="MCU"><a href="#MCU" class="headerlink" title="MCU"></a><a href="https://webrtc.org.cn/20180805-codecs-webrtc-mcu/" target="_blank" rel="noopener">MCU</a></h2><p>对于多方WebRTC一个不错的选择是 MCU 。MCU 表示多点控制单元，又被称为混合，实现多方WebRTC交流的另一种策略。伴随着MCU，想法由使用peer建立连接变为只需要连接到中心服务器，中心服务器反过来发送信息到其它 peers，并且对其它 peers 也是这样。</p>
+<p>中心服务器，接收媒体服务器的名字，并掌控处理被发送到 peers 的媒体流和数据。这个过程对于不同的实现方案有所不同，但是可以简化为五步：</p>
+<p><img src="/2020/06/19/webrtc-multi/4.png" alt=""></p>
+<p>MCU 设备从 peers 接收媒体流，对其进行解码并创建一个布局，之后它对其进行编码最终发送到 peers。现在每一个 peer 只需要在流中发送和接收。这个过程如下图所示：</p>
+<p><img src="/2020/06/19/webrtc-multi/5.png" alt=""></p>
+<p>通过使用MCU，我们避免了Mesh中的所有问题。即使用户数量增加，这也不会对用户处理能力和带宽产生影响，因为每一个用户只连接到一个peer，媒体服务器。</p>
+<p>这意味着每个人都很开心，或者他们真的开心么？我知道一些人对此不开心，这些就是对媒体服务器付费的人。</p>
+<p>使用了这种方案，你需要将一台服务器放在中间，一个非常昂贵的服务器，因为它将要掌控处理媒体信息。这个过程消耗大量CPU因为它必须对媒体编解码。</p>
+<p>MCU是一个可以解决Mesh中出现的问题的可替代方案，但是花费很高。如果你需要一个在服务器端或客户端花费不高的方案，或许应该尝试另一条路线。</p>
+<h2 id="SFU"><a href="#SFU" class="headerlink" title="SFU"></a><a href="https://webrtc.org.cn/20180805-codecs-sfu-media/" target="_blank" rel="noopener">SFU</a></h2><p>多方WebRTC选择3的方案是SFU，它表示选择转发单元。SFU背后的想法与MCU相同。它在中间有一台媒体服务器，所有peers向它发送流，唯一不同的是，它不会做繁重的处理，服务器将其引到其它peers，这样它们可以进行任何所需的处理。</p>
+<p>这样服务器不需要能支持那么繁重的处理运算，你可以利用MCU提供的好处，同时避免 Mesh hassles 和 MCU 的高代价。 SFU的结构如下图所示：</p>
+<p><img src="/2020/06/19/webrtc-multi/6.png" alt=""></p>
+<p>在SFU结构中，每个peer向媒体服务器发送自己的流，媒体服务器反过来将流引到其它peers。当然，这增加了客户端的花费，客户端现在必须对媒体流编解码。另外，当用户数量增加时，下载带宽也会增加。</p>
+<p>然而，媒体服务器具有中心控制点，它可以控制正在被引导路线的媒体，为了最小化这两个问题的影响。这就是SFU选择性部分起到作用的地方。尽管现在服务器不必进行过多的像编解码之类的处理了，其它任务可以被媒体完成。基本上服务器完成的处理可以被总结为以下三步：</p>
+<p><img src="/2020/06/19/webrtc-multi/7.png" alt=""></p>
+<p>媒体服务器接收流，选择对它做什么并最终发送它。也有可能决定不发送某一个具体的流，或使用同时联播或SVC来选择性的根据接收端发送具体类型的流。例如，我们决定向具有快速网络连接和高质量计算机的用户发送1080p视频流，但是对使用宽带连接的移动设备用户发送360p视频流。</p>
+<p>尽管具有这些缺点，SFU提供了一种结构，它不像 Mesh 那么容易瘫痪，同时比 MCU 的花费低。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>综上所述， 可以看到 SFU 最适合这种多方 webrtc 的场景，SFU 服务器最核心的特点是把自己 “伪装” 成了一个 WebRTC 的 Peer 客户端，WebRTC 的其他客户端其实并不知道自己通过 P2P 连接过去的是一台真实的客户端还是一台服务器，我们通常把这种连接称之为 P2S，即：Peer to Server。除了 “伪装” 成一个 WebRTC 的 Peer 客户端外，SFU 服务器还有一个最重要的能力就是具备 one-to-many 的能力，即可以将一个 Client 端的数据转发到其他多个 Client 端。</p>
+<p>这种网络拓扑结构中，无论多少人同时进行视频通话，每个 WebRTC 的客户端只需要连接一个 SFU 服务器，上行一路数据即可，极大减少了多人视频通话场景下 Mesh 模型给客户端带来的上行带宽压力。</p>
+<p>SFU 服务器跟 TURN 服务器最大的不同是，TURN 服务器仅仅是为 WebRTC 客户端提供的一种辅助的数据转发通道，在 P2P 不通的时候进行透明的数据转发。而 SFU 是 “懂业务” 的， 它跟 WebRTC 客户端是平等的关系，甚至 “接管了” WebRTC 客户端的数据转发的申请和控制。 而且SFU 很灵活，必要时候他也可以像 MCU 那样做处理，也可以选择要发送给哪些 peer。</p>
+<h2 id="SFU-开源框架"><a href="#SFU-开源框架" class="headerlink" title="SFU 开源框架"></a>SFU 开源框架</h2><p>目前市面上的 SFU 的开源框架主要有以下:</p>
+<ul>
+<li><a href="https://janus.conf.meetecho.com/" target="_blank" rel="noopener">Janus</a></li>
+<li><a href="https://meet.jit.si/" target="_blank" rel="noopener">Jitsi</a></li>
+<li><a href="http://www.kurento.org/" target="_blank" rel="noopener">Kurento</a></li>
+<li><a href="https://mediasoup.org/" target="_blank" rel="noopener">mediasoup</a></li>
+<li><a href="http://www.medooze.com/" target="_blank" rel="noopener">Medooze</a></li>
+</ul>
+<h2 id="关于-SFU-负载测试的资料"><a href="#关于-SFU-负载测试的资料" class="headerlink" title="关于 SFU 负载测试的资料:"></a>关于 SFU 负载测试的资料:</h2><p>关于上面五个 SFU 开源框架的性能测试，下面有最新的测试资料(2020-04), 可以参考一下, 比较稳定的框架，可以支撑同时在线客户端超过 200 多个。</p>
+<ul>
+<li><a href="https://webrtc.org.cn/20200320-sfu1/" target="_blank" rel="noopener">转折点——WebRTC SFU负载测试（一）</a></li>
+<li><a href="https://webrtc.org.cn/20200401-sfu2/" target="_blank" rel="noopener">转折点——WebRTC SFU负载测试（二）</a></li>
+<li><a href="https://webrtc.org.cn/20200403-sfu3/" target="_blank" rel="noopener">转折点——WebRTC SFU负载测试（三）</a></li>
+</ul>
+<hr>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ul>
+<li><a href="https://mp.weixin.qq.com/s/NsiU8rVYYMbDjVBGZlr3Xg" target="_blank" rel="noopener">WebRTC　简介</a></li>
+<li><a href="https://webrtc.org.cn/20180805-codecs-webrtc-p2p/" target="_blank" rel="noopener">多方WebRTC选择1：Mesh</a></li>
+<li><a href="https://webrtc.org.cn/20180805-codecs-webrtc-mcu/" target="_blank" rel="noopener">多方WebRTC选择2：MCU</a></li>
+<li><a href="https://webrtc.org.cn/20180805-codecs-sfu-media/" target="_blank" rel="noopener">多方WebRTC选择3：SFU</a></li>
+<li><a href="https://segmentfault.com/a/1190000016819686" target="_blank" rel="noopener">一文盘点直播技术中的编解码、直播协议、网络传输与简单实现</a></li>
+<li><a href="https://webrtc.org.cn/20180817-webrtc-video-js/" target="_blank" rel="noopener">如何使用WebRTC和Kurento媒体服务器,来建立视频会议App(一)</a></li>
+<li><a href="https://webrtc.org.cn/20180819-webrtc-js-vedio/" target="_blank" rel="noopener">如何使用WebRTC和Kurento媒体服务器,来建立视频会议App(二)</a></li>
+<li><a href="https://webrtc.ventures/2018/07/tutorial-build-video-conference-application-webrtc-2/" target="_blank" rel="noopener">[Tutorial] How to Build a Video Conference Application with WebRTC</a></li>
+<li><a href="https://webrtc.org.cn/20190816-webrtc-sfu-rtcp/" target="_blank" rel="noopener">WebRTC SFU中发送数据包丢失反馈</a></li>
+<li><a href="https://www.jianshu.com/p/ac307371def4" target="_blank" rel="noopener">架构设计：基于Webrtc、Kurento的一种低延迟架构实现</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/56428846" target="_blank" rel="noopener">WebRTC 开发实践：为什么你需要 SFU 服务器</a></li>
+<li><a href="https://juejin.im/post/5edf5a3ae51d45786672c31c" target="_blank" rel="noopener">一张图概括淘宝直播背后的前端技术 | 赠送多媒体前端手册</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/06/19/webrtc-multi/" title="多方 webrtc 的选择">http://kebingzao.com/2020/06/19/webrtc-multi/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/webrtc/" rel="tag"># webrtc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/19/docker-install-vim/" rel="next" title="docker 容器安装 vim">
+                <i class="fa fa-chevron-left"></i> docker 容器安装 vim
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/19/webrtc-sfu-kurento/" rel="prev" title="初试 webrtc SFU 开源框架 - Kurento">
+                初试 webrtc SFU 开源框架 - Kurento <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">202</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Mesh"><span class="nav-number">2.</span> <span class="nav-text">Mesh</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MCU"><span class="nav-number">3.</span> <span class="nav-text">MCU</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SFU"><span class="nav-number">4.</span> <span class="nav-text">SFU</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SFU-开源框架"><span class="nav-number">6.</span> <span class="nav-text">SFU 开源框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于-SFU-负载测试的资料"><span class="nav-number">7.</span> <span class="nav-text">关于 SFU 负载测试的资料:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/06/19/webrtc-multi/';
+          this.page.identifier = '2020/06/19/webrtc-multi/';
+          this.page.title = '多方 webrtc 的选择';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

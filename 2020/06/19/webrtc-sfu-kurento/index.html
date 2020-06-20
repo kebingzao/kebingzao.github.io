@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="webrtc," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言最近有在看多方 webrtc 的解决方案: 多方 webrtc 的选择, 后面觉得 SFU 应该是不错的解决方案，而目前开源的 SFU 框架有好几个:  Janus Jitsi Kurento mediasoup Medooze  后面打算一个一个用下，看看效果， 所以本次先用 Kurento 这个框架看看效果。">
+<meta name="keywords" content="webrtc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初试 webrtc SFU 开源框架 - Kurento">
+<meta property="og:url" content="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言最近有在看多方 webrtc 的解决方案: 多方 webrtc 的选择, 后面觉得 SFU 应该是不错的解决方案，而目前开源的 SFU 框架有好几个:  Janus Jitsi Kurento mediasoup Medooze  后面打算一个一个用下，看看效果， 所以本次先用 Kurento 这个框架看看效果。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/6.png">
+<meta property="og:updated_time" content="2020-06-20T03:40:39.275Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="初试 webrtc SFU 开源框架 - Kurento">
+<meta name="twitter:description" content="前言最近有在看多方 webrtc 的解决方案: 多方 webrtc 的选择, 后面觉得 SFU 应该是不错的解决方案，而目前开源的 SFU 框架有好几个:  Janus Jitsi Kurento mediasoup Medooze  后面打算一个一个用下，看看效果， 所以本次先用 Kurento 这个框架看看效果。">
+<meta name="twitter:image" content="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/"/>
+
+
+
+
+
+  <title>初试 webrtc SFU 开源框架 - Kurento | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">初试 webrtc SFU 开源框架 - Kurento</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-19T16:51:43+08:00">
+                2020-06-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
+                    <span itemprop="name">webrtc相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/06/19/webrtc-sfu-kurento/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/06/19/webrtc-sfu-kurento/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/06/19/webrtc-sfu-kurento/" class="leancloud_visitors" data-flag-title="初试 webrtc SFU 开源框架 - Kurento">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近有在看多方 webrtc 的解决方案: <a href="/2020/06/19/webrtc-multi/" title="多方 webrtc 的选择">多方 webrtc 的选择</a>, 后面觉得 SFU 应该是不错的解决方案，而目前开源的 SFU 框架有好几个:</p>
+<ul>
+<li><a href="https://janus.conf.meetecho.com/" target="_blank" rel="noopener">Janus</a></li>
+<li><a href="https://meet.jit.si/" target="_blank" rel="noopener">Jitsi</a></li>
+<li><a href="http://www.kurento.org/" target="_blank" rel="noopener">Kurento</a></li>
+<li><a href="https://mediasoup.org/" target="_blank" rel="noopener">mediasoup</a></li>
+<li><a href="http://www.medooze.com/" target="_blank" rel="noopener">Medooze</a></li>
+</ul>
+<p>后面打算一个一个用下，看看效果， 所以本次先用 Kurento 这个框架看看效果。<br><a id="more"></a></p>
+<h2 id="安装-Kurento"><a href="#安装-Kurento" class="headerlink" title="安装 Kurento"></a>安装 Kurento</h2><p>Kurento 安装其实非常简单, 具体文档: <a href="https://doc-kurento.readthedocs.io/en/6.13.2/user/installation.html" target="_blank" rel="noopener">Installation Guide</a>, 我们采用了 docker 容器的安装方式, 镜像地址: <a href="https://hub.docker.com/r/kurento/kurento-media-server" target="_blank" rel="noopener">Kurento Media Server</a>, 教程很简单，直接按照上面来操作就行了</p>
+<h3 id="1-拉取镜像"><a href="#1-拉取镜像" class="headerlink" title="1. 拉取镜像"></a>1. 拉取镜像</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull kurento/kurento-media-server:latest</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker pull kurento/kurento-media-server:latest</span><br><span class="line">latest: Pulling from kurento/kurento-media-server</span><br><span class="line">e92ed755c008: Pull complete</span><br><span class="line">...</span><br><span class="line">a8e4c7815847: Pull complete</span><br><span class="line">Digest: sha256:4b27d8f6cf853c629c14682b249f4ea7f9e186f29619bdbabde2c9564a87dc45</span><br><span class="line">Status: Downloaded newer image for kurento/kurento-media-server:latest</span><br></pre></td></tr></table></figure>
+<h3 id="2-启动容器"><a href="#2-启动容器" class="headerlink" title="2. 启动容器"></a>2. 启动容器</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --name kms -d -p 8888:8888 \</span><br><span class="line">    kurento/kurento-media-server:latest</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker run --name kms -d -p 8888:8888 \</span><br><span class="line">&gt;     kurento/kurento-media-server:latest</span><br><span class="line">f596838cdaaf8a1ae7cea81c76d9d3bd9b85038738e4243bf3f4cac095980288</span><br></pre></td></tr></table></figure>
+<p>这时候可以用 <code>docker ps</code> 查看是否存在:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker ps</span><br><span class="line">CONTAINER ID        IMAGE                                 COMMAND                  CREATED             STATUS                             PORTS                    NAMES</span><br><span class="line">f596838cdaaf        kurento/kurento-media-server:latest   &quot;/entrypoint.sh&quot;         28 seconds ago      Up 26 seconds (health: starting)   0.0.0.0:8888-&gt;8888/tcp   kms</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-测试服务是否正常"><a href="#3-测试服务是否正常" class="headerlink" title="3. 测试服务是否正常"></a>3. 测试服务是否正常</h3><p>因为这个是一个 ws 的服务，所以用 curl 测试的时候，要加上 upgrade 头部:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[kbz@centos156 test-nms.airdroid.com]$  curl     --include     --header &quot;Connection: Upgrade&quot;     --header &quot;Upgrade: websocket&quot;     --header &quot;Host: 127.0.0.1:8888&quot;     --header &quot;Origin: 127.0.0.1&quot;     http://127.0.0.1:8888/kurento</span><br><span class="line">HTTP/1.1 500 Internal Server Error</span><br><span class="line">Server: WebSocket++/0.7.0</span><br></pre></td></tr></table></figure></p>
+<p>虽然报 500 错误，但是按照文档说的，这个是正常的:<br><blockquote><p>To check whether KMS is up and listening for connections, use the following command:</p>
+<p>$ curl \<br>    –include \<br>    –header “Connection: Upgrade” \<br>    –header “Upgrade: websocket” \<br>    –header “Host: 127.0.0.1:8888” \<br>    –header “Origin: 127.0.0.1” \<br>    <a href="http://127.0.0.1:8888/kurento" target="_blank" rel="noopener">http://127.0.0.1:8888/kurento</a><br>You should get a response similar to this one:</p>
+<p>HTTP/1.1 500 Internal Server Error<br>Server: WebSocket++/0.7.0<br>Ignore the “Server Error” message: this is expected, and it actually proves that KMS is up and listening for connections.</p>
+<p>The health checker script inside this Docker image does something very similar in order to check if the container is healthy.</p>
+<footer><strong>kurento</strong><cite><a href="https://hub.docker.com/r/kurento/kurento-media-server" target="_blank" rel="noopener">hub.docker.com/r/kurento/kurento-media-server</a></cite></footer></blockquote></p>
+<p>当然我们也可以用第三方的 ws 客户端连一下，是可以连接成功的:</p>
+<p><img src="/2020/06/19/webrtc-sfu-kurento/1.png" alt=""></p>
+<p>也可以通过查看进程来判断 kms 的进程是否在:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# ps -fC kurento-media-server</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root     26964 26949  0 13:39 ?        00:00:00 /usr/bin/kurento-media-server</span><br></pre></td></tr></table></figure></p>
+<p>配置文件是在容器中的: <code>/etc/kurento/kurento.conf.json</code>, 先不用改配置文件。保持默认即可。</p>
+<h2 id="安装-stun-turn"><a href="#安装-stun-turn" class="headerlink" title="安装 stun/turn"></a>安装 stun/turn</h2><p>要完整的跑起来，除了 KMS 安装成功之后， turn server 也要安装，这个是 Kurento 官网推荐的安装文档: <a href="https://doc-kurento.readthedocs.io/en/6.13.2/user/installation.html#installation-stun-turn" target="_blank" rel="noopener">STUN/TURN server install</a></p>
+<p>具体步骤这边不细说了，之前文章就说过 coturn 的安装了: <a href="/2018/11/09/turn-install/" title="webrtc 的 turn 服务器 coturn 的搭建">webrtc 的 turn 服务器 coturn 的搭建</a>, 安装之后可以到 <a href="https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/" target="_blank" rel="noopener">WebRTC samples Trickle ICE</a> 这个站点测试, 这个在之前 coturn 权限校验的时候 也说过这个 ice 的测试站点: <a href="/2018/11/15/turn-verify/" title="webrtc 的 turn 服务器 coturn 的权限校验">webrtc 的 turn 服务器 coturn 的权限校验</a></p>
+<h2 id="hello-world-demo"><a href="#hello-world-demo" class="headerlink" title="hello-world demo"></a>hello-world demo</h2><p>既然安装完之后，那么要测试是否安装成功，写个 hello world demo 呗，官方也有完整的<a href="https://doc-kurento.readthedocs.io/en/6.13.2/user/tutorials.html" target="_blank" rel="noopener">教程文档</a>, 我们搞个 hello world 级别的先试跑一下，先去 github 将 <a href="https://github.com/Kurento/kurento-tutorial-node" target="_blank" rel="noopener">教程文档 demo 实例</a> 拉下来。</p>
+<p>这个教程有很多的实例，我们先用这个 hello world 的实例跑一下，看是否正常(服务端是 node 程序，保证 node 版本在 8.x 以上，并且有全局安装 bower):</p>
+<p><img src="/2020/06/19/webrtc-sfu-kurento/2.png" alt=""></p>
+<p>整个 hello world 的教程文档如下: <a href="https://doc-kurento.readthedocs.io/en/6.13.2/tutorials/node/tutorial-helloworld.html" target="_blank" rel="noopener">Node.js - Hello world</a>, 照着操作就行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/Kurento/kurento-tutorial-node.git</span><br><span class="line">cd kurento-tutorial-node/kurento-hello-world</span><br><span class="line">git checkout master</span><br><span class="line">npm install</span><br><span class="line">cd static</span><br><span class="line">bower install --allow-root</span><br><span class="line">cd ..</span><br><span class="line">npm start</span><br></pre></td></tr></table></figure></p>
+<p>项目跑起来了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\github\kurento-tutorial-node\kurento-hello-world&gt;npm start</span><br><span class="line"></span><br><span class="line">&gt; kurento-hello-world@6.14.0 start F:\airdroid_code\github\kurento-tutorial-node\kurento-hello-world</span><br><span class="line">&gt; node server.js</span><br><span class="line"></span><br><span class="line">(node:64572) Warning: N-API is an experimental feature and could change at any time.</span><br><span class="line">Kurento Tutorial started</span><br><span class="line">Open https://localhost:8443/ with a WebRTC capable browser</span><br></pre></td></tr></table></figure></p>
+<p>这边要注意一个细节，因为我安装 kerento 的服务器(腾讯云) 和 启动 node服务的机器(本机) 不是同一台。所以 server.js 中的 ws_uri 要改成对应的 kurento 服务器的地址:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ws_uri: &apos;ws://119.29.xx.28:8888/kurento&apos;</span><br></pre></td></tr></table></figure></p>
+<p>当然教程也提供一种不改代码，直接启动的时候设置配置项，这样子也可以:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm start -- --ws_uri=ws://kms_host:kms_port/kurento</span><br></pre></td></tr></table></figure></p>
+<p>这两种都可以。</p>
+<p>但是跑起来之后，只发现本地有图像，远程的没有 (因为没有真正的摄像头，用虚拟摄像头代替):</p>
+<p><img src="/2020/06/19/webrtc-sfu-kurento/3.png" alt=""></p>
+<p>而人家的示例，远程的图像也是有的:</p>
+<p><img src="/2020/06/19/webrtc-sfu-kurento/4.png" alt=""></p>
+<p>后面想了一下，发现是因为 Kurento 服务 和 我的浏览器 这两个 peer 端根本不在同一个局域网， 所以要借助 turn server 来转发。 但是我之前安装完 turn server 之后，并没有在 kerento 上进行配置。而对应的 demo 的 server.js 也没有连接 turn server 的代码。</p>
+<p>虽然 demo 没有配置 turnserver ，但是教程文档确实有写， 看了一下文档: <a href="https://doc-kurento.readthedocs.io/en/6.13.2/user/faq.html#faq-stun-configure" target="_blank" rel="noopener">How to configure STUN/TURN?</a>, 发现有两种配置方式:</p>
+<ul>
+<li>一种是直接在 kms 服务的配置文件 <code>/etc/kurento/modules/kurento/WebRtcEndpoint.conf.ini</code> 中直接配置默认的 turn server 转发，然后重启 kms 服务</li>
+<li>另一种是在浏览器端连接 kms 的时候，动态指定 turn server 地址，这种方式也是可以的，具体 API 文档: <a href="https://doc-kurento.readthedocs.io/en/latest/_static/client-jsdoc/module-elements.WebRtcEndpoint.html#setTurnUrl" target="_blank" rel="noopener">setTurnUrl</a></li>
+</ul>
+<p>我用的是第二种，也就是连接的时候，动态指定 turn server 的地址，代码修改如下: server.js 加上一行代码就行了, 原先的代码是这样子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">createMediaElements(pipeline, ws, function(error, webRtcEndpoint) &#123;</span><br><span class="line">  if (error) &#123;</span><br><span class="line">      pipeline.release();</span><br><span class="line">      return callback(error);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  if (candidatesQueue[sessionId]) &#123;</span><br><span class="line">      while(candidatesQueue[sessionId].length) &#123;</span><br><span class="line">          var candidate = candidatesQueue[sessionId].shift();</span><br><span class="line">          webRtcEndpoint.addIceCandidate(candidate);</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  connectMediaElements(webRtcEndpoint, function(error) &#123;</span><br><span class="line">      if (error) &#123;</span><br><span class="line">          pipeline.release();</span><br><span class="line">          return callback(error);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      webRtcEndpoint.on(&apos;OnIceCandidate&apos;, function(event) &#123;</span><br><span class="line">          var candidate = kurento.getComplexType(&apos;IceCandidate&apos;)(event.candidate);</span><br><span class="line">          ws.send(JSON.stringify(&#123;</span><br><span class="line">              id : &apos;iceCandidate&apos;,</span><br><span class="line">              candidate : candidate</span><br><span class="line">          &#125;));</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      webRtcEndpoint.processOffer(sdpOffer, function(error, sdpAnswer) &#123;</span><br><span class="line">          if (error) &#123;</span><br><span class="line">              pipeline.release();</span><br><span class="line">              return callback(error);</span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">          sessions[sessionId] = &#123;</span><br><span class="line">              &apos;pipeline&apos; : pipeline,</span><br><span class="line">              &apos;webRtcEndpoint&apos; : webRtcEndpoint</span><br><span class="line">          &#125;</span><br><span class="line">          return callback(null, sdpAnswer);</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      webRtcEndpoint.gatherCandidates(function(error) &#123;</span><br><span class="line">          if (error) &#123;</span><br><span class="line">              return callback(error);</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>只要在创建 webRtcEndpoint 并且准备开始连接 kms 的时候，设置 turn url 就行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">createMediaElements(pipeline, ws, function(error, webRtcEndpoint) &#123;</span><br><span class="line">    if (error) &#123;</span><br><span class="line">        pipeline.release();</span><br><span class="line">        return callback(error);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 设置 turnserver</span><br><span class="line">    webRtcEndpoint.setTurnUrl(&quot;username:pwd@193.xxx.xxx.33:3478&quot;, function(data)&#123;</span><br><span class="line">        if (candidatesQueue[sessionId]) &#123;</span><br><span class="line">            while(candidatesQueue[sessionId].length) &#123;</span><br><span class="line">                var candidate = candidatesQueue[sessionId].shift();</span><br><span class="line">                webRtcEndpoint.addIceCandidate(candidate);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        connectMediaElements(webRtcEndpoint, function(error) &#123;</span><br><span class="line">            if (error) &#123;</span><br><span class="line">                pipeline.release();</span><br><span class="line">                return callback(error);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            webRtcEndpoint.on(&apos;OnIceCandidate&apos;, function(event) &#123;</span><br><span class="line">                var candidate = kurento.getComplexType(&apos;IceCandidate&apos;)(event.candidate);</span><br><span class="line">                ws.send(JSON.stringify(&#123;</span><br><span class="line">                    id : &apos;iceCandidate&apos;,</span><br><span class="line">                    candidate : candidate</span><br><span class="line">                &#125;));</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            webRtcEndpoint.processOffer(sdpOffer, function(error, sdpAnswer) &#123;</span><br><span class="line">                if (error) &#123;</span><br><span class="line">                    pipeline.release();</span><br><span class="line">                    return callback(error);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                sessions[sessionId] = &#123;</span><br><span class="line">                    &apos;pipeline&apos; : pipeline,</span><br><span class="line">                    &apos;webRtcEndpoint&apos; : webRtcEndpoint</span><br><span class="line">                &#125;</span><br><span class="line">                return callback(null, sdpAnswer);</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">            webRtcEndpoint.gatherCandidates(function(error) &#123;</span><br><span class="line">                if (error) &#123;</span><br><span class="line">                    return callback(error);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这样子就可以确保在连接 kms 的时候，已经设置好 turn server 了。重新试了一下，</p>
+<p><img src="/2020/06/19/webrtc-sfu-kurento/5.png" alt=""></p>
+<p>这时候远程图像也有了。说明 turn 转发成功了。</p>
+<h2 id="one2many-call-demo"><a href="#one2many-call-demo" class="headerlink" title="one2many-call demo"></a>one2many-call demo</h2><p>hello world demo 演示成功了，至少证明 Kurento 可以作为另一个 peer 来进行 webrtc P2P 连接。 接下来我们就测试一下他的主要功能，就是一对多的转发。 刚好教程里面也有一个 一对多的直播的 <a href="https://github.com/Kurento/kurento-tutorial-node/tree/master/kurento-one2many-call" target="_blank" rel="noopener">demo</a>, 具体代码不细讲了，直接看代码就行了，主要讲一下这个 demo 要实现的几个功能:</p>
+<ol>
+<li>这个是一个直播间，点击 [Presenter] 就是主持人，然后这时候主持人先进去，然后右边就是图像(这个图像其实就是本地图像，也就是 local stream， 所以他不会卡，并且清晰)</li>
+<li>这时候直播间开启了，其他人进来，点击 [Viewer], 右边就会出现图像 (这个图像就是 remote stream，通过 turn server 转发的，所以有时候会卡，也会模糊)</li>
+<li>观看的人可以有很多个，所以这个一对多，其实就是一个 主播 对应 多个观众。 观众点击 [Stop] 按钮就是离开直播间，不影响主播，也不影响其他观众。</li>
+<li>同时在已经有主播存在的情况下，观众进来只能点 [Viewer] 按钮进行观看，或者点击 [Stop] 离开直播间。 如果点击 [Presenter] 按钮是没有反应的，会显示当前已经有一个主播了。</li>
+<li>主播如果点击 [Stop] 按钮 就是结束直播，所有的在线的观众都会退出直播间 (体现在右边的图像没有了)</li>
+<li>因为是 webrtc 技术，所以主播在说话的时候，所有的观众都是可以听到的。(当然观众说话，主播听不到)</li>
+</ol>
+<p>这个是一个很简单的直播间示例，代码也不复杂，在原来的 server.js 做一下调整，在生成 主播节点和观众节点的时候，记得把设置 turn url 的代码放上去就行了，其他都不用修改:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">presenter.pipeline.create(&apos;WebRtcEndpoint&apos;, function(error, webRtcEndpoint) &#123;</span><br><span class="line">		if (error) &#123;</span><br><span class="line">			stop(sessionId);</span><br><span class="line">			return callback(error);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">    // 设置 turnserver</span><br><span class="line">    webRtcEndpoint.setTurnUrl(&quot;username:pwd=@193.xx.xx.33:3478&quot;, function(data) &#123;</span><br><span class="line">        // todo</span><br></pre></td></tr></table></figure></p>
+<p>示例效果就是，当主播开启之后，接下来就是一堆的观众进来，进行观看:</p>
+<p><img src="/2020/06/19/webrtc-sfu-kurento/6.png" alt=""></p>
+<p>需要说明的一点就是，在测试的时候，有发现几个问题:</p>
+<ol>
+<li>当观看的人数越来越多的时候，观众的界面会变得比较卡，也比较模糊，但是当人数比较少的时候，就会比较流畅和清晰，这个应该跟 kms 所在的服务器的性能有关系，因为转发不过来</li>
+<li>当观看的人数达到一定个数，比如 40+， 我的 node 程序就会崩掉，我估计也跟我的本机的性能有关系</li>
+<li>当观看到达一定时间的时候，比如 10 分钟，就会有概率出现除了主播还在线，其他观众全部掉线的情况(没有图片了), 这个原因还在找, 还没有细究</li>
+</ol>
+<h2 id="Kurento-的日志"><a href="#Kurento-的日志" class="headerlink" title="Kurento 的日志"></a>Kurento 的日志</h2><p>Kurento 是用 docker 安装的，但是可以通过 docker logs 将日志输出到宿主机:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# docker logs --follow kms &gt;&quot;kms-$(date &apos;+%Y%m%dT%H%M%S&apos;).log&quot; 2&gt;&amp;1</span><br></pre></td></tr></table></figure></p>
+<p>这时候在执行目录下，就会有一个 log 文件了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kms-20200618T134019.log</span><br></pre></td></tr></table></figure></p>
+<p>然后就可以查看 log 了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# tail -f kms-20200618T134019.log</span><br><span class="line">1:02:19.297836682     1 0x7f273c049b80 INFO    KurentoWebRtcEndpointImpl WebRtcEndpointImpl.cpp:571:WebRtcEndpointImpl: TURN server not found in config; remember that NAT traversal requires STUN or TURN</span><br><span class="line">1:02:19.426399932     1 0x7f274000ee30 INFO         basertpendpoint kmsbasertpendpoint.c:1118:kms_base_rtp_endpoint_start_transport_send:&lt;kmswebrtcendpoint5&gt; Media &apos;video&apos; has REMB</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>总的来说， Kerento 这个 SFU 的框架确实可以实现多方 webrtc 的情况，当然更深层次的问题还是有很多(包括性能优化和性能瓶颈)， 不过从本次体验来看，无论是安装，配置还是开发应该都是比较容易的，不会有太多的理解成本。 接下来就再试试其他几个 SFU 的框架。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/" title="初试 webrtc SFU 开源框架 - Kurento">http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/webrtc/" rel="tag"># webrtc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/19/webrtc-multi/" rel="next" title="多方 webrtc 的选择">
+                <i class="fa fa-chevron-left"></i> 多方 webrtc 的选择
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">202</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装-Kurento"><span class="nav-number">2.</span> <span class="nav-text">安装 Kurento</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-拉取镜像"><span class="nav-number">2.1.</span> <span class="nav-text">1. 拉取镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-启动容器"><span class="nav-number">2.2.</span> <span class="nav-text">2. 启动容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-测试服务是否正常"><span class="nav-number">2.3.</span> <span class="nav-text">3. 测试服务是否正常</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装-stun-turn"><span class="nav-number">3.</span> <span class="nav-text">安装 stun/turn</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#hello-world-demo"><span class="nav-number">4.</span> <span class="nav-text">hello-world demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#one2many-call-demo"><span class="nav-number">5.</span> <span class="nav-text">one2many-call demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kurento-的日志"><span class="nav-number">6.</span> <span class="nav-text">Kurento 的日志</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/06/19/webrtc-sfu-kurento/';
+          this.page.identifier = '2020/06/19/webrtc-sfu-kurento/';
+          this.page.title = '初试 webrtc SFU 开源框架 - Kurento';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

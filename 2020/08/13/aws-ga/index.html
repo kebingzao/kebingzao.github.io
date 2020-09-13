@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="aws," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前有用户反馈我们的服务接口请求速度慢，比如一个请求从请求到响应用了 1.5s， 但是我通过 nginx 日志来看的话，这一条请求处理的时间只有 0.2s， 也就是 http 请求在往返途中其实消耗了 1.3s。 所以如果要优化接口速度的话， 其实就是优化请求线路。 加速线路的几种方式通常我们经常用的有以下三种: 1. 静态资源的 CDN 加速这个也是绝大部分网站经常用的，就是通过 CDN 的">
+<meta name="keywords" content="aws">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 AWS Global Accelerator 加速你的服务">
+<meta property="og:url" content="http://kebingzao.com/2020/08/13/aws-ga/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前有用户反馈我们的服务接口请求速度慢，比如一个请求从请求到响应用了 1.5s， 但是我通过 nginx 日志来看的话，这一条请求处理的时间只有 0.2s， 也就是 http 请求在往返途中其实消耗了 1.3s。 所以如果要优化接口速度的话， 其实就是优化请求线路。 加速线路的几种方式通常我们经常用的有以下三种: 1. 静态资源的 CDN 加速这个也是绝大部分网站经常用的，就是通过 CDN 的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/08/13/aws-ga/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/08/13/aws-ga/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/08/13/aws-ga/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/08/13/aws-ga/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/08/13/aws-ga/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/08/13/aws-ga/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/08/13/aws-ga/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/08/13/aws-ga/8.png">
+<meta property="og:updated_time" content="2020-09-13T04:15:33.233Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 AWS Global Accelerator 加速你的服务">
+<meta name="twitter:description" content="前言之前有用户反馈我们的服务接口请求速度慢，比如一个请求从请求到响应用了 1.5s， 但是我通过 nginx 日志来看的话，这一条请求处理的时间只有 0.2s， 也就是 http 请求在往返途中其实消耗了 1.3s。 所以如果要优化接口速度的话， 其实就是优化请求线路。 加速线路的几种方式通常我们经常用的有以下三种: 1. 静态资源的 CDN 加速这个也是绝大部分网站经常用的，就是通过 CDN 的">
+<meta name="twitter:image" content="http://kebingzao.com/2020/08/13/aws-ga/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/08/13/aws-ga/"/>
+
+
+
+
+
+  <title>使用 AWS Global Accelerator 加速你的服务 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/08/13/aws-ga/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用 AWS Global Accelerator 加速你的服务</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-13T16:31:54+08:00">
+                2020-08-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">aws 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/08/13/aws-ga/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/08/13/aws-ga/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/08/13/aws-ga/" class="leancloud_visitors" data-flag-title="使用 AWS Global Accelerator 加速你的服务">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有用户反馈我们的服务接口请求速度慢，比如一个请求从请求到响应用了 1.5s， 但是我通过 nginx 日志来看的话，这一条请求处理的时间只有 0.2s， 也就是 http 请求在往返途中其实消耗了 1.3s。 所以如果要优化接口速度的话， 其实就是优化请求线路。</p>
+<h2 id="加速线路的几种方式"><a href="#加速线路的几种方式" class="headerlink" title="加速线路的几种方式"></a>加速线路的几种方式</h2><p>通常我们经常用的有以下三种:</p>
+<h3 id="1-静态资源的-CDN-加速"><a href="#1-静态资源的-CDN-加速" class="headerlink" title="1. 静态资源的 CDN 加速"></a>1. 静态资源的 CDN 加速</h3><p>这个也是绝大部分网站经常用的，就是通过 CDN 的边缘节点，进行静态资源的缓存，然后优先走最近的节点，从而节省请求时间。 各大云厂商都有提供这种服务，比如 aws 的 cloudfront。</p>
+<h3 id="2-动态-CDN-加速"><a href="#2-动态-CDN-加速" class="headerlink" title="2. 动态 CDN 加速"></a>2. 动态 CDN 加速</h3><p>所谓的动态内容加速，是指用户在请求一些动态内容时，如网站中的 <code>.asp</code>、<code>.jsp</code>、<code>.php</code>和<code>.cgi</code>接口、<code>API</code>接口等，不直接请求源站，而是由基于地理位置的DNS调度，请求最靠近用户的云服务节点，再由云服务节点通过优化过的传输网络（公网，但比普通BGP更优化的链路），转发请求到源站，达到优化和加速的目的。当然这其中有很多其他的传输层面的优化，比如访问链路优化、传输内容压缩合并、智能选路、链路复用等技术。<br><a id="more"></a><br>很多云厂商都有这种服务，比如:</p>
+<ul>
+<li><a href="https://cloud.tencent.com/product/dsa" target="_blank" rel="noopener">腾讯云-动态加速网络 DSA</a></li>
+<li><a href="https://www.aliyun.com/product/dcdn" target="_blank" rel="noopener">阿里云-全站加速</a></li>
+<li><a href="https://amazonaws-china.com/cn/cloudfront/" target="_blank" rel="noopener">AWS- Amazon CloudFront</a></li>
+</ul>
+<p><img src="/2020/08/13/aws-ga/1.png" alt="1"></p>
+<p>这三家的动态加速，其实都支持动静态内容混合加速，即静态内容直接由边缘节点（静态CDN）返回，动态请求走内网代理转发到源站。AWS更是把动静态加速直接合并为一个服务 Amazon CloudFront，统一计费。 像我们的产品，接口服务器都在海外，国内直接访问接口的话，会比较慢，所以就有启用腾讯云的动态 CDN 加速的服务， 用了之后，确实快了很多。</p>
+<h3 id="3-把长距离公网传输改为自建的内网传输"><a href="#3-把长距离公网传输改为自建的内网传输" class="headerlink" title="3. 把长距离公网传输改为自建的内网传输"></a>3. 把长距离公网传输改为自建的内网传输</h3><p>这种通常叫全球加速， 就是在全球各个点进行布点，比如自己拉海底电缆之类的， 从而在自己的内网传输中大大的加快速度。 用一张图来说明就很清晰了：</p>
+<p><img src="/2020/08/13/aws-ga/2.png" alt="1"></p>
+<p>而我们今天要讲的 AWS Global Accelerator 这个服务就是第三种加速类型。</p>
+<h2 id="AWS-Global-Accelerator"><a href="#AWS-Global-Accelerator" class="headerlink" title="AWS Global Accelerator"></a><a href="https://aws.amazon.com/cn/global-accelerator/" target="_blank" rel="noopener">AWS Global Accelerator</a></h2><p>套用他们官网的话，就是:</p>
+<blockquote><p>AWS Global Accelerator 是一种服务，可以提高您的本地或全球用户获得的应用程序的可用性和性能。<br>它提供静态 IP 地址，充当您在单个或多个 AWS 区域中的应用程序终端节点（例如，您的 Application Load Balancers、网络负载均衡器或 Amazon EC2 实例）的固定入口点。</p>
+<p>AWS Global Accelerator 使用 AWS 全球网络优化您的用户访问应用程序的路径，将您的流量性能提高多达 60%。<br>您可以从自己的位置使用速度比较工具测试性能优势。<br>AWS Global Accelerator 持续地监控应用程序终端节点的运行状况，并在 30 秒内将流量重定向到运行正常的终端节点。</p>
+<footer><strong>AWS Global Accelerator</strong><cite><a href="https://aws.amazon.com/cn/global-accelerator/" target="_blank" rel="noopener">aws.amazon.com/cn/global-accelerator</a></cite></footer></blockquote>
+<p>他有挺多功能，但是对我们来说，他可以加速延迟敏感的应用程序这个功能就是我们要的。Global Accelerator 并不像 CDN 通过边缘节点提升访问速度，他只是类似提供了一条 aws 专线, 使用自己的aws 主干网，通过专用线路到我们服务器。通过主干网线路的优化，从而来减少网络延迟和抖动，最后达到提高请求速度的表现。</p>
+<h2 id="简单测试连通性"><a href="#简单测试连通性" class="headerlink" title="简单测试连通性"></a>简单测试连通性</h2><p>为了测试一下 GA 服务是否真的可以达到优化线路的情况，我们进行了以下测试: 以美区的某一个服务器为例，其他区去 ping 这台服务器的情况如下:</p>
+<p><img src="/2020/08/13/aws-ga/3.png" alt="1"></p>
+<p>可以看到除了美区连美区之外，其他区(欧洲，南美，中国，日本) ping 都要 110-172 ms 。 接下来将这一台服务器添加 GA 服务，然后再测试一下:</p>
+<p><img src="/2020/08/13/aws-ga/4.png" alt="1"></p>
+<p>可以看到 ping 的时间直接变成 1-7 ms， 这个就变得非常快了。 所以可以看到加了 GA 服务之后，确实从各个区到这一台服务器的线路优化了很多。</p>
+<h2 id="官网提供的-web-测试工具"><a href="#官网提供的-web-测试工具" class="headerlink" title="官网提供的 web 测试工具"></a>官网提供的 web 测试工具</h2><p>他有提供了一个测试站点的工具 <a href="https://speedtest.globalaccelerator.aws/#/" target="_blank" rel="noopener">https://speedtest.globalaccelerator.aws/#/</a></p>
+<p><img src="/2020/08/13/aws-ga/5.png" alt="1"></p>
+<p>试了一下，看起来效果挺明显的。 但是他这个工具只有浏览器版本， 没办法在我们的 云服务器 上测试。</p>
+<h2 id="从业务上来测试"><a href="#从业务上来测试" class="headerlink" title="从业务上来测试"></a>从业务上来测试</h2><p>正常的接口业务，肯定是会涉及很多比较复杂的操作，比如 IO, 读取数据库， 远程调用之类的， 所以最后还得落实到具体的业务接口上来测试， 才能正常是否有用。</p>
+<p>通过 nginx 的这个命令，我们可以得到一个接口请求的时间: <code>time_total</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -o /dev/null -s -w %&#123;http_code&#125;:%&#123;http_connect&#125;:%&#123;content_type&#125;:%&#123;time_namelookup&#125;:%&#123;time_redirect&#125;:%&#123;time_pretransfer&#125;:%&#123;time_connect&#125;:%&#123;time_starttransfer&#125;:%&#123;time_total&#125;:%&#123;speed_download&#125; http://www.xxx.com</span><br></pre></td></tr></table></figure></p>
+<p>然后再根据自己的场景去添加参数和其他头部。 </p>
+<p>分别在各个区域服务器上请求以下表格中服务的接口(直连请求5次取平均值，GA 加速请求5次取平均值), 最后得到的结果如下 (次数会偏少，但是一定程度上可以体现出来), 单位秒:</p>
+<table>
+<thead>
+<tr>
+<th>服务</th>
+<th>业务接口</th>
+<th>cn(中国区)</th>
+<th>us-west(美西)</th>
+<th>us-east(美东)</th>
+<th>eu(欧洲)</th>
+<th>jp(日本)</th>
+<th>sa(南美)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api 1</td>
+<td><code>访问数据库，有多个查询和入库操作</code></td>
+<td>直连：1.591 <br>—-<br>腾讯云加速：0.704 <br>—<br> ga : 0.907</td>
+<td>直连：0.380 <br>—<br> ga :0.289</td>
+<td>直连：0.595<br>—<br> ga : 0.605</td>
+<td>直连：0.983 <br>—<br> ga : 0.783</td>
+<td>直连： 0.989 <br>—<br> ga :  0.869</td>
+<td>直连：6.532 <br>—<br> ga :0.873</td>
+</tr>
+<tr>
+<td>api 2</td>
+<td><code>访问数据库，有入库操作</code></td>
+<td>直连：0.907 <br>—<br> ga : 0.907</td>
+<td>直连：0.149 <br>—<br> ga :0.150</td>
+<td>直连：0.521<br>—<br> ga :0.361</td>
+<td>直连：0.822 <br>—<br> ga :0.645</td>
+<td>直连： 0.8426<br>—<br> ga : 0.7224</td>
+<td>直连：6.37 <br>—<br> ga : 0.732</td>
+</tr>
+<tr>
+<td>api 3</td>
+<td><code>访问数据库，有入库操作</code></td>
+<td>直连：1.021 <br>—<br> ga : 0.762</td>
+<td>直连：0.146 <br>—<br> ga : 0.141</td>
+<td>直连：0.467<br>—<br> ga :0.415</td>
+<td>直连：0.798 <br>—<br> ga : 0.619</td>
+<td>直连：0.817 <br>—<br> ga : 0.713</td>
+<td>直连： 0.875 <br>—<br> ga : 0.717</td>
+</tr>
+<tr>
+<td>api 4</td>
+<td><code>需要远程调用另一个服务 和 查询 redis</code></td>
+<td>腾讯云加速：0.669 <br>—<br> ga :0.924</td>
+<td>直连：0.339 <br>—<br> ga : 0.323</td>
+<td>直连：3.089<br>—<br> ga :0.537</td>
+<td>直连：1.024 <br>—<br> ga :0.808</td>
+<td>直连： 0.986 <br>—<br> ga :0.885</td>
+<td>直连：1.072 <br>—<br> ga : 0.895</td>
+</tr>
+</tbody>
+</table>
+<h3 id="测试总结"><a href="#测试总结" class="headerlink" title="测试总结"></a>测试总结</h3><ol>
+<li>中国区直连确实会比 腾讯云加速 和 ga 加速来的慢 (加速后快了三分之一到二分之一)， 腾讯云加速又比 ga 加速来的快。</li>
+<li>美区的话，分为美东和美西， 美西的话，加速和没有加速几乎看不出差别 (库都在美西)， 但是美东的话， 在 api 4 直连的耗时会比 ga 耗时高很多 ( 3s -&gt; 0.5s)</li>
+<li>欧洲的话，整体速度也有提高，大概提升了 10%-20%</li>
+<li>日本地区的话，整体速度也有提高，大概提升了 10%-20%</li>
+<li>南美的话，整体优化特别明显， 速度快的接口也有提升 10%-20%， 速度慢的接口甚至可以提升好几倍</li>
+<li>而且可以看到加了 ga 之后，整体速度非常稳定，不管是访问数据库还是 redis， 基本整个接口的请求时间都会在 1s 以内, 几乎不受网络波动</li>
+</ol>
+<blockquote>
+<p>测试 GA 的方式很简单，可以在云服务器上 host GA 的静态 ip 就行了。 然后请求域名不变</p>
+</blockquote>
+<h2 id="AWS-Global-Accelerator-收费情况"><a href="#AWS-Global-Accelerator-收费情况" class="headerlink" title="AWS Global Accelerator 收费情况"></a>AWS Global Accelerator 收费情况</h2><blockquote>
+<p>具体收费标准请看: <a href="https://aws.amazon.com/cn/global-accelerator/pricing/" target="_blank" rel="noopener">AWS Global Accelerator 定价</a></p>
+</blockquote>
+<p>GA 的收费包含两部分:</p>
+<ol>
+<li><p>固定费用，按时间来收费, 按账号来算， 每小时（不足 1 小时按 1 小时算）收取 0.025 USD，直到加速器被删除， 也就是说，我们一旦开启了这个服务器，不管有没有流量，一个月就要花费 30 <em> 24 </em> 0.025 = 18 美金。 这个钱不会很多</p>
+</li>
+<li><p>按流量收费，通过 AWS 网络传输的数据的每 GB 费率。DT-Premium 费率取决于处理请求的 AWS 区域（源）和响应定向到的 AWS 边缘站点（目标）。您只需为主方向传输的数据支付 DT-Premium。AWS Global Accelerator 的 DT-Premium 费用适用于流经 AWS Global Accelerator 的所有流量，无论目标是否指向 Internet、其他 AWS 区域还是可用区。除了对在 AWS 区域中运行的应用程序终端节点收取正常的 EC2 数据传出费用之外，还会收取 DT-Premium 费用。 (也就是说除了原有的 EC2 的出站流量之外， 经过 GA 服务的流量还要额外算， 所以有些流量要算两次钱)</p>
+</li>
+</ol>
+<p>当然一样只算出站流量 (即下载流量)， 如果是入站流量 (上传流量) 是不用算钱的。 举个例子:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">您在北美洲 AWS 区域部署的应用程序中运行一台加速器。</span><br><span class="line"></span><br><span class="line">每月固定费用</span><br><span class="line"></span><br><span class="line">假设加速器每月 30 天每天运行 24 小时，则您每月需要为该加速器支付 18 USD 的固定费用。</span><br><span class="line"></span><br><span class="line">每月 DT-Premium 费用</span><br><span class="line"></span><br><span class="line">假设每月使用加速器通过 AWS 网络传输的流量是 10000GB，其中 60% 是从应用程序传输到互联网上的用户的出站流量，</span><br><span class="line">剩余 40% 是从互联网上的用户传输到 AWS 区域中应用程序的入站流量。您只需按小时为传输到用户的出站流量付费，因为这是主方向流量。</span><br><span class="line">因此，您每月只需为 6000GB 而不是 10000GB 流量付费。</span><br><span class="line"></span><br><span class="line">每月 6000GB 流量按如下方式分布：</span><br><span class="line"></span><br><span class="line">5000GB 从北美洲 AWS 区域传输到欧洲 AWS 边缘站点。对于这类流量，您每月需要支付 75 USD (0.015 USD/GB)。</span><br><span class="line">1000GB 从北美洲 AWS 区域传输到亚太地区 AWS 边缘站点。对于这类流量，您每月需要支付 35 USD (0.035 USD/GB)。</span><br><span class="line">每月 DT-Premium 费用是 110 USD，加上每月 18 USD 固定费用，则 AWS Global Accelerator 每月总费用是 128 USD。</span><br></pre></td></tr></table></figure>
+<p>而且不同地区的出站流量的价钱是不一样的，具体可以看这张图:</p>
+<p><img src="/2020/08/13/aws-ga/6.png" alt="png"></p>
+<h2 id="具体创建实操"><a href="#具体创建实操" class="headerlink" title="具体创建实操"></a>具体创建实操</h2><p>创建其实很简单， GA 支持 负载均衡的方式， 也支持单台 EC2 的方式， 注意， 只有 aws 的云服务器才能启用 GA 服务。</p>
+<h3 id="1-创建一个加速器"><a href="#1-创建一个加速器" class="headerlink" title="1. 创建一个加速器"></a>1. 创建一个加速器</h3><p>按照步骤一步一步处理即可，比如我选择的是针对 ELB 负载均衡设置的， 就可以选择这个负载均衡所在的区就行了。</p>
+<p><img src="/2020/08/13/aws-ga/7.png" alt="png"></p>
+<p>好了之后，就可以看到你创建的 GA 加速器了。</p>
+<p><img src="/2020/08/13/aws-ga/8.png" alt="png"></p>
+<p>这样就创建好了</p>
+<h3 id="2-router-53-换成-GA-的-DNS-域名"><a href="#2-router-53-换成-GA-的-DNS-域名" class="headerlink" title="2. router 53 换成 GA 的 DNS 域名"></a>2. router 53 换成 GA 的 DNS 域名</h3><p>最后要生效，只要将这个服务的域名指向这个 GA 加速器的 DNS 域名或者对应的静态 ip 就行了。</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://cloud.tencent.com/developer/article/1449808" target="_blank" rel="noopener">静态CDN、动态CDN、GAAP、AIA各种加速产品介绍</a></li>
+<li><a href="https://aws.amazon.com/cn/global-accelerator/" target="_blank" rel="noopener">AWS Global Accelerator</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/08/13/aws-ga/" title="使用 AWS Global Accelerator 加速你的服务">http://kebingzao.com/2020/08/13/aws-ga/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/aws/" rel="tag"># aws</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/08/06/linux-common-use-shell/" rel="next" title="记录一下自己常用的几个 shell 指令(备忘)">
+                <i class="fa fa-chevron-left"></i> 记录一下自己常用的几个 shell 指令(备忘)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/09/04/mysql-convert-tz/" rel="prev" title="mysql 查询的时候时区转换为本地时区">
+                mysql 查询的时候时区转换为本地时区 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">207</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">49</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#加速线路的几种方式"><span class="nav-number">2.</span> <span class="nav-text">加速线路的几种方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-静态资源的-CDN-加速"><span class="nav-number">2.1.</span> <span class="nav-text">1. 静态资源的 CDN 加速</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-动态-CDN-加速"><span class="nav-number">2.2.</span> <span class="nav-text">2. 动态 CDN 加速</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-把长距离公网传输改为自建的内网传输"><span class="nav-number">2.3.</span> <span class="nav-text">3. 把长距离公网传输改为自建的内网传输</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Global-Accelerator"><span class="nav-number">3.</span> <span class="nav-text">AWS Global Accelerator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单测试连通性"><span class="nav-number">4.</span> <span class="nav-text">简单测试连通性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#官网提供的-web-测试工具"><span class="nav-number">5.</span> <span class="nav-text">官网提供的 web 测试工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从业务上来测试"><span class="nav-number">6.</span> <span class="nav-text">从业务上来测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#测试总结"><span class="nav-number">6.1.</span> <span class="nav-text">测试总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Global-Accelerator-收费情况"><span class="nav-number">7.</span> <span class="nav-text">AWS Global Accelerator 收费情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体创建实操"><span class="nav-number">8.</span> <span class="nav-text">具体创建实操</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-创建一个加速器"><span class="nav-number">8.1.</span> <span class="nav-text">1. 创建一个加速器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-router-53-换成-GA-的-DNS-域名"><span class="nav-number">8.2.</span> <span class="nav-text">2. router 53 换成 GA 的 DNS 域名</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/08/13/aws-ga/';
+          this.page.identifier = '2020/08/13/aws-ga/';
+          this.page.title = '使用 AWS Global Accelerator 加速你的服务';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

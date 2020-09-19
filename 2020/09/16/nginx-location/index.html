@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="nginx," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前在看 Nginx 的 location 匹配规则的时候，参考了一些网上的文章，但是这些文章，要么不全，要么就是有问题的，后面打算结合我自己的实践，自己写一篇算了。 本次实践的环境:  系统: CentOS 7 Nginx 版本: 1.18.0  location 匹配的变量Nginx 的 location 规则匹配的变量是 $uri, 所以不用管后面的参数 $query_string (或">
+<meta name="keywords" content="nginx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx 的 location 匹配规则总结">
+<meta property="og:url" content="http://kebingzao.com/2020/09/16/nginx-location/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前在看 Nginx 的 location 匹配规则的时候，参考了一些网上的文章，但是这些文章，要么不全，要么就是有问题的，后面打算结合我自己的实践，自己写一篇算了。 本次实践的环境:  系统: CentOS 7 Nginx 版本: 1.18.0  location 匹配的变量Nginx 的 location 规则匹配的变量是 $uri, 所以不用管后面的参数 $query_string (或">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-09-19T14:08:59.617Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nginx 的 location 匹配规则总结">
+<meta name="twitter:description" content="前言之前在看 Nginx 的 location 匹配规则的时候，参考了一些网上的文章，但是这些文章，要么不全，要么就是有问题的，后面打算结合我自己的实践，自己写一篇算了。 本次实践的环境:  系统: CentOS 7 Nginx 版本: 1.18.0  location 匹配的变量Nginx 的 location 规则匹配的变量是 $uri, 所以不用管后面的参数 $query_string (或">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/09/16/nginx-location/"/>
+
+
+
+
+
+  <title>Nginx 的 location 匹配规则总结 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/09/16/nginx-location/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Nginx 的 location 匹配规则总结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-09-16T16:04:08+08:00">
+                2020-09-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/09/16/nginx-location/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/09/16/nginx-location/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/09/16/nginx-location/" class="leancloud_visitors" data-flag-title="Nginx 的 location 匹配规则总结">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前在看 Nginx 的 location 匹配规则的时候，参考了一些网上的文章，但是这些文章，要么不全，要么就是有问题的，后面打算结合我自己的实践，自己写一篇算了。</p>
+<p>本次实践的环境:</p>
+<ul>
+<li>系统: CentOS 7</li>
+<li>Nginx 版本: 1.18.0</li>
+</ul>
+<h2 id="location-匹配的变量"><a href="#location-匹配的变量" class="headerlink" title="location 匹配的变量"></a>location 匹配的变量</h2><p>Nginx 的 location 规则匹配的变量是 <code>$uri</code>, 所以不用管后面的参数 <code>$query_string</code> (或者 <code>$args</code>)</p>
+<h2 id="location-匹配的种类"><a href="#location-匹配的种类" class="headerlink" title="location 匹配的种类"></a>location 匹配的种类</h2><p>格式主要是这个:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location [空格 | = | ~ | ~* | ^~ | @ ] /uri/ &#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其实上面分为三部分:</p>
+<ol>
+<li>最前面的字符 (location modifier) 匹配规则</li>
+<li>后面 uri 的匹配规则 (location match)</li>
+<li>大括号内的路由转发</li>
+</ol>
+<a id="more"></a>
+<h2 id="location-modifier"><a href="#location-modifier" class="headerlink" title="location modifier"></a>location modifier</h2><p>格式:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[空格 | = | ~ | ~* | ^~ | @ ]</span><br></pre></td></tr></table></figure></p>
+<p>接下来解释一下，这些都表示啥意思:</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空格</td>
+<td>如果直接是一个空格，那就是不写 location modifier ，Nginx 仍然能去匹配 pattern 。这种情况下，匹配那些以指定的 patern 开头的 URI，注意这里的 URI 只能是普通字符串，不能使用正则表达式。</td>
+</tr>
+<tr>
+<td>=</td>
+<td>表示精确匹配，如果找到，立即停止搜索并立即处理此请求。</td>
+</tr>
+<tr>
+<td>~</td>
+<td>表示执行一个正则匹配，区分大小写匹配</td>
+</tr>
+<tr>
+<td>~*</td>
+<td>表示执行一个正则匹配，不区分大小写匹配， 注意，如果是运行 Nginx server 的系统本身对大小写不敏感，比如 Windows ，那么 ~* 和 ~ 这两个表现是一样的</td>
+</tr>
+<tr>
+<td>^~</td>
+<td>即表示只匹配普通字符（跟空格类似，但是它优先级比空格高）。使用前缀匹配，^表示“非”，即不查询正则表达式。如果匹配成功，并且所匹配的字符串是最长的， 则不再匹配其他location。</td>
+</tr>
+<tr>
+<td>@</td>
+<td>用于定义一个 Location块，且该块不能被外部Client 所访问，只能被Nginx内部配置指令所访问，比如try_files 或 error_page</td>
+</tr>
+</tbody>
+</table>
+<h3 id="location-modifier-的匹配顺序"><a href="#location-modifier-的匹配顺序" class="headerlink" title="location modifier 的匹配顺序"></a>location modifier 的匹配顺序</h3><p>首先我们直接看官方的 wiki:<br><blockquote><p>To find location matching a given request, nginx first checks locations defined using the prefix strings (prefix locations). Among them, the location with the longest matching prefix is selected and remembered. Then regular expressions are checked, in the order of their appearance in the configuration file. The search of regular expressions terminates on the first match, and the corresponding configuration is used. If no match with a regular expression is found then the configuration of the prefix location remembered earlier is used.</p>
+<footer><strong>nginx</strong><cite><a href="http://nginx.org/en/docs/http/ngx_http_core_module.html#location" target="_blank" rel="noopener">nginx.org/en/docs/http/ngx_http_core_module.html#location</a></cite></footer></blockquote><br>之前还看过一个更具体的文档:<br><blockquote><p>The order in which location directives are checked as follows:</p>
+<ol>
+<li>Directives with the “=” prefix that match the query exactly (literal string). If found, searching stops.</li>
+<li>All remaining directives with conventional strings. If this match used the `^~” prefix, searching stops.</li>
+<li>Regular expressions, in the order they are defined in the configuration file.</li>
+<li>If #3 yielded a match, that result is used. Otherwise, the match from #2 is used.</li>
+</ol>
+<p>To determine which location directive matches a particular query, the literal strings are checked first. Literal strings match the beginning portion of the query - the most specific match will be used. Afterwards, regular expressions are checked in the order defined in the configuration file. The first regular expression to match the query will stop the search. If no regular expression matches are found, the result from the literal search is used.</p>
+<footer><strong>nginx</strong><cite><a href="https://www.nginx.com/resources/wiki/#location" target="_blank" rel="noopener">www.nginx.com/resources/wiki/#location</a></cite></footer></blockquote></p>
+<p>总结一下过来就是， 按照优先级的步骤如下</p>
+<ol>
+<li>优先查找精确匹配，精确匹配 (=) 的 location 如果匹配请求 URI 的话，此 location 被马上使用，匹配过程结束。</li>
+<li>接下来进行字符串匹配(空格 和 ~^), 找到匹配最长的那个，如果发现匹配最长的那个是 ^~ 前缀, 那么也停止搜索并且马上使用，匹配过程结束。 否则继续往下走。</li>
+<li>如果字符串匹配没有，或者匹配的最长字符串不是 ^~ 前缀 (比如是空格匹配)，那么就继续搜索正则表达式匹配， 这时候就根据在配置文件定义的顺序，取最上面的配置(正则匹配跟匹配长度没关系，只跟位置有关系，只取顺序最上面的匹配)</li>
+<li>如果第三步找到了，那么就用第三步的匹配，否则就用第二步的匹配 (字符匹配最长的空格匹配)</li>
+</ol>
+<p>简单的来说就是顺序如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">精确匹配 &gt; 字符串匹配( 长 &gt; 短 [ 注: ^~ 匹配则停止匹配 ]) &gt; 正则匹配( 上 &gt; 下 )</span><br></pre></td></tr></table></figure></p>
+<p>换成符号的优先级就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[=] &gt; [^~] &gt; [~/~*] &gt; [空格]</span><br></pre></td></tr></table></figure></p>
+<p>这边注意几个细节:</p>
+<ol>
+<li>常规字符串匹配类型。是按前缀匹配(从根开始)。 而正则匹配是包含匹配，只要包含就可以匹配</li>
+<li>~ 和 ~* 的优先级一样，取决于在配置文件中的位置，最上面的为主，跟匹配的字符串长度没关系，所以在写的时候，应该越精准的要放在越前面才对</li>
+<li>空格匹配和 ^~ 都是字符串匹配，所以如果两个后面的匹配字符串一样，是会报错的，因为 nginx 会认为两者的匹配规则一致，所以会有冲突</li>
+<li>^~, =, ~, ~* 这些修饰符和后面的 URI 字符串中间可以不使用空格隔开(大部分都是用空格隔开)。但是 @ 修饰符必须和 URI 字符串直接连接。</li>
+</ol>
+<p>接下来通过几个实践来帮助理解:</p>
+<h3 id="例子-1"><a href="#例子-1" class="headerlink" title="例子 1"></a>例子 1</h3><p>配置文件配置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">location / &#123;</span><br><span class="line">  return 200 &apos;404&apos;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">location ~ /hello &#123;</span><br><span class="line">  return 200 &apos;1&apos;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">location ^~ /hello &#123;</span><br><span class="line">  return 200 &apos;2&apos;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">location = /hello &#123;</span><br><span class="line">  return 200 &apos;3&apos;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">location ~* /hello &#123;</span><br><span class="line">  return 200 &apos;4&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个是测试结果<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/hello  #精确匹配，直接结束</span><br><span class="line">3</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/hello11 #字符串匹配，并且最大长度的匹配是 ~^,直接结束</span><br><span class="line">2</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/hello/22 #字符串匹配，并且最大长度的匹配是 ~^,直接结束</span><br><span class="line">2</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/11/hello/ #字符串不匹配(前缀匹配)，正则匹配有两个，取最上面的那个</span><br><span class="line">1</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/11/Hello/ #字符串不匹配(前缀匹配)，正则匹配有一个(大小写不敏感)，取最上面的那个</span><br><span class="line">4</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/11/Hell #都不匹配，有设置通用匹配，取通用匹配</span><br><span class="line">404</span><br></pre></td></tr></table></figure></p>
+<h3 id="例子-2"><a href="#例子-2" class="headerlink" title="例子 2"></a>例子 2</h3><p>配置文件配置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">location /images/test.png &#123;</span><br><span class="line">  return 200  &apos;1&apos;;     </span><br><span class="line">&#125;        </span><br><span class="line"></span><br><span class="line">location ^~ /images/ &#123; </span><br><span class="line">  return 200  &apos;2&apos;;      </span><br><span class="line">&#125;    </span><br><span class="line"></span><br><span class="line">location ~ /images/ &#123;        </span><br><span class="line">  return 200  &apos;3&apos;;   </span><br><span class="line">&#125; </span><br><span class="line"></span><br><span class="line">location ~ /images/test.png &#123;        </span><br><span class="line">  return 200  &apos;4&apos;;   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个是测试结果<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]#  curl http://127.0.0.1/images/test.png </span><br><span class="line">3</span><br><span class="line">[root@VM_156_200_centos ~]#  curl http://127.0.0.1/images/1 </span><br><span class="line">2</span><br></pre></td></tr></table></figure></p>
+<p>第一个返回 3 是因为本例是 普通匹配和正则匹配都存在， 并且因为 ^~ 匹配不是最长的话，那么就取 正则匹配， 正则匹配满足条件的有两个， 取最上面那个， 所以是 3， (本例的字符串最长匹配是空格匹配)。(对于本例来说，如果去掉后面的两个正则匹配，那么返回的就是 1， 因为空格匹配的字符串是最长的)</p>
+<p>第二个返回 2 是因为普通匹配和正则匹配都存在，但是这个^~ 匹配是最长的，所以就是 2。</p>
+<h3 id="普通字符串的匹配冲突"><a href="#普通字符串的匹配冲突" class="headerlink" title="普通字符串的匹配冲突"></a>普通字符串的匹配冲突</h3><p>如果我这样子写:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">location /images/test.png &#123;</span><br><span class="line">    return 200  &apos;1&apos;;     </span><br><span class="line">&#125;        </span><br><span class="line"></span><br><span class="line">location ^~ /images/test.png &#123; </span><br><span class="line">     return 200  &apos;2&apos;;      </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这时候我 reload 是会报错的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@VM_156_200_centos sbin]# ./nginx -s reload</span><br><span class="line">nginx: [emerg] duplicate location &quot;/images/test.png&quot; in /usr/local/nginx/conf/nginx.conf:20</span><br></pre></td></tr></table></figure></p>
+<p>这个是因为这两个匹配的规则是一样的，所以会有冲突，了解更多请看 <a href="/2020/09/15/centos7-systemctl-reload-nginx/" title="CentOS 7 systemctl reload nginx.service 不检查配置文件的问题">CentOS 7 systemctl reload nginx.service 不检查配置文件的问题</a></p>
+<h3 id="辟谣之-比-优先级高"><a href="#辟谣之-比-优先级高" class="headerlink" title="辟谣之 - ~ 比 ~* 优先级高"></a>辟谣之 - ~ 比 ~* 优先级高</h3><p>之前也有在网上看到这种说法，就是匹配顺序的时候，如果都匹配了，那么 ~ 比 ~* 优先级高，其实这个说法是错误的，这哥俩并没有谁比谁高贵，根据上面的匹配顺序，如果都是正则匹配，那么就是谁排在前面，就采用谁。 做个实践, 我的执行顺序是这样子的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">location ~* \.jpG$ &#123;</span><br><span class="line">  return 200  &apos;1&apos;;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line">location ~ \.jpg$ &#123;</span><br><span class="line">  return 200  &apos;2&apos;;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>我的测试结果如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.jpg</span><br><span class="line">1</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.JPG</span><br><span class="line">1</span><br></pre></td></tr></table></figure></p>
+<p>只要有匹配，肯定是最上面的那个 1。</p>
+<h3 id="辟谣之-modifier-包含-和"><a href="#辟谣之-modifier-包含-和" class="headerlink" title="辟谣之 - modifier 包含 !~ 和 !~*"></a>辟谣之 - modifier 包含 !~ 和 !~*</h3><p>我看到有些网上的文章说 nginx 的 location modifier 还包含 <code>!~</code> 和 <code>!~*</code> 这两个，其实是不对的(也有可能是旧版本的，至少我的最新版本的 nginx 不支持)， 如果你这样子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location !~ \.(gif|jpg)$ &#123;</span><br><span class="line">  return 200  &apos;1&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>那么在 reload 的时候， nginx 会报这个错误:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx: [emerg] invalid location modifier &quot;!~&quot; in /usr/local/nginx/conf/nginx.conf:25</span><br></pre></td></tr></table></figure></p>
+<p>不过因为 Nginx 的正则是使用PCRE（Perl Compatible Regular Expressions）, 所以我们可以这样子写来达到我们想要的目的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location ~ \.*(?&lt;!(gif|jpg))$ &#123;</span><br><span class="line"> return 200  &apos;1&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>做个实践，假设我的路由是这样子: 如果后缀含有 gif 或者是 jpg， 那么就会返回 200， 否则就会返回 404<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">location / &#123;</span><br><span class="line">  return 200 &apos;404&apos;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">location ~ \.(gif|jpg)$ &#123;</span><br><span class="line"> return 200  &apos;200&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.gif</span><br><span class="line">200</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.jpg</span><br><span class="line">200</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.js</span><br><span class="line">404</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.css</span><br><span class="line">404</span><br></pre></td></tr></table></figure></p>
+<p>这个结果是对的。 那么就换成，如果后缀不是 gif 或者是 jpg，那么才返回 200， 否则就返回 404 (相当于上述的 !~):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">location / &#123;</span><br><span class="line">  return 200 &apos;404&apos;;</span><br><span class="line">&#125;</span><br><span class="line">location ~ \.*(?&lt;!(gif|jpg))$ &#123;</span><br><span class="line">  return 200  &apos;200&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，同样的结果，结果相反了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.gif</span><br><span class="line">404</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.jpg</span><br><span class="line">404</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.js</span><br><span class="line">200</span><br><span class="line">[root@VM_156_200_centos ~]# curl 127.0.0.1/1.css</span><br><span class="line">200</span><br></pre></td></tr></table></figure></p>
+<p>所以是可以实现这种效果的。</p>
+<h3 id="前缀的命名匹配"><a href="#前缀的命名匹配" class="headerlink" title="@ 前缀的命名匹配"></a>@ 前缀的命名匹配</h3><p>这个主要是内部定义一个 location 块，举个例子，因为 location 只验证 uri，参数是没有验证的，如果我们要验证参数，并且要根据不同的参数来进行不同的操作的话，就可以用这个内部定义块，举个例子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">location / &#123;</span><br><span class="line">   error_page 418 = @queryone;</span><br><span class="line">   error_page 419 = @querytwo;</span><br><span class="line">   error_page 420 = @querythree;</span><br><span class="line"></span><br><span class="line">   if ( $args ~ &quot;service=one&quot; ) &#123; return 418; &#125;</span><br><span class="line">   if ( $args ~ &quot;service=two&quot; ) &#123; return 419; &#125;</span><br><span class="line">   if ( $args ~ &quot;service=three&quot; ) &#123; return 420; &#125;</span><br><span class="line"></span><br><span class="line">   # do the remaining stuff</span><br><span class="line">   # ex: try_files $uri =404;</span><br><span class="line"></span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> location @queryone &#123;</span><br><span class="line">   return 200 &apos;do stuff for one&apos;;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> location @querytwo &#123;</span><br><span class="line">   return 200 &apos;do stuff for two&apos;;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> location @querythree &#123;</span><br><span class="line">   return 200 &apos;do stuff for three&apos;;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></p>
+<p>测试结果如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]#  curl http://127.0.0.1/?service=one</span><br><span class="line">do stuff for one</span><br><span class="line"></span><br><span class="line">[root@VM_156_200_centos ~]#  curl http://127.0.0.1/?service=two</span><br><span class="line">do stuff for two</span><br><span class="line"></span><br><span class="line">[root@VM_156_200_centos ~]#  curl http://127.0.0.1/?service=three</span><br><span class="line">do stuff for three</span><br></pre></td></tr></table></figure></p>
+<h2 id="location-match-uri"><a href="#location-match-uri" class="headerlink" title="location match [uri]"></a>location match [uri]</h2><p>这里主要填的是需要匹配的 path 路径，根据前面的符号，这里可以填写精确到 path 路径，也可以填正则表达式，Nginx 用的是 PCRE正则表达式语法，下表是在PCRE中元字符及其在正则表达式上下文中的行为的一个完整列表：</p>
+<table>
+<thead>
+<tr>
+<th>字符</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\</td>
+<td>将下一个字符标记为一个特殊字符、或一个原义字符、或一个向后引用、或一个八进制转义符。例如，<code>\\n</code> 匹配 <code>\n</code>。<code>\n</code> 匹配换行符。序列 <code>\\</code> 匹配 <code>\</code> , 而 <code>\(</code> 则匹配 <code>(</code>。即相当于多种编程语言中都有的<code>转义字符</code>的概念。</td>
+</tr>
+<tr>
+<td>^</td>
+<td>匹配输入字符串的开始位置。如果设置了 <code>RegExp</code> 对象的 <code>Multiline</code> 属性，<code>^</code> 也匹配<code>\n</code> 或 <code>\r</code> 之后的位置。</td>
+</tr>
+<tr>
+<td>$</td>
+<td>匹配输入字符串的结束位置。如果设置了 <code>RegExp</code> 对象的 <code>Multiline</code> 属性，<code>$</code> 也匹配<code>\n</code> 或 <code>\r</code> 之前的位置。</td>
+</tr>
+<tr>
+<td>*</td>
+<td>匹配前面的子表达式零次或多次。例如，<code>zo*</code> 能匹配 <code>z</code> 以及<code>zoo</code>。 <code>*</code> 等价于 <code>{0,}</code>。</td>
+</tr>
+<tr>
+<td>+</td>
+<td>匹配前面的子表达式一次或多次。例如，<code>zo+</code> 能匹配 <code>zo</code> 以及 <code>zoo</code>，但不能匹配 <code>z</code>。<code>+</code> 等价于 <code>{1,}</code>。</td>
+</tr>
+<tr>
+<td>?</td>
+<td>匹配前面的子表达式零次或一次。例如，<code>do(es)?</code> 可以匹配 <code>does</code> 或 <code>do</code>。<code>?</code> 等价于 <code>{0,1}</code>。</td>
+</tr>
+<tr>
+<td>{n}</td>
+<td><code>n</code> 是一个非负整数。匹配确定的n次。例如，<code>o{2}</code> 不能匹配 <code>Bob</code> 中的 <code>o</code>，但是能匹配 <code>food</code> 中的两个<code>o</code>。</td>
+</tr>
+<tr>
+<td>{n,}</td>
+<td><code>n</code> 是一个非负整数。至少匹配n次。例如，<code>o{2,}</code> 不能匹配 <code>Bob</code> 中的 <code>o</code>，但能匹配 <code>foooood</code> 中的所有o。<code>o{1,}</code> 等价于 <code>o+</code> 。<code>o{0,}</code> 则等价于 <code>o*</code>。</td>
+</tr>
+<tr>
+<td>{n,m}</td>
+<td>m和n均为非负整数，其中<code>n&lt;=m</code>。最少匹配n次且最多匹配m次。例如，<code>o{1,3}</code> 将匹配 <code>fooooood</code> 中的前三个o。<code>o{0,1}</code> 等价于<code>o?</code>。 请注意在逗号和两个数之间不能有空格。</td>
+</tr>
+<tr>
+<td>?</td>
+<td>当该字符紧跟在任何一个其他限制符（<code>*</code>,<code>+</code>,<code>?</code>，<code>{n}</code>，<code>{n,}</code>，<code>{n,m}</code>）后面时，匹配模式是非贪婪的。非贪婪模式尽可能少的匹配所搜索的字符串，而默认的贪婪模式则尽可能多的匹配所搜索的字符串。例如，对于字符串<code>oooo</code>，<code>o+?</code> 将匹配单个 <code>o</code>，而 <code>o+</code> 将匹配所有 <code>o</code>。</td>
+</tr>
+<tr>
+<td>.</td>
+<td>匹配除<code>\n</code>和<code>\r</code>之外的任何单个字符。要匹配包括<code>\n</code>和<code>\r</code>在内的任何字符，请使用像<code>[\s\S]</code>的模式。</td>
+</tr>
+<tr>
+<td>(pattern)</td>
+<td>匹配pattern并获取这一匹配。所获取的匹配可以从产生的 Matches 集合得到，在 VBScript 中使用 SMatches 集合，在JScript中则使用 $0…$9 属性。要匹配圆括号字符，请使用<code>\(</code> 或 <code>\)</code>。</td>
+</tr>
+<tr>
+<td>(?:pattern)</td>
+<td>匹配 pattern 但不获取匹配结果，也就是说这是一个非获取匹配，不进行存储供以后使用。这在使用或字符 “(&#124;)” 来组合一个模式的各个部分是很有用。例如”industr(?:y&#124;ies)” 就是一个比 “industry&#124;industries” 更简略的表达式。</td>
+</tr>
+<tr>
+<td>(?=pattern)</td>
+<td>非获取匹配，正向预查，在任何匹配 pattern 的字符串开始处匹配查找字符串。这是一个非获取匹配，也就是说，该匹配不需要获取供以后使用。例如，”Windows(?=95&#124;98&#124;NT&#124;2000)” 能匹配 <code>Windows2000</code> 中的 <code>Windows</code>，但不能匹配 <code>Windows3.1</code> 中的<code>Windows</code>。 预查不消耗字符，也就是说，在一个匹配发生后，在最后一次匹配之后立即开始下一次匹配的搜索，而不是从包含预查的字符之后开始。</td>
+</tr>
+<tr>
+<td>(?!pattern)</td>
+<td>非获取匹配， 负向预查，在任何不匹配 pattern 的字符串开始处匹配查找字符串。这是一个非获取匹配，也就是说，该匹配不需要获取供以后使用。例如”Windows(?!95&#124;98&#124;NT&#124;2000)” 能匹配 <code>Windows3.1</code> 中的 <code>Windows</code>，但不能匹配<code>Windows2000</code> 中的<code>Windows</code>。 预查不消耗字符，也就是说，在一个匹配发生后，在最后一次匹配之后立即开始下一次匹配的搜索，而不是从包含预查的字符之后开始</td>
+</tr>
+<tr>
+<td>(?&lt;=pattern)</td>
+<td>非获取匹配，反向肯定预查，与正向肯定预查类似，只是方向相反。例如，”(?&lt;=95&#124;98&#124;NT&#124;2000)Windows” 能匹配 <code>2000Windows</code> 中的 <code>Windows</code>，但不能匹配 <code>3.1Windows</code> 中的 <code>Windows</code>。</td>
+</tr>
+<tr>
+<td>(?&lt;!pattern)</td>
+<td>非获取匹配，反向否定预查，与正向否定预查类似，只是方向相反。例如 “(?&lt;!95&#124;98&#124;NT&#124;2000)Windows” 能匹配 <code>3.1Windows</code> 中的 <code>Windows</code>，但不能匹配 <code>2000Windows</code> 中的 <code>Windows</code>。</td>
+</tr>
+<tr>
+<td>x&#124;y</td>
+<td>匹配 x 或 y。例如，”z&#124;food” 能匹配 <code>z</code> 或 <code>food</code>。”(z&#124;f)ood” 则匹配 <code>zood</code> 或 <code>food</code>。</td>
+</tr>
+<tr>
+<td>[xyz]</td>
+<td>字符集合。匹配所包含的任意一个字符。例如，<code>[abc]</code> 可以匹配 <code>plain</code> 中的 <code>a</code>。</td>
+</tr>
+<tr>
+<td>[^xyz]</td>
+<td>负值字符集合。匹配未包含的任意字符。例如，<code>[^abc]</code> 可以匹配 <code>plain</code> 中的 <code>p</code>。</td>
+</tr>
+<tr>
+<td>[a-z]</td>
+<td>字符范围。匹配指定范围内的任意字符。例如，<code>[a-z]</code> 可以匹配 <code>a</code> 到 <code>z</code> 范围内的任意小写字母字符。</td>
+</tr>
+<tr>
+<td>[^a-z]</td>
+<td>负值字符范围。匹配任何不在指定范围内的任意字符。例如，<code>[^a-z]</code> 可以匹配任何不在 <code>a</code> 到 <code>z</code> 范围内的任意字符。</td>
+</tr>
+<tr>
+<td>\b</td>
+<td>匹配一个单词边界，也就是指单词和空格间的位置。例如，<code>er\b</code> 可以匹配 <code>never</code> 中的 <code>er</code> ，但不能匹配 <code>verb</code> 中的 <code>er</code>。<code>\b1_</code> 可以匹配<code>1_23</code>中的<code>1_</code>，但不能匹配<code>21_3</code>中的<code>1_</code>。</td>
+</tr>
+<tr>
+<td>\B</td>
+<td>匹配非单词边界。<code>er\B</code> 能匹配 <code>verb</code> 中的 <code>er</code> ，但不能匹配<code>never</code> 中的 <code>er</code>。</td>
+</tr>
+<tr>
+<td>\cx</td>
+<td>匹配由x指明的控制字符。例如，<code>\cM</code> 匹配一个<code>Control-M</code> 或 回车符。x 的值必须为<code>A-Z</code>或<code>a-z</code>之一。否则，将<code>c</code>视为一个原义的<code>c</code>字符。</td>
+</tr>
+<tr>
+<td>\d</td>
+<td>匹配一个数字字符。等价于 <code>[0-9]</code>。</td>
+</tr>
+<tr>
+<td>\D</td>
+<td>匹配一个非数字字符。等价于<code>[^0-9]</code>。</td>
+</tr>
+<tr>
+<td>\f</td>
+<td>匹配一个换页符。等价于<code>\x0c</code>和<code>\cL</code>。</td>
+</tr>
+<tr>
+<td>\n</td>
+<td>匹配一个换行符。等价于<code>\x0a</code>和<code>\cJ</code>。</td>
+</tr>
+<tr>
+<td>\r</td>
+<td>匹配一个回车符。等价于<code>\x0d</code>和<code>\cM</code>。</td>
+</tr>
+<tr>
+<td>\s</td>
+<td>匹配任何空白字符，包括空格、制表符、换页符等等。等价于<code>[\f\n\r\t\v]</code>。</td>
+</tr>
+<tr>
+<td>\S</td>
+<td>匹配任何非空白字符。等价于<code>[^\f\n\r\t\v]</code>。</td>
+</tr>
+<tr>
+<td>\t</td>
+<td>匹配一个制表符。等价于<code>\x09</code>和<code>\cI</code>。</td>
+</tr>
+<tr>
+<td>\v</td>
+<td>匹配一个垂直制表符。等价于<code>\x0b</code>和<code>\cK</code>。</td>
+</tr>
+<tr>
+<td>\w</td>
+<td>匹配包括下划线的任何单词字符。类似但不等价于<code>[A-Za-z0-9_]</code>，这里的<code>单词</code>字符使用<code>Unicode字符集</code>。</td>
+</tr>
+<tr>
+<td>\W</td>
+<td>匹配任何非单词字符。等价于<code>[^A-Za-z0-9_]</code>。</td>
+</tr>
+<tr>
+<td>\xn</td>
+<td>匹配n，其中n为十六进制转义值。十六进制转义值必须为确定的两个数字长。例如，<code>\x41</code>匹配<code>A</code>。<code>\x041</code>则等价于<code>\x04&amp;1</code>。正則表达式中可以使用<code>ASCII编码</code>。</td>
+</tr>
+<tr>
+<td>\num</td>
+<td>匹配num，其中num是一个正整数。对所获取的匹配的引用。例如，<code>(.)\1</code>匹配两个连续的相同字符。</td>
+</tr>
+<tr>
+<td>\n</td>
+<td>标识一个八进制转义值或一个向后引用。如果<code>\n</code>之前至少 n 个获取的子表达式，则 n 为向后引用。否则，如果 n 为八进制数字（0-7），则 n 为一个八进制转义值。</td>
+</tr>
+<tr>
+<td>\nm</td>
+<td>标识一个八进制转义值或一个向后引用。如果<code>\nm</code>之前至少有 nm 个获得子表达式，则 nm 为向后引用。如果<code>\nm</code> 之前至少有 n 个获取，则 n 为一个后跟文字m的向后引用。如果前面的条件都不满足，若n和m均为八进制数字（0-7），则<code>\nm</code>将匹配八进制转义值<code>nm</code>。</td>
+</tr>
+<tr>
+<td>\nml</td>
+<td>如果n为八进制数字（0-3），且m和l均为八进制数字（0-7），则匹配八进制转义值nml。</td>
+</tr>
+<tr>
+<td>\un</td>
+<td>匹配n，其中n是一个用四个十六进制数字表示的Unicode字符。例如，<code>\u00A9</code> 匹配版权符号（&copy;）。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h3><p>记下了举几个例子来实践一下，常用的一些实践有:</p>
+<ol>
+<li><p>判断是不是 IP 白名单:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#定义初始值</span><br><span class="line">set $my_ip 0;</span><br><span class="line"></span><br><span class="line">#判断是否为指定的白名单</span><br><span class="line">if ( $http_x_forwarded_for ~* &quot;10.0.0.1|172.16.0.1&quot; )&#123;</span><br><span class="line">    set $my_ip 1;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#不是白名单的IP进行重定向跳转</span><br><span class="line">if ( $my_ip = 0 )&#123;</span><br><span class="line">    rewrite ^/$ /40x.html;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>如果页面有多语言，但是这个多语言所在的文件找不到，那么就将多语言路径去掉，重新跳转</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">location / &#123;</span><br><span class="line">    if (!-e $request_filename) &#123;</span><br><span class="line">        rewrite ^/([A-Za-z0-9_-]+)/(.*) /$2 permanent;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>比如你请求是这样子的 <code>https://foo.com/zh-cn/a.html</code> 这时候服务端找不到这个文件，那么就会重定向到 <code>https://foo.com/a.html</code>。 这个很适合那种有多语言静态页面的站点</p>
+<ol start="3">
+<li><p>如果是一些特殊的静态文件，那么额外配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location ~* \.(gif|jpg|jpeg|png|css|js|ico)$ &#123;</span><br><span class="line">    root /webroot/res/;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>针对国内的搜索爬虫，返回中文的页面</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">set $chinaspider &quot;0&quot;;</span><br><span class="line">if ($http_user_agent ~* &quot;Baiduspider|Sogou spider|Sogou web spider&quot;) &#123;</span><br><span class="line">    set $chinaspider &quot;1&quot;;</span><br><span class="line">&#125;</span><br><span class="line">if ($chinaspider = 1) &#123;</span><br><span class="line">    return 301 https://$server_name/zh-cn;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>禁止以/data开头的文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location ~ ^/data &#123;</span><br><span class="line">  deny all;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>文件反盗链并设置过期时间</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">location ~* ^.+\.(jpg|jpeg|gif|png|swf|rar|zip|css|js)$ &#123;</span><br><span class="line">  valid_referers none blocked *.domain.com *.domain.net localhost 208.97.167.194;</span><br><span class="line">   if ($invalid_referer) &#123;</span><br><span class="line">      rewrite ^/ http://error.domain.com/error.gif;</span><br><span class="line">      return 412;</span><br><span class="line">      break;</span><br><span class="line">   &#125;</span><br><span class="line">   access_log  off;</span><br><span class="line">   root /opt/lampp/htdocs/web;</span><br><span class="line">   expires 3d;</span><br><span class="line">   break;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这里的 <code>return 412</code> 为自定义的 http 状态码，默认为<code>403</code>，方便找出正确的盗链的请求</p>
+<ul>
+<li><code>rewrite ^/ http://error.domain.com/error.gif;</code>显示一张防盗链图片</li>
+<li><code>access_log off;</code>不记录访问日志，减轻压力</li>
+<li><code>expires 3d</code>所有文件3天的浏览器缓存</li>
+</ul>
+<p>最后附上可以用作判断的全局变量</p>
+<table>
+<thead>
+<tr>
+<th>全局变量</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$remote_addr</td>
+<td>获取客户端ip</td>
+</tr>
+<tr>
+<td>$binary_remote_addr</td>
+<td>客户端ip（二进制)</td>
+</tr>
+<tr>
+<td>$remote_port</td>
+<td>客户端port，如：<code>50472</code></td>
+</tr>
+<tr>
+<td>$remote_user</td>
+<td>已经经过<code>Auth Basic Module</code>验证的用户名</td>
+</tr>
+<tr>
+<td>$host</td>
+<td>请求主机头字段，否则为服务器名称，如:<code>blog.sakmon.com</code></td>
+</tr>
+<tr>
+<td>$request</td>
+<td>用户请求信息，如：<code>GET ?a=1&amp;b=2 HTTP/1.1</code></td>
+</tr>
+<tr>
+<td>$request_filename</td>
+<td>当前请求的文件的路径名，由<code>root</code>或<code>alias</code>和<code>URI request</code>组合而成，如：<code>/2013/81.html</code></td>
+</tr>
+<tr>
+<td>$status</td>
+<td>请求的响应状态码,如:<code>200</code></td>
+</tr>
+<tr>
+<td>$body_bytes_sent</td>
+<td>响应时送出的body字节数数量。即使连接中断，这个数据也是精确的,如：<code>40</code></td>
+</tr>
+<tr>
+<td>$content_length</td>
+<td>等于请求行的<code>Content_Length</code>的值</td>
+</tr>
+<tr>
+<td>$content_type</td>
+<td>等于请求行的<code>Content_Type</code>的值</td>
+</tr>
+<tr>
+<td>$http_referer</td>
+<td>引用地址</td>
+</tr>
+<tr>
+<td>$http_user_agent</td>
+<td>客户端<code>agent</code>信息,如：<code>Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.76 Safari/537.36</code></td>
+</tr>
+<tr>
+<td>$args</td>
+<td>与 <code>$query_string</code> 相同 等于当中URL的参数(GET)，如<code>a=1&amp;b=2</code></td>
+</tr>
+<tr>
+<td>$document_uri</td>
+<td>与<code>$uri</code>相同, 这个变量指当前的请求URI，不包括任何参数(见$args) 如:<code>/2013/81.html</code></td>
+</tr>
+<tr>
+<td>$document_root</td>
+<td>针对当前请求的根路径设置值</td>
+</tr>
+<tr>
+<td>$hostname</td>
+<td>如：<code>centos53.localdomain</code></td>
+</tr>
+<tr>
+<td>$http_cookie</td>
+<td>客户端cookie信息</td>
+</tr>
+<tr>
+<td>$cookie_COOKIE</td>
+<td><code>cookie COOKIE</code>变量的值</td>
+</tr>
+<tr>
+<td>$is_args</td>
+<td>如果有<code>$args</code>参数，这个变量等于 <code>”?”</code>，否则等于<code>”&quot;</code></td>
+</tr>
+<tr>
+<td>$limit_rate</td>
+<td>这个变量可以限制连接速率，0 表示不限速</td>
+</tr>
+<tr>
+<td>$query_string</td>
+<td>与$args相同,等于当中URL的参数(GET)，如<code>a=1&amp;b=2</code></td>
+</tr>
+<tr>
+<td>$request_body</td>
+<td>记录POST过来的数据信息</td>
+</tr>
+<tr>
+<td>$request_body_file</td>
+<td>客户端请求主体信息的临时文件名</td>
+</tr>
+<tr>
+<td>$request_method</td>
+<td>客户端请求的动作，通常为GET或POST,如：GET</td>
+</tr>
+<tr>
+<td>$request_uri</td>
+<td>包含请求参数的原始URI，不包含主机名，如：<code>/2013/81.html?a=1&amp;b=2</code></td>
+</tr>
+<tr>
+<td>$scheme</td>
+<td>HTTP方法（如http，https）,如：http</td>
+</tr>
+<tr>
+<td>$uri</td>
+<td>这个变量指当前的请求URI，不包括任何参数(见$args) 如:<code>/2013/81.html</code></td>
+</tr>
+<tr>
+<td>$request_completion</td>
+<td>如果请求结束，设置为OK. 当请求未结束或如果该请求不是请求链串的最后一个时，为空(Empty)，如：OK</td>
+</tr>
+<tr>
+<td>$server_protocol</td>
+<td>请求使用的协议，通常是<code>HTTP/1.0</code>或<code>HTTP/1.1</code>，如：<code>HTTP/1.1</code></td>
+</tr>
+<tr>
+<td>$server_addr</td>
+<td>服务器IP地址，在完成一次系统调用后可以确定这个值</td>
+</tr>
+<tr>
+<td>$server_name</td>
+<td>服务器名称，如：<code>blog.sakmon.com</code></td>
+</tr>
+<tr>
+<td>$server_port</td>
+<td>请求到达服务器的端口号,如：<code>80</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="路由转发"><a href="#路由转发" class="headerlink" title="路由转发"></a>路由转发</h2><p>location 方法体内其实就是路由转发，而且 location 还允许嵌套，所以这部分要讲清楚，本文肯定是讲不完的。所以只是简单介绍一下其中的几种:</p>
+<h3 id="1-返回状态码和值"><a href="#1-返回状态码和值" class="headerlink" title="1. 返回状态码和值"></a>1. 返回状态码和值</h3><p>这个也是最常见的，就是返回 http 的状态码，不管是 200， 还是 301 或者 403。 都是这一种<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">location ~ /A.html &#123;</span><br><span class="line">  return 301 https://$server_name/B.html;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-反向代理"><a href="#2-反向代理" class="headerlink" title="2. 反向代理"></a>2. 反向代理</h3><p>主要通过 proxy_pass 来实现，可以转发到内部服务，也可以转发到外部服务，记得同时要转发真实 ip<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">location / &#123;</span><br><span class="line">  proxy_set_header  X-Real-IP       $remote_addr;</span><br><span class="line">  proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">  proxy_pass https://foo.com;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-Rewrite-命令"><a href="#3-Rewrite-命令" class="headerlink" title="3. Rewrite 命令"></a>3. Rewrite 命令</h3><p>rewrite 功能就是，使用 nginx 提供的全局变量或自己设置的变量，结合正则表达式和标志位实现 url 重写以及重定向。</p>
+<p>rewrite 只能放在<code>server{}</code>,<code>location{}</code>,<code>if{}</code>中，并且只能对域名后边的除去传递的参数外的字符串起作用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">location ~ \.cgi$ &#123;</span><br><span class="line">  rewrite ^(.*)\.cgi$ $1.html last;</span><br><span class="line">  return 301;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">location ~ \.html$ &#123;</span><br><span class="line">  return 200 &apos;1&apos;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>将所有 <code>.cgi</code> 结尾的都重定向到 <code>.html</code> 结尾的, 执行一下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_156_200_centos ~]#  curl http://127.0.0.1/api.cgi</span><br><span class="line">1</span><br></pre></td></tr></table></figure></p>
+<p>其实路由转发在 nginx 中还有非常多的用法，这边就不细讲了。毕竟这一部分也不是本文的重点。</p>
+<hr>
+<p>参考文档</p>
+<ul>
+<li><a href="https://www.cnblogs.com/kevingrace/p/6804429.html" target="_blank" rel="noopener">Nginx的location配置规则总结 - 运维笔记</a></li>
+<li><a href="https://www.cnblogs.com/BeiGuo-FengGuang/p/9844128.html" target="_blank" rel="noopener">Nginx location匹配规则</a></li>
+<li><a href="https://ialloc.org/blog/ngx-notes-http-location/" target="_blank" rel="noopener">Nginx 源代码笔记 - URI 匹配</a></li>
+<li><a href="http://nginx.org/en/docs/http/ngx_http_core_module.html#location" target="_blank" rel="noopener">Module ngx_http_core_module</a></li>
+<li><a href="https://www.cnblogs.com/alter888/p/9799981.html" target="_blank" rel="noopener">Nginx的正则表达式</a></li>
+<li><a href="https://serverfault.com/questions/811912/can-nginx-location-blocks-match-a-url-query-string" target="_blank" rel="noopener">Can nginx location blocks match a URL query string?</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/09/16/nginx-location/" title="Nginx 的 location 匹配规则总结">http://kebingzao.com/2020/09/16/nginx-location/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nginx/" rel="tag"># nginx</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/09/15/centos7-install-nginx/" rel="next" title="CentOS 7 安装 Nginx">
+                <i class="fa fa-chevron-left"></i> CentOS 7 安装 Nginx
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">210</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">49</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#location-匹配的变量"><span class="nav-number">2.</span> <span class="nav-text">location 匹配的变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#location-匹配的种类"><span class="nav-number">3.</span> <span class="nav-text">location 匹配的种类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#location-modifier"><span class="nav-number">4.</span> <span class="nav-text">location modifier</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#location-modifier-的匹配顺序"><span class="nav-number">4.1.</span> <span class="nav-text">location modifier 的匹配顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#例子-1"><span class="nav-number">4.2.</span> <span class="nav-text">例子 1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#例子-2"><span class="nav-number">4.3.</span> <span class="nav-text">例子 2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#普通字符串的匹配冲突"><span class="nav-number">4.4.</span> <span class="nav-text">普通字符串的匹配冲突</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#辟谣之-比-优先级高"><span class="nav-number">4.5.</span> <span class="nav-text">辟谣之 - ~ 比 ~* 优先级高</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#辟谣之-modifier-包含-和"><span class="nav-number">4.6.</span> <span class="nav-text">辟谣之 - modifier 包含 !~ 和 !~*</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前缀的命名匹配"><span class="nav-number">4.7.</span> <span class="nav-text">@ 前缀的命名匹配</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#location-match-uri"><span class="nav-number">5.</span> <span class="nav-text">location match [uri]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#举个例子"><span class="nav-number">5.1.</span> <span class="nav-text">举个例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由转发"><span class="nav-number">6.</span> <span class="nav-text">路由转发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-返回状态码和值"><span class="nav-number">6.1.</span> <span class="nav-text">1. 返回状态码和值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-反向代理"><span class="nav-number">6.2.</span> <span class="nav-text">2. 反向代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Rewrite-命令"><span class="nav-number">6.3.</span> <span class="nav-text">3. Rewrite 命令</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/09/16/nginx-location/';
+          this.page.identifier = '2020/09/16/nginx-location/';
+          this.page.title = 'Nginx 的 location 匹配规则总结';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

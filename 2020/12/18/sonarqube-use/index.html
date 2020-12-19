@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="sonarqube," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言做过开发的都知道，虽然都是可以 work，但是代码质量的好坏， 直接会导致这个项目的可维护性和可扩展性。 虽然我们的项目的代码在上线之前都会经过测试和 code review。但是随着项目数量越来越多，team leader 在进行 code review 的时候，往往只能注重代码的可用性，很多代码质量上的问题都被忽略了。 所以项目组决定在进行代码 patch 提交之前，在 Jenkins 构">
+<meta name="keywords" content="sonarqube">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windows 环境下使用 SonarQube 来检测工程代码质量">
+<meta property="og:url" content="http://kebingzao.com/2020/12/18/sonarqube-use/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言做过开发的都知道，虽然都是可以 work，但是代码质量的好坏， 直接会导致这个项目的可维护性和可扩展性。 虽然我们的项目的代码在上线之前都会经过测试和 code review。但是随着项目数量越来越多，team leader 在进行 code review 的时候，往往只能注重代码的可用性，很多代码质量上的问题都被忽略了。 所以项目组决定在进行代码 patch 提交之前，在 Jenkins 构">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/1.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/2.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/3.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/4.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/5.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/6.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/7.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/8.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/9.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/10.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/11.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/12.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/13.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/14.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/15.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/16.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/17.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/18.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/19.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/20.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/21.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/22.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/23.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/24.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/25.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/26.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/27.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/28.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/29.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/30.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/31.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/32.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/33.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/35.png">
+<meta property="og:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/34.png">
+<meta property="og:updated_time" content="2020-12-19T16:54:04.073Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="windows 环境下使用 SonarQube 来检测工程代码质量">
+<meta name="twitter:description" content="前言做过开发的都知道，虽然都是可以 work，但是代码质量的好坏， 直接会导致这个项目的可维护性和可扩展性。 虽然我们的项目的代码在上线之前都会经过测试和 code review。但是随着项目数量越来越多，team leader 在进行 code review 的时候，往往只能注重代码的可用性，很多代码质量上的问题都被忽略了。 所以项目组决定在进行代码 patch 提交之前，在 Jenkins 构">
+<meta name="twitter:image" content="http://kebingzao.com/2020/12/18/sonarqube-use/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2020/12/18/sonarqube-use/"/>
+
+
+
+
+
+  <title>windows 环境下使用 SonarQube 来检测工程代码质量 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2020/12/18/sonarqube-use/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">windows 环境下使用 SonarQube 来检测工程代码质量</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-18T10:26:42+08:00">
+                2020-12-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用工具集/" itemprop="url" rel="index">
+                    <span itemprop="name">实用工具集</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/18/sonarqube-use/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/12/18/sonarqube-use/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/12/18/sonarqube-use/" class="leancloud_visitors" data-flag-title="windows 环境下使用 SonarQube 来检测工程代码质量">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>做过开发的都知道，虽然都是可以 work，但是代码质量的好坏， 直接会导致这个项目的可维护性和可扩展性。 虽然我们的项目的代码在上线之前都会经过测试和 code review。但是随着项目数量越来越多，team leader 在进行 code review 的时候，往往只能注重代码的可用性，很多代码质量上的问题都被忽略了。 所以项目组决定在进行代码 patch 提交之前，在 Jenkins 构建之前，先通过代码质量检测工具 SonarQube 来检查一下代码质量。 这样子可以保证在最后入 master 分支的时候， code review 阶段可以尽可能去看这些格式优雅的代码。</p>
+<h2 id="SonarQube-简介"><a href="#SonarQube-简介" class="headerlink" title="SonarQube 简介"></a>SonarQube 简介</h2><p><a href="https://www.sonarqube.org/" target="_blank" rel="noopener">SonarQube</a> 是一款用于代码质量管理的开源工具，它主要用于管理源代码的质量。 通过插件形式，可以支持众多计算机语言，比如 java, C#, go，C/C++, PL/SQL, Cobol, JavaScrip, Groovy 等。sonar可以通过PMD,CheckStyle,Findbugs等等代码规则检测工具来检测你的代码，帮助你发现代码的漏洞，Bug，单元测试覆盖率等信息。</p>
+<p>Sonar 不仅提供了对 IDE 的支持，可以在 Eclipse和 IntelliJ IDEA 这些工具里联机查看结果；同时 Sonar 还对大量的持续集成工具提供了接口支持，可以很方便地在持续集成中使用 Sonar。<br><a id="more"></a></p>
+<h2 id="SonarQube-安装"><a href="#SonarQube-安装" class="headerlink" title="SonarQube 安装"></a>SonarQube 安装</h2><p>因为我的环境是 windows 7，所以接下来的整个安装环境都是在 windows 7 来完成的。 接下来的安装过程是从 0 到 1 的，然后遇到问题，一步一步踩坑解决的。 而不是等我最后安装使用成功了，再以上帝视角来描述。 因为那样子会忽略很多安装过程中的问题，导致对一些想使用 SonarQube 的新手来说会不够友好。</p>
+<h3 id="1-下载-SonarQube"><a href="#1-下载-SonarQube" class="headerlink" title="1. 下载 SonarQube"></a>1. 下载 SonarQube</h3><p>首先到 <a href="https://www.sonarqube.org/downloads/" target="_blank" rel="noopener">官网下载页面</a> 下载免费版，也就是 Community 版本， 因为我们的主要项目语言，主要是 JavaScript， PHP, Golang，刚好它都有支持</p>
+<p><img src="/2020/12/18/sonarqube-use/1.png" alt="1"> </p>
+<p>截止到 <code>2020-12-18</code>, 最新版本是 8.6, 所以我们直接下载， 下载完之后，直接解压， 进入到 bin 目录， 接下来选择 <code>windows  x86</code> 下的 bat 文件</p>
+<p><img src="/2020/12/18/sonarqube-use/2.png" alt="1"> </p>
+<p>双击这个 <code>StartSonar.bat</code> 文件，进行安装</p>
+<p><img src="/2020/12/18/sonarqube-use/3.png" alt="1"> </p>
+<p>从 log 上来看，发现需要 JVM 的支持，所以我们需要去下载一个， 而且要 jdk 11+ 的版本。</p>
+<h3 id="2-下载并安装-jdk-11"><a href="#2-下载并安装-jdk-11" class="headerlink" title="2. 下载并安装 jdk 11"></a>2. 下载并安装 jdk 11</h3><p>接下来到官网 <a href="https://www.oracle.com/java/technologies/oracle-java-archive-downloads.html" target="_blank" rel="noopener">官网 Java SE 下载页面</a>, 然后直接选择一个 Java SE 11 的版本</p>
+<p><img src="/2020/12/18/sonarqube-use/4.png" alt="1"> </p>
+<p><img src="/2020/12/18/sonarqube-use/5.png" alt="1"> </p>
+<p>这边注意一个细节，现在下载 Java SE 的话，要登录账号才行，如果没有的话，就去注册一个就行了。 下载完成之后，就开始进行安装</p>
+<p><img src="/2020/12/18/sonarqube-use/6.png" alt="1"> </p>
+<p>安装好了，直接验证一下，是否有自动写到环境变量中:</p>
+<p><img src="/2020/12/18/sonarqube-use/7.png" alt="1"> </p>
+<p>看起来是有了， 所以就不再需要再去配置环境变量了。</p>
+<p>接下来重新执行 <code>StartSonar.bat</code> 文件，这时候就可以看到有加载到 JVM 了</p>
+<blockquote>
+<p>我的电脑比较特殊，还是会加载失败，不过我重启电脑之后，就可以加载到了，不过一般的电脑应该不需要重启，就可以生效了</p>
+</blockquote>
+<p><img src="/2020/12/18/sonarqube-use/8.png" alt="1"> </p>
+<p>首次启动可能会久一点，耐心等待一下，一直到看到 <code>SonarQube is up</code> 的字样，说明服务已经启动了。</p>
+<p><img src="/2020/12/18/sonarqube-use/9.png" alt="1"> </p>
+<h3 id="3-登入-web-界面"><a href="#3-登入-web-界面" class="headerlink" title="3. 登入 web 界面"></a>3. 登入 web 界面</h3><p>既然服务已经启动了，这时候访问本地的 localhost:9000 就可以看到界面了</p>
+<p><img src="/2020/12/18/sonarqube-use/10.png" alt="1"> </p>
+<p>需要登录，默认的用户名和密码就是admin，admin。 首次登录之后，会需要你重新修改密码。 第一次登录进去之后，界面是这样子</p>
+<p><img src="/2020/12/18/sonarqube-use/11.png" alt="1"> </p>
+<p>默认语言是英语， 不过有汉化包， 我们下载一下 汉化包</p>
+<h3 id="4-下载汉化包"><a href="#4-下载汉化包" class="headerlink" title="4. 下载汉化包"></a>4. 下载汉化包</h3><p>具体步骤如截图:</p>
+<p><img src="/2020/12/18/sonarqube-use/12.png" alt="1"> </p>
+<p>点击安装。 最后重启一下 server</p>
+<p><img src="/2020/12/18/sonarqube-use/13.png" alt="1"> </p>
+<p>等一会儿让你重新登录， 过一会儿就变中文界面了。 但是神奇的是，我重新登录之后，界面还是没有变化，还是英文？ 懵逼了？ 啥姿势不对？</p>
+<p>后面查了一下，我的版本是 8.6 的，但是汉化包最新版本只支持到 8.5 的版本，所以我下载到的汉化包版本也是 8.5 的，暂时还没有 8.6 的汉化包</p>
+<p><img src="/2020/12/18/sonarqube-use/14.png" alt="1"> </p>
+<p>原来版本太新也有问题。 没事，用英语界面也是棒棒的。</p>
+<blockquote>
+<p>值得一提的是，隔了一天，我看到 release 版本变成支持 8.6 的版本了，本来以为可以下到 8.6 的汉化包了，结果查询了一下这个插件包，还是只有 8.5 的包，看来这两个姿势也不统一啊，估计还来不及上架，后面再等等吧</p>
+</blockquote>
+<h2 id="实操验证"><a href="#实操验证" class="headerlink" title="实操验证"></a>实操验证</h2><h3 id="1-新建项目"><a href="#1-新建项目" class="headerlink" title="1. 新建项目"></a>1. 新建项目</h3><p>既然安装好了，接下来就拿几个项目实际遛一遛才知道是否有效果。因为我们的主要项目语言就是 JavaScript， PHP, Golang。 所以先拿一个 PHP 项目测一下。</p>
+<p>首先先创建一个项目，名称随便取</p>
+<p><img src="/2020/12/18/sonarqube-use/15.png" alt="1"> </p>
+<p>然后接下来会让你生成一个 token， 后面扫描代码做校验的， 这个也是随便填没事，反正后面扫码也是直接贴指令，没有谁会去记这一串鬼东西。</p>
+<p><img src="/2020/12/18/sonarqube-use/16.png" alt="1"> </p>
+<p>接下来会让我们选择扫描项目的语种，PHP 是在 other 类别里面 (JavaScript 和 Golang 也同样是这个类别)， 然后平台选择 windows</p>
+<p><img src="/2020/12/18/sonarqube-use/17.png" alt="1"> </p>
+<h3 id="2-下载扫描组件"><a href="#2-下载扫描组件" class="headerlink" title="2. 下载扫描组件"></a>2. 下载扫描组件</h3><p>因为是第一次，所以得先下载一个扫描工具，点击 download 按钮，会跳转到一个下载页面，选择 <code>windows 64-bit 版本即可</code></p>
+<p><img src="/2020/12/18/sonarqube-use/18.png" alt="1"> </p>
+<p>点击下载， 然后下载完之后，解压， 将 这个目录的 bin 放到环境变量</p>
+<p><img src="/2020/12/18/sonarqube-use/19.png" alt="1"> </p>
+<p><img src="/2020/12/18/sonarqube-use/20.png" alt="1"> </p>
+<h3 id="3-在项目目录下执行扫码命令"><a href="#3-在项目目录下执行扫码命令" class="headerlink" title="3. 在项目目录下执行扫码命令"></a>3. 在项目目录下执行扫码命令</h3><p>扫描组件安装完之后，接下来就 copy 下面的那一长串代码，然后放到对应的项目 (本次是 php 项目) 的根目录下执行</p>
+<p><img src="/2020/12/18/sonarqube-use/21.png" alt="1"> </p>
+<p>不过好像报错了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">F:\airdroid_code\lumen-pay&gt;sonar-scanner.bat -D&quot;sonar.projectKey=lumen-pay&quot; -D&quot;sonar.sources=.&quot; -D&quot;sonar.host.url=http://localhost:9000&quot; -D&quot;sonar.login=54822b97fdce00358a0747dc84b88a169d2e61a3&quot;</span><br><span class="line">INFO: Scanner configuration file: D:\sonar-scanner-4.5.0.2216-windows\bin\..\conf\sonar-scanner.properties</span><br><span class="line">INFO: Project root configuration file: NONE</span><br><span class="line">INFO: SonarScanner 4.5.0.2216</span><br><span class="line">INFO: Java 11.0.3 AdoptOpenJDK (64-bit)</span><br><span class="line">INFO: Windows 7 6.1 amd64</span><br><span class="line">INFO: User cache: C:\Users\admin\.sonar\cache</span><br><span class="line">INFO: Scanner configuration file: D:\sonar-scanner-4.5.0.2216-windows\bin\..\conf\sonar-scanner.properties</span><br><span class="line">INFO: Project root configuration file: NONE</span><br><span class="line">INFO: Analyzing on SonarQube server 8.6.0</span><br><span class="line">INFO: Default locale: &quot;zh_CN&quot;, source code encoding: &quot;GBK&quot; (analysis is platform dependent)</span><br><span class="line">INFO: Load global settings</span><br><span class="line">INFO: Load global settings (done) | time=86ms</span><br><span class="line">INFO: Server id: BF41A1F2-AXZv_C5uGbK98_9nLrOT</span><br><span class="line">INFO: User cache: C:\Users\admin\.sonar\cache</span><br><span class="line">INFO: Load/download plugins</span><br><span class="line">INFO: Load plugins index</span><br><span class="line">INFO: Load plugins index (done) | time=43ms</span><br><span class="line">INFO: Plugin [l10nzh] defines &apos;l10nen&apos; as base plugin. This metadata can be removed from manifest of l10n plugins since version 5.2.</span><br><span class="line">INFO: Load/download plugins (done) | time=104ms</span><br><span class="line">INFO: Process project properties</span><br><span class="line">INFO: Process project properties (done) | time=11ms</span><br><span class="line">INFO: Execute project builders</span><br><span class="line">INFO: Execute project builders (done) | time=2ms</span><br><span class="line">INFO: Project key: lumen-pay</span><br><span class="line">INFO: Base dir: F:\airdroid_code\lumen-pay</span><br><span class="line">INFO: Working dir: F:\airdroid_code\lumen-pay\.scannerwork</span><br><span class="line">INFO: Load project settings for component key: &apos;lumen-pay&apos;</span><br><span class="line">INFO: Load project settings for component key: &apos;lumen-pay&apos; (done) | time=24ms</span><br><span class="line">INFO: Load quality profiles</span><br><span class="line">INFO: Load quality profiles (done) | time=54ms</span><br><span class="line">INFO: Load active rules</span><br><span class="line">INFO: ------------------------------------------------------------------------</span><br><span class="line">INFO: EXECUTION FAILURE</span><br><span class="line">INFO: ------------------------------------------------------------------------</span><br><span class="line">INFO: Total time: 2.198s</span><br><span class="line">INFO: Final Memory: 5M/24M</span><br><span class="line">INFO: ------------------------------------------------------------------------</span><br><span class="line">ERROR: Error during SonarScanner execution</span><br><span class="line">java.lang.IllegalStateException: Unable to load component class org.sonar.scanner.report.ActiveRulesPublisher</span><br><span class="line">        at org.sonar.core.platform.ComponentContainer$ExtendedDefaultPicoContainer.getComponent(ComponentContainer.java:66)</span><br><span class="line">        at org.picocontainer.DefaultPicoContainer.getComponent(DefaultPicoContainer.java:621)</span><br><span class="line">        ...</span><br><span class="line">        ... 50 more</span><br><span class="line">ERROR:</span><br><span class="line">ERROR: Re-run SonarScanner using the -X switch to enable full debug logging.</span><br></pre></td></tr></table></figure></p>
+<p>后面网上查了一下，解决方法是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Delete the directory data/es in your SonarQube installation.</span><br><span class="line">Restart SonarQube.</span><br></pre></td></tr></table></figure></p>
+<p>先把 data 下面的 es7 这个目录删掉</p>
+<p><img src="/2020/12/18/sonarqube-use/22.png" alt="1"></p>
+<p>然后再重启 SonarQube 服务 (terminal 窗体执行 <code>ctrl + c</code> 退出， 然后重新执行 .bat 文件即可)。 这一次终于跑成功了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">18:28:38.133 INFO: Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report</span><br><span class="line">18:28:38.134 INFO: More about the report processing at http://localhost:9000/api/ce/task?id=AXZwPpQRUZLk_accn7bS</span><br><span class="line">18:28:38.136 DEBUG: Post-jobs :</span><br><span class="line">18:28:38.143 INFO: Analysis total time: 2:06.523 s</span><br><span class="line">18:28:38.146 INFO: ------------------------------------------------------------------------</span><br><span class="line">18:28:38.147 INFO: EXECUTION SUCCESS</span><br><span class="line">18:28:38.147 INFO: ------------------------------------------------------------------------</span><br><span class="line">18:28:38.147 INFO: Total time: 2:08.729s</span><br><span class="line">18:28:38.211 INFO: Final Memory: 7M/30M</span><br><span class="line">18:28:38.214 INFO: ------------------------------------------------------------------------</span><br></pre></td></tr></table></figure></p>
+<p>这时候刷新页面，就有东西了</p>
+<p><img src="/2020/12/18/sonarqube-use/23.png" alt="1"></p>
+<p>看起来比想象中。好一点。 是 passed， 那就应该还好。  接下来就是针对这些有问题的地方，去进行调整和优化。 回到首页，就可以看到</p>
+<p><img src="/2020/12/18/sonarqube-use/24.png" alt="1"></p>
+<p>而且他还有安全警告的功能， 比如那三个安全警告，点进去看的时候</p>
+<p><img src="/2020/12/18/sonarqube-use/25.png" alt="1"></p>
+<p>发现有两个是 md5 的调用， 还有一个是 伪随机参数，都是不够安全的因素(这种方式都可以被 hash 碰撞)，所以就标出来。</p>
+<p><img src="/2020/12/18/sonarqube-use/26.png" alt="1"></p>
+<p>至于这个要不要改，得看所对应的业务的安全性和影响性，如果是影响比较大的，那么最好改一下。</p>
+<h3 id="4-扫描生成的缓存文件"><a href="#4-扫描生成的缓存文件" class="headerlink" title="4. 扫描生成的缓存文件"></a>4. 扫描生成的缓存文件</h3><p>在扫描的时候，会在两个地方生成缓存文件。因为它每一次扫描都不是全部代码再扫描一次，而是基于上次的扫描范围，对新的修改的代码再进行扫描分析，所以肯定会有一些缓存文件的。</p>
+<p>项目里面就会有一个 <code>.scannerwork</code> 的目录, 里面存放一些扫描的 report 报告</p>
+<p><img src="/2020/12/18/sonarqube-use/27.png" alt="1"></p>
+<p>同时在 <code>C:\Users\admin\.sonar\cache</code> 也会有缓存</p>
+<p><img src="/2020/12/18/sonarqube-use/28.png" alt="1"></p>
+<h3 id="5-扫码-golang-项目"><a href="#5-扫码-golang-项目" class="headerlink" title="5. 扫码 golang 项目"></a>5. 扫码 golang 项目</h3><p>接下来我们跑一下 golang 项目的扫描检测，一样创建一个 golang 项目的 project， 然后生成 token 之后，直接将下面的 指令 拷贝到项目目录下，开始执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">INFO: ANALYSIS SUCCESSFUL, you can browse http://localhost:9000/dashboard?id=golang-resque</span><br><span class="line">INFO: Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report</span><br><span class="line">INFO: More about the report processing at http://localhost:9000/api/ce/task?id=AXZwXu71UZLk_accn7bg</span><br><span class="line">INFO: Analysis total time: 26.953 s</span><br><span class="line">INFO: ------------------------------------------------------------------------</span><br><span class="line">INFO: EXECUTION SUCCESS</span><br><span class="line">INFO: ------------------------------------------------------------------------</span><br><span class="line">INFO: Total time: 28.692s</span><br><span class="line">INFO: Final Memory: 13M/54M</span><br><span class="line">INFO: ------------------------------------------------------------------------</span><br></pre></td></tr></table></figure></p>
+<p>这次的结果如下:</p>
+<p><img src="/2020/12/18/sonarqube-use/29.png" alt="1"></p>
+<p>也是 passed， 而且可以看到扫描结果还不错，除了一个 unreachable 的代码问题，其他几乎没啥问题，这个也是因为本身 golang 就要求错误啥的都要自己在写的时候就捕获，所以相对应的问题也比较少。</p>
+<h3 id="6-扫描-JavaScript-项目"><a href="#6-扫描-JavaScript-项目" class="headerlink" title="6. 扫描 JavaScript 项目"></a>6. 扫描 JavaScript 项目</h3><p>接下来针对 JavaScript， 也搞一个项目检测一下， 而且是 vue 框架项目。 一样的流程，扫描一下。</p>
+<p>因为代码量比较大，所以会比较久，而且这一次的检测结果竟然是失败的， 为了担心有问题，我还特意跑了两次， 结果两次都是 failed， 因为有两个 E 级别的东西， 一个是 bug ，一个是安全隐患</p>
+<p><img src="/2020/12/18/sonarqube-use/30.png" alt="1"></p>
+<p>然后我点了 bug 列表看了一下，有些确实有点问题，比如 重复定义， 还有 unreachable code，但是还有一些其实语法是没问题的，只是它没办法识别，比如这个标签</p>
+<p><img src="/2020/12/18/sonarqube-use/31.png" alt="1"></p>
+<p><img src="/2020/12/18/sonarqube-use/32.png" alt="1"></p>
+<p>他就识别不了， 其实 v-deep 的语法是 vue 中 style scope 深度访问新方式， 不过 SonarQube 没有识别出来。</p>
+<p>另外关于安全缺陷的扫码，识别也有点问题， </p>
+<p><img src="/2020/12/18/sonarqube-use/33.png" alt="1"></p>
+<p>这个明明是一个 password 字段的定义， 但是它却识别为密码硬编码。 只能说识别不够智能。 当然也有可能是 js 的语法变化太快了，它的语法分析库跟不上。</p>
+<h2 id="数据库配置的问题"><a href="#数据库配置的问题" class="headerlink" title="数据库配置的问题"></a>数据库配置的问题</h2><p>之前在实操的时候，也有看到网上相关的一些博文，大部分都是有讲到要配置数据库的，但是我一整套流程操作下来都没有涉及到数据库的配置问题，甚至连 SonarQube 的配置文件 <code>sonar.properties</code> 都没有改过配置。 不过我后面抱着这个疑惑还是去翻了一下这个配置文件，发现这一行注释就解开了我的疑惑：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># DATABASE</span><br><span class="line">#</span><br><span class="line"># IMPORTANT:</span><br><span class="line"># - The embedded H2 database is used by default. It is recommended for tests but not for</span><br><span class="line">#   production use. Supported databases are Oracle, PostgreSQL and Microsoft SQLServer.</span><br><span class="line"># - Changes to database connection URL (sonar.jdbc.url) can affect SonarSource licensed products.</span><br></pre></td></tr></table></figure></p>
+<p>他有一个内置的 H2 的数据库是默认的，我们直接用默认的即可，不需要再额外设置数据库配置。</p>
+<p>不过他的界面上，还有一个 warning 提示是针对这个内置数据库的</p>
+<p><img src="/2020/12/18/sonarqube-use/35.png" alt="1"></p>
+<p>那就是用了这个内置的数据库，只能用来做常用分析，不支持扩展，同时也不支持新版本的升级和迁移。 所以如果后面要放到构建流程去，那么有可能得自己再配一个数据库，比如 mysql 之类的。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这次通过 SonarQube 总共分析了三个不同语种的项目， 其中两个通过，一个失败。</p>
+<p><img src="/2020/12/18/sonarqube-use/34.png" alt="1"></p>
+<p>其中 php 和 golang 的语法分析规则还是挺可靠的。 JavaScript 的话，如果是原生的可能会好一点， 但是现在大家都不用原生 JavaScript 写代码了， 大部分都用框架， 而且现在 JavaScript 框架层出不穷，迭代贼快， 新语法也很多， 所以语法分析规则跟不上也很正常。 所以 JavaScript 的代码质量检测会稍微差一点， 但是一些通用的写法问题，比如变量定义，重复定义，unreachable code 这种检测肯定是没问题的。</p>
+<p>总的来说 SonarQube 用来检测项目代码质量还是有意义的。接下来就可以考虑在 gitlab + Jenkins + SonarQube 的模式，在构建的时候，先进行代码质量检测的机制。</p>
+<hr>
+<p>参考资料</p>
+<ul>
+<li><a href="https://segmentfault.com/a/1190000020719584?utm_source=tag-newest" target="_blank" rel="noopener">个人学习系列 - SonarQube的简单使用</a></li>
+<li><a href="https://www.imooc.com/article/279446?block_id=tuijian_wz" target="_blank" rel="noopener">项目工程代码质量检测神器——SonarQube 的用法</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2020/12/18/sonarqube-use/" title="windows 环境下使用 SonarQube 来检测工程代码质量">http://kebingzao.com/2020/12/18/sonarqube-use/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/sonarqube/" rel="tag"># sonarqube</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/12/16/swagger-yapi/" rel="next" title="使用 Swagger + Yapi 构建界面优雅的服务端接口 & 测试文档">
+                <i class="fa fa-chevron-left"></i> 使用 Swagger + Yapi 构建界面优雅的服务端接口 & 测试文档
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/12/18/window-storage-event/" rel="prev" title="相同站点在同一个浏览器的多个 tab 页面进行消息通信的方式">
+                相同站点在同一个浏览器的多个 tab 页面进行消息通信的方式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">235</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SonarQube-简介"><span class="nav-number">2.</span> <span class="nav-text">SonarQube 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SonarQube-安装"><span class="nav-number">3.</span> <span class="nav-text">SonarQube 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-下载-SonarQube"><span class="nav-number">3.1.</span> <span class="nav-text">1. 下载 SonarQube</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-下载并安装-jdk-11"><span class="nav-number">3.2.</span> <span class="nav-text">2. 下载并安装 jdk 11</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-登入-web-界面"><span class="nav-number">3.3.</span> <span class="nav-text">3. 登入 web 界面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-下载汉化包"><span class="nav-number">3.4.</span> <span class="nav-text">4. 下载汉化包</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实操验证"><span class="nav-number">4.</span> <span class="nav-text">实操验证</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-新建项目"><span class="nav-number">4.1.</span> <span class="nav-text">1. 新建项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-下载扫描组件"><span class="nav-number">4.2.</span> <span class="nav-text">2. 下载扫描组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-在项目目录下执行扫码命令"><span class="nav-number">4.3.</span> <span class="nav-text">3. 在项目目录下执行扫码命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-扫描生成的缓存文件"><span class="nav-number">4.4.</span> <span class="nav-text">4. 扫描生成的缓存文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-扫码-golang-项目"><span class="nav-number">4.5.</span> <span class="nav-text">5. 扫码 golang 项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-扫描-JavaScript-项目"><span class="nav-number">4.6.</span> <span class="nav-text">6. 扫描 JavaScript 项目</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库配置的问题"><span class="nav-number">5.</span> <span class="nav-text">数据库配置的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2020/12/18/sonarqube-use/';
+          this.page.identifier = '2020/12/18/sonarqube-use/';
+          this.page.title = 'windows 环境下使用 SonarQube 来检测工程代码质量';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

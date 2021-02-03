@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security,ddos," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前因之前有写过一篇 记一次接口受到的基于http请求的DDOS攻击 讲述一次抵御 DDOS 攻击的情况。 但是后面攻击的方式又增加了，最明显的两点就是:  user-agent 都是正常的浏览器类型 ip 地址都是很分散的，并且每分钟的请求频率都不高，也就 3-5 次， 但是不同 ip 请求非常多  第二点就会导致我们的禁 ip 策略就被废掉了，因为我们不能把限制降的很低，比如同一个 ip 地址请">
+<meta name="keywords" content="security,ddos">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用云服务的竞价实例来抵御 DDOS 攻击">
+<meta property="og:url" content="http://kebingzao.com/2021/01/11/ddos-spot/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前因之前有写过一篇 记一次接口受到的基于http请求的DDOS攻击 讲述一次抵御 DDOS 攻击的情况。 但是后面攻击的方式又增加了，最明显的两点就是:  user-agent 都是正常的浏览器类型 ip 地址都是很分散的，并且每分钟的请求频率都不高，也就 3-5 次， 但是不同 ip 请求非常多  第二点就会导致我们的禁 ip 策略就被废掉了，因为我们不能把限制降的很低，比如同一个 ip 地址请">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2021/01/11/ddos-spot/1.png">
+<meta property="og:image" content="http://kebingzao.com/2021/01/11/ddos-spot/2.png">
+<meta property="og:updated_time" content="2021-02-03T16:28:47.776Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用云服务的竞价实例来抵御 DDOS 攻击">
+<meta name="twitter:description" content="前因之前有写过一篇 记一次接口受到的基于http请求的DDOS攻击 讲述一次抵御 DDOS 攻击的情况。 但是后面攻击的方式又增加了，最明显的两点就是:  user-agent 都是正常的浏览器类型 ip 地址都是很分散的，并且每分钟的请求频率都不高，也就 3-5 次， 但是不同 ip 请求非常多  第二点就会导致我们的禁 ip 策略就被废掉了，因为我们不能把限制降的很低，比如同一个 ip 地址请">
+<meta name="twitter:image" content="http://kebingzao.com/2021/01/11/ddos-spot/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2021/01/11/ddos-spot/"/>
+
+
+
+
+
+  <title>使用云服务的竞价实例来抵御 DDOS 攻击 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/01/11/ddos-spot/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用云服务的竞价实例来抵御 DDOS 攻击</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-11T16:32:24+08:00">
+                2021-01-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/01/11/ddos-spot/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/01/11/ddos-spot/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/01/11/ddos-spot/" class="leancloud_visitors" data-flag-title="使用云服务的竞价实例来抵御 DDOS 攻击">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前因"><a href="#前因" class="headerlink" title="前因"></a>前因</h2><p>之前有写过一篇 <a href="/2019/08/28/http-ddos/" title="记一次接口受到的基于http请求的DDOS攻击">记一次接口受到的基于http请求的DDOS攻击</a> 讲述一次抵御 DDOS 攻击的情况。 但是后面攻击的方式又增加了，最明显的两点就是:</p>
+<ol>
+<li>user-agent 都是正常的浏览器类型</li>
+<li>ip 地址都是很分散的，并且每分钟的请求频率都不高，也就 3-5 次， 但是不同 ip 请求非常多</li>
+</ol>
+<p>第二点就会导致我们的禁 ip 策略就被废掉了，因为我们不能把限制降的很低，比如同一个 ip 地址请求登录接口一分钟如果超过 3 次，就会被加入黑名单。这样子固然可以抵御， 但是也会造成大面积的误杀。 说白了，就是这些突然爆增的流量跟正常的用户流量没啥两样。 防刷脚本已经没办法去区别了。<br><a id="more"></a></p>
+<h2 id="使用竞价实例"><a href="#使用竞价实例" class="headerlink" title="使用竞价实例"></a>使用竞价实例</h2><p>面对以上的情况，我们的防刷脚本已经没办法区分非正常流量了，而且依赖的云厂商的普通版的 DDOS 防御，也是没有用的，这种请求频率也触发不了他们的防御机制，除非花大价钱买高防版。 所以我们只能新开机器去扛流量了。 但是新开机器按量使用其实也不便宜， 而且又是临时开的， 后面等不攻击了， 新开的机器就要下架了。 所以也不可能月付或者年付。</p>
+<p>因此我们后面选择了使用竞价实例来扛流量。</p>
+<p>关于竞价实例的介绍，具体可以看: <a href="https://cloud.tencent.com/document/product/213/17816" target="_blank" rel="noopener">什么是竞价实例</a></p>
+<blockquote><p>竞价实例（Spot）是云服务器 CVM 的一种新实例运作模式，它最核心的特点是折扣售卖和系统中断机制，即您可以以一定幅度的折扣购买实例，但同时系统可能会自动回收这些折扣售卖的实例。当您购买并获得一个竞价实例后，它的使用和按量计费的 CVM 实例基本毫无区别，包括控制台操作、远程登录、服务部署、关联 VPC 等。</p>
+<footer><strong>竞价实例</strong><cite><a href="https://cloud.tencent.com/document/product/213/17816" target="_blank" rel="noopener">cloud.tencent.com/document/product/213/17816</a></cite></footer></blockquote>
+<p>简单的来说，他跟普通实例的使用是没啥差别的，唯一有几个点有区别:</p>
+<ol>
+<li>竞价实例非常便宜，一般只有同等配置的实例的 10% 的价钱，具体价格会受当前市场波动</li>
+<li>正是因为他会受市场需求价格波动，所以有可能今天你开的实例，过几天别人开更高的价格来竞价，那么这个实例就会被中断，变成别人的了</li>
+</ol>
+<h3 id="不适用场景"><a href="#不适用场景" class="headerlink" title="不适用场景"></a>不适用场景</h3><p>由于系统中断机制的存在，您并不能完全掌握实例的生命周期，所以建议避免在竞价实例上运行对稳定性要求极高的服务，例如：</p>
+<ul>
+<li>数据库服务</li>
+<li>没有采用负载均衡的在线服务、网站服务</li>
+<li>分布式架构里的核心主控制节点</li>
+<li>长时间（10+小时）的大数据计算作业</li>
+</ul>
+<h3 id="适合的场景"><a href="#适合的场景" class="headerlink" title="适合的场景"></a>适合的场景</h3><p>适用场景</p>
+<ul>
+<li>大数据计算</li>
+<li>采用了负载均衡的在线服务和网站服务</li>
+<li>网络爬虫业务</li>
+<li>其他细粒度或支持断点续算的计算场景</li>
+</ul>
+<p>针对负载均衡服务，还有一个最佳实践：  <strong>通过负载均衡在保证在线和网站服务的稳定性</strong></p>
+<ul>
+<li>接入层使用负载均衡，例如 CLB。</li>
+<li>后端资源采用部分按量计费实例 + 大量竞价实例的配比模式。</li>
+<li>监听竞价实例中断情况，从 CLB 中移除即将中断的实例。</li>
+</ul>
+<p>稳定性，不就是防御 DDOS 攻击吗， 恰好我们的服务都是有用负载均衡的服务的，比如 aws 的 ELB , 或者 腾讯云的 CLB 服务。 所以他的这个最佳实践，刚好很符合我们的这种情况。 </p>
+<h2 id="实操流程"><a href="#实操流程" class="headerlink" title="实操流程"></a>实操流程</h2><ol>
+<li>在受到 DDOS 攻击的时候，在原有服务扛不住的时候， 开启竞价实例机器</li>
+<li>将某一个业务服务器的快照，放到这台竞价实例上，启动业务服务</li>
+<li>将这台实例加入到负载均衡服务中，并设置一个比较大的权重，让大部分的流量都流到这一台，保证其他实例负载不会太高</li>
+<li>当 DDOS 攻击停止的时候，根据当前负载情况，解绑竞价实例的负载均衡服务，乃至最后下载竞价实例</li>
+</ol>
+<p>接下来附上几个图，会比较直观，以腾讯云为例，当我们开启竞价实例的时候，根据具体的业务来选择对应的配置，比如我们这种防 DDOS 攻击的，那肯定 cpu 要足够好，所以可以选择 6 核或者 8 核，这样子处理请求的时候，效率更好。 可以看到相比原价，这个价钱真是太香了。</p>
+<p><img src="/2021/01/11/ddos-spot/1.png" alt="1"></p>
+<blockquote>
+<p>这边要注意一个细节，就是竞价实例最好跟业务所在的实例在同一个 vpc 内网内(比如都在硅谷)，这样子很多权限，比如数据库权限，都不用再额外设置，只需要将快照拷过去，然后重新启动服务就行了。</p>
+</blockquote>
+<p>当竞价实例服务启动之后，接下来我们就要将这个竞价实例服务加入到业务所在的负载均衡实例的分配链中，并且设置比较大的权重:</p>
+<p><img src="/2021/01/11/ddos-spot/2.png" alt="1"></p>
+<p>这样子这台竞价实例就可以开始抗流量了。 如果一台不够，那就再加一台，看谁更持久。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过开启竞价实例，我们可以在 DDOS 攻击期间， 稳定的抗住流量而付出的成本却不会很高。 不过要注意的是， 一旦扛过去之后， 接下来就要考虑解绑和下架机器了，不能一直挂着。 不然后面系统中断竞价实例的时候，就会影响到我们的业务了。 当然， 中断的时候， 系统会提前通知对应的运维人员。 虽然文档说只会提前两分钟通知，但是真实情况应该会至少提前半小时之类的。我们也没有遇到过突然中断的情况，都是手动解绑下架的。 而且也不会频繁中断， 有用过超过一个星期都不会中断的情况， 可能得看市场需求吧。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2021/01/11/ddos-spot/" title="使用云服务的竞价实例来抵御 DDOS 攻击">http://kebingzao.com/2021/01/11/ddos-spot/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+            <a href="/tags/ddos/" rel="tag"># ddos</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/01/08/jaeger-es/" rel="next" title="使用 ElasticSearch 作为 Jaeger 的存储并且进行聚合计算">
+                <i class="fa fa-chevron-left"></i> 使用 ElasticSearch 作为 Jaeger 的存储并且进行聚合计算
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/01/26/gzip-min-length/" rel="prev" title="gzip 配置 gzip_min_length 来判断 response 是否要 gzip 压缩">
+                gzip 配置 gzip_min_length 来判断 response 是否要 gzip 压缩 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">242</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">56</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前因"><span class="nav-number">1.</span> <span class="nav-text">前因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用竞价实例"><span class="nav-number">2.</span> <span class="nav-text">使用竞价实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不适用场景"><span class="nav-number">2.1.</span> <span class="nav-text">不适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适合的场景"><span class="nav-number">2.2.</span> <span class="nav-text">适合的场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实操流程"><span class="nav-number">3.</span> <span class="nav-text">实操流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2021/01/11/ddos-spot/';
+          this.page.identifier = '2021/01/11/ddos-spot/';
+          this.page.title = '使用云服务的竞价实例来抵御 DDOS 攻击';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

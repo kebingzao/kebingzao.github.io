@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="js," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前有用户遇到一个问题，就是在访问一个我们的站点的时候，https 模式下没有问题，但是用 http 模式下(因为某些特殊原因，要保留站点的 http 模式的访问)，就会出现接口报错的情况，导致用不了。 而且都是 chrome 才有， 其他浏览器都正常， 而且 chrome 的版本还是比较新的， 87 或者 88。 我自己本身 86 好像挺正常的。 为了验证一下，也将 chrome 版本也升级">
+<meta name="keywords" content="js">
+<meta property="og:type" content="article">
+<meta property="og:title" content="chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输">
+<meta property="og:url" content="http://kebingzao.com/2021/02/22/cookie-samesite/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前有用户遇到一个问题，就是在访问一个我们的站点的时候，https 模式下没有问题，但是用 http 模式下(因为某些特殊原因，要保留站点的 http 模式的访问)，就会出现接口报错的情况，导致用不了。 而且都是 chrome 才有， 其他浏览器都正常， 而且 chrome 的版本还是比较新的， 87 或者 88。 我自己本身 86 好像挺正常的。 为了验证一下，也将 chrome 版本也升级">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2021/02/22/cookie-samesite/1.png">
+<meta property="og:image" content="http://kebingzao.com/2021/02/22/cookie-samesite/2.png">
+<meta property="og:image" content="http://kebingzao.com/2021/02/22/cookie-samesite/3.png">
+<meta property="og:image" content="http://kebingzao.com/2021/02/22/cookie-samesite/4.png">
+<meta property="og:image" content="http://kebingzao.com/2021/02/22/cookie-samesite/5.png">
+<meta property="og:image" content="http://kebingzao.com/2021/02/22/cookie-samesite/6.png">
+<meta property="og:updated_time" content="2021-02-28T13:49:25.874Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输">
+<meta name="twitter:description" content="前言之前有用户遇到一个问题，就是在访问一个我们的站点的时候，https 模式下没有问题，但是用 http 模式下(因为某些特殊原因，要保留站点的 http 模式的访问)，就会出现接口报错的情况，导致用不了。 而且都是 chrome 才有， 其他浏览器都正常， 而且 chrome 的版本还是比较新的， 87 或者 88。 我自己本身 86 好像挺正常的。 为了验证一下，也将 chrome 版本也升级">
+<meta name="twitter:image" content="http://kebingzao.com/2021/02/22/cookie-samesite/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2021/02/22/cookie-samesite/"/>
+
+
+
+
+
+  <title>chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/02/22/cookie-samesite/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-22T18:01:30+08:00">
+                2021-02-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/02/22/cookie-samesite/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/02/22/cookie-samesite/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/02/22/cookie-samesite/" class="leancloud_visitors" data-flag-title="chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有用户遇到一个问题，就是在访问一个我们的站点的时候，https 模式下没有问题，但是用 http 模式下(因为某些特殊原因，要保留站点的 http 模式的访问)，就会出现接口报错的情况，导致用不了。</p>
+<p>而且都是 chrome 才有， 其他浏览器都正常， 而且 chrome 的版本还是比较新的， 87 或者 88。 我自己本身 86 好像挺正常的。 为了验证一下，也将 chrome 版本也升级到 88， 结果还真重现了。</p>
+<h2 id="SameSite-的问题"><a href="#SameSite-的问题" class="headerlink" title="SameSite 的问题"></a>SameSite 的问题</h2><p>发现是登录接口的时候，原本要写进去的 cookie 虽然写了，但是再访问其他接口的时候，这些 cookie 根本不会带过去， 这样就导致没办法进行 cookie 校验了。 因为 cookie 在跨域的时候，并不会随着请求过去。<br><a id="more"></a></p>
+<p><img src="/2021/02/22/cookie-samesite/1.png" alt="1"> </p>
+<p>看样子是 chrome 浏览器将这些 cookie 的属性都加上了 <code>SameSite=Lax</code> 这个属性，导致在进行跨域请求的时候，这些 cookie 不会跟着传输</p>
+<p>后面查了一下资料 <a href="https://www.chromium.org/administrators/policy-list-3/cookie-legacy-samesite-policies" target="_blank" rel="noopener">Cookie Legacy SameSite Policies</a>, 好像 chrome 打算在 80 版本的时候，就打算将未显式设置 SameSite 属性的第三方 cookie 都补上 <code>SameSite=Lax</code> 这个属性 (原先默认是 <code>SameSite=None</code>)， 不过好像因为疫情的原因，又推迟了。 现在好像又推进了流程。</p>
+<p>而且经过我的测试发现，同样是chrome的最新版本 88， 但是有些浏览器就会这个机制， 但是有些浏览器就不会，还是原来的机制。 所以我怀疑这个功能应该是 A/B 测试的。</p>
+<p>后面查了一下，确实是这样子:</p>
+<blockquote><p>谷歌宣布将从7月14日发布的Chrome 84稳定版开始，重新恢复SameSite cookie策略，并且会逐步部署到Chrome 80以及以上的版本中。<br>Chrome 80于今年2月份上线，谷歌就开始滚动推出SameSite更新，通过cookies的发送机制进行了一系列新的调整更好的维护用户隐私和安全。<br>今年4月份鉴于全球疫情的爆发，谷歌宣布暂时中止该更新，以便在COVID-19大流行期间保持重要网站的正常运行。</p>
+<footer><strong>SameSite Cookie 策略</strong><cite><a href="https://www.cnbeta.com/articles/tech/984703.htm" target="_blank" rel="noopener">www.cnbeta.com/articles/tech/984703.htm</a></cite></footer></blockquote>
+<h2 id="SameSite-属性详情"><a href="#SameSite-属性详情" class="headerlink" title="SameSite 属性详情"></a>SameSite 属性详情</h2><p>我们先来看看这个属性的作用：</p>
+<p>SameSite 属性可以让 Cookie 在跨站请求时不会被发送，从而可以阻止跨站请求伪造攻击（CSRF）。</p>
+<p>属性值<br>SameSite 可以有下面三种值：</p>
+<ul>
+<li><code>Strict</code> 仅允许一方请求携带 Cookie，即浏览器将只发送相同站点请求的 Cookie，即当前网页 URL 与请求目标 URL 完全一致。</li>
+<li><code>Lax</code> 允许部分第三方请求携带 Cookie</li>
+<li><code>None</code> 无论是否跨站都会发送 Cookie</li>
+</ul>
+<p>之前默认是 None 的，Chrome80 后默认是 Lax。</p>
+<h3 id="跨域和跨站"><a href="#跨域和跨站" class="headerlink" title="跨域和跨站"></a>跨域和跨站</h3><p>那么问题来了， 什么是 <code>允许部分第三方请求携带</code> ? 有没有规则 ? 这时候就要搞清楚，对于 cookie 来说， 什么叫做第三方请求 ?</p>
+<p>首先要理解的一点就是跨站和跨域是不同的。<code>同站(same-site)</code>/<code>跨站(cross-site)</code> 和 <code>第一方(first-party)</code>/<code>第三方(third-party)</code>是等价的。但是与浏览器同源策略（SOP）中的<code>同源(same-origin)</code>/<code>跨域(cross-origin)</code> 是完全不同的概念。</p>
+<p>同源策略的同源是指两个 URL 的协议/主机名/端口一致。例如，<code>https://www.foo.com/pages/...</code>，它的协议是 <code>https</code>，主机名是 <code>www.foo.com</code>，端口是 443。</p>
+<p>同源策略作为浏览器的安全基石，其<code>同源</code> 判断是比较严格的，相对而言，Cookie中的 <code>同站</code> 判断就比较宽松：只要两个 URL 的 <code>eTLD+1</code> 相同即可，不需要考虑协议和端口。其中，<code>eTLD</code> 表示有效顶级域名，注册于 Mozilla 维护的公共后缀列表（Public Suffix List）中，例如，<code>.com</code>、<code>.co.uk</code>、<code>.github.io</code> 等。<code>eTLD+1</code> 则表示，有效顶级域名+二级域名，例如 <code>taobao.com</code> 等。</p>
+<p>举几个例子，<code>www.taobao.com</code> 和 <code>www.baidu.com</code> 是跨站，<code>www.a.taobao.com</code> 和 <code>www.b.taobao.com</code> 是同站，<code>a.github.io</code> 和 <code>b.github.io</code> 是跨站(注意是跨站)。</p>
+<p>不过这边在实践中有个问题，就是虽然域名不一样，但是 <code>eTLD+1</code> 是一样的，比如一个 a.foo.com (前端站点) 和 b.foo.com (ajax 的服务端请求站点)，但是这两个域名设置的 cookie 的 domain 都是 <code>.foo.com</code>, 所以在 cookie 的判断中，这个是属于 同站的，但是又不符合 <code>Strict</code> 的严格要求，因为他要求两者的 url 要一致。  然后经过我的实践，发现在这种情况下的 <code>SameSite=Lax</code> 的策略，如果是在前端站点 https 的全站下访问， 那么 cookie 是可以携带的， 但是如果是 http 模式下的前端站点，即使你访问的服务端站点是 https 模式，那么还是会被限制。 (这个就是我上述前言说的情况)</p>
+<h2 id="修复措施"><a href="#修复措施" class="headerlink" title="修复措施"></a>修复措施</h2><p>一般这种情况下有以下几种方式可以修复</p>
+<ol>
+<li>将前端站点改为 https 的方式，这样子设置 domain 为 <code>.foo.com</code> 的同站 cookie， 再进行 ajax 传输的时候， 也是可以传输的。</li>
+<li>不采用 cookie 进行校验的方式，而是将其换成 token 作为参数来校验</li>
+<li>将 cookie 的策略改成 <code>SameSite=None</code> 允许跨站 cookie 传输</li>
+</ol>
+<p>其中第一点因为要保留 http 模式的业务请求，所以不考虑。 换成 token 的话，成本太高，要修改多个项目，也暂时不考虑。 所以我们考虑用第三点的方式来处理。</p>
+<h3 id="设置-SameSite-None"><a href="#设置-SameSite-None" class="headerlink" title="设置 SameSite=None"></a>设置 <code>SameSite=None</code></h3><p>不过这边要注意两点:</p>
+<h4 id="1-要加-secure-属性"><a href="#1-要加-secure-属性" class="headerlink" title="1. 要加 secure 属性"></a>1. 要加 secure 属性</h4><p>如果你想加 <code>SameSite=none</code> 属性，那么该 Cookie 就必须同时加上 <code>Secure</code> 属性，表示只有在 HTTPS 协议下该 Cookie 才会被发送。 这个倒是没问题，因为我们的前端站点虽然支持 http 协议，但是请求的服务端接口肯定都是 https 协议的， 所以是满足的。</p>
+<h4 id="2-需要-UA-检测，部分浏览器不能加-SameSite-none"><a href="#2-需要-UA-检测，部分浏览器不能加-SameSite-none" class="headerlink" title="2. 需要 UA 检测，部分浏览器不能加 SameSite=none"></a>2. 需要 UA 检测，部分浏览器不能加 SameSite=none</h4><p>IOS 12 的 Safari 以及老版本的一些 Chrome 会把 SameSite=none 识别成 SameSite=Strict，所以服务端必须在下发 Set-Cookie 响应头时进行 User-Agent 检测，对这些浏览器不下发 SameSite=none 属性。</p>
+<p>这边具体可以看: <a href="https://www.chromium.org/updates/same-site/incompatible-clients" target="_blank" rel="noopener">SameSite = None：已知的不兼容客户端</a></p>
+<blockquote><p>已知某些用户代理与`SameSite = None’属性不兼容。</p>
+<ul>
+<li>Chrome的版本，从Chrome 51到Chrome 66（包括两端）。这些Chrome版本将拒绝带有“ SameSite = None”的Cookie。这也会影响Chromium衍生的浏览器的旧版本以及Android WebView 。根据当时的Cookie规范版本，此行为是正确的，但是在规范中添加了新的“ None”值后，此行为已在Chrome 67和更高版本中进行了更新。（在Chrome 51之前，SameSite属性被完全忽略，所有cookie都被视为“ SameSite = None”。）</li>
+<li>Android 12.1.3.2。之前的UC浏览器版本。较旧的版本将拒绝带有“ SameSite = None”的cookie。根据当时的cookie规范版本，此行为是正确的，但是在规范中添加了新的“ None”值后，此行为已在较新版本的UC浏览器中进行了更新。</li>
+<li>Safari和MacOS 10.14上的嵌入式浏览器以及iOS 12上的所有浏览器的版本。这些版本将错误地将标记为“ SameSite = None”的cookie视为标记为“ SameSite = Strict”的cookie。此错误已在较新版本的iOS和MacOS上修复。</li>
+</ul>
+<footer><strong>https://www.chromium.org/updates/same-site/incompatible-clients</strong></footer></blockquote>
+<p>而且他这边还给我们提供了一个示例代码，我转换为 php 代码就是:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Cookie 工具类, 不过这边不进行 cookie 的设置和获取， 这个有另外的 php 内置函数处理</span></span><br><span class="line"><span class="comment"> * 这边主要是针对 cookie 的一些属性设置的一些判断</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Cookie</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="comment">// 判断是否支持 same site 为 none 的配置</span></span><br><span class="line">    <span class="comment">// 参考文档 https://www.chromium.org/updates/same-site/incompatible-clients</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">shouldSendSameSiteNone</span><span class="params">($userAgent)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> !<span class="keyword">self</span>::isSameSiteNoneIncompatible($userAgent);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Classes of browsers known to be incompatible.</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">isSameSiteNoneIncompatible</span><span class="params">($userAgent)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>::hasWebKitSameSiteBug($userAgent) ||</span><br><span class="line">            <span class="keyword">self</span>::dropsUnrecognizedSameSiteCookies($userAgent);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">hasWebKitSameSiteBug</span><span class="params">($userAgent)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>::isIosVersion(<span class="number">12</span>, $userAgent) ||</span><br><span class="line">           (<span class="keyword">self</span>::isMacosxVersion(<span class="number">10</span>, <span class="number">14</span>, $userAgent) &amp;&amp;</span><br><span class="line">            (<span class="keyword">self</span>::isSafari($userAgent) || <span class="keyword">self</span>::isMacEmbeddedBrowser($userAgent)));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">dropsUnrecognizedSameSiteCookies</span><span class="params">($userAgent)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="keyword">self</span>::isUcBrowser($userAgent)) &#123;</span><br><span class="line">            <span class="keyword">return</span> !<span class="keyword">self</span>::isUcBrowserVersionAtLeast(<span class="number">12</span>, <span class="number">13</span>, <span class="number">2</span>, $userAgent);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>::isChromiumBased($userAgent) &amp;&amp;</span><br><span class="line">            <span class="keyword">self</span>::isChromiumVersionAtLeast(<span class="number">51</span>, $userAgent) &amp;&amp;</span><br><span class="line">           !<span class="keyword">self</span>::isChromiumVersionAtLeast(<span class="number">67</span>, $userAgent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Regex parsing of User-Agent string. (See note above!)</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">isIosVersion</span><span class="params">($major, $userAgent)</span></span>&#123;</span><br><span class="line">        $match = [];</span><br><span class="line">        preg_match(<span class="string">"/\(iP.+; CPU .*OS (\d+)[_\d]*.*\) AppleWebKit\//"</span>, $userAgent, $match);</span><br><span class="line">        <span class="keyword">if</span> (count($match) &gt; <span class="number">1</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> $match[<span class="number">1</span>] == $major;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Extract digits from first capturing group.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">isMacosxVersion</span><span class="params">($major, $minor, $userAgent)</span></span>&#123;</span><br><span class="line">        $match = [];</span><br><span class="line">        preg_match(<span class="string">"/\(Macintosh;.*Mac OS X (\d+)_(\d+)[_\d]*.*\) AppleWebKit\//"</span>, $userAgent, $match);</span><br><span class="line">        <span class="keyword">if</span> (count($match) &gt; <span class="number">2</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> $match[<span class="number">1</span>] == $major &amp;&amp; $match[<span class="number">2</span>] == $minor;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Extract digits from first and second capturing groups.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">isSafari</span><span class="params">($userAgent)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> preg_match(<span class="string">"/Version\/.* Safari\//"</span>, $userAgent) &amp;&amp; !<span class="keyword">self</span>::isChromiumBased($userAgent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">isMacEmbeddedBrowser</span><span class="params">($userAgent)</span></span>&#123;</span><br><span class="line">        $regex = <span class="string">"/^Mozilla\/[\.\d]+ \(Macintosh;.*Mac OS X [_\d]+\) "</span> . <span class="string">"AppleWebKit\/[\.\d]+ \(KHTML, like Gecko\)$/"</span>;</span><br><span class="line">        <span class="keyword">return</span> preg_match($regex, $userAgent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">isChromiumBased</span><span class="params">($userAgent)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> preg_match(<span class="string">"/Chrom(e|ium)/"</span>, $userAgent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">isChromiumVersionAtLeast</span><span class="params">($major, $userAgent)</span></span>&#123;</span><br><span class="line">        $match = [];</span><br><span class="line">        preg_match(<span class="string">"/Chrom[^ \/]+\/(\d+)[\.\d]* /"</span>, $userAgent, $match);</span><br><span class="line">        <span class="keyword">if</span> (count($match) &gt; <span class="number">1</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> $match[<span class="number">1</span>] &gt; $major;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Extract digits from first and second capturing groups.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">isUcBrowser</span><span class="params">($userAgent)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> preg_match(<span class="string">"/UCBrowser\//"</span>, $userAgent);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">isUcBrowserVersionAtLeast</span><span class="params">($major, $minor, $build, $userAgent)</span></span>&#123;</span><br><span class="line">        $match = [];</span><br><span class="line">        preg_match(<span class="string">"/UCBrowser\/(\d+)\.(\d+)\.(\d+)[\.\d]* /"</span>, $userAgent, $match);</span><br><span class="line">        <span class="keyword">if</span> (count($match) &gt; <span class="number">3</span>)&#123;</span><br><span class="line">            $majorVersion = $match[<span class="number">1</span>];</span><br><span class="line">            $minorVersion = $match[<span class="number">2</span>];</span><br><span class="line">            $buildVersion = $match[<span class="number">3</span>];</span><br><span class="line">            <span class="keyword">if</span> ($majorVersion != $major) &#123;</span><br><span class="line">                <span class="keyword">return</span> $majorVersion &gt; $major;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>($minorVersion != $minor) &#123;</span><br><span class="line">                <span class="keyword">return</span> $minorVersion &gt; $minor;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> $buildVersion &gt;= $build;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Extract digits from first and second capturing groups.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后设置的代码就可以这样子写 (我刚好用的是 <code>Yii 2</code> 框架):<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 不对 cookie 值进行加密</span></span><br><span class="line">Yii::$app-&gt;request-&gt;enableCookieValidation = <span class="keyword">false</span>;</span><br><span class="line"><span class="comment">// 接下来根据浏览器判断是否需要添加 samesite = none 的 cookie 属性, 因为有些浏览器不能识别 samesite=none 属性</span></span><br><span class="line"><span class="comment">// https://www.chromium.org/updates/same-site/incompatible-clients</span></span><br><span class="line">$userAgent = Yii::$app-&gt;request-&gt;headers-&gt;get(<span class="string">'user-agent'</span>);</span><br><span class="line"><span class="keyword">if</span>($userAgent &amp;&amp; Cookie::shouldSendSameSiteNone($userAgent))&#123;</span><br><span class="line">    $secure = <span class="keyword">true</span>;</span><br><span class="line">    setcookie($name, $value, time() + $expire, <span class="string">'/;SameSite=None'</span>, $domain, $secure);</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    $secure = <span class="keyword">false</span>;</span><br><span class="line">    setcookie($name, $value, time() + $expire, <span class="string">'/'</span>, $domain, $secure);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样子就可以了， 在 http 的前端站点下</p>
+<p><img src="/2021/02/22/cookie-samesite/2.png" alt="1"> </p>
+<p>而且可以看到在 浏览器的 控制台看到</p>
+<p><img src="/2021/02/22/cookie-samesite/3.png" alt="1"> </p>
+<h4 id="3-前端-cookie-读取问题"><a href="#3-前端-cookie-读取问题" class="headerlink" title="3. 前端 cookie 读取问题"></a>3. 前端 cookie 读取问题</h4><p>不过这边要注意一个问题，就是一旦这样子设置之后， 就意味着在 http 模式下的前端站点，就再也无法用 <code>document.cookie</code> 来获取这些 cookie， 因为一旦加了 secure 属性，那么在非 https 的站点是获取不到的(https 下是可以的，如果加了 httpOnly 属性，那么 https 也都不可以)。</p>
+<p>所以如果你的站点需要读取或者判断服务端设置的 cookie 的话，那么这时候就要进行一些代码逻辑调整了。</p>
+<h4 id="4-php-session-的问题"><a href="#4-php-session-的问题" class="headerlink" title="4. php session 的问题"></a>4. php session 的问题</h4><p>我们知道 php session 是可以作为 cookie 存储的，但是在这种情况下， 作为 cookie 的 session 也是要设置为 <code>SameSite=None</code> 不然也是无法传输的。</p>
+<p>以 <code>Yii 2</code> 框架为例, 那么就可以在 main.php 文件中设置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&apos;session&apos; =&gt; array(</span><br><span class="line">  &apos;autoStart&apos; =&gt; true,</span><br><span class="line">  &apos;cookieMode&apos; =&gt; &apos;allow&apos;,</span><br><span class="line">  // 设置 session cookie， 这边要设置 samesite=none 的值, 不然就会出现 session 设置了，但是 跨域请求的时候， 却传输不了的情况</span><br><span class="line">  // 具体看 https://www.yiiframework.com/doc/guide/2.0/en/runtime-sessions-cookies</span><br><span class="line">  &apos;cookieParams&apos; =&gt; [</span><br><span class="line">    &apos;httpOnly&apos; =&gt; true,</span><br><span class="line">    &apos;secure&apos;=&gt; true,</span><br><span class="line">    &apos;path&apos; =&gt; &apos;/;SameSite=None&apos;</span><br><span class="line">  ]</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>这样子设置的 session cookie， 也可以带上这个属性了。</p>
+<h2 id="chrome-无痕模式下无法使用的问题"><a href="#chrome-无痕模式下无法使用的问题" class="headerlink" title="chrome 无痕模式下无法使用的问题"></a>chrome 无痕模式下无法使用的问题</h2><p>注意，通过我们的上述设置，就可以在 chrome 的正常模式，在 http 的前端站点正常使用。 但是在 chrome 的无痕模式还是会出现 cookie 无法传输的情况:</p>
+<p><img src="/2021/02/22/cookie-samesite/4.png" alt="1"> </p>
+<p>这时候其实就是被显示的 block 第三方的 cookie 了, 这时候有两种方式可以解禁。</p>
+<h3 id="1-修改-default-cookie-的配置"><a href="#1-修改-default-cookie-的配置" class="headerlink" title="1. 修改 default cookie 的配置"></a>1. 修改 default cookie 的配置</h3><p>通过 <code>chrome://flags/#same-site-by-default-cookies</code> 将这个配置修改为 disable 就可以了</p>
+<p><img src="/2021/02/22/cookie-samesite/5.png" alt="1"> </p>
+<p>不过要重启浏览器</p>
+<h3 id="2-进入无痕模式的时候，将-阻止第三方-cookie-的按钮关掉"><a href="#2-进入无痕模式的时候，将-阻止第三方-cookie-的按钮关掉" class="headerlink" title="2. 进入无痕模式的时候，将 阻止第三方 cookie 的按钮关掉"></a>2. 进入无痕模式的时候，将 阻止第三方 cookie 的按钮关掉</h3><p>另一种更简单就是，在进入无痕模式的时候，将 阻止第三方 cookie 的按钮关掉</p>
+<p><img src="/2021/02/22/cookie-samesite/6.png" alt="1"> </p>
+<p>这种也是可以的，而且比较轻量。</p>
+<hr>
+<p>参考文档:</p>
+<ul>
+<li><a href="https://github.com/mqyqingfeng/Blog/issues/157" target="_blank" rel="noopener">浏览器系列之 Cookie 和 SameSite 属性</a></li>
+<li><a href="https://www.cnbeta.com/articles/tech/984703.htm" target="_blank" rel="noopener">谷歌：7月14日发布的Chrome 84将恢复SameSite cookie更新策略</a></li>
+<li><a href="https://www.chromium.org/updates/same-site/incompatible-clients" target="_blank" rel="noopener">SameSite=None: Known Incompatible Clients</a></li>
+<li><a href="https://www.chromium.org/administrators/policy-list-3/cookie-legacy-samesite-policies" target="_blank" rel="noopener">Cookie Legacy SameSite Policies</a></li>
+<li><a href="https://www.yiiframework.com/doc/guide/2.0/zh-cn/runtime-sessions-cookies" target="_blank" rel="noopener">Yii 2.0 权威指南 - Sessions 和 Cookies</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2021/02/22/cookie-samesite/" title="chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输">http://kebingzao.com/2021/02/22/cookie-samesite/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/js/" rel="tag"># js</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/02/03/request-use-gzip/" rel="next" title="http 请求的时候使用 gzip 压缩来减少流量消耗">
+                <i class="fa fa-chevron-left"></i> http 请求的时候使用 gzip 压缩来减少流量消耗
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/02/24/window-open-param/" rel="prev" title="window.open() 打开的子页面往跨域的主页面传参问题">
+                window.open() 打开的子页面往跨域的主页面传参问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">244</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">56</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SameSite-的问题"><span class="nav-number">2.</span> <span class="nav-text">SameSite 的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SameSite-属性详情"><span class="nav-number">3.</span> <span class="nav-text">SameSite 属性详情</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#跨域和跨站"><span class="nav-number">3.1.</span> <span class="nav-text">跨域和跨站</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修复措施"><span class="nav-number">4.</span> <span class="nav-text">修复措施</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#设置-SameSite-None"><span class="nav-number">4.1.</span> <span class="nav-text">设置 SameSite=None</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-要加-secure-属性"><span class="nav-number">4.1.1.</span> <span class="nav-text">1. 要加 secure 属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-需要-UA-检测，部分浏览器不能加-SameSite-none"><span class="nav-number">4.1.2.</span> <span class="nav-text">2. 需要 UA 检测，部分浏览器不能加 SameSite=none</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-前端-cookie-读取问题"><span class="nav-number">4.1.3.</span> <span class="nav-text">3. 前端 cookie 读取问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-php-session-的问题"><span class="nav-number">4.1.4.</span> <span class="nav-text">4. php session 的问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#chrome-无痕模式下无法使用的问题"><span class="nav-number">5.</span> <span class="nav-text">chrome 无痕模式下无法使用的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-修改-default-cookie-的配置"><span class="nav-number">5.1.</span> <span class="nav-text">1. 修改 default cookie 的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-进入无痕模式的时候，将-阻止第三方-cookie-的按钮关掉"><span class="nav-number">5.2.</span> <span class="nav-text">2. 进入无痕模式的时候，将 阻止第三方 cookie 的按钮关掉</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2021/02/22/cookie-samesite/';
+          this.page.identifier = '2021/02/22/cookie-samesite/';
+          this.page.title = 'chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

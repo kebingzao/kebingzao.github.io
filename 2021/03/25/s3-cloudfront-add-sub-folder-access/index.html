@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="cloudfront,aws," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前有出现过一种情况，就是我们的静态站点是有国内和国外加速的(这个是在 aws 的 router 53 服务配置的)，比如:  如果是国内访问的，那么就引导到腾讯云的 COS 存储服务 + CDN 服务 如果是国外访问的，那么就引导到 aws 的  S3 存储服务 + Cloudfront CDN 服务  正常的文件当然没问题，但是有时候会出现如果 url 后面不输入 index.html，直">
+<meta name="keywords" content="cloudfront,aws">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引">
+<meta property="og:url" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前有出现过一种情况，就是我们的静态站点是有国内和国外加速的(这个是在 aws 的 router 53 服务配置的)，比如:  如果是国内访问的，那么就引导到腾讯云的 COS 存储服务 + CDN 服务 如果是国外访问的，那么就引导到 aws 的  S3 存储服务 + Cloudfront CDN 服务  正常的文件当然没问题，但是有时候会出现如果 url 后面不输入 index.html，直">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/1.png">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/2.png">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/6.png">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/7.png">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/8.png">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/9.png">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/3.png">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/4.png">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/5.png">
+<meta property="og:updated_time" content="2021-04-01T13:03:38.393Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引">
+<meta name="twitter:description" content="前言之前有出现过一种情况，就是我们的静态站点是有国内和国外加速的(这个是在 aws 的 router 53 服务配置的)，比如:  如果是国内访问的，那么就引导到腾讯云的 COS 存储服务 + CDN 服务 如果是国外访问的，那么就引导到 aws 的  S3 存储服务 + Cloudfront CDN 服务  正常的文件当然没问题，但是有时候会出现如果 url 后面不输入 index.html，直">
+<meta name="twitter:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/"/>
+
+
+
+
+
+  <title>使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-25T16:06:42+08:00">
+                2021-03-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">aws 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/03/25/s3-cloudfront-add-sub-folder-access/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/03/25/s3-cloudfront-add-sub-folder-access/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/03/25/s3-cloudfront-add-sub-folder-access/" class="leancloud_visitors" data-flag-title="使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有出现过一种情况，就是我们的静态站点是有国内和国外加速的(这个是在 aws 的 router 53 服务配置的)，比如:</p>
+<ul>
+<li>如果是国内访问的，那么就引导到腾讯云的 COS 存储服务 + CDN 服务</li>
+<li>如果是国外访问的，那么就引导到 aws 的  S3 存储服务 + Cloudfront CDN 服务</li>
+</ul>
+<p>正常的文件当然没问题，但是有时候会出现如果 url 后面不输入 index.html，直接子目录斜杠结尾，比如 <code>https://m.foo.com/cast/</code> ，这时候腾讯云表现是正常的，因为他会索引到 <code>https://m.foo.com/cast/index.html</code>, 但是 aws 的 cloudfront 就不行，会直接报错， 显示获取 S3 对象失败:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_9_centos ~]$ curl https://m.foo.com/cast/</span><br><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;Error&gt;&lt;Code&gt;AccessDenied&lt;/Code&gt;&lt;Message&gt;Access Denied&lt;/Message&gt;&lt;RequestId&gt;QABCT7FCM4M3T4AR&lt;/RequestId&gt;&lt;HostId&gt;VnPLeZeR2KQkIMDrFhukmVLUGp+RBWbZO/V8qHeS0dGKLa1N8KOTbWvwNW/J2NKbQWqQXyP5wdw=&lt;/HostId&gt;&lt;/Error&gt;</span><br></pre></td></tr></table></figure></p>
+<p>更有甚者，如果我连子目录的斜杠都没有写全，直接子目录的话，比如 <code>https://m.foo.com/cast</code>， 这时候腾讯云的表现也是对的，他如果找不到 cast 这个文件的话，就会将其当做一个子目录，再去检索这个子目录下的 index.html 文件。所以你用 curl 请求的话，会返回一个 302 跳转，然后 location 头部就会带上 <code>https://m.foo.com/cast/</code>, 这时候就会跳转到正确的页面:</p>
+<a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[kbz@centos156 ~]$ curl -I https://m.foo.com/cast</span><br><span class="line">HTTP/1.1 302 Found</span><br><span class="line">Date: Thu, 25 Mar 2021 08:17:28 GMT</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 428</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Server: tencent-cos</span><br><span class="line">Last-Modified: Thu, 25 Mar 2021 08:10:00 GMT</span><br><span class="line">Location: /cast/</span><br><span class="line">X-NWS-UUID-VERIFY: 0066d22ffcb58c3289e6cd8f6dbdf000</span><br><span class="line">x-cos-error-code: Found</span><br><span class="line">x-cos-error-message: Resource Found</span><br><span class="line">x-cos-request-id: NjA1YzQ3MTdfOGNhNTNiMGFfZGRkN18xMGQ1NmVj</span><br><span class="line">x-cos-trace-id: OGVmYzZiMmQzYjA2OWNhODk0NTRkMTBiOWVmMDAxODc0OWRkZjk0ZDM1NmI1M2E2MTRlY2MzZDhmNmI5MWI1OTQ5YWUxMjNkYTk3NzdjZmZlMDQzOTgxOThkOTNlOWFkOGJiN2YzOGQ5MDdjNGY0ODQ1MGIzYjUyMzg2NjFhNzc=</span><br><span class="line">X-Daa-Tunnel: hop_count=4</span><br><span class="line">X-NWS-LOG-UUID: 4d3ce25e-d996-40d9-860e-ce2627a77e88</span><br><span class="line">X-Cache-Lookup: Hit From Upstream</span><br><span class="line">X-Cache-Lookup: Hit From Inner Cluster</span><br><span class="line">Strict-Transport-Security: max-age=7776000</span><br><span class="line">X-Cache-Lookup: Hit From Upstream</span><br><span class="line">X-Cache-Lookup: Hit From Inner Cluster</span><br></pre></td></tr></table></figure>
+<p>如果是换成 aws 的 cloudfront 的话，那肯定就是又找不到文件了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_9_centos ~]$ curl https://m.foo.com/cast</span><br><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;Error&gt;&lt;Code&gt;AccessDenied&lt;/Code&gt;&lt;Message&gt;Access Denied&lt;/Message&gt;&lt;RequestId&gt;52F9V25GCXQYVZ0V&lt;/RequestId&gt;&lt;HostId&gt;bk0YnUOx7fQz3mwqGCA84hXZXuLUj8Tb2YjH6DNhd+SLu75csLPDfstR5qRksNKZldPvqh2Hst4=&lt;/HostId&gt;&lt;/Error&gt;</span><br></pre></td></tr></table></figure></p>
+<h2 id="解决方式"><a href="#解决方式" class="headerlink" title="解决方式"></a>解决方式</h2><p>那么要怎么解决呢，让其 Cloudfront 的跳转规则跟 腾讯云 的跳转规则一致??</p>
+<p>首先我们要知道，其实对于根目录的默认索引文件， Cloudfront 是允许设置的。</p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/1.png" alt="1"></p>
+<p>也就是说，我如果输入 <code>https://m.foo.com</code>, 那么是会索引到 <code>https://m.foo.com/index.html</code> 这个是没问题的。</p>
+<p>但是他不适合 子目录 的方式，这个是他文档的描述：<br><blockquote><p>CloudFront does allow you to specify a default root object (index.html), but it only works on the root of the website (such as <a href="http://www.example.com" target="_blank" rel="noopener">http://www.example.com</a> &gt; <a href="http://www.example.com/index.html)" target="_blank" rel="noopener">http://www.example.com/index.html)</a>. It does not work on any subdirectory (such as <a href="http://www.example.com/about/)" target="_blank" rel="noopener">http://www.example.com/about/)</a>. If you were to attempt to request this URL through CloudFront, CloudFront would do a S3 GetObject API call against a key that does not exist.</p>
+<footer><strong>aws</strong><cite><a href="https://aws.amazon.com/cn/blogs/compute/implementing-default-directory-indexes-in-amazon-s3-backed-amazon-cloudfront-origins-using-lambdaedge/?nc1=h_ls" target="_blank" rel="noopener">aws.amazon.com/cn/blogs/compute/implementing-default-directory-indexes-in-amazon-s3-backed-amazon-cloudfront-origins-using-lambdaedge/?nc1=h_ls</a></cite></footer></blockquote><br>也就是说，我如果请求 <code>http://www.example.com/about/</code>, 那么 cloudfront 只会老老实实的去 S3 bucket 去取这个对象，而不会去找这个子目录默认的索引文件 index.html</p>
+<p>不过他有给了我们一个解决方法，就是用 Lambda 的边缘计算能力，针对 cloudfront 的请求进行重写， 从而让 cloudfront 在 S3 bucket 找到对应的文件。</p>
+<p>具体操作文档: <a href="https://aws.amazon.com/cn/blogs/compute/implementing-default-directory-indexes-in-amazon-s3-backed-amazon-cloudfront-origins-using-lambdaedge/?nc1=h_ls" target="_blank" rel="noopener">使用Lambda @ Edge在Amazon S3支持的Amazon CloudFront起源中实施默认目录索引</a></p>
+<h2 id="具体实操"><a href="#具体实操" class="headerlink" title="具体实操"></a>具体实操</h2><p>对于 Lambda 以及跟 S3 和 Cloudfront 的联动使用，在我以往的文章说了很多次了，具体可以看:</p>
+<ul>
+<li><a href="/2020/04/26/cloudfront-add-x-frame-options/" title="web 安全之 - cloudfront 添加 x-frame-options 防止 Clickjacking">web 安全之 - cloudfront 添加 x-frame-options 防止 Clickjacking</a></li>
+<li><a href="/2019/06/03/image-thumb-s3-qn/" title="针对国内和国外的图片资源和缩略图做CDN优化">针对国内和国外的图片资源和缩略图做CDN优化</a></li>
+<li><a href="/2018/08/13/use-lambda-s3/" title="项目使用 aws 的 lambda服务来生成s3的缩略图">项目使用 aws 的 lambda服务来生成s3的缩略图</a>
+</li>
+</ul>
+<p>这边直接进入实操流程：</p>
+<h3 id="1-创建函数"><a href="#1-创建函数" class="headerlink" title="1. 创建函数"></a>1. 创建函数</h3><p>首先 在 lambda 后台创建一个 lambda 函数： <code>m-addsubfolderaccess</code></p>
+<h3 id="2-写代码，并保存"><a href="#2-写代码，并保存" class="headerlink" title="2. 写代码，并保存"></a>2. 写代码，并保存</h3><p>然后选择 nodejs 版本，我这边选择的是 <code>10.x</code>, 接下来就开始写代码了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">&apos;use strict&apos;;</span><br><span class="line">exports.handler = (event, context, callback) =&gt; &#123;</span><br><span class="line">    // Extract the request from the CloudFront event that is sent to Lambda@Edge </span><br><span class="line">    var request = event.Records[0].cf.request;</span><br><span class="line"></span><br><span class="line">    // Extract the URI from the request</span><br><span class="line">    var olduri = request.uri;</span><br><span class="line"></span><br><span class="line">    // Match any &apos;/&apos; that occurs at the end of a URI. Replace it with a default index</span><br><span class="line">    // 如果最后一个字符是 /, 那么就加上 index.html</span><br><span class="line">    var newuri = olduri;</span><br><span class="line">    if(olduri[olduri.length - 1] === &apos;/&apos;)&#123;</span><br><span class="line">        newuri += &apos;index.html&apos;;</span><br><span class="line">    &#125;else&#123;</span><br><span class="line">        // 获取斜杠的最后一个参数</span><br><span class="line">        var uriArr = olduri.split(&quot;/&quot;);</span><br><span class="line">        if(uriArr.length &gt; 1)&#123;</span><br><span class="line">            var lastPath = uriArr[uriArr.length -1];</span><br><span class="line">            // 判断最后一个路径是不是有一个 . 结尾的，比如 a.jpg， 如果有的话，说明是资源。 如果么有的话，那么就是有可能没有加 斜杠的目录</span><br><span class="line">            if(lastPath &amp;&amp; lastPath.split(&quot;.&quot;).length === 1)&#123;</span><br><span class="line">                newuri += &apos;/index.html&apos;;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // Log the URI as received by CloudFront and the new URI to be used to fetch from origin</span><br><span class="line">    console.log(&quot;Old URI: &quot; + olduri);</span><br><span class="line">    console.log(&quot;New URI: &quot; + newuri);</span><br><span class="line">    // Replace the received URI with the URI that includes the index page</span><br><span class="line">    request.uri = newuri;</span><br><span class="line">    // Return to CloudFront</span><br><span class="line">    return callback(null, request);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>代码很简单，就是针对当前请求的 uri，根据不同的判断进行重写，主要是判断两种情况:</p>
+<ol>
+<li>如果最后一个字符是 <code>/</code>, 那么就加上 index.html ，这样子就可以解决子目录没有取默认 index.html 的问题</li>
+<li>获取最后一个 <code>/</code> 后面的字符，如果不存在 “.” 的字符 (说明不是资源，比如 <code>1.jpg</code> 和 <code>a.html</code>, 这边是认为这个站点的合理资源都是以 <code>[name].[ext]</code> 的方式存在的，如果没有点，说明是一个子目录)， 那么我们就认为最后的 path 其实是一个子目录，然后只需要添加 <code>/index.html</code> 就可以了。</li>
+</ol>
+<p>代码写好了，接下来点击上面的 Deploy 按钮，表示保存成功</p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/2.png" alt="1"></p>
+<h3 id="3-测试一下代码是否正确"><a href="#3-测试一下代码是否正确" class="headerlink" title="3. 测试一下代码是否正确"></a>3. 测试一下代码是否正确</h3><p>代码写好了，接下来我们跑一下测试是否正确， 首先我们测试第一个逻辑，选择一个 http 的跳转事件，然后将 uri 改成 <code>/cast/</code>, </p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/6.png" alt="1"></p>
+<p>然后点击调用:</p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/7.png" alt="1"></p>
+<p>查看执行结果，打印出来的日志 new uri 符合期望是 <code>/cast/index.html</code>, 说明没错。</p>
+<p>接下来测试第二种情况，将 uri 改成 <code>/cast</code> :</p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/8.png" alt="1"></p>
+<p>然后点击调用:</p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/9.png" alt="1"></p>
+<p>查看执行结果，打印出来的日志 new uri 符合期望是 <code>/cast/index.html</code>, 说明没错。</p>
+<h3 id="4-应用到-cloudfront"><a href="#4-应用到-cloudfront" class="headerlink" title="4. 应用到 cloudfront"></a>4. 应用到 cloudfront</h3><p>测试结果正常。接下来我们就要应用到 cloudfront 了， 选择 右上角的 [操作] - [部署到 Lambda@Edge]</p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/3.png" alt="1"></p>
+<p>选择你想要的这个 cloudfront (一定要选对，不要应用错了)， 然后选择 <code>源请求</code> 事件， 因为我们要对请求的 uri 进行重写， 然后点击部署。</p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/4.png" alt="1"></p>
+<p>这时候这个 cloudfront 就会重新部署。 大概 5 分钟就可以看效果了。</p>
+<p>而且部署的同时，lambda 也会帮我们将这个函数，生成一个新的版本</p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/5.png" alt="1"></p>
+<h3 id="5-测试有没有部署生效"><a href="#5-测试有没有部署生效" class="headerlink" title="5. 测试有没有部署生效"></a>5. 测试有没有部署生效</h3><p>等部署完之后，我们就可以重新请求了， 这时候用 curl 请求一下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_9_centos ~]$ curl -I https://m.foo.com/cast/</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 10754</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Date: Thu, 25 Mar 2021 08:05:34 GMT</span><br><span class="line">Last-Modified: Thu, 28 Jan 2021 06:18:46 GMT</span><br><span class="line">ETag: &quot;93ff430a043037a9452fe191f6b0320b&quot;</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Server: AmazonS3</span><br><span class="line">Strict-Transport-Security: max-age=7776000</span><br><span class="line">X-Cache: Hit from cloudfront</span><br><span class="line">Via: 1.1 cfa15842f57761e1aba6ea8338d380d5.cloudfront.net (CloudFront)</span><br><span class="line">X-Amz-Cf-Pop: SFO20-C1</span><br><span class="line">X-Amz-Cf-Id: 5oaotoHwXoQT197vrn5ORM1dICkGrgAH-5ILwrDcv0ru9bA1VdczRg==</span><br><span class="line">Age: 2521</span><br></pre></td></tr></table></figure></p>
+<p>这时候就是 200 成功，并且有 hit cloudfront 了。 去掉 最后的 <code>/</code> 再试试:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_9_centos ~]$ curl -I https://m.foo.com/cast</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 10754</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Date: Thu, 25 Mar 2021 08:05:38 GMT</span><br><span class="line">Last-Modified: Thu, 28 Jan 2021 06:18:46 GMT</span><br><span class="line">ETag: &quot;93ff430a043037a9452fe191f6b0320b&quot;</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Server: AmazonS3</span><br><span class="line">Strict-Transport-Security: max-age=7776000</span><br><span class="line">X-Cache: Hit from cloudfront</span><br><span class="line">Via: 1.1 88734c1b1a8053ae83daf0f85731c788.cloudfront.net (CloudFront)</span><br><span class="line">X-Amz-Cf-Pop: SFO20-C1</span><br><span class="line">X-Amz-Cf-Id: U6de8MCZwtoS6zyb4lLgDjZCsUkeJa4n_xW9PXLUb8rBL1K-vGvolg==</span><br><span class="line">Age: 2451</span><br></pre></td></tr></table></figure></p>
+<p>说明成功生效了。</p>
+<hr>
+<p>参考资料</p>
+<ul>
+<li><a href="https://aws.amazon.com/cn/blogs/compute/implementing-default-directory-indexes-in-amazon-s3-backed-amazon-cloudfront-origins-using-lambdaedge/?nc1=h_ls" target="_blank" rel="noopener">Implementing Default Directory Indexes in Amazon S3-backed Amazon CloudFront Origins Using Lambda@Edge</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/AmazonCloudFront/latest/DeveloperGuide/lambda-event-structure.html" target="_blank" rel="noopener">Lambda@Edge 事件结构</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/" title="使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引">http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/cloudfront/" rel="tag"># cloudfront</a>
+          
+            <a href="/tags/aws/" rel="tag"># aws</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/02/24/window-open-param/" rel="next" title="window.open() 打开的子页面往跨域的主页面传参问题">
+                <i class="fa fa-chevron-left"></i> window.open() 打开的子页面往跨域的主页面传参问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/04/01/2fa/" rel="prev" title="如何在你的程序中启用基于 TOTP 的两步验证">
+                如何在你的程序中启用基于 TOTP 的两步验证 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">246</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">57</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方式"><span class="nav-number">2.</span> <span class="nav-text">解决方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体实操"><span class="nav-number">3.</span> <span class="nav-text">具体实操</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-创建函数"><span class="nav-number">3.1.</span> <span class="nav-text">1. 创建函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-写代码，并保存"><span class="nav-number">3.2.</span> <span class="nav-text">2. 写代码，并保存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-测试一下代码是否正确"><span class="nav-number">3.3.</span> <span class="nav-text">3. 测试一下代码是否正确</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-应用到-cloudfront"><span class="nav-number">3.4.</span> <span class="nav-text">4. 应用到 cloudfront</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-测试有没有部署生效"><span class="nav-number">3.5.</span> <span class="nav-text">5. 测试有没有部署生效</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/';
+          this.page.identifier = '2021/03/25/s3-cloudfront-add-sub-folder-access/';
+          this.page.title = '使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

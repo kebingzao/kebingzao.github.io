@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="2fa,security,php," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言我们往往会在不同的网站上使用相同的密码，这样一旦一个网站账户的密码泄露，就会危及到其他使用相同密码的账户的安全。没错, 就是撞库行为, 往往你的站点的安全机制没有问题，但是架不住你的用户使用的密码跟其他被脱库的站点使用的密码一致(现在免费的社工库很多，随便写个简单的暴力碰撞程序(记得挂上代理)，就可以试出一堆可以正常使用的用户名和密码), 导致很容易通过撞库的行为从而知道这个用户在你站点的用户">
+<meta name="keywords" content="2fa,security,php">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何在你的程序中启用基于 TOTP 的两步验证">
+<meta property="og:url" content="http://kebingzao.com/2021/04/01/2fa/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言我们往往会在不同的网站上使用相同的密码，这样一旦一个网站账户的密码泄露，就会危及到其他使用相同密码的账户的安全。没错, 就是撞库行为, 往往你的站点的安全机制没有问题，但是架不住你的用户使用的密码跟其他被脱库的站点使用的密码一致(现在免费的社工库很多，随便写个简单的暴力碰撞程序(记得挂上代理)，就可以试出一堆可以正常使用的用户名和密码), 导致很容易通过撞库的行为从而知道这个用户在你站点的用户">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2021/04/01/2fa/1.png">
+<meta property="og:image" content="http://kebingzao.com/2021/04/01/2fa/2.png">
+<meta property="og:image" content="http://kebingzao.com/2021/04/01/2fa/3.png">
+<meta property="og:image" content="http://kebingzao.com/2021/04/01/2fa/4.png">
+<meta property="og:image" content="http://kebingzao.com/2021/04/01/2fa/5.png">
+<meta property="og:image" content="http://kebingzao.com/2021/04/01/2fa/6.png">
+<meta property="og:image" content="http://kebingzao.com/2021/04/01/2fa/7.png">
+<meta property="og:image" content="http://kebingzao.com/2021/04/01/2fa/8.png">
+<meta property="og:updated_time" content="2021-04-01T13:03:38.386Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何在你的程序中启用基于 TOTP 的两步验证">
+<meta name="twitter:description" content="前言我们往往会在不同的网站上使用相同的密码，这样一旦一个网站账户的密码泄露，就会危及到其他使用相同密码的账户的安全。没错, 就是撞库行为, 往往你的站点的安全机制没有问题，但是架不住你的用户使用的密码跟其他被脱库的站点使用的密码一致(现在免费的社工库很多，随便写个简单的暴力碰撞程序(记得挂上代理)，就可以试出一堆可以正常使用的用户名和密码), 导致很容易通过撞库的行为从而知道这个用户在你站点的用户">
+<meta name="twitter:image" content="http://kebingzao.com/2021/04/01/2fa/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2021/04/01/2fa/"/>
+
+
+
+
+
+  <title>如何在你的程序中启用基于 TOTP 的两步验证 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/04/01/2fa/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">如何在你的程序中启用基于 TOTP 的两步验证</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-04-01T11:33:22+08:00">
+                2021-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/04/01/2fa/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/04/01/2fa/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/04/01/2fa/" class="leancloud_visitors" data-flag-title="如何在你的程序中启用基于 TOTP 的两步验证">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们往往会在不同的网站上使用相同的密码，这样一旦一个网站账户的密码泄露，就会危及到其他使用相同密码的账户的安全。没错, 就是撞库行为, 往往你的站点的安全机制没有问题，但是架不住你的用户使用的密码跟其他被脱库的站点使用的密码一致(现在免费的社工库很多，随便写个简单的暴力碰撞程序(<code>记得挂上代理</code>)，就可以试出一堆可以正常使用的用户名和密码), 导致很容易通过撞库的行为从而知道这个用户在你站点的用户名和密码。 为了解决这个问题，一些网站在登录时要求除了输入账户密码之外，还需要输入另一个一次性密码。</p>
+<p>而这个输入的一次性密码，其实就是我们所说的两步验证，这不是什么新奇的技术，国内都使用了N多年了，比如说银行用的动态令牌</p>
+<p><img src="/2021/04/01/2fa/1.png" alt="1"></p>
+<p>再说一个大家比较有情怀的东西，就是早期网易的将军令(爷春回) 也是用的这个技术:</p>
+<p><img src="/2021/04/01/2fa/2.png" alt="1"></p>
+<p>虽然不是什么新技术，不过早期因为手机的不普及，更多的是用硬件的方式来实现 (这玩意儿一旦没有电，就必须重新换一个，因为他没办法联网同步时间，不过这个耗电量极低，一个可以用好几年)。 但是随着手机的普及，以及大家的安全意识的提升。 越来越多的站点都用软件的方式来实现(比如 Evernote， Google， 以及我所在团队的站点)，而且成本很低。</p>
+<a id="more"></a>
+<h2 id="两步验证原理"><a href="#两步验证原理" class="headerlink" title="两步验证原理"></a>两步验证原理</h2><p>两步验证，对应的英文是 <code>Two-factor Authentication（2FA）</code>,从名字可以看出，「两步」是 2FA 的重点，也就是 密码 + 一次性密码（One Time Password，OTP）</p>
+<h3 id="OTP"><a href="#OTP" class="headerlink" title="OTP"></a>OTP</h3><p>2FA 中使用的是一次性密码（One Time Password，OTP），也被称作动态密码。一般 OTP 有两种策略：HOTP ( HMAC-based One Time Password) 和 TOTP ( Time-based One-time Password) 。目前被广泛使用的正是后者这种基于时间的动态密码生成策略。</p>
+<h3 id="HOTP-的原理"><a href="#HOTP-的原理" class="headerlink" title="HOTP 的原理"></a>HOTP 的原理</h3><blockquote>
+<p>本节的原理来自 <a href="https://blog.seetee.me/post/2011/google-two-step-verification/" target="_blank" rel="noopener">Google账户两步验证的工作原理</a></p>
+</blockquote>
+<p>虽然实践中更多的是使用 TOTP 来进行两步校验， 但是它是基于 HOTP 来实现的， 所以我们先了解一下 HTOP 的工作原理。</p>
+<ol>
+<li><p>客户端和服务器事先协商好一个密钥K，用于一次性密码的生成过程，此密钥不被任何第三方所知道。此外，客户端和服务器各有一个计数器C，并且事先将计数值同步。</p>
+</li>
+<li><p>进行验证时，客户端对密钥和计数器的组合(K,C)使用HMAC（Hash-based Message Authentication Code）算法计算一次性密码，公式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HOTP(K,C) = Truncate(HMAC-SHA-1(K,C))</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>上面采用了 <code>HMAC-SHA-1</code>，当然也可以使用<code>HMAC-MD5</code>等。HMAC 算法得出的值位数比较多，不方便用户输入，因此需要截断（Truncate）成为一组不太长十进制数（例如6位）。计算完成之后客户端计数器C计数值加1。</p>
+<ol start="3">
+<li>用户将这一组十进制数输入并且提交之后，服务器端同样的计算，并且与用户提交的数值比较，如果相同，则验证通过，服务器端将计数值C增加1。如果不相同，则验证失败。</li>
+</ol>
+<p>这里的一个比较有趣的问题是，如果验证失败或者客户端不小心多进行了一次生成密码操作，那么服务器和客户端之间的计数器C将不再同步，因此需要有一个重新同步（Resynchronization）的机制。这里不作具体介绍，详情可以参看 <a href="http://tools.ietf.org/html/rfc4226" target="_blank" rel="noopener">RFC 4226</a>。</p>
+<h3 id="TOTP-的原理"><a href="#TOTP-的原理" class="headerlink" title="TOTP 的原理"></a>TOTP 的原理</h3><blockquote>
+<p>本节的原理来自 <a href="https://blog.seetee.me/post/2011/google-two-step-verification/" target="_blank" rel="noopener">Google账户两步验证的工作原理</a></p>
+</blockquote>
+<p>介绍完了HOTP，Time-based One-time Password（TOTP）也就容易理解了。TOTP 将 HOTP 中的计数器C用当前时间T来替代，于是就得到了随着时间变化的一次性密码。非常有趣吧！</p>
+<p>虽然原理很简单，但是用时间来替代计数器会有一些特殊的问题，这些问题也很有意思，我们选取几个进行一下探讨。</p>
+<p>首先，时间T的值怎么选取？ 因为时间每时每刻都在变化，如果选择一个变化太快的T（例如从某一时间点开始的秒数），那么用户来不及输入密码。如果选择一个变化太慢的T（例如从某一时间点开始的小时数），那么第三方攻击者就有充足的时间去尝试所有可能的一次性密码（试想6位数字的一次性密码仅仅有10^6种组合），降低了密码的安全性。除此之外，变化太慢的T还会导致另一个问题。如果用户需要在短时间内两次登录账户，由于密码是一次性的不可重用(这个其实可以配置)， 用户必须等到下一个一次性密码被生成时才能登录，这意味着最多需要等待59分59秒！这显然不可接受。综合以上考虑，Google选择了30秒作为时间片，T的数值为从 Unix epoch（1970年1月1日 00:00:00）来经历的30秒的个数。</p>
+<p>第二个问题是，由于网络延时，用户输入延迟等因素，可能当服务器端接收到一次性密码时，T的数值已经改变，这样就会导致服务器计算的一次性密码值与用户输入的不同，验证失败。解决这个问题个一个方法是，服务器计算当前时间片以及前面的n个时间片内的一次性密码值(这个其实也可以配置)，只要其中有一个与用户输入的密码相同，则验证通过。当然，n不能太大，否则会降低安全性。</p>
+<h3 id="TOTP-的算法和特点"><a href="#TOTP-的算法和特点" class="headerlink" title="TOTP 的算法和特点"></a>TOTP 的算法和特点</h3><p>综上所述， TOTP 的算法大体是这样子:</p>
+<ol>
+<li>客户端和服务器事先协商好一个SECRET，用于一次性密码的生成过程，此密钥不被任何第三方所知道。此外，客户端和服务器都采用时间做计数器。</li>
+<li>客户端对密钥和计数器的组合(SECRET,time/30) 使用HMAC（Hash-based Message Authentication Code）算法计算一次性密码，公式如下：<code>HMAC-SHA-1(SECRET, time/30)</code></li>
+<li>各种算法加特效后成6位数字</li>
+</ol>
+<p>基于 TOTP 的密码有如下特点</p>
+<ol>
+<li>无需记忆，不会产生 password 这样的泄漏问题</li>
+<li>动态生成,每30s生成一个，安全性大大提高</li>
+<li>对网络无要求，离线下仍可正常使用</li>
+<li>成本低，无需购买硬件和软件 (只需要安装一个客户端就行了，这种市面上很多)</li>
+</ol>
+<h2 id="两步验证流程实现"><a href="#两步验证流程实现" class="headerlink" title="两步验证流程实现"></a>两步验证流程实现</h2><p>算法和原理搞懂了，接下来讲讲流程:</p>
+<ol>
+<li>服务端随机生成一个类似于<code>DPI45HKISEXU6HG7</code> 的密钥，并且把这个密钥保存在数据库中。</li>
+<li>在页面上显示一个二维码，内容是一个URI地址（<code>otpauth://totp/厂商:账号?secret=密钥&amp;issuer=厂商</code>）</li>
+<li>客户端扫描二维码，把密钥<code>DPI45HKISEXU6HG7</code>保存在客户端。</li>
+<li>客户端每30秒使用密钥<code>DPI45HKISEXU6HG7</code> 和时间戳通过 TOTP 算法 生成一个6位数字的一次性密码</li>
+<li>用户输入这个一次性密码，然后服务端进行验证</li>
+</ol>
+<h3 id="客户端的选择"><a href="#客户端的选择" class="headerlink" title="客户端的选择"></a>客户端的选择</h3><p>要实现上述两步验证的流程，我们需要一个客户端 (Google Authenticator compatible app)，这个客户端我们不需要直接去开发，市面上很多:</p>
+<ul>
+<li><a href="https://authy.com/" target="_blank" rel="noopener">Authy for iOS, Android, Chrome, OS X</a></li>
+<li><a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8" target="_blank" rel="noopener">Google Authenticator for iOS</a></li>
+<li><a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank" rel="noopener">Google Authenticator for Android</a></li>
+<li><a href="https://www.microsoft.com/en-us/store/p/google-authenticator/9wzdncrdnkrf" target="_blank" rel="noopener">Google Authenticator (port) on Windows Store</a></li>
+<li><a href="https://1password.com" target="_blank" rel="noopener">1Password for iOS, Android, OS X, Windows</a></li>
+</ul>
+<p>比如我装的是 <code>Google Authenticator for iOS</code>, 打开是这样子的 (因为我已经有使用了)</p>
+<p><img src="/2021/04/01/2fa/3.png" alt="1"></p>
+<p>上面有两条记录，说明我在两个站点上，有开启了两步验证，然后这边就会根据 TOTP 算法，每隔 30s 就会刷一次 code 。</p>
+<p>如果要扫码的话，直接选择右下角的 “+” 按钮，然后选择 <code>扫描二维码</code> 即可</p>
+<h3 id="流程的效果图"><a href="#流程的效果图" class="headerlink" title="流程的效果图"></a>流程的效果图</h3><p>有了流程图之后，配合效果图，就很好理解了。</p>
+<ol>
+<li>首先当用户选择两步验证的时候，就要提示他要立即绑定 谷歌身份验证器 </li>
+</ol>
+<p><img src="/2021/04/01/2fa/4.png" alt="1"></p>
+<ol start="2">
+<li>接下来前端就请求服务端得到 OTP 的绑定内容(<code>otpauth://totp/厂商:账号?secret=密钥&amp;issuer=厂商</code>)，以二维码的方式显示</li>
+</ol>
+<p><img src="/2021/04/01/2fa/5.png" alt="1"></p>
+<ol start="3">
+<li><p>谷歌身份验证器扫码之后，就会绑定这个站点的两步验证信息(其实就是保存密钥，厂商，账号等信息)，同时生成 code</p>
+</li>
+<li><p>最后再输入刚才生成的 6 位数的 code，然后前端传到服务端去验证，如果验证通过之后，那么就绑定成功了。</p>
+</li>
+<li><p>这样子用户下次登录的时候，服务端检测到用户有开启两步验证，那么就弹出框让其输入 OTP 码， 然后验证，如果验证通过，才进入真正的产品界面</p>
+</li>
+</ol>
+<p><img src="/2021/04/01/2fa/6.png" alt="1"></p>
+<p>这样子，一个简单的两步验证的流程就完成了。 客户端不需要我们自己处理， 前端只需要请求接口就行了， 主要是服务端的逻辑， 要负责下发 OTP 绑定内容给客户端扫码绑定，又要负责校验。 所以我们接下来讲一下服务端要怎么处理。</p>
+<h3 id="服务端的处理方式"><a href="#服务端的处理方式" class="headerlink" title="服务端的处理方式"></a>服务端的处理方式</h3><p>我们用的是 PHP 来处理，而且用的是一个第三方包 <a href="https://github.com/antonioribeiro/google2fa" target="_blank" rel="noopener">antonioribeiro/google2fa</a>, 这个包的功能非常全面，我们要的功能都有，而且不仅仅是 TOTP 验证，他也提供 HOTP 验证。</p>
+<p>首先用 composer 安装一下这个包:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">composer require pragmarx/google2fa</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-生成-secret-key"><a href="#1-生成-secret-key" class="headerlink" title="1. 生成 secret key"></a>1. 生成 secret key</h4><p>首先要先生成 secret key， 然后保存到这个用户所在的信息表中 (不能跟已存在的重复，如果重复，就重新生成一个)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">use PragmaRX\Google2FA\Google2FA;</span><br><span class="line">    </span><br><span class="line">$google2fa = new Google2FA();</span><br><span class="line">    </span><br><span class="line">return $google2fa-&gt;generateSecretKey();</span><br></pre></td></tr></table></figure></p>
+<p>这个密钥默认是 16 位，这个其实够用了，如果需要安全性更高的，那么也可以设置为 32 位<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$secretKey = $google2fa-&gt;generateSecretKey(32); // defaults to 16 bytes</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-生成二维码的-OTP-绑定内容"><a href="#2-生成二维码的-OTP-绑定内容" class="headerlink" title="2. 生成二维码的 OTP 绑定内容"></a>2. 生成二维码的 OTP 绑定内容</h4><p>接下来就要生成 OTP 的绑定内容， 用来做二维码的内容显示:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">otpauth://totp/厂商:账号?secret=密钥&amp;issuer=厂商</span><br></pre></td></tr></table></figure></p>
+<p>这个也有 api:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$qrCodeUrl = $google2fa-&gt;getQRCodeUrl(</span><br><span class="line">    $companyName,</span><br><span class="line">    $companyEmail,</span><br><span class="line">    $secretKey</span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p>这样子就生成了， 不过要注意一点的是，这个只是扫描二维码之后的内容。 只是一个字符串而已，并不是二维码本身。 如果前端有自己的生成二维码的程序的话，那么只需要将这个返回给前端就行了。 如果前端没有的话，那么服务端也可以直接生成一张包含这个内容的二维码图片，然后传给前端， 前端直接显示这种图片即可。</p>
+<p>这边需要注意一个细节，就是这个包在新版的时候，已经将生成二维码图片的功能去掉了，如果你要生成二维码的话，那么就要结合其他的第三方包，比如 <a href="https://github.com/Bacon/BaconQrCode" target="_blank" rel="noopener">Bacon/QRCode</a> 这个包来生成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">use PragmaRX\Google2FA\Google2FA;</span><br><span class="line">use BaconQrCode\Renderer\ImageRenderer;</span><br><span class="line">use BaconQrCode\Renderer\Image\ImagickImageBackEnd;</span><br><span class="line">use BaconQrCode\Renderer\RendererStyle\RendererStyle;</span><br><span class="line">use BaconQrCode\Writer;</span><br><span class="line"></span><br><span class="line">$google2fa = app(Google2FA::class);</span><br><span class="line"></span><br><span class="line">$g2faUrl = $google2fa-&gt;getQRCodeUrl(</span><br><span class="line">    &apos;pragmarx&apos;,</span><br><span class="line">    &apos;google2fa@pragmarx.com&apos;,</span><br><span class="line">    $google2fa-&gt;generateSecretKey()</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">$writer = new Writer(</span><br><span class="line">    new ImageRenderer(</span><br><span class="line">        new RendererStyle(400),</span><br><span class="line">        new ImagickImageBackEnd()</span><br><span class="line">    )</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">$qrcode_image = base64_encode($writer-&gt;writeString($g2faUrl));</span><br></pre></td></tr></table></figure></p>
+<p>不过这个包的旧版本，比如 <code>4.0.0</code> 版，还是有提供这个生成二维码图片地址的功能的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$google2fa-&gt;-&gt;setAllowInsecureCallToGoogleApis(true);</span><br><span class="line">$google2fa-&gt;-&gt;getQRCodeGoogleUrl($company, $userEmail, $secret, $size);</span><br></pre></td></tr></table></figure></p>
+<p>看了一下他的源码，他是直接封装了 google chart 的 api 来处理的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">public function getQRCodeGoogleUrl($company, $holder, $secret, $size = 200)</span><br><span class="line">&#123;</span><br><span class="line">    if (!$this-&gt;allowInsecureCallToGoogleApis) &#123;</span><br><span class="line">        throw new InsecureCallException(&quot;It&apos;s not secure to send secret keys to Google Apis, you have to explicitly allow it by calling \$google2fa-&gt;setAllowInsecureCallToGoogleApis(true).&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return Url::generateGoogleQRCodeUrl(</span><br><span class="line">        &apos;https://chart.googleapis.com/&apos;,</span><br><span class="line">        &apos;chart&apos;,</span><br><span class="line">        &apos;chs=&apos;.$size.&apos;x&apos;.$size.&apos;&amp;chld=M|0&amp;cht=qr&amp;chl=&apos;,</span><br><span class="line">        $this-&gt;getQRCodeUrl($company, $holder, $secret)</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个在国内是访问不了的。 可能也是考虑到其他原因吧， 后面新版本就把这个东西去掉了。</p>
+<h4 id="3-OTP-验证"><a href="#3-OTP-验证" class="headerlink" title="3. OTP 验证"></a>3. OTP 验证</h4><p>当 谷歌身份验证器扫码之后， 为了让服务端知道已经有扫码绑定了， 这时候就需要第一次将 OTP 输入，然后到服务端进行校验，如果校验成功，那么就说明流程成功。 所以这边会涉及到 验证码的校验, 这边也是有直接的 api 可以处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$secret = $request-&gt;input(&apos;secret&apos;);</span><br><span class="line"></span><br><span class="line">$valid = $google2fa-&gt;verifyKey($user-&gt;google2fa_secret, $secret);</span><br></pre></td></tr></table></figure></p>
+<p>其中第一个参数就是我们生成存放到数据库的密钥， 第二个参数才是前端传过来的 一次性验证码。</p>
+<h3 id="几个注意事项"><a href="#几个注意事项" class="headerlink" title="几个注意事项"></a>几个注意事项</h3><p>现在我们已经将整个两步验证的流程都串起来了。 不过有几个注意事项要记得处理:</p>
+<h4 id="1-OTP-不能复用"><a href="#1-OTP-不能复用" class="headerlink" title="1. OTP 不能复用"></a>1. OTP 不能复用</h4><p>生成的 OTP 应该是不能复用的，也就是用户在登陆或者危险操作时输入完一次 OTP 后，手机端 OTP 仍然未刷新时，在进行登陆或者危险操作时输入刚才的 OTP 是无效的，必须等待手机上 OTP 的刷新。</p>
+<p>这个包是有 api 支援的, 换成 <code>verifyKeyNewer</code> 这个 api 就行了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$secret = $request-&gt;input(&apos;secret&apos;);</span><br><span class="line"></span><br><span class="line">$timestamp = $google2fa-&gt;verifyKeyNewer($user-&gt;google2fa_secret, $secret, $user-&gt;google2fa_ts);</span><br><span class="line"></span><br><span class="line">if ($timestamp !== false) &#123;</span><br><span class="line">    $user-&gt;update([&apos;google2fa_ts&apos; =&gt; $timestamp]);</span><br><span class="line">    // successful</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    // failed</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="2-设置足够时间的窗口期"><a href="#2-设置足够时间的窗口期" class="headerlink" title="2. 设置足够时间的窗口期"></a>2. 设置足够时间的窗口期</h4><p>既然可以离线使用，那么怎么保证时间的差异性，我们服务端会兼容服务器时间的前后30s。从而有效的避免细微时间上差异而导致的验证失败，同时也避免了用户刚输入完 OTP 后还未做提交操作时 OTP 刷新而引起验证失败。</p>
+<p>这个包的 api 也是有的，他可以设置验证时间的窗口期，默认是延长 1 个窗口期， 也就是这个 OTP 的有效时间是 60s:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">protected $window = 1; // Keys will be valid for 60 seconds</span><br></pre></td></tr></table></figure></p>
+<p>当然我们也可以显示的设置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$window = 8; // 8 keys (respectively 4 minutes) past and future</span><br><span class="line"></span><br><span class="line">$valid = $google2fa-&gt;verifyKey($user-&gt;google2fa_secret, $secret, $window);</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-防止暴力破解-OTP"><a href="#3-防止暴力破解-OTP" class="headerlink" title="3. 防止暴力破解 OTP"></a>3. 防止暴力破解 OTP</h4><p>在遇到使用遍历所有6位数数字进行暴力破解 OTP 时，我们要对错误次数进行限制，超过一定的错误次数，那么就要进行限制。</p>
+<h4 id="4-要重新登录"><a href="#4-要重新登录" class="headerlink" title="4. 要重新登录"></a>4. 要重新登录</h4><p>在开启两步认证后，其他所有登陆的客户端都会因为开启两步认证而过期，必须重新登陆。</p>
+<h4 id="5-客户端绑定的时候，允许直接输入密钥进行绑定"><a href="#5-客户端绑定的时候，允许直接输入密钥进行绑定" class="headerlink" title="5. 客户端绑定的时候，允许直接输入密钥进行绑定"></a>5. 客户端绑定的时候，允许直接输入密钥进行绑定</h4><p>有时候客户会扫不了二维码，这时候我们要提供 密钥，允许直接在客户端输入账号和密钥进行绑定， 这个在 google 身份验证器的时候，也是可以操作的</p>
+<p><img src="/2021/04/01/2fa/7.png" alt="1"></p>
+<h4 id="6-预留备用-code-行为"><a href="#6-预留备用-code-行为" class="headerlink" title="6. 预留备用 code 行为"></a>6. 预留备用 code 行为</h4><p>因为有时候会出现当前手机上没有安装 谷歌身份验证器， 但是又需要登录我们的站点。 因此我们站点如果有开启两步验证之后，同时也会预留一组备用码。 当身份验证器不在身边的时候，也可以通过输入备用码进行登录， 不过这个备用码也是一次性的，一旦用完之后， 只能在我们产品的后台重新刷新生成。</p>
+<p><img src="/2021/04/01/2fa/8.png" alt="1"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上就是在项目实践中实现两步验证的流程了。 总的来说不难，不过需要注意，因为 TOTP 是需要客户端和服务端的时间同步的，如果客户端直接将时间调快的话，那么验证就会出错的。</p>
+<hr>
+<p>参考文档:</p>
+<ul>
+<li><a href="https://security.stackexchange.com/questions/35157/how-does-google-authenticator-work" target="_blank" rel="noopener">How does Google Authenticator work?</a></li>
+<li><a href="https://blog.seetee.me/post/2011/google-two-step-verification/" target="_blank" rel="noopener">Google账户两步验证的工作原理</a></li>
+<li><a href="https://github.com/antonioribeiro/google2fa" target="_blank" rel="noopener">Google Two-Factor Authentication for PHP</a></li>
+<li><a href="https://blog.coding.net/blog/two-factor-authentication" target="_blank" rel="noopener">Coding 两步认证技术介绍</a></li>
+<li><a href="https://www.cnblogs.com/hanyifeng/p/5516053.html" target="_blank" rel="noopener">Linux 之 利用Google Authenticator实现用户双因素认证</a></li>
+<li><a href="https://www.zhihu.com/question/20462696" target="_blank" rel="noopener">谷歌验证 (Google Authenticator) 的实现原理是什么？</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2021/04/01/2fa/" title="如何在你的程序中启用基于 TOTP 的两步验证">http://kebingzao.com/2021/04/01/2fa/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/2fa/" rel="tag"># 2fa</a>
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+            <a href="/tags/php/" rel="tag"># php</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/03/25/s3-cloudfront-add-sub-folder-access/" rel="next" title="使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引">
+                <i class="fa fa-chevron-left"></i> 使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">246</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">57</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#两步验证原理"><span class="nav-number">2.</span> <span class="nav-text">两步验证原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OTP"><span class="nav-number">2.1.</span> <span class="nav-text">OTP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HOTP-的原理"><span class="nav-number">2.2.</span> <span class="nav-text">HOTP 的原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TOTP-的原理"><span class="nav-number">2.3.</span> <span class="nav-text">TOTP 的原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TOTP-的算法和特点"><span class="nav-number">2.4.</span> <span class="nav-text">TOTP 的算法和特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#两步验证流程实现"><span class="nav-number">3.</span> <span class="nav-text">两步验证流程实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端的选择"><span class="nav-number">3.1.</span> <span class="nav-text">客户端的选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#流程的效果图"><span class="nav-number">3.2.</span> <span class="nav-text">流程的效果图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端的处理方式"><span class="nav-number">3.3.</span> <span class="nav-text">服务端的处理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-生成-secret-key"><span class="nav-number">3.3.1.</span> <span class="nav-text">1. 生成 secret key</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-生成二维码的-OTP-绑定内容"><span class="nav-number">3.3.2.</span> <span class="nav-text">2. 生成二维码的 OTP 绑定内容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-OTP-验证"><span class="nav-number">3.3.3.</span> <span class="nav-text">3. OTP 验证</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#几个注意事项"><span class="nav-number">3.4.</span> <span class="nav-text">几个注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-OTP-不能复用"><span class="nav-number">3.4.1.</span> <span class="nav-text">1. OTP 不能复用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-设置足够时间的窗口期"><span class="nav-number">3.4.2.</span> <span class="nav-text">2. 设置足够时间的窗口期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-防止暴力破解-OTP"><span class="nav-number">3.4.3.</span> <span class="nav-text">3. 防止暴力破解 OTP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-要重新登录"><span class="nav-number">3.4.4.</span> <span class="nav-text">4. 要重新登录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-客户端绑定的时候，允许直接输入密钥进行绑定"><span class="nav-number">3.4.5.</span> <span class="nav-text">5. 客户端绑定的时候，允许直接输入密钥进行绑定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-预留备用-code-行为"><span class="nav-number">3.4.6.</span> <span class="nav-text">6. 预留备用 code 行为</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2021/04/01/2fa/';
+          this.page.identifier = '2021/04/01/2fa/';
+          this.page.title = '如何在你的程序中启用基于 TOTP 的两步验证';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

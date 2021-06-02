@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="nginx," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前段时间我们的官网上了新版本， 有将一些对 seo 不友好的旧页面的路由变成了新页面的路由。 比如将 bizHome.html 换成 business/, 但是其实内容是一样的。 刚开始为了保证旧页面不失效，在构建的时候，是将新页面和旧页面的内容都构建成一样的。 但是这样子一来， seo 的权重就被割裂了。 所以为了保证新页面的 seo 权重能够继承旧页面的权重。就要换成将旧页面的访问全部变成">
+<meta name="keywords" content="nginx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上">
+<meta property="og:url" content="http://kebingzao.com/2021/05/18/nginx-301-4/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前段时间我们的官网上了新版本， 有将一些对 seo 不友好的旧页面的路由变成了新页面的路由。 比如将 bizHome.html 换成 business/, 但是其实内容是一样的。 刚开始为了保证旧页面不失效，在构建的时候，是将新页面和旧页面的内容都构建成一样的。 但是这样子一来， seo 的权重就被割裂了。 所以为了保证新页面的 seo 权重能够继承旧页面的权重。就要换成将旧页面的访问全部变成">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-02T16:01:28.922Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上">
+<meta name="twitter:description" content="前言前段时间我们的官网上了新版本， 有将一些对 seo 不友好的旧页面的路由变成了新页面的路由。 比如将 bizHome.html 换成 business/, 但是其实内容是一样的。 刚开始为了保证旧页面不失效，在构建的时候，是将新页面和旧页面的内容都构建成一样的。 但是这样子一来， seo 的权重就被割裂了。 所以为了保证新页面的 seo 权重能够继承旧页面的权重。就要换成将旧页面的访问全部变成">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2021/05/18/nginx-301-4/"/>
+
+
+
+
+
+  <title>nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/05/18/nginx-301-4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-18T15:16:42+08:00">
+                2021-05-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/18/nginx-301-4/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/05/18/nginx-301-4/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/05/18/nginx-301-4/" class="leancloud_visitors" data-flag-title="nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间我们的官网上了新版本， 有将一些对 seo 不友好的旧页面的路由变成了新页面的路由。 比如将 <code>bizHome.html</code> 换成 <code>business/</code>, 但是其实内容是一样的。</p>
+<p>刚开始为了保证旧页面不失效，在构建的时候，是将新页面和旧页面的内容都构建成一样的。 但是这样子一来， seo 的权重就被割裂了。</p>
+<p>所以为了保证新页面的 seo 权重能够继承旧页面的权重。就要换成将旧页面的访问全部变成 301 的永久跳转到新页面上。</p>
+<h2 id="nginx-进行-301-跳转"><a href="#nginx-进行-301-跳转" class="headerlink" title="nginx 进行 301 跳转"></a>nginx 进行 301 跳转</h2><p>如果要进行 301 永久性跳转的话，是没办法在前端层面上进行的。 只能在服务端上进行， 而我们用的是 webserver 是 nginx， 所以要在 nginx 上面配置。</p>
+<p>假设我们这次要调整的页面有以下:<br><a id="more"></a></p>
+<table>
+<thead>
+<tr>
+<th>旧网址</th>
+<th>301跳转到新网址</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>https://www.foo.com/get.html</code></td>
+<td><code>https://www.foo.com/download/foo-personal/</code></td>
+</tr>
+<tr>
+<td><code>https://www.foo.com/get.html?init=business</code></td>
+<td><code>https://www.foo.com/download/foo-business/</code></td>
+</tr>
+<tr>
+<td><code>https://www.foo.com/pricing/?init=biz</code></td>
+<td><code>https://www.foo.com/pricing/foo-business/</code></td>
+</tr>
+<tr>
+<td><code>https://www.foo.com/pricing/?init=personal</code></td>
+<td><code>https://www.foo.com/pricing/foo-personal/</code></td>
+</tr>
+<tr>
+<td><code>https://www.foo.com/pricing/</code></td>
+<td><code>https://www.foo.com/pricing/foo-personal/</code></td>
+</tr>
+<tr>
+<td>所有 pt-pt 的网址都要 301 跳转到 pt-br</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p>而且我们的页面都是有小语种，也就是重定向之后，小语种的路由要在，比如 <code>/en/get.html</code> 301 跳转之后就是 <code>/en/download/foo-personal</code></p>
+<h2 id="使用-rewrite-来进行重定向"><a href="#使用-rewrite-来进行重定向" class="headerlink" title="使用 rewrite 来进行重定向"></a>使用 rewrite 来进行重定向</h2><p>nginx 设置 301 重定向有好几种， 直接 <code>return 301 url</code> 最简单。 不过因为我们这边会涉及到多语言路径也要带过去， 所以会有正则表达式匹配的需求，所以就用 rewrite 来处理。</p>
+<p>rewrite 语法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rewrite regex replacement[flag];</span><br></pre></td></tr></table></figure></p>
+<p>rewrite 是实现 URL 重定向的重要指令，他根据regex(正则表达式)来匹配内容跳转到 replacement，结尾是 flag 标记</p>
+<p>他可以应用的位置是 <code>server</code>, <code>location</code>, <code>if</code> 这几个内容块里面。 </p>
+<p>他的应用 regex 的参数其实是 nginx 的内置变量 <code>$uri</code>, 也就是 url 的 path， 不包含传递的参数和锚点。</p>
+<p>比如 <code>https://www.foo.com/a/b/index.html?name=1&amp;age=2#hello</code> 这个 url，那么应用 regex 的 url 就是 <code>/a/b/index.html</code></p>
+<p>举个例子，像我们之前做多语言的时候，如果这个多语言路径不存在的话，那么就会重定向到非多语言的路径去。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if (!-e $request_filename) &#123;</span><br><span class="line">  rewrite ^/([A-Za-z0-9_-]+)/(.*) /$2 permanent;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这边就会用到这个 rewrite 语法， 具体的表现就是，如果我请求 <code>https://www.foo.com/ru/download/</code> 这个页面的时候，如果这个页面不存在， 那么就会 301 重定向到 <code>https://www.foo.com/download/</code></p>
+<p>而且最后的这个 <code>flag</code> 的值 <code>permanent</code> 表示跳转行为为 301 的永久重定向。 <code>flog</code> 有以下值:</p>
+<ul>
+<li><code>last</code> : 本条规则匹配完成后继续向下匹配新的location URI规则</li>
+<li><code>break</code>: 本条规则匹配完成后终止，不在匹配任何规则</li>
+<li><code>redirect</code>: 返回302临时重定向</li>
+<li><code>permanent</code>: 返回301永久重定向</li>
+</ul>
+<h2 id="具体实操"><a href="#具体实操" class="headerlink" title="具体实操"></a>具体实操</h2><p>针对上面的这几个旧页面， 处理一下 301 重定向。 因为这边涉及到 location 规则的匹配，具体可以看: <a href="/2020/09/16/nginx-location/" title="Nginx 的 location 匹配规则总结">Nginx 的 location 匹配规则总结</a></p>
+<h3 id="1-首先是针对-get-html-的处理"><a href="#1-首先是针对-get-html-的处理" class="headerlink" title="1. 首先是针对 get.html 的处理"></a>1. 首先是针对 get.html 的处理</h3><p>处理逻辑如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">if ($request_uri ~* &quot;get.html\\?init=business&quot;) &#123;</span><br><span class="line">    rewrite ^/(.*)get.html$ /$1download/foo-business/ permanent;</span><br><span class="line">&#125;</span><br><span class="line">if ($request_uri ~* &quot;get.html&quot;) &#123;</span><br><span class="line">    rewrite ^/(.*)get.html$ /$1download/foo-personal/ permanent;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这边注意一个细节， 重定向的逻辑 都在 if 判断的块里面， 是因为只有这些特殊的页面才需要重定向。 而判断的 <code>$request_uri</code> 也是 nginx 的内置变量， 不过这个跟 <code>$uri</code> 变量不一样，他还包含后面的请求参数， 只不过他是不能被修改的。</p>
+<p>然后会在 rewrite 的正则里面将 多语言的路径提取出来，并放到新的路径里面。</p>
+<p>而且替换后的也是 uri 部分， 后面的参数还是会跟原来的。也就是会将 <code>/en/get.html?name=1</code> 变成 <code>/en/download/foo-personal/?name=1</code></p>
+<h3 id="2-对-pricing-界面的处理"><a href="#2-对-pricing-界面的处理" class="headerlink" title="2. 对 pricing 界面的处理"></a>2. 对 pricing 界面的处理</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">if ($request_uri ~* &quot;/pricing(/)?(index.html)?\\?init=biz&quot;) &#123;</span><br><span class="line">    rewrite ^/(.*)(pricing) /$1pricing/foo-business/ permanent;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if ($request_uri ~* &quot;/pricing(/)?(index.html)?\\?init=personal&quot;) &#123;</span><br><span class="line">    rewrite ^/(.*)(pricing) /$1pricing/foo-personal/ permanent;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if ($request_uri ~* &quot;/pricing(/)?(index.html)?$&quot;) &#123;</span><br><span class="line">    rewrite ^/(.*)(pricing) /$1pricing/foo-personal/ permanent;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>逻辑跟上面差不多，不过需要注意一点的是，因为这个页面，有时候会省略 <code>index.html</code>, 有时候甚至连 <code>/</code> 都省略。 所以还要兼容以上两种情况， 所以用了两个 <code>?</code> 来做兼容。</p>
+<h3 id="3-对-pt-pt-做处理"><a href="#3-对-pt-pt-做处理" class="headerlink" title="3. 对 pt-pt 做处理"></a>3. 对 pt-pt 做处理</h3><p>这个就很简单了，直接瞄准 <code>pt-pt</code> 的语言路径:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if ($request_uri ~* &quot;/pt-pt/&quot;) &#123;</span><br><span class="line">    rewrite ^/(pt-pt)(.*) /pt-br$2 permanent;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后替换成固定的 <code>pt-br</code> 即可。</p>
+<p>最后替换完之后，要做两步:</p>
+<ol>
+<li>执行 <code>nginx -t</code> 进行语法检查</li>
+<li>执行 <code>nginx -s reload</code> 重启 nginx， 让配置文件生效</li>
+</ol>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>测试的话，很简单，用 curl 测试就行了。 使用参数 <code>-I</code>, 然后直接看 location 头部就行了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/get.html</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/download/foo-personal/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-personal/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html?name=1</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-personal/?name=1</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html?init=business</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-business/?init=business</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/pt-pt/</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/pt-br/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/pricing/</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/pricing/foo-personal/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/pricing</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/pricing/foo-personal/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/pricing/index.html?init=biz</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/pricing/foo-business/?init=biz</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>不过这边要注意一个细节，在使用 curl 的时候，如果参数后面有 <code>&amp;</code> 要转义，不然会报错, 导致参数传递不全 (直接输入浏览器之所以不用，是因为浏览器帮我们自动转义了)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html?name=1&amp;age=2</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-personal/?name=1</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>就会发现 <code>&amp;</code> 后面的参数丢了。</p>
+<p>这个是因为在使用 <code>curl</code> 的时候，参数的连接符 <code>&amp;</code> 是要进行转义的， 所以加上转义符号就可以:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html?name=1\&amp;age=2</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-personal/?name=1&amp;age=2</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2021/05/18/nginx-301-4/" title="nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上">http://kebingzao.com/2021/05/18/nginx-301-4/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nginx/" rel="tag"># nginx</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/04/26/mobile-chrome-window-open/" rel="next" title="移动端 chrome window.open 失效的问题">
+                <i class="fa fa-chevron-left"></i> 移动端 chrome window.open 失效的问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/05/25/php-background-process/" rel="prev" title="php 接口提前响应返回，然后继续执行后台逻辑">
+                php 接口提前响应返回，然后继续执行后台逻辑 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">60</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx-进行-301-跳转"><span class="nav-number">2.</span> <span class="nav-text">nginx 进行 301 跳转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-rewrite-来进行重定向"><span class="nav-number">3.</span> <span class="nav-text">使用 rewrite 来进行重定向</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体实操"><span class="nav-number">4.</span> <span class="nav-text">具体实操</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-首先是针对-get-html-的处理"><span class="nav-number">4.1.</span> <span class="nav-text">1. 首先是针对 get.html 的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-对-pricing-界面的处理"><span class="nav-number">4.2.</span> <span class="nav-text">2. 对 pricing 界面的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-对-pt-pt-做处理"><span class="nav-number">4.3.</span> <span class="nav-text">3. 对 pt-pt 做处理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试"><span class="nav-number">5.</span> <span class="nav-text">测试</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2021/05/18/nginx-301-4/';
+          this.page.identifier = '2021/05/18/nginx-301-4/';
+          this.page.title = 'nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="golang,opencv,cmake," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前段时间， 业务上有需要用到图像识别的功能， 用的是开源的 OpenCV, 刚好我们的服务端语言 golang 有支持 OpenCV 这个开源库的库: GoCV 所以就在服务器上进行安装, 服务器环境就是 CentOS 7 操作之前既然是 golang 的库，当前要先安装 golang:1yum install golang 安装后的版本是:12[root@VM-16-29-centos ~]">
+<meta name="keywords" content="golang,opencv,cmake">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS 7 安装 GoCV">
+<meta property="og:url" content="http://kebingzao.com/2021/05/27/opencv-gocv/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前段时间， 业务上有需要用到图像识别的功能， 用的是开源的 OpenCV, 刚好我们的服务端语言 golang 有支持 OpenCV 这个开源库的库: GoCV 所以就在服务器上进行安装, 服务器环境就是 CentOS 7 操作之前既然是 golang 的库，当前要先安装 golang:1yum install golang 安装后的版本是:12[root@VM-16-29-centos ~]">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2021-06-02T16:01:28.923Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CentOS 7 安装 GoCV">
+<meta name="twitter:description" content="前言前段时间， 业务上有需要用到图像识别的功能， 用的是开源的 OpenCV, 刚好我们的服务端语言 golang 有支持 OpenCV 这个开源库的库: GoCV 所以就在服务器上进行安装, 服务器环境就是 CentOS 7 操作之前既然是 golang 的库，当前要先安装 golang:1yum install golang 安装后的版本是:12[root@VM-16-29-centos ~]">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2021/05/27/opencv-gocv/"/>
+
+
+
+
+
+  <title>CentOS 7 安装 GoCV | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/05/27/opencv-gocv/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CentOS 7 安装 GoCV</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-05-27T17:43:17+08:00">
+                2021-05-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang相关/" itemprop="url" rel="index">
+                    <span itemprop="name">golang相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/05/27/opencv-gocv/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/05/27/opencv-gocv/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/05/27/opencv-gocv/" class="leancloud_visitors" data-flag-title="CentOS 7 安装 GoCV">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间， 业务上有需要用到图像识别的功能， 用的是开源的 OpenCV, 刚好我们的服务端语言 golang 有支持 OpenCV 这个开源库的库: <a href="https://gocv.io/" target="_blank" rel="noopener">GoCV</a></p>
+<p>所以就在服务器上进行安装, 服务器环境就是 CentOS 7</p>
+<h2 id="操作之前"><a href="#操作之前" class="headerlink" title="操作之前"></a>操作之前</h2><p>既然是 golang 的库，当前要先安装 golang:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install golang</span><br></pre></td></tr></table></figure></p>
+<p>安装后的版本是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos ~]# go version</span><br><span class="line">go version go1.15.5 linux/amd64</span><br></pre></td></tr></table></figure></p>
+<h2 id="开始安装"><a href="#开始安装" class="headerlink" title="开始安装"></a>开始安装</h2><p>官方有 linux 的安装教程的: <a href="https://gocv.io/getting-started/linux/" target="_blank" rel="noopener">linux install</a></p>
+<p>首先安装 GoCV 的包:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go get -u -d gocv.io/x/gocv</span><br></pre></td></tr></table></figure></p>
+<p>然后到目标目录:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd $GOPATH/src/gocv.io/x/gocv</span><br></pre></td></tr></table></figure></p>
+<p>然后在该目录下执行安装就行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make install</span><br></pre></td></tr></table></figure></p>
+<p>如果一切顺利的话，最后打印应该是版本号:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gocv version: 0.26.0</span><br><span class="line">opencv lib version: 4.5.1</span><br></pre></td></tr></table></figure></p>
+<p>所以就完啦 ??? 那写个毛线 blog， 没见过这么水字数的。 所以不出意外， <code>make install</code> 应该是报错了:<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">CMake Error at CMakeLists.txt:27 (cmake_minimum_required):</span><br><span class="line">  CMake 3.5.1 or higher is required.  You are running version 2.8.12.2</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- Configuring incomplete, errors occurred!</span><br><span class="line">make[1]: Entering directory `/tmp/opencv/opencv-4.5.2/build&apos;</span><br><span class="line">make[1]: *** No targets specified and no makefile found.  Stop.</span><br><span class="line">make[1]: Leaving directory `/tmp/opencv/opencv-4.5.2/build&apos;</span><br><span class="line">make[1]: Entering directory `/tmp/opencv/opencv-4.5.2/build&apos;</span><br><span class="line">make[1]: *** No rule to make target `preinstall&apos;.  Stop.</span><br><span class="line">make[1]: Leaving directory `/tmp/opencv/opencv-4.5.2/build&apos;</span><br><span class="line">/tmp/opencv/opencv-4.5.2</span><br><span class="line">cd /tmp/opencv/opencv-4.5.2/build</span><br><span class="line">sudo make install</span><br><span class="line">sudo ldconfig</span><br><span class="line">cd -</span><br><span class="line">make: *** No rule to make target `install&apos;.  Stop.</span><br><span class="line">/root/go/src/gocv.io/x/gocv</span><br><span class="line">go clean --cache</span><br><span class="line">rm -rf /tmp/opencv</span><br><span class="line">go run ./cmd/version/main.go</span><br><span class="line"># pkg-config --cflags  -- opencv4</span><br><span class="line">Package opencv4 was not found in the pkg-config search path.</span><br><span class="line">Perhaps you should add the directory containing `opencv4.pc&apos;</span><br><span class="line">to the PKG_CONFIG_PATH environment variable</span><br><span class="line">No package &apos;opencv4&apos; found</span><br><span class="line">pkg-config: exit status 1</span><br><span class="line">make: *** [verify] Error 2</span><br></pre></td></tr></table></figure></p>
+<p>一堆的报错，让我无从下手啊， 先从第一个开始解决吧， Cmake 版本太低了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos gocv]# cmake -version</span><br><span class="line">cmake version 2.8.12.2</span><br></pre></td></tr></table></figure></p>
+<p>先升级到 3.x 版本吧。</p>
+<h2 id="升级-Cmake"><a href="#升级-Cmake" class="headerlink" title="升级 Cmake"></a>升级 Cmake</h2><p>按照这一篇教程来: <a href="https://blog.csdn.net/llwy1428/article/details/95473542" target="_blank" rel="noopener">记一次 Centos7 cmake 版本升级（由 v2.8.12.2 升级至 v3.14.5）</a></p>
+<h3 id="1-先下载并解压"><a href="#1-先下载并解压" class="headerlink" title="1. 先下载并解压"></a>1. 先下载并解压</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos ~]# mkdir /opt/cmake</span><br><span class="line">[root@VM-16-29-centos ~]# cd /opt/cmake/</span><br><span class="line">[root@VM-16-29-centos cmake]# wget https://cmake.org/files/v3.14/cmake-3.14.5.tar.gz</span><br><span class="line">[root@VM-16-29-centos cmake]# tar zxvf cmake-3.14.5.tar.gz</span><br></pre></td></tr></table></figure>
+<h3 id="2-先将旧的删掉"><a href="#2-先将旧的删掉" class="headerlink" title="2. 先将旧的删掉"></a>2. 先将旧的删掉</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake]# yum remove cmake -y</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>旧的那个是刚才执行 <code>make install</code> 安装的</p>
+</blockquote>
+<h3 id="3-编译"><a href="#3-编译" class="headerlink" title="3. 编译"></a>3. 编译</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake]# cd cmake-3.14.5/</span><br><span class="line">[root@VM-16-29-centos cmake-3.14.5]# ./configure --prefix=/usr/local/cmake</span><br><span class="line">... 这边执行配置还挺久的</span><br><span class="line">---------------------------------------------</span><br><span class="line">CMake has bootstrapped.  Now run gmake.</span><br></pre></td></tr></table></figure>
+<h3 id="4-安装"><a href="#4-安装" class="headerlink" title="4. 安装"></a>4. 安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake-3.14.5]# make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+<h3 id="5-创建连接"><a href="#5-创建连接" class="headerlink" title="5. 创建连接"></a>5. 创建连接</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake-3.14.5]# ln -s /usr/local/cmake/bin/cmake /usr/bin/cmake</span><br></pre></td></tr></table></figure>
+<h3 id="6-查看"><a href="#6-查看" class="headerlink" title="6. 查看"></a>6. 查看</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake-3.14.5]# cmake -version</span><br><span class="line">cmake version 3.14.5</span><br><span class="line"></span><br><span class="line">CMake suite maintained and supported by Kitware (kitware.com/cmake).</span><br></pre></td></tr></table></figure>
+<h2 id="再次安装"><a href="#再次安装" class="headerlink" title="再次安装"></a>再次安装</h2><p>既然 Cmake 升级好了，那么接下来继续执行 <code>make install</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake-3.14.5]# cd /root/go/src/gocv.io/x/gocv/</span><br><span class="line">[root@VM-16-29-centos gocv]# make install</span><br><span class="line">...</span><br><span class="line">CMake Error at CMakeLists.txt:27 (cmake_minimum_required):</span><br><span class="line">  CMake 3.5.1 or higher is required.  You are running version 2.8.12.2</span><br></pre></td></tr></table></figure></p>
+<p>结果还是一样的错误， 又是版本太低， 不是已经升级上来了吗， recheck 一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-24-centos gocv]# cmake --version</span><br><span class="line">cmake version 2.8.12.2</span><br></pre></td></tr></table></figure></p>
+<p>神奇的事情发生了， 还是旧版本。 可是刚刚明明是新版本的啊， 所以我怀疑是不是又被覆盖了。</p>
+<p>因为是 <code>make install</code> 是快速安装，我们没办法去判断是哪一步有问题。 幸好官方也有提供逐步安装的方案。 那我们用逐步安装的方式试一下。</p>
+<h2 id="逐步安装"><a href="#逐步安装" class="headerlink" title="逐步安装"></a>逐步安装</h2><h3 id="1-安装依赖包-make-deps"><a href="#1-安装依赖包-make-deps" class="headerlink" title="1. 安装依赖包 make deps"></a>1. 安装依赖包 make deps</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-24-centos gocv]# make deps</span><br><span class="line">sudo yum -y install pkgconfig cmake curl wget git gtk2-devel libpng-devel libjpeg-devel libtiff-devel tbb tbb-devel libdc1394-devel unzip gcc-c++</span><br><span class="line">Loaded plugins: fastestmirror, langpacks</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line">Package 1:pkgconfig-0.27.1-4.el7.x86_64 already installed and latest version</span><br><span class="line">Package cmake-2.8.12.2-2.el7.x86_64 already installed and latest version</span><br></pre></td></tr></table></figure>
+<p>发现真相了， 安装依赖包的时候，竟然又去装 <code>cmake-2.8.12.2</code> 版本的 cmake。 所以我们应该在 build 的时候， 将 cmake 重新升级上来。</p>
+<h3 id="2-下载-opencv-包"><a href="#2-下载-opencv-包" class="headerlink" title="2. 下载 opencv 包"></a>2. 下载 opencv 包</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos gocv]# make download</span><br></pre></td></tr></table></figure>
+<h3 id="3-重新升级-cmake"><a href="#3-重新升级-cmake" class="headerlink" title="3. 重新升级 cmake"></a>3. 重新升级 cmake</h3><p>这时候不需要再走配置了，直接删掉原来的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake]# yum remove cmake -y</span><br></pre></td></tr></table></figure></p>
+<p>然后直接安装:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake-3.14.5]# make &amp;&amp; make install</span><br></pre></td></tr></table></figure></p>
+<p>创建连接:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake-3.14.5]# ln -s /usr/local/cmake/bin/cmake /usr/bin/cmake</span><br></pre></td></tr></table></figure></p>
+<p>升级成功:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos cmake-3.14.5]# cmake -version</span><br><span class="line">cmake version 3.14.5</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-开始编译"><a href="#4-开始编译" class="headerlink" title="4. 开始编译"></a>4. 开始编译</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos gocv]# make build</span><br></pre></td></tr></table></figure>
+<p>记得重新回到 gocv 目录， 同时这一步的时间也会耗时久一点</p>
+<h3 id="5-安装"><a href="#5-安装" class="headerlink" title="5. 安装"></a>5. 安装</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos gocv]# make sudo_install</span><br></pre></td></tr></table></figure>
+<p>好这样子就安装完了。</p>
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p>接下来验证一下， 这个库有一个 version 的脚本，可以验证是否有成功安装:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-24-centos gocv]# go run ./cmd/version/main.go</span><br><span class="line"># pkg-config --cflags  -- opencv4</span><br><span class="line">Package opencv4 was not found in the pkg-config search path.</span><br><span class="line">Perhaps you should add the directory containing `opencv4.pc&apos;</span><br><span class="line">to the PKG_CONFIG_PATH environment variable</span><br><span class="line">No package &apos;opencv4&apos; found</span><br><span class="line">pkg-config: exit status 1</span><br></pre></td></tr></table></figure></p>
+<p>发现还是报错了，好像是要配置一个环境变量 <code>PKG_CONFIG_PATH</code>, 查了一下资料，发现这边有说: <a href="https://blog.csdn.net/weixin_40592935/article/details/104880710" target="_blank" rel="noopener">Centos7 GoCV安装实操</a></p>
+<p>其实就是在 <code>/root/.bashrc</code> 文件下面添加这两行, 作为环境变量<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib64/pkgconfig</span><br><span class="line">export PKG_CONFIG_PATH</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-24-centos gocv]# vim /root/.bashrc</span><br><span class="line">[root@VM-16-24-centos gocv]# source /root/.bashrc</span><br><span class="line">[root@VM-16-24-centos lib64]# cat /root/.bashrc</span><br><span class="line">...</span><br><span class="line">PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib64/pkgconfig</span><br><span class="line">export PKG_CONFIG_PATH</span><br></pre></td></tr></table></figure>
+<p>然后再试一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos gocv]# go run ./cmd/version/main.go</span><br><span class="line">/tmp/go-build268425498/b001/exe/main: error while loading shared libraries: libopencv_stitching.so.4.5: cannot open shared object file: No such file or directory</span><br><span class="line">exit status 127</span><br></pre></td></tr></table></figure></p>
+<p>发现变成另一个错误了。 变成 <code>libopencv_stitching.so</code> 这个文件好像找不到</p>
+<p>但是我找了一下, 文件是存在的， 在 <code>/usr/local/lib64</code> 这个目录下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lrwxrwxrwx 1 root root      26 May 27 15:41 libopencv_stitching.so -&gt; libopencv_stitching.so.4.5</span><br><span class="line">lrwxrwxrwx 1 root root      28 May 27 15:41 libopencv_stitching.so.4.5 -&gt; libopencv_stitching.so.4.5.2</span><br><span class="line">-rwxr-xr-x 1 root root  826992 May 27 15:38 libopencv_stitching.so.4.5.2</span><br></pre></td></tr></table></figure></p>
+<p>不过怎么会找不到呢， 再查了一下， 这篇文章有解: <a href="https://blog.csdn.net/innocent_sheld/article/details/80509651" target="_blank" rel="noopener">Linux多版本opencv配置与“cannot open shared object file: No such file or directory”问题解决</a></p>
+<p>按照他的做法，是因为编译器自己找不到安装后的 opencv 库的路径，所以需要告诉系统到指定的地方链接， 所以我们编辑 <code>/etc/ld.so.conf.d/opencv.conf</code> 配置文件，补上这个路径 <code>/usr/local/lib64</code> 即可 (这个文件默认不存在，所以要新建)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-29-centos ld.so.conf.d] touch opencv.conf</span><br><span class="line">[root@VM-16-24-centos gocv]# cat /etc/ld.so.conf.d/opencv.conf</span><br><span class="line">/usr/local/lib64</span><br></pre></td></tr></table></figure></p>
+<p>然后重新链接一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-24-centos gocv]# sudo ldconfig -v</span><br><span class="line">...</span><br><span class="line">/usr/local/lib64:</span><br><span class="line">    libopencv_saliency.so.4.5 -&gt; libopencv_saliency.so.4.5.2</span><br><span class="line">    libopencv_img_hash.so.4.5 -&gt; libopencv_img_hash.so.4.5.2</span><br><span class="line">    libopencv_wechat_qrcode.so.4.5 -&gt; libopencv_wechat_qrcode.so.4.5.2</span><br><span class="line">    libopencv_plot.so.4.5 -&gt; libopencv_plot.so.4.5.2</span><br></pre></td></tr></table></figure></p>
+<p>可以看到已经有链接这个目录了。</p>
+<p>最后再执行一下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-24-centos gocv]# go run ./cmd/version/main.go</span><br><span class="line">gocv version: 0.27.0</span><br><span class="line">opencv lib version: 4.5.2</span><br></pre></td></tr></table></figure>
+<p>而这个 脚本 其实就是简单的打印出 gocv 和 opencv 库的版本:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">package main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"gocv.io/x/gocv"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">func main() &#123;</span><br><span class="line">	fmt.Printf(<span class="string">"gocv version: %s\n"</span>, gocv.Version())</span><br><span class="line">	fmt.Printf(<span class="string">"opencv lib version: %s\n"</span>, gocv.OpenCVVersion())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这下子终于成功了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>万丈高楼平地起， 就算官网文档放在你面前，但是整个安装过程还是有很多的坑啊， 不过好在环境终于配好了， 接下来就去撸代码吧。 gocv 这边还有一些很有用的例子可以参考</p>
+<ul>
+<li><a href="https://gocv.io/writing-code/more-examples/" target="_blank" rel="noopener">https://gocv.io/writing-code/more-examples/</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2021/05/27/opencv-gocv/" title="CentOS 7 安装 GoCV">http://kebingzao.com/2021/05/27/opencv-gocv/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/opencv/" rel="tag"># opencv</a>
+          
+            <a href="/tags/cmake/" rel="tag"># cmake</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/05/25/php-background-process/" rel="next" title="php 接口提前响应返回，然后继续执行后台逻辑">
+                <i class="fa fa-chevron-left"></i> php 接口提前响应返回，然后继续执行后台逻辑
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/06/02/opencv-match-template/" rel="prev" title="使用 gocv 进行图片的模板匹配">
+                使用 gocv 进行图片的模板匹配 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">251</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">60</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#操作之前"><span class="nav-number">2.</span> <span class="nav-text">操作之前</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开始安装"><span class="nav-number">3.</span> <span class="nav-text">开始安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#升级-Cmake"><span class="nav-number">4.</span> <span class="nav-text">升级 Cmake</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-先下载并解压"><span class="nav-number">4.1.</span> <span class="nav-text">1. 先下载并解压</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-先将旧的删掉"><span class="nav-number">4.2.</span> <span class="nav-text">2. 先将旧的删掉</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-编译"><span class="nav-number">4.3.</span> <span class="nav-text">3. 编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-安装"><span class="nav-number">4.4.</span> <span class="nav-text">4. 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-创建连接"><span class="nav-number">4.5.</span> <span class="nav-text">5. 创建连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-查看"><span class="nav-number">4.6.</span> <span class="nav-text">6. 查看</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#再次安装"><span class="nav-number">5.</span> <span class="nav-text">再次安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#逐步安装"><span class="nav-number">6.</span> <span class="nav-text">逐步安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装依赖包-make-deps"><span class="nav-number">6.1.</span> <span class="nav-text">1. 安装依赖包 make deps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-下载-opencv-包"><span class="nav-number">6.2.</span> <span class="nav-text">2. 下载 opencv 包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-重新升级-cmake"><span class="nav-number">6.3.</span> <span class="nav-text">3. 重新升级 cmake</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-开始编译"><span class="nav-number">6.4.</span> <span class="nav-text">4. 开始编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-安装"><span class="nav-number">6.5.</span> <span class="nav-text">5. 安装</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#验证"><span class="nav-number">7.</span> <span class="nav-text">验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2021/05/27/opencv-gocv/';
+          this.page.identifier = '2021/05/27/opencv-gocv/';
+          this.page.title = 'CentOS 7 安装 GoCV';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

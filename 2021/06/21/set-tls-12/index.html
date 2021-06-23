@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security,nginx," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前有 researcher 给我们发邮件说我们的一些站点的 tls 加密还支持 tls 1.0 和 tls 1.1 的协议。 这个是很不安全的。   而且会导致站点的评分会被降低， 可以用 ssltest 站点来测试,  而从安全性来评估的话，因为 tls 1.0 和 tls 1.1 的加密方式已经可以被破解了， 所以很容易招到攻击，比如以下攻击方式:  BEAST Attack CRIME">
+<meta name="keywords" content="security,nginx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="将 tls 加密级别调整到 tls 1.2 版本">
+<meta property="og:url" content="http://kebingzao.com/2021/06/21/set-tls-12/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前有 researcher 给我们发邮件说我们的一些站点的 tls 加密还支持 tls 1.0 和 tls 1.1 的协议。 这个是很不安全的。   而且会导致站点的评分会被降低， 可以用 ssltest 站点来测试,  而从安全性来评估的话，因为 tls 1.0 和 tls 1.1 的加密方式已经可以被破解了， 所以很容易招到攻击，比如以下攻击方式:  BEAST Attack CRIME">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2021/06/21/set-tls-12/1.png">
+<meta property="og:image" content="http://kebingzao.com/2021/06/21/set-tls-12/2.png">
+<meta property="og:updated_time" content="2021-06-23T16:44:20.279Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="将 tls 加密级别调整到 tls 1.2 版本">
+<meta name="twitter:description" content="前言之前有 researcher 给我们发邮件说我们的一些站点的 tls 加密还支持 tls 1.0 和 tls 1.1 的协议。 这个是很不安全的。   而且会导致站点的评分会被降低， 可以用 ssltest 站点来测试,  而从安全性来评估的话，因为 tls 1.0 和 tls 1.1 的加密方式已经可以被破解了， 所以很容易招到攻击，比如以下攻击方式:  BEAST Attack CRIME">
+<meta name="twitter:image" content="http://kebingzao.com/2021/06/21/set-tls-12/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2021/06/21/set-tls-12/"/>
+
+
+
+
+
+  <title>将 tls 加密级别调整到 tls 1.2 版本 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/06/21/set-tls-12/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">将 tls 加密级别调整到 tls 1.2 版本</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-06-21T13:39:46+08:00">
+                2021-06-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/06/21/set-tls-12/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/06/21/set-tls-12/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/06/21/set-tls-12/" class="leancloud_visitors" data-flag-title="将 tls 加密级别调整到 tls 1.2 版本">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有 researcher 给我们发邮件说我们的一些站点的 tls 加密还支持 tls 1.0 和 tls 1.1 的协议。 这个是很不安全的。 </p>
+<p><img src="/2021/06/21/set-tls-12/1.png" alt="1"></p>
+<p>而且会导致站点的评分会被降低， 可以用 <a href="https://www.ssllabs.com/ssltest/analyze.html" target="_blank" rel="noopener">ssltest 站点来测试</a>,  而从安全性来评估的话，因为 tls 1.0 和 tls 1.1 的加密方式已经可以被破解了， 所以很容易招到攻击，比如以下攻击方式:</p>
+<ul>
+<li><a href="https://raymii.org/s/tutorials/HTTP_Strict_Transport_Security_for_Apache_NGINX_and_Lighttpd.html" target="_blank" rel="noopener">BEAST Attack</a></li>
+<li><a href="https://wiki.mozilla.org/SecurityEngineering/Public_Key_Pinning" target="_blank" rel="noopener">CRIME Attack</a></li>
+<li><a href="https://raymii.org/s/articles/HTTP_Public_Key_Pinning_Extension_HPKP.html" target="_blank" rel="noopener">Heartbleed</a></li>
+<li><a href="https://www.ssllabs.com/ssltest/" target="_blank" rel="noopener">FREAK Attack</a></li>
+</ul>
+<p>所以不管是从站点评分上， 还是安全性考虑上， 我们都应该剔除掉 tls 1.0 和 tls 1.1 的加密方式，只采用 tls 1.2 的加密方式。 之所以为啥是 tls 1.2 而不是 tls 1.3， 也是因为 tls 1.2 是最广泛应用的。<br><a id="more"></a></p>
+<h2 id="具体实操"><a href="#具体实操" class="headerlink" title="具体实操"></a>具体实操</h2><p>从项目用到的 tls 加密来看， tls 加密的方式，主要是分为两种，一个是短链接的 https， 一种是长连接的 wss。 接下来具体分析都应该怎么处理。</p>
+<p>当然在设置之前， nginx 和 openssl 的版本要检查一下，太低的版本是不行的，比如 openssl 要 1.0.1 及以上的版本才会支持 tls 1.2。</p>
+<h2 id="https-接口的方式"><a href="#https-接口的方式" class="headerlink" title="https 接口的方式"></a>https 接口的方式</h2><p>因为我们的项目都是用 nginx 做 web server 的， 所以如果要指定 tls 1.2 版本的话，只需要在各项目的 nginx 的配置加上对应的配置。</p>
+<p>比如原来是这样子的, 三种都支持<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssl_protocols TLSv1 TLSv1.1 TLSv1.2;</span><br></pre></td></tr></table></figure></p>
+<p>后面要改成只支持 1.2 版本:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssl_protocols TLSv1.2;</span><br></pre></td></tr></table></figure></p>
+<p>但是具体实操，发现没有那么简单，还要配合对应的 cipher suite 才行。 比如我们原先的配置是这样子的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ssl_session_timeout         5m;</span><br><span class="line">ssl_protocols               TLSv1 TLSv1.1 TLSv1.2;</span><br><span class="line">ssl_ciphers                 EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;</span><br><span class="line">ssl_prefer_server_ciphers   on;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到当前是支持 1.0 和 1.1 的。 所以后面这个文件要改成</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ssl_session_timeout         5m;</span><br><span class="line">ssl_protocols               TLSv1.2;</span><br><span class="line"></span><br><span class="line">#支持TLSv1.2 版本的高强度加密</span><br><span class="line">ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:RSA-AES256-SHA:RSA-AES128-SHA;</span><br><span class="line"></span><br><span class="line">ssl_prefer_server_ciphers   on;</span><br></pre></td></tr></table></figure>
+<p>从配置上来说，确实是只支持 tls 1.2， 但是由于加密算法中 cipher suite 有一些还是属于原来 tls 1.0 或者 tls 1.1 的算法，这就导致虽然我将 <code>ssl_protocols</code> 设置为 1.2 了， 但是因为加密算法的配置有一些是 1.0 或者 1.1 支持的加密算法， 也是属于不安全的加密算法，比如这个 <code>RSA-AES128-SHA</code>, 所以客户端还是认为你还是支持 1.0 版本。</p>
+<p>所以 <code>ssl_protocols</code> 要配合 <code>ssl_ciphers</code> 两个一起修改，才算正确修改， 所以本例应该修改为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ssl_session_timeout         5m;</span><br><span class="line">ssl_protocols               TLSv1.2;</span><br><span class="line"></span><br><span class="line">#支持TLSv1.2 版本的高强度加密</span><br><span class="line">ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;</span><br><span class="line"></span><br><span class="line">ssl_prefer_server_ciphers   on;</span><br></pre></td></tr></table></figure></p>
+<p>然后一定要测试一下是否真的支持 (后面会讲到怎么测试支持的 tls 版本)。</p>
+<p>而且由于这个加密算法其实在不同的平台上是不一样，所以如果用到的话，最好每个客户端平台都要测一下，然后得到适合你们产品的 tls 1.2 所能支持的 cipher suite。 还是以本例来说， 上面的加密算法，其实不支持在 windows 7 的 tls 1.2 加密。 还要再补上这三个加密算法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256</span><br></pre></td></tr></table></figure></p>
+<p>所以最后 cipher suite 为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 这个是 pc 要求加入的，可以兼容 windows 7 的 tls 1.2</span><br><span class="line">ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256;</span><br></pre></td></tr></table></figure></p>
+<p>然后在 nginx 改完之后， 记得要 reload 一下 nginx。</p>
+<h2 id="wss-接口的方式"><a href="#wss-接口的方式" class="headerlink" title="wss 接口的方式"></a>wss 接口的方式</h2><p>同样是 wss， 但是因为有不同的语言来实现， 这边就单独说。</p>
+<h3 id="golang"><a href="#golang" class="headerlink" title="golang"></a>golang</h3><p>我们很多 golang 项目都是走长链接的 wss 服务，这一块配置也比较简单，原来是这样子的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tlsConfig := &amp;tls.Config&#123;&#125;</span><br><span class="line">tlsConfig.MinVersion = tls.VersionTLS10</span><br><span class="line">tlsConfig.MaxVersion = tls.VersionTLS12</span><br></pre></td></tr></table></figure></p>
+<p>后面改成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tlsConfig := &amp;tls.Config&#123;&#125;</span><br><span class="line">tlsConfig.MinVersion = tls.VersionTLS12</span><br><span class="line">tlsConfig.MaxVersion = tls.VersionTLS12</span><br></pre></td></tr></table></figure></p>
+<p>如果想要更详细一点， 想要设置加密套件的话 cipher suite, 可以类似于这样子设置 (不过基本上上面就够用了):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cfg := &amp;tls.Config&#123;</span><br><span class="line">        MinVersion:               tls.VersionTLS12,</span><br><span class="line">        CurvePreferences:         []tls.CurveID&#123;tls.CurveP521, tls.CurveP384, tls.CurveP256&#125;,</span><br><span class="line">        PreferServerCipherSuites: true,</span><br><span class="line">        CipherSuites: []uint16&#123;</span><br><span class="line">            tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,</span><br><span class="line">            tls.TLS_RSA_WITH_AES_256_GCM_SHA384,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="python"><a href="#python" class="headerlink" title="python"></a>python</h3><p>还有几个项目是用 python 做长连接的，然后用的是 <code>tornado.web</code> 库， 所以直接指定 ssl version 即可:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">app.listen(ssl_port_, ssl_options=&#123;</span><br><span class="line">        &quot;certfile&quot;: crt_,</span><br><span class="line">        &quot;keyfile&quot;: key_,</span><br><span class="line">        &quot;ssl_version&quot;: ssl.PROTOCOL_TLSv1_2,</span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure></p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>也有用到一些第三方库的，比如 coturn 之类的， 也可以在配置里面设置 (一般配置里面都有):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cipher-list=&quot;EECDH+AESGCM:EDH+AESGCM&quot;</span><br><span class="line">ec-curve-name=secp384r1</span><br><span class="line">dh2066</span><br><span class="line">no-tlsv1</span><br><span class="line">no-tlsv1_1</span><br></pre></td></tr></table></figure></p>
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p>当我们配置完了， 接下来最主要的就是验证我们配置的对不对， 有两种方式可以验证。</p>
+<h3 id="1-curl-直接验证"><a href="#1-curl-直接验证" class="headerlink" title="1. curl 直接验证"></a>1. curl 直接验证</h3><p>可以用 curl 的指令来验证站点的 tls 是否支持某个版本， 格式如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -I -v --tlsv&#123;version&#125; --tls-max &#123;version&#125; https://&#123;site&#125;:&#123;port&#125;</span><br></pre></td></tr></table></figure></p>
+<p>也就是说，我如果要检验某一个服务是否支持 tls 1.0。那么就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[kbz@centos156 ~]$ curl -I -v --tlsv1.0 --tls-max 1.0 https://foo.com/</span><br><span class="line">*   Trying xx.xx.xx.xxx:443...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">* Closing connection 0</span><br><span class="line">curl: (35) Cannot communicate securely with peer: no common encryption algorithm(s).</span><br></pre></td></tr></table></figure></p>
+<p>如果不支持就是这样子的， 如果是 1.1 版本，那么 curl 指令就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -I -v --tlsv1.1 --tls-max 1.1 https://foo.com/</span><br></pre></td></tr></table></figure></p>
+<p>如果是要测 wss 长连接，一般都要加上端口号，而且协议要改成 https，而不是 wss， 比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -I -v --tlsv1.1 --tls-max 1.1 https://forward.foo.com:9011</span><br></pre></td></tr></table></figure></p>
+<p>如果是支持的协议的话，那么是有回执的，比如支持 tls 1.2 :<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">[kbz@centos156 ~]$ curl -I -v --tlsv1.2 --tls-max 1.2 https://foo.com/</span><br><span class="line">*   Trying xx.xx.xx.xx:443...</span><br><span class="line">* Connected to foo.com (xx.xx.xx.xx) port 443 (#0)</span><br><span class="line">* Initializing NSS with certpath: sql:/etc/pki/nssdb</span><br><span class="line">*  CAfile: xxx</span><br><span class="line">*  CApath: xxx</span><br><span class="line">* loaded libnssckbi.so</span><br><span class="line">* ALPN, server accepted to use h2</span><br><span class="line">* SSL connection using TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256</span><br><span class="line">* Server certificate:</span><br><span class="line">*   subject: CN=*.foo.com,OU=Domain Control Validated</span><br><span class="line">*   start date: Oct 27 05:04:13 2020 GMT</span><br><span class="line">*   expire date: Nov 28 05:04:13 2021 GMT</span><br><span class="line">*   common name: *.foo.com</span><br><span class="line">*   issuer: CN=Go Daddy Secure Certificate Authority - G2,OU=http://certs.godaddy.com/repository/,O=&quot;GoDaddy.com, Inc.&quot;,L=Scottsdale,ST=Arizona,C=US</span><br><span class="line">* Using HTTP2, server supports multi-use</span><br><span class="line">* Connection state changed (HTTP/2 confirmed)</span><br><span class="line">* Copying HTTP/2 data in stream buffer to connection buffer after upgrade: len=0</span><br><span class="line">* Using Stream ID: 1 (easy handle 0x1809100)</span><br><span class="line">&gt; HEAD / HTTP/2</span><br><span class="line">&gt; Host: foo.com</span><br><span class="line">&gt; user-agent: curl/7.77.0</span><br><span class="line">&gt; accept: */*</span><br><span class="line">&gt; </span><br><span class="line">* Connection state changed (MAX_CONCURRENT_STREAMS == 128)!</span><br><span class="line">&lt; HTTP/2 200 </span><br><span class="line">HTTP/2 200 </span><br><span class="line">&lt; server: openresty</span><br><span class="line">server: openresty</span><br><span class="line">&lt; date: Fri, 18 Jun 2021 05:37:25 GMT</span><br><span class="line">date: Fri, 18 Jun 2021 05:37:25 GMT</span><br><span class="line">&lt; content-type: text/html; charset=UTF-8</span><br><span class="line">content-type: text/html; charset=UTF-8</span><br><span class="line">&lt; content-length: 562</span><br><span class="line">content-length: 562</span><br><span class="line">&lt; last-modified: Fri, 26 May 2017 05:21:02 GMT</span><br><span class="line">last-modified: Fri, 26 May 2017 05:21:02 GMT</span><br><span class="line">&lt; etag: &quot;5927bb3e-232&quot;</span><br><span class="line">etag: &quot;5927bb3e-232&quot;</span><br><span class="line">&lt; accept-ranges: bytes</span><br><span class="line">accept-ranges: bytes</span><br><span class="line"></span><br><span class="line">&lt; </span><br><span class="line">* Connection #0 to host foo.com left intact</span><br></pre></td></tr></table></figure></p>
+<p>所以测试结果就是要 <code>tls1.0</code>, <code>tls1.1</code>, <code>tls1.3</code> 都是失败， 只有 <code>tls 1.2</code> 才是成功的，这样子才符合预期。</p>
+<h3 id="2-tls-checker-站点测试"><a href="#2-tls-checker-站点测试" class="headerlink" title="2. tls checker 站点测试"></a>2. tls checker 站点测试</h3><p>线上也有很多 tls checker 站点，他们也是可以的</p>
+<ul>
+<li><a href="https://www.cdn77.com/tls-test" target="_blank" rel="noopener">TLS checker</a></li>
+<li><a href="https://www.ssllabs.com/ssltest/analyze.html" target="_blank" rel="noopener">SSL Server Test</a></li>
+</ul>
+<p>如果是有端口的(比如 wss)， 后面跟上端口即可。不需要加协议，因为默认都是走 https</p>
+<p><img src="/2021/06/21/set-tls-12/2.png" alt="1"></p>
+<hr>
+<p>参考文档:</p>
+<ul>
+<li><a href="https://www.cyberciti.biz/faq/configure-nginx-to-use-only-tls-1-2-and-1-3/" target="_blank" rel="noopener">How To Configure Nginx to use TLS 1.2 / 1.3 only</a></li>
+<li><a href="https://serverfault.com/questions/1025568/nginx-enable-only-tls-v1-2" target="_blank" rel="noopener">NGINX enable only TLS v1.2</a></li>
+<li><a href="https://curl.se/docs/ssl-ciphers.html" target="_blank" rel="noopener">SSL Ciphers</a></li>
+<li><a href="https://syslink.pl/cipherlist/" target="_blank" rel="noopener">cipherlist</a></li>
+<li><a href="https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html#toc_1" target="_blank" rel="noopener">Strong SSL Security on nginx</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2021/06/21/set-tls-12/" title="将 tls 加密级别调整到 tls 1.2 版本">http://kebingzao.com/2021/06/21/set-tls-12/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+            <a href="/tags/nginx/" rel="tag"># nginx</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/06/07/opencv-match-template-3/" rel="next" title="使用 gocv 进行图片的模板匹配优化之 - 缩放后快速匹配">
+                <i class="fa fa-chevron-left"></i> 使用 gocv 进行图片的模板匹配优化之 - 缩放后快速匹配
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/06/21/s3-bucket-index/" rel="prev" title="记一次 aws s3 公开桶的索引泄露问题">
+                记一次 aws s3 公开桶的索引泄露问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">256</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体实操"><span class="nav-number">2.</span> <span class="nav-text">具体实操</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#https-接口的方式"><span class="nav-number">3.</span> <span class="nav-text">https 接口的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#wss-接口的方式"><span class="nav-number">4.</span> <span class="nav-text">wss 接口的方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#golang"><span class="nav-number">4.1.</span> <span class="nav-text">golang</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#python"><span class="nav-number">4.2.</span> <span class="nav-text">python</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他"><span class="nav-number">4.3.</span> <span class="nav-text">其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#验证"><span class="nav-number">5.</span> <span class="nav-text">验证</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-curl-直接验证"><span class="nav-number">5.1.</span> <span class="nav-text">1. curl 直接验证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-tls-checker-站点测试"><span class="nav-number">5.2.</span> <span class="nav-text">2. tls checker 站点测试</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2021/06/21/set-tls-12/';
+          this.page.identifier = '2021/06/21/set-tls-12/';
+          this.page.title = '将 tls 加密级别调整到 tls 1.2 版本';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

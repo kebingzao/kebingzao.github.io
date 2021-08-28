@@ -94,7 +94,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://kebingzao.com/2021/01/11/ddos-spot/1.png">
 <meta property="og:image" content="http://kebingzao.com/2021/01/11/ddos-spot/2.png">
-<meta property="og:updated_time" content="2021-02-03T16:28:47.776Z">
+<meta property="og:updated_time" content="2021-08-28T11:11:34.688Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用云服务的竞价实例来抵御 DDOS 攻击">
 <meta name="twitter:description" content="前因之前有写过一篇 记一次接口受到的基于http请求的DDOS攻击 讲述一次抵御 DDOS 攻击的情况。 但是后面攻击的方式又增加了，最明显的两点就是:  user-agent 都是正常的浏览器类型 ip 地址都是很分散的，并且每分钟的请求频率都不高，也就 3-5 次， 但是不同 ip 请求非常多  第二点就会导致我们的禁 ip 策略就被废掉了，因为我们不能把限制降的很低，比如同一个 ip 地址请">
@@ -473,6 +473,7 @@
 <p>当竞价实例服务启动之后，接下来我们就要将这个竞价实例服务加入到业务所在的负载均衡实例的分配链中，并且设置比较大的权重:</p>
 <p><img src="/2021/01/11/ddos-spot/2.png" alt="1"></p>
 <p>这样子这台竞价实例就可以开始抗流量了。 如果一台不够，那就再加一台，看谁更持久。</p>
+<h2 id="同禁-ip-一起处理"><a href="#同禁-ip-一起处理" class="headerlink" title="同禁 ip 一起处理"></a>同禁 ip 一起处理</h2><p>很多时候，我们通过开启竞价实例之后， 虽然流量抗住了。 这时候如果 攻击者 还是锲而不舍的 一直在攻击， 持续了好几天。 这时候还可以辅助 禁 ip 这个策略。 之前短时间之内，我们无法很快的判断哪些 ip 是刷的，一个是因为 攻击者 用了 ip 池， 少则几千个 ip， 大则几万个 ip， 这时候如果再加上平均请求频率低的话， 我们是很难马上抓到这些刷的 ip 的。 但是他经过一天一夜的刷接口之后， 只要时间足够长， 我们是可以直接从 nginx 的 log 中，分析有哪些 ip 是一直在请求该接口的，并且知道请求的总数， 然后再定一个策略，比如 2 个小时之内， 请求该接口的次数超过了 50 次， 那么这个 ip 无疑就是攻击者的 ip 了， 那么接下来只需要将这些 ip 都禁掉就行了。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过开启竞价实例，我们可以在 DDOS 攻击期间， 稳定的抗住流量而付出的成本却不会很高。 不过要注意的是， 一旦扛过去之后， 接下来就要考虑解绑和下架机器了，不能一直挂着。 不然后面系统中断竞价实例的时候，就会影响到我们的业务了。 当然， 中断的时候， 系统会提前通知对应的运维人员。 虽然文档说只会提前两分钟通知，但是真实情况应该会至少提前半小时之类的。我们也没有遇到过突然中断的情况，都是手动解绑下架的。 而且也不会频繁中断， 有用过超过一个星期都不会中断的情况， 可能得看市场需求吧。</p>
 
       
@@ -627,7 +628,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">256</span>
+                  <span class="site-state-item-count">259</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -649,7 +650,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-count">63</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -692,7 +693,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前因"><span class="nav-number">1.</span> <span class="nav-text">前因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用竞价实例"><span class="nav-number">2.</span> <span class="nav-text">使用竞价实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不适用场景"><span class="nav-number">2.1.</span> <span class="nav-text">不适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适合的场景"><span class="nav-number">2.2.</span> <span class="nav-text">适合的场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实操流程"><span class="nav-number">3.</span> <span class="nav-text">实操流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前因"><span class="nav-number">1.</span> <span class="nav-text">前因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用竞价实例"><span class="nav-number">2.</span> <span class="nav-text">使用竞价实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不适用场景"><span class="nav-number">2.1.</span> <span class="nav-text">不适用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适合的场景"><span class="nav-number">2.2.</span> <span class="nav-text">适合的场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实操流程"><span class="nav-number">3.</span> <span class="nav-text">实操流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#同禁-ip-一起处理"><span class="nav-number">4.</span> <span class="nav-text">同禁 ip 一起处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>

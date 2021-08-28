@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="webrtc," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言早在 2020-06-19 的时候，就有安装了 webrtc 的 SFU 开源框架 Kurento: 初试 webrtc SFU 开源框架 - Kurento, 那时候 node demo 脚本， kurento 服务， turnserver 是属于 3 台机器的。 本次搞了一个 16 核 32 G 的竞价型 云服务器。 打算在裸机的基础上， 直接在这台服务器上全部部署，并应用起来。 直接在这">
+<meta name="keywords" content="webrtc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="云服务器裸机安装 Kurento 并应用">
+<meta property="og:url" content="http://kebingzao.com/2021/08/11/webrtc-install-kurento/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言早在 2020-06-19 的时候，就有安装了 webrtc 的 SFU 开源框架 Kurento: 初试 webrtc SFU 开源框架 - Kurento, 那时候 node demo 脚本， kurento 服务， turnserver 是属于 3 台机器的。 本次搞了一个 16 核 32 G 的竞价型 云服务器。 打算在裸机的基础上， 直接在这台服务器上全部部署，并应用起来。 直接在这">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2021/08/11/webrtc-install-kurento/1.png">
+<meta property="og:image" content="http://kebingzao.com/2021/08/11/webrtc-install-kurento/2.png">
+<meta property="og:image" content="http://kebingzao.com/2021/08/11/webrtc-install-kurento/5.png">
+<meta property="og:image" content="http://kebingzao.com/2021/08/11/webrtc-install-kurento/3.png">
+<meta property="og:updated_time" content="2021-08-28T11:11:34.702Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="云服务器裸机安装 Kurento 并应用">
+<meta name="twitter:description" content="前言早在 2020-06-19 的时候，就有安装了 webrtc 的 SFU 开源框架 Kurento: 初试 webrtc SFU 开源框架 - Kurento, 那时候 node demo 脚本， kurento 服务， turnserver 是属于 3 台机器的。 本次搞了一个 16 核 32 G 的竞价型 云服务器。 打算在裸机的基础上， 直接在这台服务器上全部部署，并应用起来。 直接在这">
+<meta name="twitter:image" content="http://kebingzao.com/2021/08/11/webrtc-install-kurento/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2021/08/11/webrtc-install-kurento/"/>
+
+
+
+
+
+  <title>云服务器裸机安装 Kurento 并应用 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/08/11/webrtc-install-kurento/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">云服务器裸机安装 Kurento 并应用</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-11T18:13:59+08:00">
+                2021-08-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
+                    <span itemprop="name">webrtc相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/08/11/webrtc-install-kurento/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/08/11/webrtc-install-kurento/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/08/11/webrtc-install-kurento/" class="leancloud_visitors" data-flag-title="云服务器裸机安装 Kurento 并应用">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>早在 <code>2020-06-19</code> 的时候，就有安装了 webrtc 的 SFU 开源框架 Kurento: <a href="/2020/06/19/webrtc-sfu-kurento/" title="初试 webrtc SFU 开源框架 - Kurento">初试 webrtc SFU 开源框架 - Kurento</a>, 那时候 node demo 脚本， kurento 服务， turnserver 是属于 3 台机器的。 本次搞了一个 16 核 32 G 的竞价型 云服务器。 打算在裸机的基础上， 直接在这台服务器上全部部署，并应用起来。 直接在这台性能比较强的机器上， 开个直播看看， 看看性能怎么样。</p>
+<h2 id="本次部署云服务器"><a href="#本次部署云服务器" class="headerlink" title="本次部署云服务器"></a>本次部署云服务器</h2><p>16 核 32 G CentOS 7, 裸机</p>
+<h2 id="前置安装软件"><a href="#前置安装软件" class="headerlink" title="前置安装软件"></a>前置安装软件</h2><h3 id="安装翻墙软件"><a href="#安装翻墙软件" class="headerlink" title="安装翻墙软件"></a>安装翻墙软件</h3><h4 id="安装-shadowsocks"><a href="#安装-shadowsocks" class="headerlink" title="安装 shadowsocks"></a>安装 shadowsocks</h4><p>安装过程中，有些需要翻墙 (比如 docker， node 的安装)，所以要先把  翻墙环境搞定。  所以首先应该先处理翻墙环境， 参照我以前的教程: <a href="/2019/02/14/centos7-ss-proxy/" title="CentOS7 配置 shadowsocks 全局代理">CentOS7 配置 shadowsocks 全局代理</a><br><a id="more"></a><br>在这之前，要先安装 python3 (python 2.7 虽然有预安装，但是这个版本已经不再维护了，所以还是自己装 python 3)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install epel-release -y</span><br><span class="line"></span><br><span class="line">sudo yum install -y python36</span><br><span class="line"></span><br><span class="line">python3 --version</span><br></pre></td></tr></table></figure></p>
+<p>这时候 python3 就装好了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# python3 --version</span><br><span class="line">Python 3.6.8</span><br></pre></td></tr></table></figure></p>
+<p>接下来 安装 pip3:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# python3.6 -m ensurepip</span><br><span class="line">WARNING: Running pip install with root privileges is generally not a good idea. Try `__main__.py install --user` instead.</span><br><span class="line">Requirement already satisfied: setuptools in /usr/lib/python3.6/site-packages</span><br></pre></td></tr></table></figure></p>
+<p>安装完之后，查了一下， 版本有点旧:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# pip3 list</span><br><span class="line">pip (9.0.3)</span><br><span class="line">setuptools (39.2.0)</span><br></pre></td></tr></table></figure></p>
+<p>所以还是要将 pip 版本升级上来:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# pip3 install --upgrade pip</span><br><span class="line">WARNING: Running pip install with root privileges is generally not a good idea. Try `pip3 install --user` instead.</span><br><span class="line">Collecting pip</span><br><span class="line">  Downloading http://mirrors.tencentyun.com/pypi/packages/8a/d7/f505e91e2cdea53cfcf51f4ac478a8cd64fb0bc1042629cedde20d9a6a9b/pip-21.2.2-py3-none-any.whl (1.6MB)</span><br><span class="line">    100% |████████████████████████████████| 1.6MB 30.0MB/s</span><br><span class="line">Installing collected packages: pip</span><br><span class="line">Successfully installed pip-21.2.2</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# pip3 list</span><br><span class="line">WARNING: pip is being invoked by an old script wrapper. This will fail in a future version of pip.</span><br><span class="line">Please see https://github.com/pypa/pip/issues/5599 for advice on fixing the underlying issue.</span><br><span class="line">To avoid this problem you can invoke Python with &apos;-m pip&apos; instead of running pip directly.</span><br><span class="line">Package    Version</span><br><span class="line">---------- -------</span><br><span class="line">pip        21.2.2</span><br><span class="line">setuptools 39.2.0</span><br></pre></td></tr></table></figure>
+<p>这样子就升级上来了。 接下来安装 shadowsocks :<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip3 install shadowsocks</span><br></pre></td></tr></table></figure></p>
+<p>然后接下来将代理的 配置文件写进去：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# cd /etc/</span><br><span class="line">[root@VM-0-13-centos etc]# mkdir shadowsocks</span><br><span class="line">[root@VM-0-13-centos etc]# cd shadowsocks/</span><br><span class="line">[root@VM-0-13-centos shadowsocks]# touch sslocal.json</span><br><span class="line">[root@VM-0-13-centos shadowsocks]# sudo vim sslocal.json</span><br><span class="line">[root@VM-0-13-centos shadowsocks]# cat sslocal.json</span><br><span class="line">&#123;</span><br><span class="line">&quot;server&quot;:&quot;ts-1.xxx.club&quot;,</span><br><span class="line">&quot;server_port&quot;:2555,</span><br><span class="line">&quot;password&quot;:&quot;xxxxx&quot;,</span><br><span class="line">&quot;method&quot;:&quot;rc4-md5&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接下来启动 shadowsocks 客户端:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos shadowsocks]# sslocal -c /etc/shadowsocks/sslocal.json -d start</span><br><span class="line">INFO: loading config from /etc/shadowsocks/sslocal.json</span><br><span class="line">2021-08-06 17:21:37 INFO     loading libcrypto from libcrypto.so.10</span><br><span class="line">started</span><br></pre></td></tr></table></figure></p>
+<p>启动的时候，肯定是后台启动的， 这个是 <code>-d</code> 表示后台。 其实这时候的端口号是 1080， 如果是正常启动的话， 这个端口号会打印出来<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos shadowsocks]# sslocal -c /etc/shadowsocks/sslocal.json start</span><br><span class="line">INFO: loading config from /etc/shadowsocks/sslocal.json</span><br><span class="line">2021-08-06 17:20:55 INFO     loading libcrypto from libcrypto.so.10</span><br><span class="line">2021-08-06 17:20:55 INFO     starting local at 127.0.0.1:1080</span><br></pre></td></tr></table></figure></p>
+<h4 id="安装-Privoxy"><a href="#安装-Privoxy" class="headerlink" title="安装 Privoxy"></a>安装 Privoxy</h4><p>如果直接下载的话<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://www.privoxy.org/sf-download-mirror/Sources/3.0.32%20%28stable%29/privoxy-3.0.32-stable-src.tar.gz</span><br></pre></td></tr></table></figure></p>
+<p>正常情况下，下载这个包是要翻墙的，我们可以先用可以翻墙的机器，先把这个包下载好， 然后拷贝到这台机器上。 或者直接用国内的源也行。</p>
+<p>接下来进行解压 并 进入目录:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tar -vxf privoxy-3.0.32-stable-src.tar.gz</span><br><span class="line">cd privoxy-3.0.32-stable/</span><br></pre></td></tr></table></figure></p>
+<p>创建一个用户 privoxy:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">useradd privoxy</span><br></pre></td></tr></table></figure></p>
+<p>安装 autoconf， 因为 接下来编译安装要用到:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install autoconf</span><br></pre></td></tr></table></figure></p>
+<p>接下来开始编译安装:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">autoheader &amp;&amp; autoconf</span><br><span class="line">./configure</span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure></p>
+<p>这样子就编译安装好了， 接下来进行配置。</p>
+<p>配置之前，先备份:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos privoxy-3.0.32-stable]# cd /usr/local/etc/privoxy/</span><br><span class="line">[root@VM-0-13-centos privoxy]# cp config config.bak</span><br></pre></td></tr></table></figure></p>
+<p>接下来改配置:</p>
+<p>先搜索关键字 <code>listen-address</code> 找到 <code>listen-address 127.0.0.1:8118</code> 这一句，保证这一句没有注释，8118 就是将来 http代理要输入的端口。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos privoxy]# cat config | grep &apos;127.0.0.1:8118&apos;</span><br><span class="line">#      127.0.0.1:8118</span><br><span class="line">listen-address  127.0.0.1:8118</span><br></pre></td></tr></table></figure></p>
+<p>然后搜索 <code>forward-socks5t</code>,将 <code>forward-socks5t / 127.0.0.1:9050</code> . 此句的注释去掉. 并且将端口号改成 <code>shadowsocks</code> 的端口号 <code>1080</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos privoxy]# sudo vim config</span><br><span class="line">[root@VM-0-13-centos privoxy]# cat config | grep &apos;forward-socks5t&apos;</span><br><span class="line">#  5.2. forward-socks4, forward-socks4a, forward-socks5 and forward-socks5t</span><br><span class="line">#      forward-socks5t works like vanilla forward-socks5 but lets</span><br><span class="line">        forward-socks5t   /               127.0.0.1:1080 .</span><br></pre></td></tr></table></figure></p>
+<p>最后启动一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos privoxy]# service privoxy start</span><br><span class="line">Starting Privoxy, OK.</span><br></pre></td></tr></table></figure></p>
+<h4 id="翻墙配置"><a href="#翻墙配置" class="headerlink" title="翻墙配置"></a>翻墙配置</h4><p>这样子这两个翻墙所要用的软件都安装并且启动好了，接下来就是进行配置了</p>
+<p>接下来配置 <code>/etc/profile</code>, 要在全局的配置文件里面添加代理设置, 执行 <code>vim /etc/profile</code>, 最下面添加如下三句:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos privoxy]# cat /etc/profile | grep proxy</span><br><span class="line"># ss http proxy</span><br><span class="line">export http_proxy=http://127.0.0.1:8118</span><br><span class="line">export https_proxy=http://127.0.0.1:8118</span><br><span class="line">export ftp_proxy=http://127.0.0.1:8118</span><br></pre></td></tr></table></figure></p>
+<p>然后生效 配置文件:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos privoxy]# source /etc/profile</span><br></pre></td></tr></table></figure></p>
+<p>这样子就配置完了， 接下来测试一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos privoxy]# curl cip.cc</span><br><span class="line">IP    : 52.xx.xx.204</span><br><span class="line">地址    : 日本  东京都  东京</span><br><span class="line">运营商    : amazon.com</span><br><span class="line"></span><br><span class="line">数据二    : 美国 | 华盛顿州西雅图市亚马逊(Amazon)公司数据中心</span><br><span class="line"></span><br><span class="line">数据三    : 日本东京都东京 | 亚马逊</span><br><span class="line"></span><br><span class="line">URL    : http://www.cip.cc/52.xx.xx.204</span><br></pre></td></tr></table></figure></p>
+<p>这样子就翻墙成功了。</p>
+<p>关掉翻墙也很简单， 就是将 <code>/etc/profile</code> 那三行注释掉， 然后用 <code>source /etc/profile</code> 生效。最后重新开一个 shell 的 terminal 窗口就行了。</p>
+<p>重新开启翻墙也是一样，将 <code>/etc/profile</code> 那三行去掉注释，然后用 <code>source /etc/profile</code> 生效。最后重新开一个 shell 的 terminal 窗口就行了。</p>
+<h3 id="安装-docker"><a href="#安装-docker" class="headerlink" title="安装 docker"></a>安装 docker</h3><p>因为我们安装 kurento 的方式是通过 docker 镜像安装的， 所以我们要先安装 docker。</p>
+<p>先把翻墙开起来， 然后按照这个教程安装即可: <a href="https://docs.docker.com/engine/install/centos/" target="_blank" rel="noopener">centos install docker</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install -y yum-utils</span><br><span class="line"></span><br><span class="line">sudo yum-config-manager \</span><br><span class="line">--add-repo \</span><br><span class="line">https://download.docker.com/linux/centos/docker-ce.repo</span><br><span class="line"></span><br><span class="line">sudo yum install docker-ce docker-ce-cli containerd.io</span><br></pre></td></tr></table></figure></p>
+<p>然后接下来启动:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start docker</span><br></pre></td></tr></table></figure></p>
+<p>然后验证一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">[root@VM-0-13-centos privoxy]# docker version</span><br><span class="line">...</span><br><span class="line">docker-init:</span><br><span class="line">  Version:          0.19.0</span><br><span class="line">  GitCommit:        de40ad0</span><br></pre></td></tr></table></figure></p>
+<h3 id="安装-nodejs"><a href="#安装-nodejs" class="headerlink" title="安装 nodejs"></a>安装 nodejs</h3><p>因为 kurento 的 demo 都是用 nodejs 写的， 所以 nodejs 的环境也要安装。 安装个 nodejs 14 的版本就够了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -</span><br><span class="line"></span><br><span class="line">sudo yum install -y nodejs</span><br><span class="line"></span><br><span class="line">[root@VM-0-13-centos ~]#  node -v</span><br><span class="line">v14.17.4</span><br></pre></td></tr></table></figure></p>
+<p>而且会用到 bower， 所以要全局安装一下 bower:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g bower</span><br></pre></td></tr></table></figure></p>
+<h3 id="安装-git"><a href="#安装-git" class="headerlink" title="安装 git"></a>安装 git</h3><p>因为拉取 demo 代码，需要 git， 所以也要安装:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yum install git</span><br><span class="line"></span><br><span class="line">[root@VM-0-13-centos ~]# git --version</span><br><span class="line">git version 1.8.3.1</span><br></pre></td></tr></table></figure></p>
+<h2 id="安装-kurento"><a href="#安装-kurento" class="headerlink" title="安装 kurento"></a>安装 kurento</h2><p>前置环境都装好了，接下来我们安装 kurento， 可以参照: <a href="/2020/06/19/webrtc-sfu-kurento/" title="初试 webrtc SFU 开源框架 - Kurento">初试 webrtc SFU 开源框架 - Kurento</a>, 直接用 docker 镜像安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull kurento/kurento-media-server:latest</span><br></pre></td></tr></table></figure></p>
+<p>然后启动容器:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos privoxy]# docker run --name kms -d -p 8888:8888 \</span><br><span class="line">&gt;     kurento/kurento-media-server:latest</span><br><span class="line">Bba46ff48cb2b159187ebdeda00d724a8cdbc66457e4078e75fc5b5399913026f</span><br></pre></td></tr></table></figure></p>
+<p>查看容器是否存在:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos privoxy]# docker ps</span><br><span class="line">CONTAINER ID   IMAGE                                 COMMAND            CREATED          STATUS                            PORTS                                       NAMES</span><br><span class="line">ba46ff48cb2b   kurento/kurento-media-server:latest   &quot;/entrypoint.sh&quot;   20 seconds ago   Up 7 seconds (health: starting)   0.0.0.0:8888-&gt;8888/tcp, :::8888-&gt;8888/tcp   kms</span><br></pre></td></tr></table></figure></p>
+<p>这样子就安装好了。 接下来测试 ws 的服务是否正常。 接下来测试是否可以连通上， 因为这个是一个 ws 的服务，所以用 curl 测试的时候，要加上 upgrade 头部 (这时候记得要先将 翻墙代理关掉，不然会报 privoxy 的错)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# curl --include  --header &quot;Connection: Upgrade&quot;  --header &quot;Upgrade: websocket&quot;  --header &quot;Host: 127.0.0.1:8888&quot;  --header &quot;Origin: 127.0.0.1&quot;  http://127.0.0.1:8888/kurento</span><br><span class="line">HTTP/1.1 500 Internal Server Error</span><br><span class="line">Server: WebSocket++/0.7.0</span><br></pre></td></tr></table></figure></p>
+<p>这时候返回 500 错误是对的。我们可以通过查看进程来判断 kms 的进程是否在:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# ps -fC kurento-media-server</span><br><span class="line">UID        PID  PPID  C STIME TTY          TIME CMD</span><br><span class="line">root     14964 14943  0 17:48 ?        00:00:00 /usr/bin/kurento-media-server</span><br></pre></td></tr></table></figure></p>
+<h2 id="安装-turnserver"><a href="#安装-turnserver" class="headerlink" title="安装 turnserver"></a>安装 turnserver</h2><p>要完整的跑起来，除了 KMS 安装成功之后， turn server 也要安装, 可以参照: <a href="/2018/11/09/turn-install/" title="webrtc 的 turn 服务器 coturn 的搭建">webrtc 的 turn 服务器 coturn 的搭建</a></p>
+<p>下载对应 tar 包，然后解压:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# wget http://turnserver.open-sys.org/downloads/v4.5.0.7/turnserver-4.5.0.7-CentOS7.4-x86_64.tar.gz</span><br><span class="line"></span><br><span class="line">[root@VM-0-13-centos ~]# tar xvfz turnserver-4.5.0.7-CentOS7.4-x86_64.tar.gz</span><br></pre></td></tr></table></figure></p>
+<p>进入到 <code>turnserver-4.5.0.7</code> 这个目录， 执行 install.sh, 直接进行安装:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# cd turnserver-4.5.0.7/</span><br><span class="line">[root@VM-0-13-centos turnserver-4.5.0.7]# ./install.sh</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">Installed:</span><br><span class="line">  turnserver-utils.x86_64 0:4.5.0.7-0.el7.centos                                                                                                                                                                                                                    </span><br><span class="line"></span><br><span class="line">Complete!</span><br><span class="line">SUCCESS !</span><br></pre></td></tr></table></figure></p>
+<p>这样子安装就好了,  接下来进行配置 <code>/etc/turnserver/turnserver.conf</code></p>
+<p>不过修改之前，要先用 openssl 生成证书:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl req -x509 -newkey rsa:2048 -keyout /etc/turn_server_pkey.pem -out /etc/turn_server_cert.pem -days 99999 -nodes</span><br></pre></td></tr></table></figure></p>
+<p>按照惯例， 修改之前，先备份<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos turnserver-4.5.0.7]# cd /etc/turnserver/</span><br><span class="line">[root@VM-0-13-centos turnserver]# ll</span><br><span class="line">total 24</span><br><span class="line">-rw-r--r-- 1 turnserver turnserver 23609 Dec 11  2017 turnserver.conf</span><br><span class="line">[root@VM-0-13-centos turnserver]# cp turnserver.conf turnserver.conf.bak</span><br></pre></td></tr></table></figure></p>
+<p>然后再修改, 主要是修改这几个值:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos turnserver]# diff turnserver.conf turnserver.conf.bak</span><br><span class="line">97c97</span><br><span class="line">&lt; relay-ip=172.16.0.13</span><br><span class="line">---</span><br><span class="line">&gt; #relay-ip=172.17.19.105</span><br><span class="line">120c120</span><br><span class="line">&lt; external-ip=159.xx.xx.169</span><br><span class="line">---</span><br><span class="line">&gt; #external-ip=60.70.80.91</span><br><span class="line">165c165</span><br><span class="line">&lt; fingerprint</span><br><span class="line">---</span><br><span class="line">&gt; #fingerprint</span><br><span class="line">170c170</span><br><span class="line">&lt; lt-cred-mech</span><br><span class="line">---</span><br><span class="line">&gt; #lt-cred-mech</span><br><span class="line">200c200</span><br><span class="line">&lt; use-auth-secret</span><br><span class="line">---</span><br><span class="line">&gt; #use-auth-secret</span><br><span class="line">208c208</span><br><span class="line">&lt; static-auth-secret=1234567890</span><br><span class="line">---</span><br><span class="line">&gt; #static-auth-secret=north</span><br><span class="line">224c224</span><br><span class="line">&lt; realm=realm</span><br><span class="line">---</span><br><span class="line">&gt; #realm=realm</span><br><span class="line">416c416</span><br><span class="line">&lt; cert=/etc/turn_server_cert.pem</span><br><span class="line">---</span><br><span class="line">&gt; #cert=/usr/local/etc/turn_server_cert.pem</span><br><span class="line">423c423</span><br><span class="line">&lt; pkey=/etc/turn_server_pkey.pem</span><br><span class="line">---</span><br><span class="line">&gt; #pkey=/usr/local/etc/turn_server_pkey.pem</span><br><span class="line">469c469</span><br><span class="line">&lt; #no-stdout-log</span><br><span class="line">---</span><br><span class="line">&gt; no-stdout-log</span><br><span class="line">482c482</span><br><span class="line">&lt; log-file=/var/tmp/turn.log</span><br><span class="line">---</span><br><span class="line">&gt; #log-file=/var/tmp/turn.log</span><br><span class="line">486c486</span><br><span class="line">&lt; #syslog</span><br><span class="line">---</span><br><span class="line">&gt; syslog</span><br></pre></td></tr></table></figure></p>
+<p>具体参数是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"># 设置转发的ip（局域网ip），如果不设置，他会自己选择默认的</span><br><span class="line">relay-ip=172.xx.xxx.108</span><br><span class="line"></span><br><span class="line"># 转发的外网ip(本机外网ip)，用于NAT 地址映射</span><br><span class="line">external-ip=47.96.xx.xx</span><br><span class="line"></span><br><span class="line"># WebRTC 的消息里会用到</span><br><span class="line">fingerprint</span><br><span class="line"></span><br><span class="line"># WebRTC 认证需要</span><br><span class="line">lt-cred-mech</span><br><span class="line"></span><br><span class="line"># REST API 认证需要</span><br><span class="line">use-auth-secret</span><br><span class="line"></span><br><span class="line"># REST API 加密所需的 KEY</span><br><span class="line"># 这里我们使用“静态”的 KEY，Google 自己也用的这个</span><br><span class="line">static-auth-secret=1234567890</span><br><span class="line"></span><br><span class="line"># 用户登录域</span><br><span class="line">realm=realm</span><br><span class="line"></span><br><span class="line"># 证书</span><br><span class="line">cert=/etc/turn_server_cert.pem</span><br><span class="line"></span><br><span class="line"># 证书key</span><br><span class="line">pkey=/etc/turn_server_pkey.pem</span><br><span class="line"></span><br><span class="line"># 不输出log</span><br><span class="line">#no-stdout-log</span><br><span class="line"></span><br><span class="line"># 输出的log，将log输出到 log</span><br><span class="line">log-file=/var/tmp/turn.log</span><br><span class="line"></span><br><span class="line">#syslog</span><br></pre></td></tr></table></figure></p>
+<p>接下来启动:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos turnserver]# service turnserver  start</span><br><span class="line">Redirecting to /bin/systemctl start turnserver.service</span><br></pre></td></tr></table></figure></p>
+<p>这时候就可以看到 log 了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos tmp]# tail -f /var/tmp/turn_2021-08-06.log</span><br><span class="line">0: IO method (auth thread): epoll (with changelist)</span><br><span class="line">0: IO method (auth thread): epoll (with changelist)</span><br><span class="line">0: IO method (auth thread): epoll (with changelist)</span><br><span class="line">0: IO method (auth thread): epoll (with changelist)</span><br></pre></td></tr></table></figure></p>
+<p>可以直接访问  3478 端口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# curl 127.0.0.1:3478</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">  &lt;head&gt;</span><br><span class="line">    &lt;title&gt;TURN Server&lt;/title&gt;</span><br><span class="line">  &lt;/head&gt;</span><br><span class="line">  &lt;body&gt;</span><br><span class="line">    &lt;b&gt;TURN Server&lt;/b&gt; &lt;br&gt; &lt;b&gt;&lt;i&gt;use https connection for the admin session&lt;/i&gt;&lt;/b&gt;</span><br><span class="line">  &lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br><span class="line"></span><br><span class="line">[root@VM-0-13-centos ~]# curl 172.16.0.13:3478</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">  &lt;head&gt;</span><br><span class="line">    &lt;title&gt;TURN Server&lt;/title&gt;</span><br><span class="line">  &lt;/head&gt;</span><br><span class="line">  &lt;body&gt;</span><br><span class="line">    &lt;b&gt;TURN Server&lt;/b&gt; &lt;br&gt; &lt;b&gt;&lt;i&gt;use https connection for the admin session&lt;/i&gt;&lt;/b&gt;</span><br><span class="line">  &lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure></p>
+<p>本地和局域网可以访问， 但是 外网访问不了 <code>curl 159.xx.xx.169:3478</code></p>
+<p>这个其实是 腾讯云 那边 的安全组 的端口要对外开放才行。 而且不能只开放 tcp 的 3478， udp 也有一堆端口也要开放 (转发过程其实是通过 udp 协议转发的)，尤其还有这个区间的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Lower and upper bounds of the UDP relay endpoints:</span><br><span class="line"># (default values are 49152 and 65535)</span><br><span class="line">#</span><br><span class="line">#min-port=49152</span><br><span class="line">#max-port=65535</span><br></pre></td></tr></table></figure></p>
+<p>只有这些端口都开了， turnserver 才能对外进行转发</p>
+<p><img src="/2021/08/11/webrtc-install-kurento/1.png" alt=""></p>
+<p>这样子我们在外网测试 3478 端口的时候， 就可以连上服务了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# curl 159.xx.xx.169:3478</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">  &lt;head&gt;</span><br><span class="line">    &lt;title&gt;TURN Server&lt;/title&gt;</span><br><span class="line">  &lt;/head&gt;</span><br><span class="line">  &lt;body&gt;</span><br><span class="line">    &lt;b&gt;TURN Server&lt;/b&gt; &lt;br&gt; &lt;b&gt;&lt;i&gt;use https connection for the admin session&lt;/i&gt;&lt;/b&gt;</span><br><span class="line">  &lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure></p>
+<p>这边要注意一个细节， 因为这个是 demo， 所以我们并没有开启 turnserver 的流量收集统计，turnserver 是有自带流量收集的配置的， 是这个配置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#redis-statsdb=&quot;ip=&lt;ip-address&gt; dbname=&lt;database-number&gt; password=&lt;database-user-password&gt; port=&lt;port&gt; connect_timeout=&lt;seconds&gt;&quot;</span><br><span class="line">redis-statsdb=&quot;ip=xx.xx.xx.156 dbname=13 port=6379 connect_timeout=30&quot;</span><br></pre></td></tr></table></figure></p>
+<p>其实就是抛到 redis 的队列上， 就是采用 订阅的方式, 具体还可以看: <a href="/2018/11/15/turn-stat/" title="coturn 添加redis实现对转发流量和转发时长的统计">coturn 添加redis实现对转发流量和转发时长的统计</a></p>
+<p>不过如果要统计准确的话， 还要再安装一个依赖 <code>hiredis-devel</code> 依赖，依赖安装如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install gcc gcc-c++ openssl-devel libevent2 libevent2-devel  hiredis-devel</span><br></pre></td></tr></table></figure></p>
+<p>启动之后， 接下来要验证校验是否可以正常连接，具体算法可以看: <a href="/2018/11/15/turn-verify/" title="webrtc 的 turn 服务器 coturn 的权限校验">webrtc 的 turn 服务器 coturn 的权限校验</a></p>
+<p>虽然可以配置固定的 用户名 和 密码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#user=username1:password1</span><br><span class="line">#user=username2:password2</span><br></pre></td></tr></table></figure></p>
+<p>但是这种情况下， 我们一般不用， 正常情况下，还是走静态密码验证， 算法也很简单，我们用一个简单的 golang 就可以得到:<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">  <span class="string">"strconv"</span></span><br><span class="line">  <span class="string">"time"</span></span><br><span class="line">  <span class="string">"fmt"</span></span><br><span class="line">  <span class="string">"encoding/base64"</span></span><br><span class="line">  <span class="string">"crypto/hmac"</span></span><br><span class="line">  <span class="string">"crypto/sha1"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Base64EncodeToStr</span><span class="params">(str <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> base64.StdEncoding.EncodeToString([]<span class="keyword">byte</span>(str))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">HmacSha1</span><span class="params">(key, data <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">  h := hmac.New(sha1.New, []<span class="keyword">byte</span>(key))</span><br><span class="line">  h.Write([]<span class="keyword">byte</span>(data))</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">string</span>(h.Sum(<span class="literal">nil</span>))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">var</span> ttl <span class="keyword">int64</span></span><br><span class="line">  ttl = <span class="number">864000</span></span><br><span class="line">  username := <span class="string">"kbz"</span></span><br><span class="line">  expired := time.Now().Unix() + ttl</span><br><span class="line">  username = strconv.Itoa(<span class="keyword">int</span>(expired)) + <span class="string">":"</span> + username</span><br><span class="line">  <span class="comment">// turnserver 这个值 static-auth-secret=1234567890</span></span><br><span class="line">  key := <span class="string">"1234567890"</span></span><br><span class="line">  password := Base64EncodeToStr((HmacSha1(key, username)))</span><br><span class="line">  fmt.Println(fmt.Sprintf(<span class="string">"%v,%v"</span>, username, password))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过这个算法，我们其实是可以算出来的。 所以就可以得到这个 turnserver 的校验值:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">turn:159.xx.xx.169:3478</span><br><span class="line">1629112375:kbz</span><br><span class="line">VpNSo+WtI0AEsSQ96hWZZriiY4c=</span><br></pre></td></tr></table></figure></p>
+<p>然后就可以到这个站点 <a href="https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/" target="_blank" rel="noopener">trickle-ice</a> 进行验证</p>
+<p><img src="/2021/08/11/webrtc-install-kurento/2.png" alt=""></p>
+<p>这样子就可以测试成功了。</p>
+<h2 id="demo-演示"><a href="#demo-演示" class="headerlink" title="demo 演示"></a>demo 演示</h2><p>还是一样， 用那两个 demo 来处理。具体 demo 细节:  <a href="/2020/06/19/webrtc-sfu-kurento/" title="初试 webrtc SFU 开源框架 - Kurento">初试 webrtc SFU 开源框架 - Kurento</a></p>
+<h3 id="demo-–-hello-world"><a href="#demo-–-hello-world" class="headerlink" title="demo – hello world"></a>demo – hello world</h3><p>拉取代码并跑起来:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/Kurento/kurento-tutorial-node.git</span><br><span class="line">cd kurento-tutorial-node/kurento-hello-world</span><br><span class="line">git checkout master</span><br><span class="line">npm install</span><br><span class="line">cd static</span><br><span class="line">bower install --allow-root</span><br><span class="line">cd ..</span><br><span class="line">npm start</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos kurento-hello-world]# npm start</span><br><span class="line"></span><br><span class="line">&gt; kurento-hello-world@6.16.1-dev start /root/kurento-tutorial-node/kurento-hello-world</span><br><span class="line">&gt; node server.js</span><br><span class="line"></span><br><span class="line">Kurento Tutorial started</span><br><span class="line">Open https://localhost:8443/ with a WebRTC capable browser</span><br></pre></td></tr></table></figure>
+<p>这时候因为要外网访问， 所以 8443 端口要在安全组开放， 才能访问。</p>
+<p>但是因为没有配 turnserver 配置，所以就会出现远程视频流出不来。 所以代码还是跟之前一样，要改一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// 设置 turnserver</span><br><span class="line">   webRtcEndpoint.setTurnUrl(&quot;1629112375:kbz:VpNSo+WtI0AEsSQ96hWZZriiY4c=@159.xx.xx.169:3478&quot;, function(data)&#123;</span><br><span class="line">       if (candidatesQueue[sessionId]) &#123;</span><br></pre></td></tr></table></figure></p>
+<p>这边要注意， turnserver 的地址，要填 外网地址才行， 填 <code>127.0.0.1</code> 或者 <code>localhost</code> 都是不行的， 只有填外网地址，才能成功转发。</p>
+<p>反倒是连接 kurento 的时候， 内网地址是可以的， 当然外网地址也是可以的， 如果 8888 端口也有外网开放的话:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ws_uri: &apos;ws://127.0.0.1:8888/kurento&apos;</span><br></pre></td></tr></table></figure></p>
+<p>图像可以成功看到:</p>
+<p><img src="/2021/08/11/webrtc-install-kurento/5.png" alt=""></p>
+<h3 id="demo-–-one2many"><a href="#demo-–-one2many" class="headerlink" title="demo – one2many"></a>demo – one2many</h3><p>第二个就是主播的方式， 一样先改代码，再启动 (为了便于对比，改之前将原来的 <code>server.js</code> 做一下备份成 <code>server.js.bak</code>):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos kurento-one2many-call]# diff server.js server.js.bak</span><br><span class="line">30c30</span><br><span class="line">&lt;         ws_uri: &apos;ws://127.0.0.1:8888/kurento&apos;</span><br><span class="line">---</span><br><span class="line">&gt;         ws_uri: &apos;ws://localhost:8888/kurento&apos;</span><br><span class="line">217,218c217</span><br><span class="line">&lt;                         webRtcEndpoint.setTurnUrl(&quot;1629112375:kbz:VpNSo+WtI0AEsSQ96hWZZriiY4c=@159.xx.xx.169:3478&quot;, function(data)&#123;</span><br><span class="line">&lt;                                 console.log(&quot;=======&quot; + data);</span><br><span class="line">---</span><br><span class="line">&gt;</span><br><span class="line">256d254</span><br><span class="line">&lt;               &#125;);</span><br><span class="line">259c257</span><br><span class="line">&lt;      &#125;);</span><br><span class="line">---</span><br><span class="line">&gt;     &#125;);</span><br><span class="line">275,276d272</span><br><span class="line">&lt;                 webRtcEndpoint.setTurnUrl(&quot;1629112375:kbz:VpNSo+WtI0AEsSQ96hWZZriiY4c=@159.xx.xx.169:3478&quot;, function(data)&#123;</span><br><span class="line">&lt;                 console.log(&quot;=======&quot; + data);</span><br><span class="line">332d327</span><br><span class="line">&lt;     &#125;);</span><br><span class="line">364c359</span><br><span class="line">&lt;         kurentoClient &amp;&amp; kurentoClient.close();</span><br><span class="line">---</span><br><span class="line">&gt;         kurentoClient.close();</span><br></pre></td></tr></table></figure></p>
+<p>然后安装依赖，启动:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">npm install</span><br><span class="line">cd static</span><br><span class="line">bower install --allow-root</span><br><span class="line">cd ..</span><br><span class="line">npm start</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2021/08/11/webrtc-install-kurento/3.png" alt=""></p>
+<p>效果还是不错的，同时在线人数， 50+ 没问题的，而且对于服务器的负载也不高，最高也不会超过 1， 偶尔超过 1，但是马上就下来了。 </p>
+<p>就是有时候，会没有画面， 导致退出得重新刷新，点击 viewer 按钮。  主播这边倒是挺稳定的。不过还得再优化一下。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2021/08/11/webrtc-install-kurento/" title="云服务器裸机安装 Kurento 并应用">http://kebingzao.com/2021/08/11/webrtc-install-kurento/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/webrtc/" rel="tag"># webrtc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/06/21/s3-subdomain-takeover/" rel="next" title="记一次因为 S3 bucket 删除而导致的子域名接管(subdomain takeover)的安全问题">
+                <i class="fa fa-chevron-left"></i> 记一次因为 S3 bucket 删除而导致的子域名接管(subdomain takeover)的安全问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/08/19/use-web-logan/" rel="prev" title="使用 Logan 来做前端日志系统">
+                使用 Logan 来做前端日志系统 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">259</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本次部署云服务器"><span class="nav-number">2.</span> <span class="nav-text">本次部署云服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前置安装软件"><span class="nav-number">3.</span> <span class="nav-text">前置安装软件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装翻墙软件"><span class="nav-number">3.1.</span> <span class="nav-text">安装翻墙软件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#安装-shadowsocks"><span class="nav-number">3.1.1.</span> <span class="nav-text">安装 shadowsocks</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#安装-Privoxy"><span class="nav-number">3.1.2.</span> <span class="nav-text">安装 Privoxy</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#翻墙配置"><span class="nav-number">3.1.3.</span> <span class="nav-text">翻墙配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-docker"><span class="nav-number">3.2.</span> <span class="nav-text">安装 docker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-nodejs"><span class="nav-number">3.3.</span> <span class="nav-text">安装 nodejs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-git"><span class="nav-number">3.4.</span> <span class="nav-text">安装 git</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装-kurento"><span class="nav-number">4.</span> <span class="nav-text">安装 kurento</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装-turnserver"><span class="nav-number">5.</span> <span class="nav-text">安装 turnserver</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#demo-演示"><span class="nav-number">6.</span> <span class="nav-text">demo 演示</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#demo-–-hello-world"><span class="nav-number">6.1.</span> <span class="nav-text">demo – hello world</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#demo-–-one2many"><span class="nav-number">6.2.</span> <span class="nav-text">demo – one2many</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2021/08/11/webrtc-install-kurento/';
+          this.page.identifier = '2021/08/11/webrtc-install-kurento/';
+          this.page.title = '云服务器裸机安装 Kurento 并应用';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

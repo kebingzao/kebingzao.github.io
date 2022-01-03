@@ -26,7 +26,7 @@
 <meta http-equiv="Cache-Control" content="no-transform" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
 
-<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
 
 
 
@@ -95,7 +95,7 @@
 <meta property="og:image" content="http://kebingzao.com/2021/10/21/nginx-proxy-wss-https/3.png">
 <meta property="og:image" content="http://kebingzao.com/2021/10/21/nginx-proxy-wss-https/1.png">
 <meta property="og:image" content="http://kebingzao.com/2021/10/21/nginx-proxy-wss-https/2.png">
-<meta property="og:updated_time" content="2021-11-15T16:40:34.272Z">
+<meta property="og:updated_time" content="2022-01-03T01:54:07.620Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="nginx 转发代理 wss 和 https (目标程序是 ws 和 http)">
 <meta name="twitter:description" content="前言前段时间有用户反馈我们的一个服务有问题， 查了一下，发现我们的一个 wss 的长连接服务被挡掉， 后面原因是因为这个 wss 的长连接服务的端口因为不是常见端口，导致被有些公司内网的路由策略屏蔽掉了。 而如果是常见的 443 的 tls 端口的话， 大部分都是跟 80 一样默认开放的，也就不会有这些问题。 1234567891011121314C:\Users\Marco\Downloads\">
@@ -531,6 +531,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssl_session_cache   shared:SSL:50m;</span><br><span class="line">ssl_session_timeout 4h;</span><br></pre></td></tr></table></figure>
 <p>比如：共享50M内存，建议使用shared，而不是builtin。shared：所有 worker 进程之间共享的缓存。缓存大小以字节为单位指定，1M可以存储大约 4000 个会话。每个共享缓存都应有一个任意的名称。可以在多个虚拟服务器中使用有相同名称的缓存。</p>
 <h3 id="开启-https"><a href="#开启-https" class="headerlink" title="开启 https"></a>开启 https</h3><p>开启http2，比起http1.1快了66%<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">listen 443 ssl http2;</span><br></pre></td></tr></table></figure></p>
+<p>不过要开启 https, openssl 的版本必须在<code>1.0.2e</code> 及以上，在 Chrome 51 后，谷歌去掉了对 NPN 的支持，HTTP2 不能用了会证书错误，而<code>openssl1.0.2e</code> 之后的版本修复了此问题, 同时 nginx 还要加载一个额外的模块 <code>--with-http_v2_module</code></p>
 <h3 id="nginx-转发的端口是有上限-针对长连接的转发"><a href="#nginx-转发的端口是有上限-针对长连接的转发" class="headerlink" title="nginx 转发的端口是有上限 (针对长连接的转发)"></a>nginx 转发的端口是有上限 (针对长连接的转发)</h3><p>之前有针对 配置 nginx 转发之后的服务器进行压测， 发现加入了 nginx 之后， 虽然可以通过上述的 tls 优化，让其同一时刻的并发数比原先更高， 但是还有两个缺点:</p>
 <ol>
 <li>nginx 也要吃内存，本来原先的内存都是给程序吃的，但是现在加入了 nginx 转发之后， 在内存分配上，至少有 30% 要给 nginx</li>
@@ -550,6 +551,7 @@
 <li><a href="https://linux.cn/article-5374-1.html" target="_blank" rel="noopener">增强 nginx 的 SSL 安全性</a></li>
 <li><a href="https://wangxingcs.com/2015/0510/1240/" target="_blank" rel="noopener">Nginx SSL性能优化参数</a></li>
 <li><a href="https://www.cnblogs.com/liufarui/p/11075630.html" target="_blank" rel="noopener">nginx反向代理时保持长连接</a></li>
+<li><a href="https://www.cnblogs.com/hugetong/p/12192587.html" target="_blank" rel="noopener">[tls][https][nginx] https的client session cache与session ticket机制分析</a></li>
 </ul>
 
       
@@ -706,7 +708,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">263</span>
+                  <span class="site-state-item-count">266</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -728,7 +730,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">65</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -791,7 +793,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

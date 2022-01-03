@@ -26,7 +26,7 @@
 <meta http-equiv="Cache-Control" content="no-transform" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
 
-<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
 
 
 
@@ -92,7 +92,7 @@
 <meta property="og:site_name" content="Zach Ke&#39;s Notes">
 <meta property="og:description" content="前言前段时间我们的官网上了新版本， 有将一些对 seo 不友好的旧页面的路由变成了新页面的路由。 比如将 bizHome.html 换成 business/, 但是其实内容是一样的。 刚开始为了保证旧页面不失效，在构建的时候，是将新页面和旧页面的内容都构建成一样的。 但是这样子一来， seo 的权重就被割裂了。 所以为了保证新页面的 seo 权重能够继承旧页面的权重。就要换成将旧页面的访问全部变成">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2021-06-02T16:01:28.922Z">
+<meta property="og:updated_time" content="2022-01-03T01:54:07.617Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上">
 <meta name="twitter:description" content="前言前段时间我们的官网上了新版本， 有将一些对 seo 不友好的旧页面的路由变成了新页面的路由。 比如将 bizHome.html 换成 business/, 但是其实内容是一样的。 刚开始为了保证旧页面不失效，在构建的时候，是将新页面和旧页面的内容都构建成一样的。 但是这样子一来， seo 的权重就被割裂了。 所以为了保证新页面的 seo 权重能够继承旧页面的权重。就要换成将旧页面的访问全部变成">
@@ -491,7 +491,10 @@
 <h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>测试的话，很简单，用 curl 测试就行了。 使用参数 <code>-I</code>, 然后直接看 location 头部就行了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/get.html</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/download/foo-personal/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-personal/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html?name=1</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-personal/?name=1</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html?init=business</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-business/?init=business</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/pt-pt/</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/pt-br/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/pricing/</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/pricing/foo-personal/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/pricing</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/pricing/foo-personal/</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/pricing/index.html?init=biz</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/pricing/foo-business/?init=biz</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
 <p>不过这边要注意一个细节，在使用 curl 的时候，如果参数后面有 <code>&amp;</code> 要转义，不然会报错, 导致参数传递不全 (直接输入浏览器之所以不用，是因为浏览器帮我们自动转义了)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html?name=1&amp;age=2</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-personal/?name=1</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
 <p>就会发现 <code>&amp;</code> 后面的参数丢了。</p>
-<p>这个是因为在使用 <code>curl</code> 的时候，参数的连接符 <code>&amp;</code> 是要进行转义的， 所以加上转义符号就可以:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html?name=1\&amp;age=2</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-personal/?name=1&amp;age=2</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>这个是因为在使用 <code>curl</code> 的时候，参数的连接符 <code>&amp;</code> 是要进行转义的， 所以加上转义符号就可以 (当然也可以不用转义， 直接将 url 用双引号括起来就行了):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-156-200-centos ~]# curl -I https://www.foo.com/zh-cn/get.html?name=1\&amp;age=2</span><br><span class="line">HTTP/1.1 301 Moved Permanently</span><br><span class="line">...</span><br><span class="line">Location: https://www.foo.com/zh-cn/download/foo-personal/?name=1&amp;age=2</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>如果 nginx 针对某个路由设置 301 跳转，并且排除某一个符合条件的路由，单单上面那种操作是不够的， 具体看: <a href="/2021/12/24/nginx-301-5/" title="nginx 针对某个路由设置 301 跳转，并且排除某一个符合条件的路由">nginx 针对某个路由设置 301 跳转，并且排除某一个符合条件的路由</a></p>
+</blockquote>
 
       
     </div>
@@ -643,7 +646,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">263</span>
+                  <span class="site-state-item-count">266</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -665,7 +668,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">65</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -728,7 +731,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

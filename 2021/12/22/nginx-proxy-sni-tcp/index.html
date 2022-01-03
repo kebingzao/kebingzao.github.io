@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="nginx,golang,tcp," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前有处理过 nginx 转发代理 wss 和 https (目标程序是 ws 和 http), 后面发现我们的服务还有一些是 tcp 长连接，而且还是支持 tls 的 tcp 长连接。 这个也是非 80 和 443 端口的。 后面也需要用 nginx 转发代理一下。 nginx 支持 tcp 层的转发nginx 1.9 开始支持 tcp 层的转发，通过 stream 实现的，而 socket">
+<meta name="keywords" content="nginx,golang,tcp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口">
+<meta property="og:url" content="http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前有处理过 nginx 转发代理 wss 和 https (目标程序是 ws 和 http), 后面发现我们的服务还有一些是 tcp 长连接，而且还是支持 tls 的 tcp 长连接。 这个也是非 80 和 443 端口的。 后面也需要用 nginx 转发代理一下。 nginx 支持 tcp 层的转发nginx 1.9 开始支持 tcp 层的转发，通过 stream 实现的，而 socket">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/1.png">
+<meta property="og:updated_time" content="2022-01-03T01:54:07.618Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口">
+<meta name="twitter:description" content="前言之前有处理过 nginx 转发代理 wss 和 https (目标程序是 ws 和 http), 后面发现我们的服务还有一些是 tcp 长连接，而且还是支持 tls 的 tcp 长连接。 这个也是非 80 和 443 端口的。 后面也需要用 nginx 转发代理一下。 nginx 支持 tcp 层的转发nginx 1.9 开始支持 tcp 层的转发，通过 stream 实现的，而 socket">
+<meta name="twitter:image" content="http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/"/>
+
+
+
+
+
+  <title>nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-22T10:18:43+08:00">
+                2021-12-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/22/nginx-proxy-sni-tcp/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/12/22/nginx-proxy-sni-tcp/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/12/22/nginx-proxy-sni-tcp/" class="leancloud_visitors" data-flag-title="nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有处理过 <a href="/2021/10/21/nginx-proxy-wss-https/" title="nginx 转发代理 wss 和 https (目标程序是 ws 和 http)">nginx 转发代理 wss 和 https (目标程序是 ws 和 http)</a>, 后面发现我们的服务还有一些是 tcp 长连接，而且还是支持 tls 的 tcp 长连接。 这个也是非 80 和 443 端口的。 后面也需要用 nginx 转发代理一下。</p>
+<h2 id="nginx-支持-tcp-层的转发"><a href="#nginx-支持-tcp-层的转发" class="headerlink" title="nginx 支持 tcp 层的转发"></a>nginx 支持 tcp 层的转发</h2><p>nginx 1.9 开始支持 tcp 层的转发，通过 stream 实现的，而 socket 也是基于 tcp 通信，跟 ws 和 wss 不一样， 本质上 ws 虽然也是长连接， 但是他是基于 http 的协议上去进行协议升级的，所以可以写在 http 指令串里面。</p>
+<p>但是 tcp 不支持，而且依赖的模块也不一样，他依赖的是 <code>ngx_stream_core_module</code>， 这个模块也是要单独安装的。而且这个 stream 块， 只能放到 <code>nginx.conf</code> 文件中，不能放到 <code>site-avaliable</code> 目录中， 不然就会变成 http 的。</p>
+<h3 id="安装-stream-和-ssl-stream-模块"><a href="#安装-stream-和-ssl-stream-模块" class="headerlink" title="安装 stream 和 ssl_stream 模块"></a>安装 stream 和 ssl_stream 模块</h3><p>安装 nginx，stream 模块默认不安装的， 通过 <code>/usr/local/nginx/sbin/nginx -V</code> 查找<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# /usr/local/nginx/sbin/nginx -V</span><br><span class="line">nginx version: nginx/1.18.0</span><br><span class="line">built by gcc 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC)</span><br><span class="line">built with OpenSSL 1.0.2k-fips  26 Jan 2017</span><br><span class="line">TLS SNI support enabled</span><br><span class="line">configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module</span><br></pre></td></tr></table></figure></p>
+<p>目前只安装  http 的 ssl 的模块， 并没有包含 <code>ngx_stream_core_module</code> 这个模块， 所以我们只需要重新编译一下,覆盖一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos nginx-1.18.0]# ./configure --prefix=/usr/local/nginx  --with-http_ssl_module --with-stream --with-stream_ssl_module</span><br></pre></td></tr></table></figure></p>
+<p>具体步骤可以看: <a href="/2020/09/15/centos7-install-nginx/" title="CentOS 7 安装 Nginx">CentOS 7 安装 Nginx</a> 的 <code>现有的 nginx 程序添加 http_ssl_module 模块</code> 小节，一样的流程。而且这次不仅仅要添加 stream 模块， ssl_stream 模块也要用到，因为我们也有用到 tls 的 tcp 连接。所以两个一起加进去。</p>
+<p>最后添加完之后是这样子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos nginx-1.18.0]# /usr/local/nginx/sbin/nginx -V</span><br><span class="line">nginx version: nginx/1.18.0</span><br><span class="line">built by gcc 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC)</span><br><span class="line">built with OpenSSL 1.0.2k-fips  26 Jan 2017</span><br><span class="line">TLS SNI support enabled</span><br><span class="line">configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module --with-stream --with-stream_ssl_module</span><br></pre></td></tr></table></figure></p>
+<h2 id="简单的转发-demo"><a href="#简单的转发-demo" class="headerlink" title="简单的转发 demo"></a>简单的转发 demo</h2><p>我们写个简单的 demo</p>
+<h3 id="客户端-demo"><a href="#客户端-demo" class="headerlink" title="客户端 demo"></a>客户端 demo</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"bufio"</span></span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"net"</span></span><br><span class="line">	<span class="string">"os"</span></span><br><span class="line">	<span class="string">"strings"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	conn, err := net.Dial(<span class="string">"tcp"</span>, <span class="string">"127.0.0.1:8006"</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"client err="</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close() <span class="comment">// 关闭连接</span></span><br><span class="line">	<span class="comment">//客户端可以发送单行数据</span></span><br><span class="line">	reader := bufio.NewReader(os.Stdin)</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		input, err := reader.ReadString(<span class="string">'\n'</span>)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"readstring err="</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line">		inputInfo := strings.Trim(input, <span class="string">"\r\n"</span>)</span><br><span class="line">		<span class="comment">//fmt.Println(inputInfo)</span></span><br><span class="line">		<span class="keyword">if</span> strings.ToUpper(inputInfo) == <span class="string">"Q"</span> &#123; <span class="comment">// 如果输入q就退出</span></span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//将line发送给服务器</span></span><br><span class="line">		_, err = conn.Write([]<span class="keyword">byte</span>(inputInfo))</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"conn.write err="</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="服务端-demo"><a href="#服务端-demo" class="headerlink" title="服务端 demo"></a>服务端 demo</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"net"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">process</span><span class="params">(conn net.Conn)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		buf := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)</span><br><span class="line">		fmt.Printf(<span class="string">"服务器在等待客户端%s发送信息\n"</span>, conn.RemoteAddr().String())</span><br><span class="line">		n, err := conn.Read(buf)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"客户端退出 err="</span>, err)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(<span class="string">"客户端发送的数据："</span>, <span class="keyword">string</span>(buf[:n]))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Println(<span class="string">"服务器开始监听端口"</span>)</span><br><span class="line">	listen, err := net.Listen(<span class="string">"tcp"</span>, <span class="string">"0.0.0.0:8008"</span>)</span><br><span class="line">	fmt.Println(listen)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"listen err="</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> listen.Close()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"等待客户端连接"</span>)</span><br><span class="line">		conn, err := listen.Accept()</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"Accept err="</span>, err)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">"suc conn=%v,客户端ip=%v\n "</span>, conn, conn.RemoteAddr().String())</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">go</span> process(conn)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>逻辑很简单， 服务端监听的端口是 8008， 但是 客户端连接的端口是 8006。 说明 nginx 会代理这个 tcp 请求</p>
+<h3 id="nginx-配置"><a href="#nginx-配置" class="headerlink" title="nginx 配置:"></a>nginx 配置:</h3><blockquote>
+<p>这个要配在 nginx.conf 文件中， 原先的都可以不变，再最下面加上</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">stream &#123;</span><br><span class="line"></span><br><span class="line">    upstream tcpend &#123;</span><br><span class="line">        server 127.0.0.1:8008;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen 8006;</span><br><span class="line">        proxy_pass tcpend;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>逻辑很简单，如果是 tcp 请求，那么就将 8006 端口代理到上游服务的 8008 端口中。</p>
+<p>先启动 demo 的 server， 再启动 demo 的 client，然后两者进行交互， server log 如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos new-demo]# ./server </span><br><span class="line">服务器开始监听端口</span><br><span class="line">&amp;&#123;0xc0000cc000 &#123;&lt;nil&gt; 0&#125;&#125;</span><br><span class="line">等待客户端连接</span><br><span class="line">suc conn=&amp;&#123;&#123;0xc0000cc080&#125;&#125;,客户端ip=127.0.0.1:27071</span><br><span class="line"> 等待客户端连接</span><br><span class="line">服务器在等待客户端127.0.0.1:27071发送信息</span><br><span class="line">客户端发送的数据： hello</span><br><span class="line">服务器在等待客户端127.0.0.1:27071发送信息</span><br><span class="line">客户端发送的数据： this is test</span><br><span class="line">服务器在等待客户端127.0.0.1:27071发送信息</span><br><span class="line">客户端退出 err= EOF</span><br></pre></td></tr></table></figure></p>
+<p>client log:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos new-demo]# ./client </span><br><span class="line">hello</span><br><span class="line">this is test</span><br><span class="line">q</span><br></pre></td></tr></table></figure></p>
+<p>可以看到转发 tcp 是没有问题的。</p>
+<h2 id="tls-版本-demo"><a href="#tls-版本-demo" class="headerlink" title="tls 版本 demo"></a>tls 版本 demo</h2><p>接下来试一下 tls tcp 的版本， 之前已经装了 <code>stream_ssl_module</code>, 所以这边直接配置。 证书用自制的就行了</p>
+<h3 id="客户端-demo-1"><a href="#客户端-demo-1" class="headerlink" title="客户端 demo"></a>客户端 demo</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"bufio"</span></span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"os"</span></span><br><span class="line">	<span class="string">"strings"</span></span><br><span class="line">	<span class="string">"crypto/tls"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	conn, err := tls.Dial(<span class="string">"tcp"</span>, <span class="string">"127.0.0.1:443"</span>, &amp;tls.Config&#123;InsecureSkipVerify: <span class="literal">true</span>&#125;)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"client err="</span>, err)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close() <span class="comment">// 关闭连接</span></span><br><span class="line">	<span class="comment">//客户端可以发送单行数据</span></span><br><span class="line">	reader := bufio.NewReader(os.Stdin)</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		input, err := reader.ReadString(<span class="string">'\n'</span>)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"readstring err="</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line">		inputInfo := strings.Trim(input, <span class="string">"\r\n"</span>)</span><br><span class="line">		<span class="comment">//fmt.Println(inputInfo)</span></span><br><span class="line">		<span class="keyword">if</span> strings.ToUpper(inputInfo) == <span class="string">"Q"</span> &#123; <span class="comment">// 如果输入q就退出</span></span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//将line发送给服务器</span></span><br><span class="line">		_, err = conn.Write([]<span class="keyword">byte</span>(inputInfo))</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"conn.write err="</span>, err)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这次不需要服务端修改， 因为是走 tcp tls 代理的， 上游程序还是一样是 8008 的非 tls 的 tcp 连接。 而且因为是自制证书， 所以客户端连接的时候，要指定 <code>insecure</code> 选项</p>
+<h3 id="nginx-配置-1"><a href="#nginx-配置-1" class="headerlink" title="nginx 配置"></a>nginx 配置</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">stream &#123;  </span><br><span class="line">  </span><br><span class="line">    upstream tcpend &#123;  </span><br><span class="line">        server 127.0.0.1:8008;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    server &#123;  </span><br><span class="line">        #listen 8006;</span><br><span class="line">        listen 443 ssl;</span><br><span class="line">        proxy_pass tcpend;</span><br><span class="line"></span><br><span class="line">        ssl_certificate      ssl/server.crt;</span><br><span class="line">        ssl_certificate_key  ssl/server.key;</span><br><span class="line"></span><br><span class="line">        ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">        ssl_prefer_server_ciphers  on;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>server log:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos new-demo]# ./server </span><br><span class="line">服务器开始监听端口</span><br><span class="line">&amp;&#123;0xc0000c4000 &#123;&lt;nil&gt; 0&#125;&#125;</span><br><span class="line">等待客户端连接</span><br><span class="line">suc conn=&amp;&#123;&#123;0xc0000c4080&#125;&#125;,客户端ip=127.0.0.1:33291</span><br><span class="line"> 等待客户端连接</span><br><span class="line">服务器在等待客户端127.0.0.1:33291发送信息</span><br><span class="line">客户端发送的数据： this is  tc</span><br><span class="line">服务器在等待客户端127.0.0.1:33291发送信息</span><br><span class="line">客户端发送的数据： this is tls hello</span><br><span class="line">服务器在等待客户端127.0.0.1:33291发送信息</span><br><span class="line">客户端退出 err= EOF</span><br></pre></td></tr></table></figure></p>
+<p>client log:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos new-demo]# ./client-tls</span><br><span class="line">this is  tc</span><br><span class="line">this is tls hello</span><br><span class="line">q</span><br></pre></td></tr></table></figure></p>
+<p>可以看到转发没有问题。 而且也不一定要合法证书，用自建证书，然后 ip 地址连接，然后再配置跳过 ssl 校验的话，那么是可以的。</p>
+<p>这样子就可以将 入口的 tls tcp 转发到非 tls 的 tcp 后端程序。 跟之前用 nginx 代理 wss 一样， 后端程序不用改成 tls， 走 nginx 即可。</p>
+<h2 id="使用-SNI-来使得-https-和-tls-tcp-复用-443-端口"><a href="#使用-SNI-来使得-https-和-tls-tcp-复用-443-端口" class="headerlink" title="使用 SNI 来使得 https 和 tls tcp 复用 443 端口"></a>使用 SNI 来使得 https 和 tls tcp 复用 443 端口</h2><p>正常情况下， 在 同一个 nginx 配置中， http 块 和 stream 是没办法同时监听 443 端口的。 <a href="https://stackoverflow.com/questions/65033538/how-to-combine-nginx-stream-and-http-for-the-same-servername" target="_blank" rel="noopener">How to combine nginx “stream” and “http” for the same servername?</a></p>
+<p>那么如果我一定要这么配呢，会出现什么情况，会报错吗? 客户端和服务端还是不变。 然后 nginx.conf 配置变一下， http 和 stream 都监听 tls 443<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos conf]# cat nginx.conf</span><br><span class="line"></span><br><span class="line">worker_processes  1;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    # HTTPS server</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 443 ssl;</span><br><span class="line">        server_name  localhost;</span><br><span class="line">        ssl_certificate      ssl/server.crt;</span><br><span class="line">        ssl_certificate_key  ssl/server.key;</span><br><span class="line">        ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">        ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">stream &#123;  </span><br><span class="line">    upstream tcpend &#123;  </span><br><span class="line">        server 127.0.0.1:8008;  </span><br><span class="line">    &#125;  </span><br><span class="line">    server &#123;  </span><br><span class="line">        #listen 8006;</span><br><span class="line">        listen 443 ssl;</span><br><span class="line">        proxy_pass tcpend;</span><br><span class="line"></span><br><span class="line">        ssl_certificate      ssl/server.crt;</span><br><span class="line">        ssl_certificate_key  ssl/server.key;</span><br><span class="line"></span><br><span class="line">        ssl_protocols        SSLv3 TLSv1 TLSv1.1 TLSv1.2;</span><br><span class="line">        ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">        ssl_prefer_server_ciphers  on;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后用 tcp 客户端连一下， 发现是可以连接上的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">suc conn=&amp;&#123;&#123;0xc0000c4100&#125;&#125;,客户端ip=127.0.0.1:35825</span><br><span class="line"> 等待客户端连接</span><br><span class="line">服务器在等待客户端127.0.0.1:35825发送信息</span><br><span class="line">客户端发送的数据： hello</span><br><span class="line">服务器在等待客户端127.0.0.1:35825发送信息</span><br><span class="line">客户端发送的数据： yes</span><br><span class="line">服务器在等待客户端127.0.0.1:35825发送信息</span><br><span class="line">客户端退出 err= EOF</span><br></pre></td></tr></table></figure>
+<p>可以连上去，说明没问题。</p>
+<p>然后接下来用 curl 请求一下 https 请求:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos sbin]# curl https://127.0.0.1:443 --insecure</span><br></pre></td></tr></table></figure></p>
+<p>发现没有走 http 块，还是走到 stream 块，所以直接转发到 上游服务 8008 端口那边:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">suc conn=&amp;&#123;&#123;0xc0000e4000&#125;&#125;,客户端ip=127.0.0.1:36171</span><br><span class="line"> 等待客户端连接</span><br><span class="line">服务器在等待客户端127.0.0.1:36171发送信息</span><br><span class="line">客户端发送的数据： GET / HTTP/1.1</span><br><span class="line">User-Agent: curl/7.29.0</span><br><span class="line">Host: 127.0.0.1</span><br><span class="line">Accept: */*</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">服务器在等待客户端127.0.0.1:36171发送信息</span><br><span class="line">客户端退出 err= EOF</span><br></pre></td></tr></table></figure></p>
+<p>说明虽然 http 和 stream 都可以监听 443 端口， 但是其实流量只会走 stream 块。 http 块不会走。</p>
+<p>那么跟 nginx.conf 的 stream 块和 http 块的顺序是否有关呢， 上面的配置文件是 http 上面， stream 下面， 我将其调换一下。 发现结果还是一样。 流量都走 stream 了。</p>
+<p>所以其实就可以理解 443 端口其实是被 stream 块使用了， http 块不行。因为 http 协议(网络层第七层应用层)本质上也是基于 tcp 协议(网络层第四层传输层), 所以如果在传输层就将流量劫持了，那么就没有上层的事情了。 我如果将 http 块的监听，换成其他端口，比如 8001 而不是 443，那么是可以正常走到 https 那一边。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos new-demo]# curl https://127.0.0.1:8001 --insecure</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;Welcome to nginx!&lt;/title&gt;</span><br><span class="line">&lt;style&gt;</span><br><span class="line">    body &#123;</span><br><span class="line">        width: 35em;</span><br><span class="line">        margin: 0 auto;</span><br><span class="line">        font-family: Tahoma, Verdana, Arial, sans-serif;</span><br><span class="line">    &#125;</span><br><span class="line">&lt;/style&gt;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>所以至少从上面的配置来说，  stream 和 http 是无法复用 443 端口。 但是其实还有一种方式可以让 https/wss 和 tls tcp 复用 443 端口，那就是 SNI(Server Name Indication)</p>
+<h3 id="SNI-概念"><a href="#SNI-概念" class="headerlink" title="SNI 概念"></a>SNI 概念</h3><p>传输层安全性协议(即大名鼎鼎的 TLS)是一个工作在传输层上的重要安全协议，它可以为互联网通信提供安全及数据完整性保障，像HTTPS等安全传输都是基于TLS所进行的。</p>
+<p>服务器名称指示(SNI)是TLS的一个扩展协议，在该协议下，在握手过程开始时客户端告诉它正在连接的服务器要连接的主机名称。Nginx 就可以利用stream模块，基于SNI，对进入同一端口、不同主机名的TLS流量进行分流。如果你有一个基于TLS的应用，想要运行在443端口；而443端口已经被Nginx监听用作Web运行网站，你就可以使用Nginx的SNI分流，将443端口复用，把使用不同的域名(主机名)的TLS流量分开，互不干扰，完美共存。</p>
+<p>nginx 的版本至少要 <code>1.15.9</code></p>
+<h3 id="前置准备工作-1-安装模块"><a href="#前置准备工作-1-安装模块" class="headerlink" title="前置准备工作 1: 安装模块"></a>前置准备工作 1: 安装模块</h3><p>如果要开启 SNI, 除了之前我们安装的 <code>ngx_stream_core_module</code> 模块(stream模块), 那么就还需要开启 <code>ngx_stream_ssl_preread_module</code>, 所以我们要再重新编译加载 <code>--with-stream_ssl_preread_module</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos conf]# nginx -V</span><br><span class="line">nginx version: nginx/1.18.0</span><br><span class="line">built by gcc 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC) </span><br><span class="line">built with OpenSSL 1.0.2n  7 Dec 2017</span><br><span class="line">TLS SNI support enabled</span><br><span class="line">configure arguments: --prefix=/usr/local/nginx --with-http_ssl_module --with-stream --with-stream_ssl_module --with-stream_ssl_preread_module</span><br></pre></td></tr></table></figure></p>
+<h3 id="前置准备工作-2-设置域名和有效证书"><a href="#前置准备工作-2-设置域名和有效证书" class="headerlink" title="前置准备工作 2: 设置域名和有效证书"></a>前置准备工作 2: 设置域名和有效证书</h3><p>因为 SNI 是基于域名的，所以我们要准备两个域名，一个用于 tcp 转发，一个用于 http 转发</p>
+<ul>
+<li><code>test-tcp-proxy.example.com</code>  这个是 tcp</li>
+<li><code>test-tcp-http.example.com</code>  这个是 https</li>
+</ul>
+<h3 id="前置准备工作-3-上游程序要支持-tls-tcp-连接"><a href="#前置准备工作-3-上游程序要支持-tls-tcp-连接" class="headerlink" title="前置准备工作 3: 上游程序要支持 tls tcp 连接"></a>前置准备工作 3: 上游程序要支持 tls tcp 连接</h3><p>因为 SNI 是基于 tls 传输的，不仅客户端入口连接的时候，要走 tls 加密， 连上游服务器 upstream 在转发的时候也要走 tls 监听</p>
+<font color="red"> 这一点跟上述的 nginx 代理转发 非 tls tcp 的 upstream 是不一样的。 SNI 的 upstream 一定要走 tls 才行。 这时候当初实践的时候，踩了一个大坑 </font>
+
+<p>如果 upstream 没有走 tls 监听的话， 是可以连上，但是握手的时候会报一堆的乱码:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">suc conn=&amp;&#123;&#123;0xc0000c2180&#125;&#125;,客户端ip=127.0.0.1:29852</span><br><span class="line">等待客户端连接</span><br><span class="line">服务器在等待客户端127.0.0.1:29852发送信息</span><br><span class="line">客户端发送的数据： ¸#△Έ©ԿL&lt;:=枾^輁녆»¤ ׀&apos;&amp;¿¨8Ju&#123;W°:L!:go2ేV%&amp;ﾯﾰﾫﾬ̨̩ﾓ    ﾔ</span><br><span class="line">/5ﾒ</span><br><span class="line">est-tcp-proxy.example.com</span><br><span class="line">                                                                                                                                                                                                                                                            </span><br><span class="line">ÿ+    3&amp;$ L(¦²­</span><br><span class="line">LԼǹR껣 ¨َࠩ|·µX</span><br></pre></td></tr></table></figure></p>
+<p>事实上，这一块，文档是有写的:</p>
+<blockquote><p>Pass the TLS stream to an upstream server, based on the domain name from TLS SNI field. This does not terminate TLS.<br>The upstream server can serve HTTPS or other TLS secured TCP responses.</p>
+<footer><strong>non terminating, TLS pass through</strong><cite><a href="https://gist.github.com/kekru/c09dbab5e78bf76402966b13fa72b9d2" target="_blank" rel="noopener">gist.github.com/kekru/c09dbab5e78bf76402966b13fa72b9d2</a></cite></footer></blockquote>
+<p>所以我们的服务端程序要改造一下， 换成 tls tcp 监听 8889<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"net"</span></span><br><span class="line">	<span class="string">"crypto/tls"</span></span><br><span class="line">	<span class="string">"crypto/rand"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">	<span class="string">"os"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">process</span><span class="params">(conn net.Conn)</span></span> &#123;</span><br><span class="line">	<span class="keyword">defer</span> conn.Close()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		buf := <span class="built_in">make</span>([]<span class="keyword">byte</span>, <span class="number">1024</span>)</span><br><span class="line">		fmt.Printf(<span class="string">"服务器在等待客户端%s发送信息\n"</span>, conn.RemoteAddr().String())</span><br><span class="line">		n, err := conn.Read(buf)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"客户端退出 err="</span>, err)</span><br><span class="line">			<span class="keyword">return</span></span><br><span class="line">		&#125;</span><br><span class="line">		fmt.Println(<span class="string">"客户端发送的数据："</span>, <span class="keyword">string</span>(buf[:n]))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Println(<span class="string">"服务器开始监听端口"</span>)</span><br><span class="line">	crt, err := tls.LoadX509KeyPair(<span class="string">"./example.com.crt"</span>, <span class="string">"./example.com.key"</span>)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(fmt.Sprintf(<span class="string">"phone load tls key pair err,%v"</span>, err.Error()))</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	tlsConfig := &amp;tls.Config&#123;&#125;</span><br><span class="line">	tlsConfig.MinVersion = tls.VersionTLS10</span><br><span class="line">	tlsConfig.MaxVersion = tls.VersionTLS12</span><br><span class="line">	tlsConfig.Certificates = []tls.Certificate&#123;crt&#125;</span><br><span class="line">	<span class="comment">// Time returns the current time as the number of seconds since the epoch.</span></span><br><span class="line">	<span class="comment">// If Time is nil, TLS uses time.Now.</span></span><br><span class="line">	tlsConfig.Time = time.Now</span><br><span class="line">	<span class="comment">// Rand provides the source of entropy for nonces and RSA blinding.</span></span><br><span class="line">	<span class="comment">// If Rand is nil, TLS uses the cryptographic random reader in package</span></span><br><span class="line">	<span class="comment">// crypto/rand.</span></span><br><span class="line">	<span class="comment">// The Reader must be safe for use by multiple goroutines.</span></span><br><span class="line">	tlsConfig.Rand = rand.Reader</span><br><span class="line">	listen, err := tls.Listen(<span class="string">"tcp"</span>, <span class="string">":8889"</span>, tlsConfig)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		fmt.Println(fmt.Sprintf(<span class="string">"phone tcp err,%v"</span>, err.Error()))</span><br><span class="line">		os.Exit(<span class="number">1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	fmt.Println(fmt.Sprintf(<span class="string">"===load tls tcp success"</span>))</span><br><span class="line">	<span class="keyword">defer</span> listen.Close()</span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">		fmt.Println(<span class="string">"等待客户端连接"</span>)</span><br><span class="line">		conn, err := listen.Accept()</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			fmt.Println(<span class="string">"Accept err="</span>, err)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			fmt.Printf(<span class="string">"suc conn=%v,客户端ip=%v\n "</span>, conn, conn.RemoteAddr().String())</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">go</span> process(conn)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>同时 客户端的那个 tls 的程序的连接地址也改成对应的地址:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conn, err := tls.Dial(&quot;tcp&quot;, &quot;test-tcp-proxy.example.com:443&quot;,  nil)</span><br></pre></td></tr></table></figure></p>
+<p>这时候证书是合法的，不需要设置为不安全的选项</p>
+<h3 id="nginx-的配置文件"><a href="#nginx-的配置文件" class="headerlink" title="nginx 的配置文件:"></a>nginx 的配置文件:</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos conf]# cat nginx.conf</span><br><span class="line"></span><br><span class="line">worker_processes  1;</span><br><span class="line">pid /var/run/nginx.pid;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">stream &#123;  </span><br><span class="line">    map $ssl_preread_server_name $stream_map &#123;</span><br><span class="line">        test-web-proxy.example.com web;</span><br><span class="line">        test-tcp-proxy.example.com bd;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    upstream bd &#123;</span><br><span class="line">        server 127.0.0.1:8889;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    upstream web &#123;</span><br><span class="line">        server 127.0.0.1:443;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    server &#123;  </span><br><span class="line">        listen 172.16.0.13:443;</span><br><span class="line">        proxy_pass $stream_map;</span><br><span class="line">        ssl_preread on;</span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 127.0.0.1:443 ssl http2;</span><br><span class="line">        ssl_certificate      ssl/now/example.com.crt;</span><br><span class="line">        ssl_certificate_key  ssl/now/example.com.key;</span><br><span class="line">        ssl_protocols        SSLv3 TLSv1 TLSv1.1 TLSv1.2;</span><br><span class="line">        ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">        ssl_prefer_server_ciphers  on;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这边 https 的时候，有启用了 http2 优化，这个模块 <code>http_v2_module</code> 也是要额外载入的。 而且他要求 openssl 的版本必须在1.0.2e及以上。 在 configure 的时候，补上 <code>--with-http_v2_module</code> 就可以了。</p>
+<p>同时 设置分流的时候， 这边用内网 ip <code>172.16.0.13</code> 来指定， 如果不指定(直接 <code>listen 443</code>)或者指定为 <code>listen [::]:443</code> 都不行</p>
+<p>接下来我们测试一下 分流的情况:</p>
+<p>首先启用 tcp 的连接客户端，然后看下服务端 upstream 的日志:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos new-demo]# ./server-tls</span><br><span class="line">服务器开始监听端口</span><br><span class="line">===load tls tcp success</span><br><span class="line">等待客户端连接</span><br><span class="line">suc conn=&amp;&#123;0xc00000e048 false 0 &#123;0 0&#125; &lt;nil&gt; 0 false 0xc000001500 0 false 0 [] [] [] []  false &lt;nil&gt; [] false &lt;nil&gt; false [0 0 0 0 0 0 0 0 0 0 0 0] [0 0 0 0 0 0 0 0 0 0 0 0]  false &#123;&#123;0 0&#125; &lt;nil&gt; 0 &lt;nil&gt; &lt;nil&gt; [0 0 0 0 0 0 0 0] [0 0 0 0 0 0 0 0 0 0 0 0 0] &lt;nil&gt; &lt;nil&gt; []&#125; &#123;&#123;0 0&#125; &lt;nil&gt; 0 &lt;nil&gt; &lt;nil&gt; [0 0 0 0 0 0 0 0] [0 0 0 0 0 0 0 0 0 0 0 0 0] &lt;nil&gt; &lt;nil&gt; []&#125; &#123;[] 0 0&#125; &#123;[] 0 0&#125; &#123;[] 0 0&#125; [] false [] 0 0 0 0 [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]&#125;,客户端ip=127.0.0.1:45579</span><br><span class="line"> 等待客户端连接</span><br><span class="line">服务器在等待客户端127.0.0.1:45579发送信息</span><br><span class="line">客户端发送的数据： 123</span><br><span class="line">服务器在等待客户端127.0.0.1:45579发送信息</span><br><span class="line">客户端发送的数据： 666</span><br><span class="line">服务器在等待客户端127.0.0.1:45579发送信息</span><br><span class="line">客户端退出 err= EOF</span><br></pre></td></tr></table></figure></p>
+<p>可以看到数据正常。</p>
+<p>然后再用 curl 请求 https 试一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos new-demo]# curl &quot;https://test-web-proxy.example.com&quot;</span><br><span class="line">&lt;!DOCTYPE html&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">&lt;title&gt;Welcome to nginx!&lt;/title&gt;</span><br><span class="line">&lt;style&gt;</span><br><span class="line">    body &#123;</span><br></pre></td></tr></table></figure></p>
+<p>发现也是正常的， 所以这个分流是可以的。</p>
+<h2 id="后续遇到的问题"><a href="#后续遇到的问题" class="headerlink" title="后续遇到的问题"></a>后续遇到的问题</h2><h3 id="1-跟其他的-nginx-wss-的服务一起配置会有问题"><a href="#1-跟其他的-nginx-wss-的服务一起配置会有问题" class="headerlink" title="1. 跟其他的 nginx wss 的服务一起配置会有问题"></a>1. 跟其他的 nginx wss 的服务一起配置会有问题</h3><p>因为 SNI 要配置在 nginx.conf 文件，但是其他的 nginx 代理转发 wss， 是可以配置在 site-avaliable 目录下的。如果要共存的话是会有问题的。</p>
+<p>假设我们还有一个 nginx wss 的代理，域名是 <code>test-wss-data.example.com</code>, 那么他也是要走分流的 (流量被劫持了)， 那么 nginx.conf 的配置如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos conf]# cat nginx.conf</span><br><span class="line"></span><br><span class="line">worker_processes  1;</span><br><span class="line">pid /var/run/nginx.pid;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections  1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">stream &#123;  </span><br><span class="line">    map $ssl_preread_server_name $stream_map &#123;</span><br><span class="line">        test-web-proxy.example.com web;</span><br><span class="line">        test-tcp-proxy.example.com bd;</span><br><span class="line">        test-wss-data.example.com data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    upstream bd &#123;</span><br><span class="line">        server 127.0.0.1:8889;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    upstream web &#123;</span><br><span class="line">        server 127.0.0.1:443;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    upstream data &#123;</span><br><span class="line">        server 127.0.0.1:9443;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    server &#123;  </span><br><span class="line">        listen 172.16.0.13:443;</span><br><span class="line">        proxy_pass $stream_map;</span><br><span class="line">        ssl_preread on;</span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 127.0.0.1:443 ssl http2;</span><br><span class="line">        ssl_certificate      ssl/now/example.com.crt;</span><br><span class="line">        ssl_certificate_key  ssl/now/example.com.key;</span><br><span class="line">        ssl_protocols        SSLv3 TLSv1 TLSv1.1 TLSv1.2;</span><br><span class="line">        ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">        ssl_prefer_server_ciphers  on;</span><br><span class="line">        port_in_redirect off;</span><br><span class="line">        location / &#123;</span><br><span class="line">            root   html;</span><br><span class="line">            index  index.html index.htm;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    include /usr/local/nginx/conf/site-avaliable/wss.conf;	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后 <code>/usr/local/nginx/conf/site-avaliable/wss.conf</code> 就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos site-avaliable]# cat wss.conf </span><br><span class="line">map $http_upgrade $connection_upgrade &#123;</span><br><span class="line">    default upgrade;</span><br><span class="line">    &apos;&apos; close;</span><br><span class="line">&#125;</span><br><span class="line">upstream data&#123;</span><br><span class="line">        server 127.0.0.1:8007 fail_timeout=0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    server_name  test-wss-data.example.com;</span><br><span class="line">    listen       9443 ssl http2;</span><br><span class="line">    ssl_certificate      ssl/now/example.com.crt;</span><br><span class="line">    ssl_certificate_key  ssl/now/example.com.key;</span><br><span class="line">    ssl_protocols        SSLv3 TLSv1 TLSv1.1 TLSv1.2;</span><br><span class="line">    ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">    ssl_prefer_server_ciphers  on;</span><br><span class="line">    port_in_redirect off;</span><br><span class="line">    location = /ws &#123;</span><br><span class="line">            proxy_pass http://data;</span><br><span class="line">            </span><br><span class="line">            proxy_read_timeout 300s;</span><br><span class="line">            proxy_send_timeout 300s;</span><br><span class="line">            </span><br><span class="line">            proxy_set_header Host $host;</span><br><span class="line">            proxy_set_header X-real-ip $remote_addr;</span><br><span class="line">            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">            </span><br><span class="line">            proxy_http_version 1.1;</span><br><span class="line">            proxy_set_header Upgrade $http_upgrade;</span><br><span class="line">            proxy_set_header Connection $connection_upgrade;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>就跟我们在 <a href="/2021/10/21/nginx-proxy-wss-https/" title="nginx 转发代理 wss 和 https (目标程序是 ws 和 http)">nginx 转发代理 wss 和 https (目标程序是 ws 和 http)</a> nginx.conf 的配置差不多，只不过是挪到了 site-avaliable 中</p>
+<p>具体效果:</p>
+<p><img src="/2021/12/22/nginx-proxy-sni-tcp/1.png" alt=""></p>
+<p>其实就是将 443 再转发到 9443。 通过  port_in_redirect 这个配置。 他默认是 on 的， 也就是当前 listen 是多少端口，那么就反代什么端口。</p>
+<p>但是对于本例来说，我们要反代的端口是不一样的，从 443 -&gt; 9443, 所以我们要将其关掉。 同时 wss 的 data 程序就会变成 二级代理的方式了。</p>
+<p>这样子就可以在原来 SNI 分流的基础上，再接入之前的 wss 转发代理服务了。缺点就是因为变成了二级代理的方式，每次都要多设置一个代理端口，本例就是 9443 端口。</p>
+<h3 id="2-关于-android-6-0-及以下的握手问题"><a href="#2-关于-android-6-0-及以下的握手问题" class="headerlink" title="2. 关于 android 6.0 及以下的握手问题"></a>2. 关于 android 6.0 及以下的握手问题</h3><p>之前用 SNI 的时候，还有出现一个问题，就是在我们的 app 上， android 7.0 及以上的设备都可以成功连接上。 但是 android 6.0 及以下的设备却是会握手失败。</p>
+<p>后面通过对 android 6.0 和 android 7.0 的 443 端口的抓包:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-0-13-centos ~]# sudo tcpdump -i eth0 port 443 -w ./target.cap</span><br><span class="line">tcpdump: listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes</span><br></pre></td></tr></table></figure></p>
+<p>还真发现了问题，android 6 在握手的 client hello 的报文中，是找不到 <code>server_name</code> 这一条扩展字段的。但是 android 7 的 client hello 报文中，就可以找到 server_name 的扩展字段:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Extension: server_name (len=34)</span><br><span class="line">    Type: server_name (0)</span><br><span class="line">    Length: 34</span><br><span class="line">    Server Name Indication extension</span><br></pre></td></tr></table></figure>
+<p>因为如果是要完成 SNI 分流的话，那么是需要在 client hello 的报文中，添加 server_name 段的，用来指明请求的域名，这样子 nginx 才能针对这个域名来下发对应的 ssl 证书。 具体文档: <a href="https://datatracker.ietf.org/doc/html/rfc3546#section-3.1" target="_blank" rel="noopener">Server Name Indication</a></p>
+<p>所以需要 android 6 那边的程序，在进行 握手的时候， 添加 <code>server_name</code> 的这个扩展字段就可以了。 而且如果是 SNI 导致的握手问题的话，其实是不会返回具体错误的，nginx 那边会直接返回 <code>FIN ACK</code>, 刚好符合 android 那边的错误日志，因为除了握手失败之外，没有其他的信息。 而如果是 加密套件 失败的话，是会有更具体的错误信息的。</p>
+<h2 id="几种优化措施"><a href="#几种优化措施" class="headerlink" title="几种优化措施"></a>几种优化措施</h2><h3 id="1-使用-reuseport-来允许多个-socket-来监听同一个端口"><a href="#1-使用-reuseport-来允许多个-socket-来监听同一个端口" class="headerlink" title="1. 使用 reuseport 来允许多个 socket 来监听同一个端口"></a>1. 使用 reuseport 来允许多个 socket 来监听同一个端口</h3><p>我们可以在分流的时候， 加上 reuseport, 这个可以提高性能。 </p>
+<p>reuseport 是一种套接字复用机制，它允许你将多个套接字 bind 在同一个IP地址/端口对上，这样一来，就可以建立多个服务来接受到同一个端口的连接。 reuseport 是支持多个进程或者线程绑定到同一端口，提高服务器程序的吞吐性能，其优点体现在如下几个方面:</p>
+<ol>
+<li>允许多个套接字 bind()/listen() 同一个TCP/UDP端口</li>
+<li>每一个线程拥有自己的服务器套接字</li>
+<li>在服务器套接字上没有了锁的竞争，因为每个进程一个服务器套接字</li>
+<li>内核层面实现负载均衡</li>
+<li>安全层面，监听同一个端口的套接字只能位于同一个用户下面</li>
+</ol>
+<p>可以写在 stream 块 或者 http 块:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;  </span><br><span class="line">        listen 172.16.0.13:443 reuseport;</span><br><span class="line">        proxy_pass $stream_map;</span><br><span class="line">        ssl_preread on;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-启用-http2-模块"><a href="#2-启用-http2-模块" class="headerlink" title="2. 启用 http2 模块"></a>2. 启用 http2 模块</h3><p>这个上面已经说了，开启 http2 模块，不仅可以做到多路复用，它的 header 还会压缩，减少体积。</p>
+<p>这个是在 http 块开启的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">        listen 127.0.0.1:443 ssl http2;</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-设置超时"><a href="#3-设置超时" class="headerlink" title="3. 设置超时"></a>3. 设置超时</h3><p>如果我们需要在 tcp 上传一些资料的话，尤其是大文件二进制的话，那么也是要在 stream 那边设置超时的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">stream &#123;  </span><br><span class="line">    proxy_timeout 3600s;</span><br><span class="line">    proxy_connect_timeout 3600s;</span><br></pre></td></tr></table></figure></p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://gist.github.com/kekru/c09dbab5e78bf76402966b13fa72b9d2" target="_blank" rel="noopener">Nginx TLS SNI routing, based on subdomain pattern</a></li>
+<li><a href="https://blog.xmgspace.me/archives/nginx-sni-dispatcher.html" target="_blank" rel="noopener">使用Nginx进行SNI分流并完美和网站共存</a></li>
+<li><a href="https://www.chengxiaobai.com/trouble-maker/trojan-shared-443-port-scheme" target="_blank" rel="noopener">Trojan 共用 443 端口方案</a></li>
+<li><a href="https://www.cnblogs.com/hugetong/p/11583789.html" target="_blank" rel="noopener">nginx配置https与ssl/tls的sni的方法</a></li>
+<li><a href="https://blog.csdn.net/u014756827/article/details/105733018" target="_blank" rel="noopener">Nginx代理后服务端使用remote_addr获取真实IP</a></li>
+<li><a href="https://cloud.tencent.com/developer/article/1340233" target="_blank" rel="noopener">nginx的port_in_redirect配置</a></li>
+<li><a href="https://docs.nginx.com/nginx/admin-guide/load-balancer/tcp-udp-load-balancer/" target="_blank" rel="noopener">TCP and UDP Load Balancing</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/336424544" target="_blank" rel="noopener">高性能 -Nginx 多进程高并发问题</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/" title="nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口">http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nginx/" rel="tag"># nginx</a>
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/tcp/" rel="tag"># tcp</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/11/02/golang-mod-replace/" rel="next" title="记一次 go module 因为内部公共包使用 replace 导致当前程序拉取公共包最新版本失败的情况">
+                <i class="fa fa-chevron-left"></i> 记一次 go module 因为内部公共包使用 replace 导致当前程序拉取公共包最新版本失败的情况
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/12/24/nginx-301-5/" rel="prev" title="nginx 针对某个路由设置 301 跳转，并且排除某一个符合条件的路由">
+                nginx 针对某个路由设置 301 跳转，并且排除某一个符合条件的路由 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">266</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx-支持-tcp-层的转发"><span class="nav-number">2.</span> <span class="nav-text">nginx 支持 tcp 层的转发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-stream-和-ssl-stream-模块"><span class="nav-number">2.1.</span> <span class="nav-text">安装 stream 和 ssl_stream 模块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简单的转发-demo"><span class="nav-number">3.</span> <span class="nav-text">简单的转发 demo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端-demo"><span class="nav-number">3.1.</span> <span class="nav-text">客户端 demo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#服务端-demo"><span class="nav-number">3.2.</span> <span class="nav-text">服务端 demo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nginx-配置"><span class="nav-number">3.3.</span> <span class="nav-text">nginx 配置:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tls-版本-demo"><span class="nav-number">4.</span> <span class="nav-text">tls 版本 demo</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端-demo-1"><span class="nav-number">4.1.</span> <span class="nav-text">客户端 demo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nginx-配置-1"><span class="nav-number">4.2.</span> <span class="nav-text">nginx 配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-SNI-来使得-https-和-tls-tcp-复用-443-端口"><span class="nav-number">5.</span> <span class="nav-text">使用 SNI 来使得 https 和 tls tcp 复用 443 端口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SNI-概念"><span class="nav-number">5.1.</span> <span class="nav-text">SNI 概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前置准备工作-1-安装模块"><span class="nav-number">5.2.</span> <span class="nav-text">前置准备工作 1: 安装模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前置准备工作-2-设置域名和有效证书"><span class="nav-number">5.3.</span> <span class="nav-text">前置准备工作 2: 设置域名和有效证书</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前置准备工作-3-上游程序要支持-tls-tcp-连接"><span class="nav-number">5.4.</span> <span class="nav-text">前置准备工作 3: 上游程序要支持 tls tcp 连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nginx-的配置文件"><span class="nav-number">5.5.</span> <span class="nav-text">nginx 的配置文件:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后续遇到的问题"><span class="nav-number">6.</span> <span class="nav-text">后续遇到的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-跟其他的-nginx-wss-的服务一起配置会有问题"><span class="nav-number">6.1.</span> <span class="nav-text">1. 跟其他的 nginx wss 的服务一起配置会有问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-关于-android-6-0-及以下的握手问题"><span class="nav-number">6.2.</span> <span class="nav-text">2. 关于 android 6.0 及以下的握手问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#几种优化措施"><span class="nav-number">7.</span> <span class="nav-text">几种优化措施</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-使用-reuseport-来允许多个-socket-来监听同一个端口"><span class="nav-number">7.1.</span> <span class="nav-text">1. 使用 reuseport 来允许多个 socket 来监听同一个端口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-启用-http2-模块"><span class="nav-number">7.2.</span> <span class="nav-text">2. 启用 http2 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-设置超时"><span class="nav-number">7.3.</span> <span class="nav-text">3. 设置超时</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/';
+          this.page.identifier = '2021/12/22/nginx-proxy-sni-tcp/';
+          this.page.title = 'nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

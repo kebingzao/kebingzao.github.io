@@ -26,7 +26,7 @@
 <meta http-equiv="Cache-Control" content="no-transform" />
 <meta http-equiv="Cache-Control" content="no-siteapp" />
 
-<script data-ad-client="ca-pub-9657591565519636" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
 
 
 
@@ -293,6 +293,519 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/12/24/nginx-split-clients/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/12/24/nginx-split-clients/" itemprop="url">nginx 实现前端页面的 A/B 测</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-24T16:02:45+08:00">
+                2021-12-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/24/nginx-split-clients/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/12/24/nginx-split-clients/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/12/24/nginx-split-clients/" class="leancloud_visitors" data-flag-title="nginx 实现前端页面的 A/B 测">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段之前产品有个需求， 想要对一个申请页面的修改进行 A/B 测试, 从而判断出是哪个页面的转化率会比较高。 所以需要前端人员针对原先的 申请页面 进行 A/B 测试。</p>
+<p>简单的来说就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">用户访问的还是同一个入口: mobile-device-management-free-trial/index.html</span><br><span class="line">然后 A 用户 得到的是旧页面: mobile-device-management-free-trial-old/index.html (这边为了区分，将旧页面的路由改成 old)</span><br><span class="line">然后 B 用户 得到的是新页面: mobile-device-management-free-trial-new/index.html</span><br><span class="line"></span><br><span class="line">而且还会有多语言，比如: zh-cn/mobile-device-management-free-trial/index.html</span><br><span class="line">然后 A 用户 得到的是旧页面: zh-cn/mobile-device-management-free-trial-old/index.html</span><br><span class="line">然后 B 用户 得到的是新页面: zh-cn/mobile-device-management-free-trial-new/index.html</span><br></pre></td></tr></table></figure></p>
+<p>然后新旧页面的各自流量是一半。</p>
+<h2 id="nginx-ngx-http-split-clients-module"><a href="#nginx-ngx-http-split-clients-module" class="headerlink" title="nginx ngx_http_split_clients_module"></a>nginx ngx_http_split_clients_module</h2><p>nginx 的 <code>ngx_http_split_clients_module</code> 可以满足这种需求，可以用来实现流量的分流 (当然也可以实现负载均衡)。 而且该模块是默认就载入的，不需要额外再载入。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2021/12/24/nginx-split-clients/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/12/24/nginx-301-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/12/24/nginx-301-5/" itemprop="url">nginx 针对某个路由设置 301 跳转，并且排除某一个符合条件的路由</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-24T10:38:06+08:00">
+                2021-12-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/24/nginx-301-5/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/12/24/nginx-301-5/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/12/24/nginx-301-5/" class="leancloud_visitors" data-flag-title="nginx 针对某个路由设置 301 跳转，并且排除某一个符合条件的路由">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前官网重构的时候，为了保证原页面的 seo 权重，就有针对一些旧页面路由进行 301 重定向到新路由。 具体看 <a href="/2021/05/18/nginx-301-4/" title="nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上">nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上</a>， 但是后面又提了一个新需求， 就是针对一些路由进行目录结构上的调整。</p>
+<p>比如原先是 <code>a.html</code> 后面会移动到 <code>product/a.html</code>， 而且 html 的名称还不能变。 所以这时候从用户访问来看就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">访问 www.foo.com/a.html --&gt; 301 重定向 --&gt; www.foo.com/product/a.html</span><br><span class="line">考虑到大部分是有小语种路径的，比如 zh-cn，那么就是</span><br><span class="line">访问 www.foo.com/zh-cn/a.html --&gt; 301 重定向 --&gt; www.foo.com/zh-cn/product/a.html</span><br></pre></td></tr></table></figure></p>
+<h2 id="原先的方法不适用"><a href="#原先的方法不适用" class="headerlink" title="原先的方法不适用"></a>原先的方法不适用</h2><p>如果是原先这种方式的话:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if ($request_uri ~* &quot;a.html&quot;) &#123;</span><br><span class="line">    rewrite ^/(.*)a.html$ /$1product/a.html permanent;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>就会发现其实重定向后的 url 也是符合这个规则的，就会导致 nginx 无限重定向。 所以这样子是不行的<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2021/12/24/nginx-301-5/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/12/22/nginx-proxy-sni-tcp/" itemprop="url">nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-22T10:18:43+08:00">
+                2021-12-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/22/nginx-proxy-sni-tcp/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/12/22/nginx-proxy-sni-tcp/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/12/22/nginx-proxy-sni-tcp/" class="leancloud_visitors" data-flag-title="nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有处理过 <a href="/2021/10/21/nginx-proxy-wss-https/" title="nginx 转发代理 wss 和 https (目标程序是 ws 和 http)">nginx 转发代理 wss 和 https (目标程序是 ws 和 http)</a>, 后面发现我们的服务还有一些是 tcp 长连接，而且还是支持 tls 的 tcp 长连接。 这个也是非 80 和 443 端口的。 后面也需要用 nginx 转发代理一下。</p>
+<h2 id="nginx-支持-tcp-层的转发"><a href="#nginx-支持-tcp-层的转发" class="headerlink" title="nginx 支持 tcp 层的转发"></a>nginx 支持 tcp 层的转发</h2><p>nginx 1.9 开始支持 tcp 层的转发，通过 stream 实现的，而 socket 也是基于 tcp 通信，跟 ws 和 wss 不一样， 本质上 ws 虽然也是长连接， 但是他是基于 http 的协议上去进行协议升级的，所以可以写在 http 指令串里面。</p>
+<p>但是 tcp 不支持，而且依赖的模块也不一样，他依赖的是 <code>ngx_stream_core_module</code>， 这个模块也是要单独安装的。而且这个 stream 块， 只能放到 <code>nginx.conf</code> 文件中，不能放到 <code>site-avaliable</code> 目录中， 不然就会变成 http 的。</p>
+<h3 id="安装-stream-和-ssl-stream-模块"><a href="#安装-stream-和-ssl-stream-模块" class="headerlink" title="安装 stream 和 ssl_stream 模块"></a>安装 stream 和 ssl_stream 模块</h3><p>安装 nginx，stream 模块默认不安装的， 通过 <code>/usr/local/nginx/sbin/nginx -V</code> 查找<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2021/12/22/nginx-proxy-sni-tcp/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -3245,524 +3758,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/04/01/2fa/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/04/01/2fa/" itemprop="url">如何在你的程序中启用基于 TOTP 的两步验证</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-04-01T11:33:22+08:00">
-                2021-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/web安全/" itemprop="url" rel="index">
-                    <span itemprop="name">web安全</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/04/01/2fa/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/04/01/2fa/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/04/01/2fa/" class="leancloud_visitors" data-flag-title="如何在你的程序中启用基于 TOTP 的两步验证">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们往往会在不同的网站上使用相同的密码，这样一旦一个网站账户的密码泄露，就会危及到其他使用相同密码的账户的安全。没错, 就是撞库行为, 往往你的站点的安全机制没有问题，但是架不住你的用户使用的密码跟其他被脱库的站点使用的密码一致(现在免费的社工库很多，随便写个简单的暴力碰撞程序(<code>记得挂上代理</code>)，就可以试出一堆可以正常使用的用户名和密码), 导致很容易通过撞库的行为从而知道这个用户在你站点的用户名和密码。 为了解决这个问题，一些网站在登录时要求除了输入账户密码之外，还需要输入另一个一次性密码。</p>
-<p>而这个输入的一次性密码，其实就是我们所说的两步验证，这不是什么新奇的技术，国内都使用了N多年了，比如说银行用的动态令牌</p>
-<p><img src="/2021/04/01/2fa/1.png" alt="1"></p>
-<p>再说一个大家比较有情怀的东西，就是早期网易的将军令(爷春回) 也是用的这个技术:</p>
-<p><img src="/2021/04/01/2fa/2.png" alt="1"></p>
-<p>虽然不是什么新技术，不过早期因为手机的不普及，更多的是用硬件的方式来实现 (这玩意儿一旦没有电，就必须重新换一个，因为他没办法联网同步时间，不过这个耗电量极低，一个可以用好几年)。 但是随着手机的普及，以及大家的安全意识的提升。 越来越多的站点都用软件的方式来实现(比如 Evernote， Google， 以及我所在团队的站点)，而且成本很低。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/04/01/2fa/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/03/25/s3-cloudfront-add-sub-folder-access/" itemprop="url">使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-25T16:06:42+08:00">
-                2021-03-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
-                    <span itemprop="name">aws 相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/03/25/s3-cloudfront-add-sub-folder-access/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/03/25/s3-cloudfront-add-sub-folder-access/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/03/25/s3-cloudfront-add-sub-folder-access/" class="leancloud_visitors" data-flag-title="使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有出现过一种情况，就是我们的静态站点是有国内和国外加速的(这个是在 aws 的 router 53 服务配置的)，比如:</p>
-<ul>
-<li>如果是国内访问的，那么就引导到腾讯云的 COS 存储服务 + CDN 服务</li>
-<li>如果是国外访问的，那么就引导到 aws 的  S3 存储服务 + Cloudfront CDN 服务</li>
-</ul>
-<p>正常的文件当然没问题，但是有时候会出现如果 url 后面不输入 index.html，直接子目录斜杠结尾，比如 <code>https://m.foo.com/cast/</code> ，这时候腾讯云表现是正常的，因为他会索引到 <code>https://m.foo.com/cast/index.html</code>, 但是 aws 的 cloudfront 就不行，会直接报错， 显示获取 S3 对象失败:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_9_centos ~]$ curl https://m.foo.com/cast/</span><br><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;Error&gt;&lt;Code&gt;AccessDenied&lt;/Code&gt;&lt;Message&gt;Access Denied&lt;/Message&gt;&lt;RequestId&gt;QABCT7FCM4M3T4AR&lt;/RequestId&gt;&lt;HostId&gt;VnPLeZeR2KQkIMDrFhukmVLUGp+RBWbZO/V8qHeS0dGKLa1N8KOTbWvwNW/J2NKbQWqQXyP5wdw=&lt;/HostId&gt;&lt;/Error&gt;</span><br></pre></td></tr></table></figure></p>
-<p>更有甚者，如果我连子目录的斜杠都没有写全，直接子目录的话，比如 <code>https://m.foo.com/cast</code>， 这时候腾讯云的表现也是对的，他如果找不到 cast 这个文件的话，就会将其当做一个子目录，再去检索这个子目录下的 index.html 文件。所以你用 curl 请求的话，会返回一个 302 跳转，然后 location 头部就会带上 <code>https://m.foo.com/cast/</code>, 这时候就会跳转到正确的页面:</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/03/25/s3-cloudfront-add-sub-folder-access/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/02/24/window-open-param/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/24/window-open-param/" itemprop="url">window.open() 打开的子页面往跨域的主页面传参问题</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-24T15:25:20+08:00">
-                2021-02-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/前端相关/" itemprop="url" rel="index">
-                    <span itemprop="name">前端相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/24/window-open-param/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/02/24/window-open-param/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/02/24/window-open-param/" class="leancloud_visitors" data-flag-title="window.open() 打开的子页面往跨域的主页面传参问题">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有遇到比较奇葩的需求，就是正常情况下，我们站点在进行第三方登录的时候，会通过 <code>window.open</code> 的方法，打开一个服务端的接口页面，然后这个服务端的接口去判断当前是否有授权行为，如果有的话，就写入 cookie，然后关闭当前窗体， 如果没有的话，就跳转到第三方的授权页面，然后在授权结束，回调的时候，写入 cookie，然后关闭当前窗体，前端会监听当前的窗体，当发现已经关闭的时候，就会去请求自动登录的接口，这时候，因为 cookie 信息已经让服务端写入了，所以这时候就可以正常登录，这时候前端还会读取服务端的某一个 token cookie， 然后生成当前一次性令牌 token， 以供服务端进行校验。</p>
-<p>正常情况下是没有问题的，但是由于 chrome 浏览器在新版本的时候，cookie的默认设置会有 <code>SameSite=Lax</code>，这时候就会导致前端读取不了服务端的 cookie (<a href="/2021/02/22/cookie-samesite/" title="chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输">chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输</a>)， 从而无法生成一次性访问 token 令牌， 这时候再去请求自动登录的接口，就会出现校验失败。</p>
-<p>所以这边的想法是，服务端在生成 cookie 的时候，能不能在窗口关闭之前，往前端传 当前的一次性令牌的 token。这样子前端就可以带上这个 token 去进行自动登录的校验。</p>
-<p>所以这边就会涉及到 <code>window.open()</code> 打开的子页面， 往主页面传参问题。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/02/24/window-open-param/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3817,7 +3812,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">263</span>
+                  <span class="site-state-item-count">266</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3839,7 +3834,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">65</span>
+                  <span class="site-state-item-count">66</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -3886,7 +3881,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

@@ -93,7 +93,7 @@
 <meta property="og:description" content="前言通过 将A站点代理到B站点的某一个页面 我们知道可以先建一个全新的域名，然后将其反向代理到另一个站点的某一个页面(地址栏url不能变)。结果现在还有一个更复杂的需求，就是有一个新的域名 foo.at(真实域名换成foo)， 然后后面有带参数，比如  foo.at/112233 ，然后转发代理到另一个站点的另一个页面，比如 www.foo.com/en/action?code=112233 ，其">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://kebingzao.com/2019/05/30/nginx-301-2/1.png">
-<meta property="og:updated_time" content="2019-06-04T12:34:49.103Z">
+<meta property="og:updated_time" content="2022-03-06T14:54:03.518Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="将带参数的A站点代理到B站点的某一个页面">
 <meta name="twitter:description" content="前言通过 将A站点代理到B站点的某一个页面 我们知道可以先建一个全新的域名，然后将其反向代理到另一个站点的某一个页面(地址栏url不能变)。结果现在还有一个更复杂的需求，就是有一个新的域名 foo.at(真实域名换成foo)， 然后后面有带参数，比如  foo.at/112233 ，然后转发代理到另一个站点的另一个页面，比如 www.foo.com/en/action?code=112233 ，其">
@@ -427,6 +427,9 @@
 <p>加上这一句就会把参数带过去了，所以就可以了。</p>
 <h2 id="备案的问题"><a href="#备案的问题" class="headerlink" title="备案的问题"></a>备案的问题</h2><p>还有一个问题，就是 foo.at 没有在国内的域名备案，所以如果访问 http 的话，就会出现这个页面：<br><img src="/2019/05/30/nginx-301-2/1.png" alt="1"><br>所以在备案之前（备案要一个月左右）要用 https 才行。 foo.at 因为在 godaddy 买的，所以不能在国内备案，所以最好可以转到腾讯云。不过后面发现，原来不放国内服务器（之前放的是广东那一台），就不会有备案的问题了。 但是放国外的服务器，又可能出现国内访问国外，解析有问题的情况。所以最好的情况，就是放香港那一台服务器，国内，国外都可以解析。 所以就没有这个问题啦。我真的是个小机灵鬼。<br>所以就把 foo.at 放到香港那一台服务器了。<a href="http://www.foo.com" target="_blank" rel="noopener">www.foo.com</a> 还是放原来的服务器。</p>
 <h2 id="最后调整"><a href="#最后调整" class="headerlink" title="最后调整"></a>最后调整</h2><p>最后调整了一下结构为：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">	listen 80;</span><br><span class="line">	listen 443 ssl http2;</span><br><span class="line">	server_name foo.at;</span><br><span class="line">	include ssl/ssl_foo.at.conf;</span><br><span class="line"></span><br><span class="line">	access_log /var/log/nginx/foo.at.access.log main;</span><br><span class="line">	access_log /var/log/nginx/foo.at.4xx-5xx.log combined if=$loggable;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	if ($scheme = http)&#123;</span><br><span class="line">		return 301 https://$server_name$request_uri;</span><br><span class="line">	&#125;</span><br><span class="line">	location / &#123;</span><br><span class="line">		resolver 8.8.8.8;	</span><br><span class="line">		proxy_pass https://www.foo.com/$cookie_lang/action;	</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>注意这边有个多语言的 cookie 获取 : <code>$cookie_lang</code>, nginx 有 <code>$cookie_x</code> 变量，x 是 cookie 变量名， 所以 <code>$cookie_lang</code> 就是获取 key 为 lang 的 cookie 的值。</p>
+</blockquote>
 <p>然后在 action 这个页面的函数里面，加上域名的判断，如果是 foo.at 的域名，那么就得到后面的参数, 不管有没有多语言，最后一个路径就是参数<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">function init () &#123;</span><br><span class="line">    var hostname = window.location.hostname;</span><br><span class="line">    if (hostname.indexOf('foo.at') !== -1) &#123;</span><br><span class="line">        var pathArr = window.location.pathname.split('/');</span><br><span class="line">        code = pathArr[pathArr.length - 1];</span><br><span class="line">        beginProcess();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 
       
@@ -579,7 +582,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">266</span>
+                  <span class="site-state-item-count">269</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前段时间公司有请了安全服务公司来给公司的项目做 安全渗透， 尤其是 web 应用的安全渗透。 其中可测试点非常多。  其实关于 web 安全方面， 我之前也写了一些文章: 分类 - web 安全, 但是更多的是各种的安全的案例以及对应的解决方案。好像还没有从大的方向上来总结和归纳。 所以本次我也想总结一下 web 安全渗透到底是什么，为什么要做， 以及怎么做? 什么是渗透测试渗透测试（Pene">
+<meta name="keywords" content="security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈之 - web 安全渗透测试方案">
+<meta property="og:url" content="http://kebingzao.com/2022/01/11/web-penetration-testing/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前段时间公司有请了安全服务公司来给公司的项目做 安全渗透， 尤其是 web 应用的安全渗透。 其中可测试点非常多。  其实关于 web 安全方面， 我之前也写了一些文章: 分类 - web 安全, 但是更多的是各种的安全的案例以及对应的解决方案。好像还没有从大的方向上来总结和归纳。 所以本次我也想总结一下 web 安全渗透到底是什么，为什么要做， 以及怎么做? 什么是渗透测试渗透测试（Pene">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2022/01/11/web-penetration-testing/1.png">
+<meta property="og:updated_time" content="2022-03-06T14:54:03.522Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅谈之 - web 安全渗透测试方案">
+<meta name="twitter:description" content="前言前段时间公司有请了安全服务公司来给公司的项目做 安全渗透， 尤其是 web 应用的安全渗透。 其中可测试点非常多。  其实关于 web 安全方面， 我之前也写了一些文章: 分类 - web 安全, 但是更多的是各种的安全的案例以及对应的解决方案。好像还没有从大的方向上来总结和归纳。 所以本次我也想总结一下 web 安全渗透到底是什么，为什么要做， 以及怎么做? 什么是渗透测试渗透测试（Pene">
+<meta name="twitter:image" content="http://kebingzao.com/2022/01/11/web-penetration-testing/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/01/11/web-penetration-testing/"/>
+
+
+
+
+
+  <title>浅谈之 - web 安全渗透测试方案 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/01/11/web-penetration-testing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浅谈之 - web 安全渗透测试方案</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-01-11T20:13:50+08:00">
+                2022-01-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/01/11/web-penetration-testing/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/01/11/web-penetration-testing/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/01/11/web-penetration-testing/" class="leancloud_visitors" data-flag-title="浅谈之 - web 安全渗透测试方案">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间公司有请了安全服务公司来给公司的项目做 安全渗透， 尤其是 web 应用的安全渗透。 其中可测试点非常多。 </p>
+<p>其实关于 web 安全方面， 我之前也写了一些文章: <a href="https://kebingzao.com/categories/web%E5%AE%89%E5%85%A8/">分类 - web 安全</a>, 但是更多的是各种的安全的案例以及对应的解决方案。好像还没有从大的方向上来总结和归纳。</p>
+<p>所以本次我也想总结一下 web 安全渗透到底是什么，为什么要做， 以及怎么做?</p>
+<h2 id="什么是渗透测试"><a href="#什么是渗透测试" class="headerlink" title="什么是渗透测试"></a>什么是渗透测试</h2><p>渗透测试（Penetration Test）是指安全工程师尽可能完整地摸拟黑客使用的漏洞发现技术和攻击手段，对 目标网络/系统/主机/应用 的安全性做深入的探测，发现系统最脆弱的环节的过程，渗透测试能够直观的让管理人员知道自己网络面临的问题。</p>
+<a id="more"></a>
+<p>渗透测试是一种专业的安全服务，类似于军队里的 <code>实战演习</code> 或者 <code>沙盘推演</code>，通过实战和推演，让用户清晰了解目前网络的脆弱性、可能造成的影响，以便采取必要的防范措施。</p>
+<p>渗透测试的方式分为以下几种:</p>
+<h3 id="1-黑盒测试"><a href="#1-黑盒测试" class="headerlink" title="1. 黑盒测试"></a>1. 黑盒测试</h3><p>黑箱测试又被称为所谓的 <code>zero-knowledge testing</code>, 渗透者完全处于对系统一无所知的状态，通常这类型测试，最初的信息获取来自于DNS、Web、Email及各种公开对外的服务器。</p>
+<h3 id="2-白盒测试"><a href="#2-白盒测试" class="headerlink" title="2. 白盒测试"></a>2. 白盒测试</h3><p>白盒测试与黑箱测试恰恰相反，测试者可以通过正常的渠道向被单位取得各种资料，包括网络拓扑、员工资料甚至网站或其它程序的代码片断，也能够与单位的其它员工（销售、程序员、管理者……）进行面对面的交流。这类测试的目的是模拟企业内部雇员的越权操作。</p>
+<h3 id="3-隐秘测试"><a href="#3-隐秘测试" class="headerlink" title="3. 隐秘测试"></a>3. 隐秘测试</h3><p>隐秘测试是对被测单位而言的，通常情况下，接受渗透测试的单位网络管理部门会收到通知：在某些时段进行测试，因此能够监测网络中出现的变化，但隐性测试则被测单位也仅有极少数人知晓测试的存在，因此能够有效地检验单位中的信息安全事件监控、响应、恢复等做的是否到位。</p>
+<h2 id="渗透测试目的"><a href="#渗透测试目的" class="headerlink" title="渗透测试目的"></a>渗透测试目的</h2><p>渗透测试是完全模拟黑客可能使用的攻击技术和漏洞发现技术，对目标系统的安全作深入的探测，发现系统最脆弱的环节。渗透测试能够直观的让管理人员知道自己网络所面临的问题。</p>
+<p>渗透测试主要依据安全专家已经掌握的安全漏洞和安全检测工具，模拟黑客的攻击方法在客户的授权和监督下对客户的系统和网络进行非破坏性质的攻击性测试。</p>
+<p>渗透测试主要利用网络安全扫描器、专用安全测试工具和富有经验的安全工程师对网络中的核心服务器及重要的网络设备，包括服务器、网络设备、防火墙等进行非破坏性质的模拟黑客攻击，目的是入侵系统和获取机密信息并将入侵的过程和细节产生报告给用户。</p>
+<p>渗透测试和工具扫描可以很好的互相补充。工具扫描具有很好的效率和速度，但是存在一定的误报率和漏报率，并不能发现高层次、复杂、并且相互关联的安全问题；渗透测试需要投入的人力资源较大、对测试者的专业技能要求很高（渗透测试报告的价值与渗透测试者的专业技能直接相关），但是非常准确，可以发现逻辑性更强、更深层次的弱点。</p>
+<h2 id="渗透测试流程"><a href="#渗透测试流程" class="headerlink" title="渗透测试流程"></a>渗透测试流程</h2><p>渗透测试服务通过远程利用目标应用系统等安全弱点，模拟真正的黑客入侵攻击方法，以人工渗透为主，以漏洞扫描工具为辅，在保证整个渗透测试过程都在可以控制和调整的范围之内尽可能的获取目标信息系统的管理权限以及敏感信息。</p>
+<p>一般的流程是这样子的</p>
+<p><img src="/2022/01/11/web-penetration-testing/1.png" alt=""></p>
+<h3 id="1-信息收集"><a href="#1-信息收集" class="headerlink" title="1. 信息收集"></a>1. 信息收集</h3><p>信息收集是指渗透实施前尽可能多地获取目标信息系统相关信息，例如网站注册信息、共享资源、系统版本信息、已知漏洞及弱口令等等。通过对以上信息的收集，发现可利用的安全漏洞，为进一步对目标信息系统进行渗透入侵提供基础。</p>
+<h3 id="2-弱点分析及功能分析"><a href="#2-弱点分析及功能分析" class="headerlink" title="2. 弱点分析及功能分析"></a>2. 弱点分析及功能分析</h3><p>对收集到的目标信息系统可能存在的可利用安全漏洞或弱点进行分析，并确定渗透方式和步骤实施渗透测试。</p>
+<h3 id="3-获取权限"><a href="#3-获取权限" class="headerlink" title="3. 获取权限"></a>3. 获取权限</h3><p>对目标信息系统渗透成功，获取目标信息系统普通权限。</p>
+<h3 id="4-权限提升"><a href="#4-权限提升" class="headerlink" title="4. 权限提升"></a>4. 权限提升</h3><p>当获取目标信息系统普通管理权限后，利用已知提权类漏洞或特殊渗透方式进行本地提权，获取目标系统远程控制权限。</p>
+<h2 id="渗透测试的几种类型"><a href="#渗透测试的几种类型" class="headerlink" title="渗透测试的几种类型"></a>渗透测试的几种类型</h2><ol>
+<li>web 应用安全渗透</li>
+<li>接口类应用安全渗透</li>
+<li>前端应用安全渗透</li>
+<li>系统软件安全渗透</li>
+<li>硬件设备安全渗透</li>
+<li>其他类型应用安全渗透(业务场景，网络层，数据存储，中间件)</li>
+</ol>
+<p>本文主要是总结 web 安全渗透的，所以只包含前三种，也就是:</p>
+<ol>
+<li>web 应用安全渗透</li>
+<li>接口类应用安全渗透</li>
+<li>前端应用安全渗透</li>
+</ol>
+<p>还有就是 其他类型应用安全渗透的 web 业务场景的渗透测试。</p>
+<h2 id="测试工具说明"><a href="#测试工具说明" class="headerlink" title="测试工具说明"></a>测试工具说明</h2><p>渗透测试人员模拟黑客入侵攻击的过程中使用的是操作系统自带网络应用、管理和诊断工具、黑客可以在网络上免费下载的扫描器、远程入侵代码和本地提升权限代码以及自主开发的安全测试工具。</p>
+<p>这些工具经过全球数以万计的程序员、网络管理员、安全专家以及黑客的测试和实际应用，在技术上已经非常成熟，实现了网络检查和安全测试的高度可控性，能够根据使用者的实际要求进行有针对性的测试。</p>
+<p>但是安全工具本身也是一把双刃剑，为了做到万无一失，渗透测试工程师也要针对系统可能出现的不稳定现象提出相应对策，以确保服务器和网络设备在进行渗透测试的过程中保持在可信状态。</p>
+<h3 id="1-系统自带工具"><a href="#1-系统自带工具" class="headerlink" title="1. 系统自带工具"></a>1. 系统自带工具</h3><p>以下列出了主要应用到的系统自带网络应用、管理和诊断工具，渗透测试工程师将用到但不限于只使用以下系统命令进行渗透测试。</p>
+<table>
+<thead>
+<tr>
+<th>工具名称</th>
+<th>风险等级</th>
+<th>获取途径</th>
+<th>主要用途</th>
+<th>存在风险描述</th>
+<th>风险控制方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ping</td>
+<td>无</td>
+<td>系统自带</td>
+<td>获取软件部署的信息</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>telnet</td>
+<td>无</td>
+<td>系统自带</td>
+<td>登录系统</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ftp</td>
+<td>无</td>
+<td>系统自带</td>
+<td>传输文件</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>tracert</td>
+<td>无</td>
+<td>系统自带</td>
+<td>获取网络信息</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>net use</td>
+<td>无</td>
+<td>系统自带</td>
+<td>建立连接</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>net user</td>
+<td>无</td>
+<td>系统自带</td>
+<td>查看系统用户</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>echo</td>
+<td>无</td>
+<td>系统自带</td>
+<td>文件输出</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>nslookup</td>
+<td>无</td>
+<td>系统自带</td>
+<td>获取软件部署的主机信息</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>IE</td>
+<td>无</td>
+<td>系统自带</td>
+<td>获取 web 信息，进行 SQL 注入</td>
+<td>无</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-自由软件和渗透测试工具"><a href="#2-自由软件和渗透测试工具" class="headerlink" title="2. 自由软件和渗透测试工具"></a>2. 自由软件和渗透测试工具</h3><blockquote>
+<p>以下工具不限于只用来做 web 安全渗透</p>
+</blockquote>
+<p>以下列出了渗透测试中常用到的网络扫描工具、网络管理软件等工具，这些工具都是网络上的免费软件。渗透测试工程师将可能利用到但是不限于利用以下工具。</p>
+<p>远程溢出代码和本地溢出代码需要根据具体系统的版本和漏洞情况来选择，由于种类繁杂并且没有代表性，在这里不会一一列出。</p>
+<table>
+<thead>
+<tr>
+<th>工具名称</th>
+<th>风险等级</th>
+<th>主要用途</th>
+<th>存在风险描述</th>
+<th>风险控制方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://zh.wikipedia.org/wiki/Netcat" target="_blank" rel="noopener">nc</a></td>
+<td>无</td>
+<td>对软件部署的主机扫描端口连接工具</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td>远程溢出工具</td>
+<td>中</td>
+<td>通过对软件部署的主机漏洞远程进入系统</td>
+<td>溢出程序可能造成服务不稳定</td>
+<td>备份数据，服务异常时重启服务</td>
+</tr>
+<tr>
+<td>本地溢出工具</td>
+<td>中</td>
+<td>通过对软件部署的主机漏洞本地提升权限</td>
+<td>溢出程序可能造成服务不稳定</td>
+<td>备份数据，服务异常时重启服务</td>
+</tr>
+<tr>
+<td><a href="https://www.arachni-scanner.com/" target="_blank" rel="noopener">Arachni</a></td>
+<td>低</td>
+<td>高性能安全Web扫描程序</td>
+<td>可能造成网络资源的占用</td>
+<td>如果软件部署的主机负载过高，停止扫描</td>
+</tr>
+<tr>
+<td><a href="https://github.com/faizann24/XssPy" target="_blank" rel="noopener">XssPy</a></td>
+<td>低</td>
+<td>XSS（跨站脚本）漏洞扫描器</td>
+<td>可能造成网络资源的占用</td>
+<td>如果软件部署的主机负载过高，停止扫描</td>
+</tr>
+<tr>
+<td><a href="http://w3af.org/" target="_blank" rel="noopener">w3af</a></td>
+<td>低</td>
+<td>Web应用程序进行审计</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td><a href="https://cirt.net/Nikto2" target="_blank" rel="noopener">Nikto</a></td>
+<td>低</td>
+<td>扫描Web服务器配置错误、插件和Web漏洞</td>
+<td>可能造成网络资源的占用</td>
+<td>如果软件部署的主机负载过高，停止扫描</td>
+</tr>
+<tr>
+<td><a href="https://github.com/xmendez/wfuzz" target="_blank" rel="noopener">Wfuzz</a></td>
+<td>无</td>
+<td>对字段的HTTP请求中的数据进行模糊处理，对Web应用程序进行审查</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td><a href="https://www.zaproxy.org/" target="_blank" rel="noopener">OWASP ZAP</a></td>
+<td>低</td>
+<td>在浏览器和Web应用程序之间拦截和检查消息</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td><a href="https://wapiti.sourceforge.io/" target="_blank" rel="noopener">Wapiti</a></td>
+<td>低</td>
+<td>扫描特定的目标网页，寻找能够注入数据的脚本和表单</td>
+<td>可能造成网络资源的占用</td>
+<td>如果软件部署的主机负载过高，停止扫描</td>
+</tr>
+<tr>
+<td><a href="https://subgraph.com/vega/" target="_blank" rel="noopener">Vega</a></td>
+<td>低</td>
+<td>查找XSS，SQLi、RFI和其它的漏洞</td>
+<td>可能造成网络资源的占用</td>
+<td>如果软件部署的主机负载过高，停止扫描</td>
+</tr>
+<tr>
+<td><a href="https://sqlmap.org/" target="_blank" rel="noopener">SQLmap</a></td>
+<td>低</td>
+<td>对后台数据库进行渗透测试和漏洞查找</td>
+<td>可能造成网络资源的占用</td>
+<td>如果软件部署的主机负载过高，停止扫描</td>
+</tr>
+<tr>
+<td><a href="https://rgaucher.info/beta/grabber/" target="_blank" rel="noopener">Grabber</a></td>
+<td>无</td>
+<td>管理和运行渗透工具分析器的流行安全工具框架</td>
+<td>无</td>
+<td>无</td>
+</tr>
+<tr>
+<td><a href="https://github.com/ajinabraham/OWASP-Xenotix-XSS-Exploit-Framework" target="_blank" rel="noopener">OWASP Xenotix XSS</a></td>
+<td>低</td>
+<td>用于查找和利用Web跨站点脚本的高级框架</td>
+<td>可能造成网络资源的占用</td>
+<td>如果软件部署的主机负载过高，停止扫描</td>
+</tr>
+<tr>
+<td><a href="https://portswigger.net/burp" target="_blank" rel="noopener">Burpsuite</a></td>
+<td>低</td>
+<td>用于渗透Web应用程序的集成平台</td>
+<td>可能造成网络资源的占用</td>
+<td>如果软件部署的主机负载过高，停止扫描</td>
+</tr>
+</tbody>
+</table>
+<h2 id="测试环境说明"><a href="#测试环境说明" class="headerlink" title="测试环境说明"></a>测试环境说明</h2><p>为更好的保护系统安全，实际生产环境和测试开发环境应该隔离。在生产环境中的任何改动，都需要严格遵循变更管理流程，做到执行人、执行时间、执行对象和具体改动均记录在案，并有企业信息安全部门进行事前审核和事后审计。</p>
+<p>技术人员一般不要直接调试生产系统，可以在测试环境中调试完成后再更新生产系统，以避免调试过程中开启某些接口、更改某些配置或者保存某些调试信息造成安全隐患。如果非要在线调试生产系统，而且需要保存调试信息时，应避免将调试信息直接保存到服务器本地，同时调试完成后在第一时间删除相关调试信息并恢复系统配置。</p>
+<h2 id="Web应用安全渗透测试详情"><a href="#Web应用安全渗透测试详情" class="headerlink" title="Web应用安全渗透测试详情"></a>Web应用安全渗透测试详情</h2><p><a href="https://zhuanlan.zhihu.com/p/393635352" target="_blank" rel="noopener">OWASP Top 10</a> 的首要目的是教导开发人员、设计人员、架构师、管理人员和企业组织，让他们认识到最严重Web应用程序安全弱点所产生的后果。Top 10 提供了这些高风险问题的描述。渗透测试工程师应该重点针对 OWASP 漏洞清单内容逐一进行检查。</p>
+<h3 id="OWASP-Top-10"><a href="#OWASP-Top-10" class="headerlink" title="OWASP Top 10"></a>OWASP Top 10</h3><p>具体的 OWASP Top 10 的漏洞缺陷如下:</p>
+<h4 id="1-注入"><a href="#1-注入" class="headerlink" title="1. 注入"></a>1. 注入</h4><p>将不受信任的数据作为命令或查询的一部分发送到解析器时，会产生诸如SQL注入、NoSQL注入、OS注入和LDAP注入的注入缺陷。攻击者的恶意数据可以诱使解析器在没有适当授权的情况下执行非预期命令或访问数据。</p>
+<h5 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h5><p>注入可以导致数据丢失或被破坏，缺乏可审计性或拒绝服务。注入漏洞有时甚至可导致完全接管主机</p>
+<h5 id="常见的注入"><a href="#常见的注入" class="headerlink" title="常见的注入"></a>常见的注入</h5><ul>
+<li>sql注入</li>
+<li>–os-shell</li>
+<li>LDAP（轻量目录访问协议）</li>
+<li>xpath（XPath即为XML路径语言，它是一种用来确定XML（标准通用标记语言的子集）文档中某部分位置的语言）</li>
+<li>HQL注入</li>
+</ul>
+<h5 id="如何防范"><a href="#如何防范" class="headerlink" title="如何防范"></a>如何防范</h5><ol>
+<li>使用安全的API，避免使用解释器</li>
+<li><p>对输入的特殊的字符进行ESCAPE转义处理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">例子：LIKE ‘%M%’ ESCAPE ‘M’</span><br><span class="line"></span><br><span class="line">使用ESCAPE关键字定义了转义字符“M”，告诉DBMS将搜索字符串“%M%”中的第二个百分符（%）作为实际值，而不是通配符</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用白名单来规范化的输入验证方法</p>
+</li>
+</ol>
+<h4 id="2-失效的身份认证"><a href="#2-失效的身份认证" class="headerlink" title="2. 失效的身份认证"></a>2. 失效的身份认证</h4><p>通常，通过错误使用应用程序的身份认证和会话管理功能，攻击者能够破译密码、密钥或会话令牌，或者利用其它开发缺陷来暂时性或永久性冒充其他用户的身份。</p>
+<h5 id="危害-1"><a href="#危害-1" class="headerlink" title="危害"></a>危害</h5><p>这些漏洞可能导致部分甚至全部账户遭受攻击，一旦攻击成功，攻击者就能执行合法的任何操作</p>
+<h5 id="如何防范-1"><a href="#如何防范-1" class="headerlink" title="如何防范"></a>如何防范</h5><ul>
+<li>使用内置的会话管理功能</li>
+<li>通过认证的问候</li>
+<li>使用单一的入口点</li>
+<li>确保在一开始登录SSL保护的网页</li>
+</ul>
+<h4 id="3-敏感数据泄露"><a href="#3-敏感数据泄露" class="headerlink" title="3. 敏感数据泄露"></a>3. 敏感数据泄露</h4><p>许多Web应用程序和API都无法正确保护敏感数据，例如：财务数据、医疗数据和PII数据。攻击者可以通过窃取或修改未加密的数据来实施信用卡诈骗、身份盗窃或其他犯罪行为。</p>
+<p>未加密的敏感数据容易受到破坏，因此，我们需要对敏感数据加密，这些数据包括：传输过程中的数据、存储的数据以及浏览器的交互数据。</p>
+<h4 id="4-XML外部实体-XXE"><a href="#4-XML外部实体-XXE" class="headerlink" title="4. XML外部实体(XXE)"></a>4. XML外部实体(XXE)</h4><p>XXE 全称为 <code>XML External Entity attack</code>, 即XML(可扩展标记语言) 外部实体注入攻击，</p>
+<p>许多较早的或配置错误的XML处理器评估了XML文件中的外部实体引用。攻击者可以利用外部实体窃取使用URI文件处理器的内部文件和共享文件、监听内部扫描端口、执行远程代码和实施拒绝服务攻击。</p>
+<h4 id="5-失效的访问控制"><a href="#5-失效的访问控制" class="headerlink" title="5. 失效的访问控制"></a>5. 失效的访问控制</h4><p>未对通过身份验证的用户实施恰当的访问控制。攻击者可以利用这些缺陷访问未经授权的功能或数据，例如：访问其他用户的帐户、查看敏感文件、修改其他用户的数据、更改访问权限等。</p>
+<h5 id="危害-2"><a href="#危害-2" class="headerlink" title="危害"></a>危害</h5><p>这种漏洞可以损坏参数所引用的所有数据</p>
+<h5 id="如何防范-2"><a href="#如何防范-2" class="headerlink" title="如何防范"></a>如何防范</h5><ol>
+<li>使用基于用户或会话的间接对象访问，这样可防止攻击者直接攻击未授权资源</li>
+<li>访问检查：对任何来自不受信源所使用的所有对象进行访问控制检查</li>
+<li>避免在url或网页中直接引用内部文件名或数据库关键字</li>
+<li>验证用户输入和url请求，拒绝包含<code>./</code>  <code>…/</code> 的请求</li>
+</ol>
+<h4 id="6-安全配置错误"><a href="#6-安全配置错误" class="headerlink" title="6. 安全配置错误"></a>6. 安全配置错误</h4><p>安全配置错误是最常见的安全问题，这通常是由于不安全的默认配置、不完整的临时配置、开源云存储、错误的HTTP 标头配置以及包含敏感信息的详细错误信息所造成的。</p>
+<p>因此，我们不仅需要对所有的操作系统、框架、库和应用程序进行安全配置，而且必须及时修补和升级它们。</p>
+<p>之前就出现过几起因为不安全配置导致的安全缺陷问题:</p>
+<ul>
+<li><a href="/2021/06/21/s3-bucket-index/" title="记一次 aws s3 公开桶的索引泄露问题">记一次 aws s3 公开桶的索引泄露问题</a></li>
+<li><a href="/2021/06/21/s3-subdomain-takeover/" title="记一次因为 S3 bucket 删除而导致的子域名接管(subdomain takeover)的安全问题">记一次因为 S3 bucket 删除而导致的子域名接管(subdomain takeover)的安全问题</a></li>
+<li><a href="/2020/04/11/ssl-caa/" title="web 安全之 - 给站点添加 DNS CAA 保护">web 安全之 - 给站点添加 DNS CAA 保护</a>
+</li>
+</ul>
+<h5 id="危害-3"><a href="#危害-3" class="headerlink" title="危害"></a>危害</h5><p>系统可能在未知的情况下被完全攻破，用户数据可能随着时间被全部盗走或篡改。甚至导致整个系统被完全破坏</p>
+<h5 id="如何防范-3"><a href="#如何防范-3" class="headerlink" title="如何防范"></a>如何防范</h5><ol>
+<li>自动化安装部署</li>
+<li>及时了解并部署每个环节的软件更新和补丁信息</li>
+<li>实施漏洞扫描和安全审计</li>
+</ol>
+<h4 id="7-跨站脚本（xss）"><a href="#7-跨站脚本（xss）" class="headerlink" title="7. 跨站脚本（xss）"></a>7. 跨站脚本（xss）</h4><p>xss攻击全称为跨站脚本攻击,</p>
+<p>当应用程序的新网页中包含不受信任的、未经恰当验证或转义的数据时，或者使用可以创建 HTML 或 JavaScript 的浏览器API 更新现有的网页时，就会出现 XSS 缺陷。</p>
+<p>XSS 让攻击者能够在受害者的浏览器中执行脚本，并劫持用户会话、破坏网站或将用户重定向到恶意站点。</p>
+<h5 id="危害-4"><a href="#危害-4" class="headerlink" title="危害"></a>危害</h5><p>攻击者在受害者浏览器中执行脚本以劫持用户会话，插入恶意内容，重定向用户，使用恶意软件劫持用户浏览器等</p>
+<p>XSS 的漏洞有好几种类型，包含 存储型， 反射型， DOM 型</p>
+<h5 id="如何防范-4"><a href="#如何防范-4" class="headerlink" title="如何防范"></a>如何防范</h5><ol>
+<li>验证输入</li>
+<li>编码输出（用来确保输入的字符被视为数据，而不是作为html被浏览器所解析）</li>
+</ol>
+<h4 id="8-不安全的反序列化"><a href="#8-不安全的反序列化" class="headerlink" title="8. 不安全的反序列化"></a>8. 不安全的反序列化</h4><p>不安全的反序列化会导致远程代码执行。即使反序列化缺陷不会导致远程代码执行，攻击者也可以利用它们来执行攻击，包括：重播攻击、注入攻击和特权升级攻击。</p>
+<h4 id="9-使用含有已知漏洞的组件"><a href="#9-使用含有已知漏洞的组件" class="headerlink" title="9. 使用含有已知漏洞的组件"></a>9. 使用含有已知漏洞的组件</h4><p>组件（例如：库、框架和其他软件模块）拥有和应用程序相同的权限。如果应用程序中含有已知漏洞的组件被攻击者利用，可能会造成严重的数据丢失或服务器接管。</p>
+<p>同时，使用含有已知漏洞的组件的应用程序和API可能会破坏应用程序防御、造成各种攻击并产生严重影响。</p>
+<h5 id="如何防范-5"><a href="#如何防范-5" class="headerlink" title="如何防范"></a>如何防范</h5><ol>
+<li>识别正在使用的组件和版本，包括所有的依赖</li>
+<li>更新组件或引用的库文件到最新</li>
+<li>建立安全策略来管理组件的使用</li>
+</ol>
+<h4 id="10-不足的日志记录和监控"><a href="#10-不足的日志记录和监控" class="headerlink" title="10. 不足的日志记录和监控"></a>10. 不足的日志记录和监控</h4><p>不足的日志记录和监控，以及事件响应缺失或无效的集成，使攻击者能够进一步攻击系统、保持持续性或转向更多系统，以及篡改、提取或销毁数据。</p>
+<p>大多数缺陷研究显示，缺陷被检测出的时间超过200天，且通常通过外部检测方检测，而不是通过内部流程或监控检测。</p>
+<h2 id="接口类应用安全渗透测试详情"><a href="#接口类应用安全渗透测试详情" class="headerlink" title="接口类应用安全渗透测试详情"></a>接口类应用安全渗透测试详情</h2><h3 id="1-常规接口安全风险"><a href="#1-常规接口安全风险" class="headerlink" title="1. 常规接口安全风险"></a>1. 常规接口安全风险</h3><p>接口的安全风险主要有信息泄露、接口非法调用、不安全的对象引用等。如采取访问控制安全策略：例如相关服务器的数据信息只允许经授权的接口调用，其它来源均禁止。</p>
+<h3 id="2-业务接口调用"><a href="#2-业务接口调用" class="headerlink" title="2. 业务接口调用"></a>2. 业务接口调用</h3><p>业务接口调用是以内部操作分离出外部调用的方法，使其能被修改而不影响外界其他其交互的方式，常见业务接口方式有重放攻击，短信炸弹，邮件轰炸。</p>
+<ul>
+<li>重放攻击：在短信或邮件调用业务（例如：短信验证码，邮件验证码），对其业务环节进行调用（重放）测试。如果业务经过调用（重放）后被多次生成有效的业务或数据结果。</li>
+<li>短信炸弹：在测试的过程中，一般系统平台仅在前端通过JS校验时间来控制短信发送按钮，但后台并未对发送做任何限制，导致可通过重放包的方式大量发送恶意短信。</li>
+<li>邮件轰炸: 同短信炸弹，只不过媒介是邮件</li>
+</ul>
+<h3 id="3-Web认证业务接口调用"><a href="#3-Web认证业务接口调用" class="headerlink" title="3. Web认证业务接口调用"></a>3. Web认证业务接口调用</h3><p>测试内容包括但不限于：</p>
+<ul>
+<li>会话重放，信息轰炸</li>
+<li>更换不同账号，反复请求，资源消耗</li>
+<li>非法调用/未验证会话</li>
+</ul>
+<h3 id="4-API接口处理响应测试"><a href="#4-API接口处理响应测试" class="headerlink" title="4. API接口处理响应测试"></a>4. API接口处理响应测试</h3><p>包括利用 <code>Peach</code> 使用 <code>Fuzzing</code> 的方式进行接口处理响应测试。</p>
+<h3 id="5-接口数据验证测试"><a href="#5-接口数据验证测试" class="headerlink" title="5. 接口数据验证测试"></a>5. 接口数据验证测试</h3><p>检查外部接口传输给应用程序的数据是否经过了校验，校验规则是否完善，对非法字符是否进行了阻断。</p>
+<h3 id="6-不安全的生态接口"><a href="#6-不安全的生态接口" class="headerlink" title="6. 不安全的生态接口"></a>6. 不安全的生态接口</h3><p>包括生态系统中不安全的Web、后端API、云或移动接口，导致设备或相关组件遭攻陷。</p>
+<p>常见的问题包括缺乏认证或授权、缺乏加密或弱加密以及缺乏输入和输出过滤。</p>
+<h3 id="7-接口访问控制机制"><a href="#7-接口访问控制机制" class="headerlink" title="7. 接口访问控制机制"></a>7. 接口访问控制机制</h3><p>应当考虑访问控制机制的可用性与成熟度及实现的难易程度。</p>
+<p>如通过接口对用户访问的系统功能进行限制，如：对不同的用户显示不同的功能菜单。</p>
+<h3 id="8-接口返回敏感数据"><a href="#8-接口返回敏感数据" class="headerlink" title="8. 接口返回敏感数据"></a>8. 接口返回敏感数据</h3><p>此问题是由于接口控制不严导致，解决方法一般是严格控制查询接口和响应数据，不需要返回的数据不返回给客户端。</p>
+<h2 id="前端应用安全渗透测试详情"><a href="#前端应用安全渗透测试详情" class="headerlink" title="前端应用安全渗透测试详情"></a>前端应用安全渗透测试详情</h2><p>通过采用适当测试手段，发现测试目标在服务系统认证及授权、代码审查、被信任系统的测试、文件接口模块报警响应等方面存在的安全漏洞,并现场演示再现利用该漏洞可能造成的客户资金损失，并提供避免或防范此类威胁、风险或漏洞的具体改进或加固措施。</p>
+<p>应用程序及代码在开发过程中，由于开发者缺乏安全意识，疏忽大意极为容易导致应用系统存在可利用的安全漏洞。一般包括:</p>
+<ul>
+<li>SQL 注入</li>
+<li>跨站脚本</li>
+<li>表单绕过</li>
+<li>上传漏洞</li>
+<li>文件包含</li>
+<li>已知木马</li>
+<li>敏感信息泄露</li>
+<li>恶意代码</li>
+<li>解析漏洞</li>
+<li>远程代码执行漏洞</li>
+<li>任意文件读取</li>
+<li>目录遍历</li>
+<li>目录列出</li>
+<li>跨站请求伪造</li>
+<li>弱口令</li>
+<li>不安全对象引用</li>
+<li>安全配置错误</li>
+<li>链接地址重定向</li>
+<li>跳转漏洞</li>
+<li>后台管理</li>
+<li>会话管理</li>
+<li>无效验证码</li>
+</ul>
+<h3 id="1-SQL注入"><a href="#1-SQL注入" class="headerlink" title="1. SQL注入"></a>1. SQL注入</h3><p>SQL注入漏洞的产生原因是网站程序在编写时，没有对用户输入数据的合法性进行判断，导致应用程序存在安全隐患。</p>
+<p>SQL注入漏洞攻击就是利用现有应用程序没有对用户输入数据的合法性进行判断，将恶意的SQL命令注入到后台数据库引擎执行的黑客攻击手段。</p>
+<h3 id="2-跨站脚本"><a href="#2-跨站脚本" class="headerlink" title="2. 跨站脚本"></a>2. 跨站脚本</h3><p>跨站脚本攻击简称为 XSS 又叫CSS (Cross Site Script Execution)，是指服务器端的CGI程序没有对用户提交的变量中的HTML代码进行有效的过滤或转换，允许攻击者往WEB页面里插入对终端用户造成影响或损失的HTML代码。</p>
+<h3 id="3-表单绕过"><a href="#3-表单绕过" class="headerlink" title="3. 表单绕过"></a>3. 表单绕过</h3><p>表单绕过是指在登录表单时可以利用一些特殊字符绕过对合法用户的认证体系，这造成对用户输入的字符没有进行安全性检测，攻击者可利用该漏洞进行SQL注入攻击。</p>
+<h3 id="4-上传漏洞"><a href="#4-上传漏洞" class="headerlink" title="4. 上传漏洞"></a>4. 上传漏洞</h3><p>上传漏洞是指网站开发者在开发时在上传页面中针对文件格式（如asp、php等）和文件路径过滤不严格，导致攻击者可以在网站上上传木马，非法获取WebShell权限。</p>
+<h3 id="5-文件包含"><a href="#5-文件包含" class="headerlink" title="5. 文件包含"></a>5. 文件包含</h3><p>目标网站允许用户调用网站程序函数进行文件包含，同时未对所包含文件的类型及内容进行严格过滤。</p>
+<h3 id="6-已知木马"><a href="#6-已知木马" class="headerlink" title="6. 已知木马"></a>6. 已知木马</h3><p>目标网站被攻击者植入恶意木马，已知木马包括攻击者在进行网站入侵时留下的后门程序和网页挂马两种：</p>
+<ul>
+<li><strong>后门程序</strong> 严重危害网站安全，攻击者可利用该后门直接获取整个网站的控制权限，可对网站进行任意操作，甚至以网站为跳板，获取整个内网服务器的控制权限</li>
+<li><strong>网页挂马</strong> 严重危害网站用户安全，用户对已被挂马的网页进行浏览和访问，其PC机自动下载并执行木马程序，导致用户PC机被攻击，同时严重危害网站的信誉和形象。</li>
+</ul>
+<h3 id="7-敏感信息泄露"><a href="#7-敏感信息泄露" class="headerlink" title="7. 敏感信息泄露"></a>7. 敏感信息泄露</h3><p>敏感信息泄漏漏洞指泄漏有关WEB应用系统的信息，例如，用户名、物理路径、目录列表和软件版本。</p>
+<p>尽管泄漏的这些信息可能不重要，然而当这些信息联系到其他漏洞或错误设置时，可能产生严重的后果。例如：某源代码泄漏了SQL服务器系统管理员账号和密码，且SQL服务器端口能被攻击者访问，则密码可被攻击者用来登录SQL服务器，从而访问数据或运行系统命令。</p>
+<p>以下几个是比较典型的敏感信息泄露漏洞：</p>
+<ul>
+<li>源码信息泄露</li>
+<li>备份信息泄露</li>
+<li>错误信息泄露</li>
+<li>测试账户泄露</li>
+<li>测试文件泄露</li>
+<li>绝对路径泄露</li>
+</ul>
+<h3 id="8-恶意代码"><a href="#8-恶意代码" class="headerlink" title="8. 恶意代码"></a>8. 恶意代码</h3><p>恶意代码泛指没有作用却带来危险的代码，其普遍的特征是具有恶意的目的；本身是一个独立的程序，通过执行发生作用。由于应用系统存在可被利用的安全漏洞，可能已被恶意人员植入恶意代码以获取相应权限或用以传播病毒。</p>
+<h3 id="9-解析漏洞"><a href="#9-解析漏洞" class="headerlink" title="9. 解析漏洞"></a>9. 解析漏洞</h3><p>解析漏洞是指没有对解析的内容进行严格的定义，被攻击者利用，可能会使系统对带有木马的文件进行了解析并执行，导致敏感信息被窃取、篡改，甚至是系统奔溃。</p>
+<h3 id="10-远程代码执行漏洞"><a href="#10-远程代码执行漏洞" class="headerlink" title="10. 远程代码执行漏洞"></a>10. 远程代码执行漏洞</h3><p>远程执行任意代码漏洞是指由于配置失误（有时我们在用户认证只显示给用户认证过的页面和菜单选项，而实际上这些仅仅是表示层的访问控制而不能真正生效），攻击者能够很容易的就伪造请求直接访问未被授权的页面。</p>
+<h3 id="11-任意文件读取"><a href="#11-任意文件读取" class="headerlink" title="11. 任意文件读取"></a>11. 任意文件读取</h3><p>系统开发过程中没有重视安全问题或使用不安全的第三方组件等，导致任意文件可读取，可导致入侵者获得数据库权限，并利用数据库提权进一步获得系统权限。</p>
+<h3 id="12-目录遍历"><a href="#12-目录遍历" class="headerlink" title="12. 目录遍历"></a>12. 目录遍历</h3><p>目录遍历是指由于程序中没有过滤用户输入的<code>../</code> 和 <code>./</code> 之类的目录跳转符,导致攻击者通过提交目录跳转来遍历服务器上的任意文件。</p>
+<h3 id="13-目录列出"><a href="#13-目录列出" class="headerlink" title="13. 目录列出"></a>13. 目录列出</h3><p>目录列出是指攻击者通过对访问的URL分析，得到一个敏感的一级或二级目录名称，然后访问该目录，返回结果会将会显示指定目录及其子目录下的所有文件，从而可以寻找并获取敏感信息（如备份文件存放地址、数据库连接文件源码、系统敏感文件内容等），甚至可以通过在地址栏中修改URL来挖掘这个目录结构。</p>
+<h3 id="14-跨站请求伪造"><a href="#14-跨站请求伪造" class="headerlink" title="14. 跨站请求伪造"></a>14. 跨站请求伪造</h3><p>跨站请求伪造（Cross-site request forgery，缩写为CSRF），也被称成为 <code>one click attack</code> 或者 <code>session riding</code>， 通常缩写为<code>CSRF</code>或者<code>XSRF</code>，是一种对网站的恶意利用。</p>
+<p>尽管听起来像跨站脚本（XSS），但它与XSS非常不同，并且攻击方式几乎相左。XSS利用站点内的信任用户，而CSRF则通过伪装来自受信任用户的请求来利用受信任的网站。</p>
+<p>与XSS攻击相比，CSRF攻击往往不大流行（因此对其进行防范的资源也相当稀少）和难以防范，所以被认为比XSS更具危险性。</p>
+<h3 id="15-弱口令"><a href="#15-弱口令" class="headerlink" title="15. 弱口令"></a>15. 弱口令</h3><p>弱口令通常有以下几种情况：用户名和密码是系统默认、空口令、口令长度过短、口令选择与本身特征相关等。</p>
+<p>系统、应用程序、数据库存在弱口令可以导致入侵者直接得到系统权限、修改盗取数据库中敏感数据、任意篡改页面等。</p>
+<h3 id="16-不安全对象引用"><a href="#16-不安全对象引用" class="headerlink" title="16. 不安全对象引用"></a>16. 不安全对象引用</h3><p>不安全的对象引用是指程序在调用对象的时候未对该对象的有效性、安全性进行必要的校验。</p>
+<p>如：某些下载程序会以文件名作为下载程序的参数传递，而在传递后程序未对该参数的有效性和安全性进行检验，而直接按传递的文件名来下载文件，这就可能造成恶意用户通过构造敏感文件名而达成下载服务端敏感文件的目的。</p>
+<h3 id="17-安全配置错误"><a href="#17-安全配置错误" class="headerlink" title="17. 安全配置错误"></a>17. 安全配置错误</h3><p>某些HTTP应用程序，或第三方插件，在使用过程中由于管理人员或开发人员的疏忽，可能未对这些程序或插件进行必要的安全配置和修改，这就很容易导致敏感信息的泄露。</p>
+<p>而对于某些第三方插件来说，如果存在安全隐患，更有可能对服务器获得部分控制权限。</p>
+<h3 id="18-链接地址重定向"><a href="#18-链接地址重定向" class="headerlink" title="18. 链接地址重定向"></a>18. 链接地址重定向</h3><p>重定向就是通过各种的方法将各种网络请求重新定个方向转到其它位置（如：网页重定向、域名的重定向、路由选择的变化也是对数据报文经由路径的一种重定向）。</p>
+<p>而某些程序在重定向的跳转过程中，对重定向的地址未进行必要的有效性和安全性检查，且该重定向地址又很容易被恶意用户控制和修改，这就可能导致在重定向发生时，用户会被定向至恶意用户事先构造好的页面或其他URL，而导致用户信息受损。</p>
+<p>之前就有遇到一个关于重定向的安全问题: <a href="/2020/05/14/a-target-blank/" title="web 安全之 - A 标签target=”_blank”的安全问题及解决办法">web 安全之 - A 标签target=”_blank”的安全问题及解决办法</a></p>
+<h3 id="19-跳转漏洞"><a href="#19-跳转漏洞" class="headerlink" title="19. 跳转漏洞"></a>19. 跳转漏洞</h3><p>跳转漏洞是指网站用户访问时对其输入的参数没有进行验证，浏览器直接返回跳转到指定的URL，跳转漏洞可引发XSS漏洞，攻击者可利用这个漏洞进行恶意欺骗。</p>
+<h3 id="20-后台管理"><a href="#20-后台管理" class="headerlink" title="20. 后台管理"></a>20. 后台管理</h3><p>后台管理是指由于网站设计者的疏忽、后台管理员的配置不当或失误，导致攻击者可通过某些非法手段直接访问后台数据库页面，从而获取重要敏感信息，上传木马，甚至可获取后台管理员的权限，可进行删除、添加等非法操作，篡改后台数据库数据。</p>
+<h3 id="21-会话管理"><a href="#21-会话管理" class="headerlink" title="21. 会话管理"></a>21. 会话管理</h3><p>会话管理主要是针对需授权的登录过程的一种管理方式，以用户密码验证为常见方式，通过对敏感用户登录区域的验证，可有效校验系统授权的安全性，测试包含以下部分：</p>
+<h4 id="1-用户口令易猜解"><a href="#1-用户口令易猜解" class="headerlink" title="1. 用户口令易猜解"></a>1. 用户口令易猜解</h4><p>通过对表单认证、HTTP认证等方式的简单口令尝试，以验证存在用户身份校验的登录入口是否存在易猜解的用户名和密码。</p>
+<h4 id="2-是否存在验证码防护"><a href="#2-是否存在验证码防护" class="headerlink" title="2. 是否存在验证码防护"></a>2. 是否存在验证码防护</h4><p>验证码是有效防止暴力破解的一种安全机制，通过对各登录入口的检查，以确认是否存在该保护机制。</p>
+<p>像 google 机器人验证码，就是我最常用的验证码防护方式: <a href="/2019/11/15/use-google-recaptcha/" title="使用" google="" recaptcha"来防止站点接口被刷"="">使用"Google reCaptcha"来防止站点接口被刷</a></p>
+<h4 id="3-是否存在易暴露的管理登录地址"><a href="#3-是否存在易暴露的管理登录地址" class="headerlink" title="3. 是否存在易暴露的管理登录地址"></a>3. 是否存在易暴露的管理登录地址</h4><p>某些管理地址虽无外部链接可介入，但由于采用了容易猜解的地址（如：admin）而导致登录入口暴露，从而给外部恶意用户提供了可乘之机。</p>
+<h4 id="4-是否提供了不恰当的验证错误信息"><a href="#4-是否提供了不恰当的验证错误信息" class="headerlink" title="4. 是否提供了不恰当的验证错误信息"></a>4. 是否提供了不恰当的验证错误信息</h4><p>某些验证程序返回错误信息过于友好，如：当用户名与密码均错误的时候，验证程序返回“用户名不存在”等类似的信息，通过对这一信息的判断，并结合 <code>HTTP Fuzzing</code> 工具便可轻易枚举系统中存在的用户名，从而为破解提供了机会。</p>
+<p>会话管理主要是针对验证通过之后，服务端程序对已建立的、且经过验证的会话的处理方式是否安全，一般会从以下几个角度检测会话管理的安全性：</p>
+<h4 id="5-Session是否随机"><a href="#5-Session是否随机" class="headerlink" title="5. Session是否随机"></a>5. Session是否随机</h4><p>Session作为验证用户身份信息的一个重要字符串，其随机性是避免外部恶意用户构造Session的一个重要安全保护机制，通过抓包分析Session中随机字符串的长度及其形成规律，可对Session随机性进行验证，以此来确认其安全性。</p>
+<h4 id="6-校验前后Session是否变更"><a href="#6-校验前后Session是否变更" class="headerlink" title="6. 校验前后Session是否变更"></a>6. 校验前后Session是否变更</h4><p>通过身份校验的用户所持有的Session应与其在经过身份验证之前所持有的Session不同。</p>
+<h4 id="7-会话储存是否安全"><a href="#7-会话储存是否安全" class="headerlink" title="7. 会话储存是否安全"></a>7. 会话储存是否安全</h4><p>会话存储是存储于客户端本地（以cookie的形式存储）还是存储于服务端（以Session的形式存储），同时检测其存储内容是否经过必要的加密，以防止敏感信息泄露。</p>
+<h3 id="22-无效验证码"><a href="#22-无效验证码" class="headerlink" title="22. 无效验证码"></a>22. 无效验证码</h3><p>目标系统管理入口（或数据库外部连接）存在缺少验证码，攻击者可利用弱口令漏洞，通过进行暴力猜解，获取网站管理权限，包括修改删除网站页面、窃取数据库敏感信息、植入恶意木马；甚至以网站为跳板，获取整个内网服务器控制权限。</p>
+<h2 id="其他类型中的-业务场景-测试详情"><a href="#其他类型中的-业务场景-测试详情" class="headerlink" title="其他类型中的 业务场景 测试详情"></a>其他类型中的 业务场景 测试详情</h2><h3 id="1-注册场景"><a href="#1-注册场景" class="headerlink" title="1. 注册场景"></a>1. 注册场景</h3><ul>
+<li>批量注册检测，会话重放攻击、验证码绕过攻击</li>
+<li>任意手机/邮箱注册</li>
+<li>短信/邮件轰炸</li>
+<li>资源竞争，并发注册相同用户名，造成系统业务逻辑状态错误</li>
+<li>覆盖注册</li>
+</ul>
+<h3 id="2-登录场景"><a href="#2-登录场景" class="headerlink" title="2. 登录场景"></a>2. 登录场景</h3><ul>
+<li>社工库遍历</li>
+<li>爆破验证码</li>
+<li>用户名不变，爆破密码</li>
+<li>密码不变，爆破用户，</li>
+<li>固定会话攻击</li>
+<li>短信/邮件轰炸</li>
+<li>Oauth授权缺陷绕过</li>
+<li>修改响应包绕过登录验证</li>
+<li>万能密码登录绕过场景</li>
+</ul>
+<h3 id="3-密码重置"><a href="#3-密码重置" class="headerlink" title="3. 密码重置"></a>3. 密码重置</h3><ul>
+<li>爆破验证码</li>
+<li>客户端本地验证绕过</li>
+<li>验证码直接在response中返回</li>
+<li>跳过验证步骤，直接访问修改密码页面</li>
+<li>篡改接受验证码手机、邮箱</li>
+<li>越权重置他人密码</li>
+<li>密码修改逻辑放在前台JS脚本，根据逻辑绕过修改密码</li>
+<li>修改密码步骤SQL注入</li>
+<li>重置密码弱token破解</li>
+</ul>
+<p>之前我有针对密码重置链接的场景做了一个安全方面的总结: <a href="https://kebingzao.com/2020/04/29/reset-pwd-security/">web 安全之 - 关于重置密码链接的几个安全问题</a></p>
+<h3 id="4-界面锁定"><a href="#4-界面锁定" class="headerlink" title="4. 界面锁定"></a>4. 界面锁定</h3><ul>
+<li>修改返回包</li>
+<li>禁用JS</li>
+</ul>
+<h2 id="常见的十大业务逻辑漏洞的检查清单"><a href="#常见的十大业务逻辑漏洞的检查清单" class="headerlink" title="常见的十大业务逻辑漏洞的检查清单"></a>常见的十大业务逻辑漏洞的检查清单</h2><p>正常情况，在进行安全渗透的时候，有一些场景业务是一定要测试并且检查的:</p>
+<table>
+<thead>
+<tr>
+<th>业务风险</th>
+<th>风险描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>身份认证安全</td>
+<td>在没有验证码限制(意思：没有验证码限制)或者一次验证码可以多次使用的地方，使用已知用户对密码进行暴力破解或者用一个通用密码对用户进行暴力破解。</td>
+</tr>
+<tr>
+<td>业务一致性安全</td>
+<td>手机号篡改描述: 抓包修改手机号码参数为其他号码尝试，例如在办理查询页面，输入自己的号码然后抓包，修改手机号码参数为其他人号码，查看是否能查询其他人的业务。</td>
+</tr>
+<tr>
+<td>业务数据篡改</td>
+<td>1. 金额数据篡改描述: 抓包修改金额等字段，例如在支付页面抓取请求中商品的金额字段，修改成任意数额的金额并提交，查看能否以修改后的金额数据完成业务流程。 <br> 2. 商品数量篡改描述: 抓包修改商品数量等字段，将请求中的商品数量修改成任意数额，如负数并提交，查看能否以修改后的数量完成业务流程。<br> 3. 最大数限制突破描述: 很多商品限制用户购买数量时，服务器仅在页面通过js脚本限制，未在服务器端校验用户提交的数量，通过抓包修改商品最大数限制，将请求中的商品数量改为大于最大数限制的值，查看能否以修改后的数量完成业务流程。</td>
+</tr>
+<tr>
+<td>用户输入合规性</td>
+<td>用户输入合规性描述：用户输入合规性功能测试，一般用户登陆处用的多一些，未对用户输入的参数未做html转义过滤（要过滤的字符包括：单引号、双引号、大于号、小于号，&amp;符号等），防止脚本执行。在变量输出时进行HTML ENCODE 处理。</td>
+</tr>
+<tr>
+<td>密码找回漏洞</td>
+<td>密码找回逻辑描述：互联网中，有用户注册的地方，基本就会有密码找回的功能。密码找回功能里可能存在此逻辑漏洞，而这些漏洞往往可能产生非常大的危害，如用户账号被盗等。</td>
+</tr>
+<tr>
+<td>验证码突破</td>
+<td>验证码描述：验证码一般是防止批量注册、刷票、论坛灌水，有效防止某个黑客对某一个特定注册用户用特定程序暴力破解方式进行不断的登陆尝试验证码。</td>
+</tr>
+<tr>
+<td>业务授权安全</td>
+<td>1. 未授权访问描述：<br>非授权访问是指用户在没有通过认证授权的情况下能够直接访问需要通过认证才能访问到的页面或文本信息。可以尝试在登录某网站前台或后台之后，将相关的页面链接复制于其他浏览器或其他电脑上进行访问，看是否能访问成功。<br>2. 越权访问描述：<br> 越权漏洞的成因主要是因为开发人员在对数据进行增、删、改、查询时对终端请求的数据过分相信而遗漏了权限的判定. <br> a) 垂直越权（垂直越权是指使用权限低的用户可以访问权限较高的用户）<br> b) 水平越权（水平越权是指相同权限的不同用户可以互相访问）</td>
+</tr>
+<tr>
+<td>业务流程乱序</td>
+<td>业务流程乱序描述：一般一个程序上，针对不同的业务需求，业主会设定相应的业务流程序，快速提高相对应的工作效率。业务流程顺序一般先A过程后B过程然后C过程最后D过程，比如出现的逻辑乱序是先A过程后直接到D过程。</td>
+</tr>
+<tr>
+<td>业务接口调用</td>
+<td>业务接口调用描述：业务接口调用是以内部操作分离出外部调用的方法，使其能被修改而不影响外界其他其交互的方式，常见业务接口方式有重放攻击，短信炸弹。<br> 1. 重放攻击：在短信或邮件调用业务（例如：短信验证码，邮件验证码），对其业务环节进行调用（重放）测试。如果业务经过调用（重放）后被多次生成有效的业务或数据结果。<br>2. 短信炸弹：在测试的过程中，一般系统平台仅在前端通过JS校验时间来控制短信发送按钮，但后台并未对发送做任何限制，导致可通过重放包的方式大量发送恶意短信。</td>
+</tr>
+<tr>
+<td>时效性绕过</td>
+<td>时效性绕过描述：针对某些带有时间限制的业务，修改其时间限制范围。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="web-安全渗透-检查清单"><a href="#web-安全渗透-检查清单" class="headerlink" title="web 安全渗透 检查清单"></a>web 安全渗透 检查清单</h2><p>接下来就是具体的渗透测试的 检查清单了，一般分为两种</p>
+<ol>
+<li>针对安全缺陷的类型来逐一测试, 以保证常见的安全缺陷都可以被覆盖到</li>
+<li>针对具体业务场景来逐一测试，以保证常见的用户场景都可以被覆盖到</li>
+</ol>
+<h3 id="1-针对安全缺陷漏洞的检查清单"><a href="#1-针对安全缺陷漏洞的检查清单" class="headerlink" title="1. 针对安全缺陷漏洞的检查清单"></a>1. 针对安全缺陷漏洞的检查清单</h3><table>
+<thead>
+<tr>
+<th>序号</th>
+<th>检查项</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>SQL注入攻击</td>
+</tr>
+<tr>
+<td>2</td>
+<td>反射式跨站脚本攻击</td>
+</tr>
+<tr>
+<td>3</td>
+<td>存储式跨站脚本攻击</td>
+</tr>
+<tr>
+<td>4</td>
+<td>DOM跨站脚本攻击</td>
+</tr>
+<tr>
+<td>5</td>
+<td>会话固定</td>
+</tr>
+<tr>
+<td>6</td>
+<td>HTTP头安全配置</td>
+</tr>
+<tr>
+<td>7</td>
+<td>HTTP方法</td>
+</tr>
+<tr>
+<td>8</td>
+<td>服务器版本信息</td>
+</tr>
+<tr>
+<td>9</td>
+<td>会话生命周期</td>
+</tr>
+<tr>
+<td>10</td>
+<td>水平权限溢出</td>
+</tr>
+<tr>
+<td>11</td>
+<td>纵向权限溢出</td>
+</tr>
+<tr>
+<td>12</td>
+<td>默认凭证</td>
+</tr>
+<tr>
+<td>13</td>
+<td>弱密码规则测试</td>
+</tr>
+<tr>
+<td>14</td>
+<td>账户锁定测试</td>
+</tr>
+<tr>
+<td>15</td>
+<td>安全问题测试</td>
+</tr>
+<tr>
+<td>16</td>
+<td>密码修改测试</td>
+</tr>
+<tr>
+<td>17</td>
+<td>目录遍历</td>
+</tr>
+<tr>
+<td>18</td>
+<td>文件包含</td>
+</tr>
+<tr>
+<td>19</td>
+<td>授权绕过</td>
+</tr>
+<tr>
+<td>20</td>
+<td>权限溢出</td>
+</tr>
+<tr>
+<td>21</td>
+<td>不安全对象直接引用</td>
+</tr>
+<tr>
+<td>22</td>
+<td>Cookie属性</td>
+</tr>
+<tr>
+<td>23</td>
+<td>会话管理</td>
+</tr>
+<tr>
+<td>24</td>
+<td>登出测试</td>
+</tr>
+<tr>
+<td>25</td>
+<td>会话超时测试</td>
+</tr>
+<tr>
+<td>26</td>
+<td>账户恶意锁定</td>
+</tr>
+<tr>
+<td>27</td>
+<td>用户账户唯一性测试</td>
+</tr>
+<tr>
+<td>28</td>
+<td>Session随机性与唯一性测试</td>
+</tr>
+<tr>
+<td>29</td>
+<td>CRLF注入测试</td>
+</tr>
+<tr>
+<td>30</td>
+<td>LDAP注入测试</td>
+</tr>
+<tr>
+<td>31</td>
+<td>XML注入测试</td>
+</tr>
+<tr>
+<td>32</td>
+<td>ORM注入测试</td>
+</tr>
+<tr>
+<td>33</td>
+<td>Xpath注入测试</td>
+</tr>
+<tr>
+<td>34</td>
+<td>本地文件包含</td>
+</tr>
+<tr>
+<td>35</td>
+<td>远程文件包含</td>
+</tr>
+<tr>
+<td>36</td>
+<td>命令执行</td>
+</tr>
+<tr>
+<td>37</td>
+<td>缓冲区溢出</td>
+</tr>
+<tr>
+<td>38</td>
+<td>堆溢出</td>
+</tr>
+<tr>
+<td>39</td>
+<td>栈溢出</td>
+</tr>
+<tr>
+<td>40</td>
+<td>格式化字符串测试</td>
+</tr>
+<tr>
+<td>41</td>
+<td>HTTP Split测试</td>
+</tr>
+<tr>
+<td>42</td>
+<td>代码异常处理</td>
+</tr>
+<tr>
+<td>43</td>
+<td>栈异常跟踪</td>
+</tr>
+<tr>
+<td>44</td>
+<td>SSL/TLS加密算法测试</td>
+</tr>
+<tr>
+<td>45</td>
+<td>PaddingOracle测试</td>
+</tr>
+<tr>
+<td>46</td>
+<td>敏感信息泄露</td>
+</tr>
+<tr>
+<td>47</td>
+<td>上传文件测试</td>
+</tr>
+<tr>
+<td>48</td>
+<td>事务完整性测试</td>
+</tr>
+<tr>
+<td>49</td>
+<td>HTML注入</td>
+</tr>
+<tr>
+<td>50</td>
+<td>URL重定向攻击</td>
+</tr>
+<tr>
+<td>51</td>
+<td>CSS注入攻击</td>
+</tr>
+<tr>
+<td>52</td>
+<td>Blind注入测试</td>
+</tr>
+<tr>
+<td>53</td>
+<td>点击劫持测试</td>
+</tr>
+<tr>
+<td>54</td>
+<td>WebSocket测试</td>
+</tr>
+<tr>
+<td>55</td>
+<td>本地存储测试</td>
+</tr>
+<tr>
+<td>56</td>
+<td>Web Messaging测试</td>
+</tr>
+<tr>
+<td>57</td>
+<td>IMAP/SMTP注入测试</td>
+</tr>
+<tr>
+<td>58</td>
+<td>代码注入测试</td>
+</tr>
+<tr>
+<td>59</td>
+<td>处理响应时间测试</td>
+</tr>
+<tr>
+<td>60</td>
+<td>可用性测试</td>
+</tr>
+<tr>
+<td>61</td>
+<td>CORS测试</td>
+</tr>
+<tr>
+<td>62</td>
+<td>FlashSWF测试</td>
+</tr>
+<tr>
+<td>63</td>
+<td>恶意文件上传测试</td>
+</tr>
+<tr>
+<td>64</td>
+<td>暴力破解</td>
+</tr>
+<tr>
+<td>65</td>
+<td>传输层常见安全测试</td>
+</tr>
+<tr>
+<td>66</td>
+<td>错误代码分析</td>
+</tr>
+<tr>
+<td>67</td>
+<td>失效验证测试</td>
+</tr>
+<tr>
+<td>68</td>
+<td>使用已知不安全组件测试</td>
+</tr>
+<tr>
+<td>69</td>
+<td>未验证重定向与转发</td>
+</tr>
+<tr>
+<td>70</td>
+<td>不安全对象失效间接引用</td>
+</tr>
+<tr>
+<td>71</td>
+<td>默认配置安全测试</td>
+</tr>
+<tr>
+<td>72</td>
+<td>用户隐私信息检查</td>
+</tr>
+<tr>
+<td>73</td>
+<td>CSRF客户端请求伪造测试</td>
+</tr>
+<tr>
+<td>74</td>
+<td>HTML5安全测试</td>
+</tr>
+<tr>
+<td>75</td>
+<td>邮件头注入测试</td>
+</tr>
+<tr>
+<td>76</td>
+<td>常见框架已知脆弱性检查</td>
+</tr>
+<tr>
+<td>77</td>
+<td>SSRF服务端请求伪造测试</td>
+</tr>
+<tr>
+<td>78</td>
+<td>XXE</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-针对业务场景的检查清单"><a href="#2-针对业务场景的检查清单" class="headerlink" title="2. 针对业务场景的检查清单"></a>2. 针对业务场景的检查清单</h3><table>
+<thead>
+<tr>
+<th>序号</th>
+<th>分类</th>
+<th>检查项</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>登录场景</td>
+<td>社工库遍历</td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>爆破验证码</td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td>用户名不变，爆破密码</td>
+</tr>
+<tr>
+<td>4</td>
+<td></td>
+<td>密码不变，爆破用户名</td>
+</tr>
+<tr>
+<td>5</td>
+<td></td>
+<td>固定会话攻击</td>
+</tr>
+<tr>
+<td>6</td>
+<td></td>
+<td>短信/邮件轰炸</td>
+</tr>
+<tr>
+<td>7</td>
+<td></td>
+<td>Oauth授权缺陷绕过</td>
+</tr>
+<tr>
+<td>8</td>
+<td></td>
+<td>万能密码登录绕过</td>
+</tr>
+<tr>
+<td>9</td>
+<td></td>
+<td>修改响应包绕过登录验证</td>
+</tr>
+<tr>
+<td>10</td>
+<td></td>
+<td>验证码安全测试（验证码方案、识别率、验证码绕过等）</td>
+</tr>
+<tr>
+<td>11</td>
+<td></td>
+<td>安全协议测试</td>
+</tr>
+<tr>
+<td>12</td>
+<td></td>
+<td>http安全配置检查</td>
+</tr>
+<tr>
+<td>13</td>
+<td></td>
+<td>安全登录验证策略检查</td>
+</tr>
+<tr>
+<td>14</td>
+<td></td>
+<td>弱口令、空口令检测</td>
+</tr>
+<tr>
+<td>15</td>
+<td></td>
+<td>用户名口令容错性测试</td>
+</tr>
+<tr>
+<td>16</td>
+<td></td>
+<td>登录信息有效性测试，边界测试</td>
+</tr>
+<tr>
+<td>17</td>
+<td></td>
+<td>SQL注入，XSS等</td>
+</tr>
+<tr>
+<td>18</td>
+<td></td>
+<td>多种查询语句的组合测试</td>
+</tr>
+<tr>
+<td>19</td>
+<td>密码找回场景<br>（根据实际业务）</td>
+<td>短信/邮件/微信验证绕过</td>
+</tr>
+<tr>
+<td>20</td>
+<td></td>
+<td>密码暴露破解</td>
+</tr>
+<tr>
+<td>21</td>
+<td></td>
+<td>信息劫持漏洞</td>
+</tr>
+<tr>
+<td>22</td>
+<td></td>
+<td>绕过时间控制</td>
+</tr>
+<tr>
+<td>23</td>
+<td>密码重置场景<br>（根据实际业务）</td>
+<td>爆破验证码</td>
+</tr>
+<tr>
+<td>24</td>
+<td></td>
+<td>客户端本地验证绕过</td>
+</tr>
+<tr>
+<td>25</td>
+<td></td>
+<td>验证码直接在response中返回</td>
+</tr>
+<tr>
+<td>26</td>
+<td></td>
+<td>跳过验证步骤，直接访问修改密码页面</td>
+</tr>
+<tr>
+<td>27</td>
+<td></td>
+<td>篡改接收验证码手机、邮箱</td>
+</tr>
+<tr>
+<td>28</td>
+<td></td>
+<td>越权重置他人密码</td>
+</tr>
+<tr>
+<td>29</td>
+<td></td>
+<td>密码修改逻辑放在前台JS脚本，根据逻辑绕过修改密码</td>
+</tr>
+<tr>
+<td>30</td>
+<td></td>
+<td>修改密码步骤SQL注入</td>
+</tr>
+<tr>
+<td>31</td>
+<td></td>
+<td>重置密码弱token破解</td>
+</tr>
+<tr>
+<td>32</td>
+<td>界面锁定<br>（根据实际业务）</td>
+<td>修改返回包</td>
+</tr>
+<tr>
+<td>33</td>
+<td></td>
+<td>禁用JS</td>
+</tr>
+<tr>
+<td>34</td>
+<td>注册场景<br>（根据实际业务）</td>
+<td>批量注册（会话重放/验证码绕过）</td>
+</tr>
+<tr>
+<td>35</td>
+<td></td>
+<td>任意手机/邮箱注册</td>
+</tr>
+<tr>
+<td>36</td>
+<td></td>
+<td>短信/邮件轰炸攻击</td>
+</tr>
+<tr>
+<td>37</td>
+<td></td>
+<td>资源竞争 ，并发注册相同用户名，造成业务系统逻辑错误</td>
+</tr>
+<tr>
+<td>38</td>
+<td></td>
+<td>覆盖注册</td>
+</tr>
+<tr>
+<td>39</td>
+<td></td>
+<td>信息劫持（合法输入、验证码，激活邮件）</td>
+</tr>
+<tr>
+<td>40</td>
+<td>web认证业务接口调用</td>
+<td>会话重放，信息轰炸</td>
+</tr>
+<tr>
+<td>41</td>
+<td></td>
+<td>更换不同账号，反复请求，资源消耗</td>
+</tr>
+<tr>
+<td>42</td>
+<td></td>
+<td>非法调用/未验证会话</td>
+</tr>
+<tr>
+<td>43</td>
+<td>上传/下载场景</td>
+<td>上传/下载文件格式限制饶过</td>
+</tr>
+<tr>
+<td>44</td>
+<td></td>
+<td>上传/下载文件大小限制饶过</td>
+</tr>
+<tr>
+<td>45</td>
+<td></td>
+<td>饶过拓展名</td>
+</tr>
+<tr>
+<td>46</td>
+<td></td>
+<td>上传/下载空间位置限制</td>
+</tr>
+<tr>
+<td>47</td>
+<td></td>
+<td>特殊字符饶过</td>
+</tr>
+<tr>
+<td>48</td>
+<td></td>
+<td>并发处理逻辑验证</td>
+</tr>
+<tr>
+<td>49</td>
+<td></td>
+<td>上传/下载流程绕过</td>
+</tr>
+<tr>
+<td>50</td>
+<td></td>
+<td>乱序流程测试</td>
+</tr>
+<tr>
+<td>51</td>
+<td>权限控制</td>
+<td>基于URL的横向越权、纵向越权</td>
+</tr>
+<tr>
+<td>52</td>
+<td></td>
+<td>权限最小化的安全设计</td>
+</tr>
+<tr>
+<td>53</td>
+<td></td>
+<td>普通用户可以获取admin权限</td>
+</tr>
+<tr>
+<td>54</td>
+<td></td>
+<td>普通用户可以查看其它用户身份证、密码、房产等敏感信息</td>
+</tr>
+<tr>
+<td>55</td>
+<td></td>
+<td>页面的权限控制，如必须经过A-B-C的页面是否直接可以A-C绕过</td>
+</tr>
+<tr>
+<td>56</td>
+<td></td>
+<td>后台资源暴露</td>
+</tr>
+<tr>
+<td>57</td>
+<td></td>
+<td>删除修改正在登陆系统人员权限。 程序是否正常处理</td>
+</tr>
+<tr>
+<td>58</td>
+<td></td>
+<td>系统资源同步问题</td>
+</tr>
+<tr>
+<td>59</td>
+<td>敏感数据</td>
+<td>上传敏感数据（身份证、房产、密码等）使用安全协议，保证数据的机密性和完整性</td>
+</tr>
+<tr>
+<td>60</td>
+<td></td>
+<td>数据在本地存储采用安全加密算法</td>
+</tr>
+<tr>
+<td>61</td>
+<td></td>
+<td>日志、页面等处是否有暴露出的敏感信息</td>
+</tr>
+<tr>
+<td>62</td>
+<td>其他</td>
+<td>最新漏洞测试</td>
+</tr>
+<tr>
+<td>63</td>
+<td></td>
+<td>配置检查类，组件版本类问题</td>
+</tr>
+<tr>
+<td>64</td>
+<td></td>
+<td>不必要的开放端口，造成的权限绕过</td>
+</tr>
+</tbody>
+</table>
+<h2 id="漏洞定级"><a href="#漏洞定级" class="headerlink" title="漏洞定级"></a>漏洞定级</h2><p>具体看: <a href="/2020/05/25/cvss/" title="web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性">web 安全之 - 使用 CVSS V3.0 来判断安全漏洞的严重性</a></p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://www.freebuf.com/sectool/246434.html" target="_blank" rel="noopener">github渗透测试工具库</a></li>
+<li><a href="https://blog.csdn.net/zixuanfy/category_6404684.html" target="_blank" rel="noopener">小白日志: kali 渗透测试</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/393635352" target="_blank" rel="noopener">小白必看!OWASP top 10详解</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/01/11/web-penetration-testing/" title="浅谈之 - web 安全渗透测试方案">http://kebingzao.com/2022/01/11/web-penetration-testing/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/12/24/nginx-split-clients/" rel="next" title="nginx 实现前端页面的 A/B 测">
+                <i class="fa fa-chevron-left"></i> nginx 实现前端页面的 A/B 测
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/01/28/any-file-upload/" rel="prev" title="记一次任意文件上传的安全缺陷">
+                记一次任意文件上传的安全缺陷 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">269</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">27</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">66</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是渗透测试"><span class="nav-number">2.</span> <span class="nav-text">什么是渗透测试</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-黑盒测试"><span class="nav-number">2.1.</span> <span class="nav-text">1. 黑盒测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-白盒测试"><span class="nav-number">2.2.</span> <span class="nav-text">2. 白盒测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-隐秘测试"><span class="nav-number">2.3.</span> <span class="nav-text">3. 隐秘测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#渗透测试目的"><span class="nav-number">3.</span> <span class="nav-text">渗透测试目的</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#渗透测试流程"><span class="nav-number">4.</span> <span class="nav-text">渗透测试流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-信息收集"><span class="nav-number">4.1.</span> <span class="nav-text">1. 信息收集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-弱点分析及功能分析"><span class="nav-number">4.2.</span> <span class="nav-text">2. 弱点分析及功能分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-获取权限"><span class="nav-number">4.3.</span> <span class="nav-text">3. 获取权限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-权限提升"><span class="nav-number">4.4.</span> <span class="nav-text">4. 权限提升</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#渗透测试的几种类型"><span class="nav-number">5.</span> <span class="nav-text">渗透测试的几种类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试工具说明"><span class="nav-number">6.</span> <span class="nav-text">测试工具说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-系统自带工具"><span class="nav-number">6.1.</span> <span class="nav-text">1. 系统自带工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-自由软件和渗透测试工具"><span class="nav-number">6.2.</span> <span class="nav-text">2. 自由软件和渗透测试工具</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#测试环境说明"><span class="nav-number">7.</span> <span class="nav-text">测试环境说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Web应用安全渗透测试详情"><span class="nav-number">8.</span> <span class="nav-text">Web应用安全渗透测试详情</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OWASP-Top-10"><span class="nav-number">8.1.</span> <span class="nav-text">OWASP Top 10</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-注入"><span class="nav-number">8.1.1.</span> <span class="nav-text">1. 注入</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#危害"><span class="nav-number">8.1.1.1.</span> <span class="nav-text">危害</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#常见的注入"><span class="nav-number">8.1.1.2.</span> <span class="nav-text">常见的注入</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#如何防范"><span class="nav-number">8.1.1.3.</span> <span class="nav-text">如何防范</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-失效的身份认证"><span class="nav-number">8.1.2.</span> <span class="nav-text">2. 失效的身份认证</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#危害-1"><span class="nav-number">8.1.2.1.</span> <span class="nav-text">危害</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#如何防范-1"><span class="nav-number">8.1.2.2.</span> <span class="nav-text">如何防范</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-敏感数据泄露"><span class="nav-number">8.1.3.</span> <span class="nav-text">3. 敏感数据泄露</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-XML外部实体-XXE"><span class="nav-number">8.1.4.</span> <span class="nav-text">4. XML外部实体(XXE)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-失效的访问控制"><span class="nav-number">8.1.5.</span> <span class="nav-text">5. 失效的访问控制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#危害-2"><span class="nav-number">8.1.5.1.</span> <span class="nav-text">危害</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#如何防范-2"><span class="nav-number">8.1.5.2.</span> <span class="nav-text">如何防范</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-安全配置错误"><span class="nav-number">8.1.6.</span> <span class="nav-text">6. 安全配置错误</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#危害-3"><span class="nav-number">8.1.6.1.</span> <span class="nav-text">危害</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#如何防范-3"><span class="nav-number">8.1.6.2.</span> <span class="nav-text">如何防范</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-跨站脚本（xss）"><span class="nav-number">8.1.7.</span> <span class="nav-text">7. 跨站脚本（xss）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#危害-4"><span class="nav-number">8.1.7.1.</span> <span class="nav-text">危害</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#如何防范-4"><span class="nav-number">8.1.7.2.</span> <span class="nav-text">如何防范</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-不安全的反序列化"><span class="nav-number">8.1.8.</span> <span class="nav-text">8. 不安全的反序列化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9-使用含有已知漏洞的组件"><span class="nav-number">8.1.9.</span> <span class="nav-text">9. 使用含有已知漏洞的组件</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#如何防范-5"><span class="nav-number">8.1.9.1.</span> <span class="nav-text">如何防范</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#10-不足的日志记录和监控"><span class="nav-number">8.1.10.</span> <span class="nav-text">10. 不足的日志记录和监控</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接口类应用安全渗透测试详情"><span class="nav-number">9.</span> <span class="nav-text">接口类应用安全渗透测试详情</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-常规接口安全风险"><span class="nav-number">9.1.</span> <span class="nav-text">1. 常规接口安全风险</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-业务接口调用"><span class="nav-number">9.2.</span> <span class="nav-text">2. 业务接口调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Web认证业务接口调用"><span class="nav-number">9.3.</span> <span class="nav-text">3. Web认证业务接口调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-API接口处理响应测试"><span class="nav-number">9.4.</span> <span class="nav-text">4. API接口处理响应测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-接口数据验证测试"><span class="nav-number">9.5.</span> <span class="nav-text">5. 接口数据验证测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-不安全的生态接口"><span class="nav-number">9.6.</span> <span class="nav-text">6. 不安全的生态接口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-接口访问控制机制"><span class="nav-number">9.7.</span> <span class="nav-text">7. 接口访问控制机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-接口返回敏感数据"><span class="nav-number">9.8.</span> <span class="nav-text">8. 接口返回敏感数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#前端应用安全渗透测试详情"><span class="nav-number">10.</span> <span class="nav-text">前端应用安全渗透测试详情</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-SQL注入"><span class="nav-number">10.1.</span> <span class="nav-text">1. SQL注入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-跨站脚本"><span class="nav-number">10.2.</span> <span class="nav-text">2. 跨站脚本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-表单绕过"><span class="nav-number">10.3.</span> <span class="nav-text">3. 表单绕过</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-上传漏洞"><span class="nav-number">10.4.</span> <span class="nav-text">4. 上传漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-文件包含"><span class="nav-number">10.5.</span> <span class="nav-text">5. 文件包含</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-已知木马"><span class="nav-number">10.6.</span> <span class="nav-text">6. 已知木马</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-敏感信息泄露"><span class="nav-number">10.7.</span> <span class="nav-text">7. 敏感信息泄露</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-恶意代码"><span class="nav-number">10.8.</span> <span class="nav-text">8. 恶意代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-解析漏洞"><span class="nav-number">10.9.</span> <span class="nav-text">9. 解析漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-远程代码执行漏洞"><span class="nav-number">10.10.</span> <span class="nav-text">10. 远程代码执行漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-任意文件读取"><span class="nav-number">10.11.</span> <span class="nav-text">11. 任意文件读取</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-目录遍历"><span class="nav-number">10.12.</span> <span class="nav-text">12. 目录遍历</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-目录列出"><span class="nav-number">10.13.</span> <span class="nav-text">13. 目录列出</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-跨站请求伪造"><span class="nav-number">10.14.</span> <span class="nav-text">14. 跨站请求伪造</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-弱口令"><span class="nav-number">10.15.</span> <span class="nav-text">15. 弱口令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#16-不安全对象引用"><span class="nav-number">10.16.</span> <span class="nav-text">16. 不安全对象引用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#17-安全配置错误"><span class="nav-number">10.17.</span> <span class="nav-text">17. 安全配置错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-链接地址重定向"><span class="nav-number">10.18.</span> <span class="nav-text">18. 链接地址重定向</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#19-跳转漏洞"><span class="nav-number">10.19.</span> <span class="nav-text">19. 跳转漏洞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#20-后台管理"><span class="nav-number">10.20.</span> <span class="nav-text">20. 后台管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#21-会话管理"><span class="nav-number">10.21.</span> <span class="nav-text">21. 会话管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-用户口令易猜解"><span class="nav-number">10.21.1.</span> <span class="nav-text">1. 用户口令易猜解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-是否存在验证码防护"><span class="nav-number">10.21.2.</span> <span class="nav-text">2. 是否存在验证码防护</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-是否存在易暴露的管理登录地址"><span class="nav-number">10.21.3.</span> <span class="nav-text">3. 是否存在易暴露的管理登录地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-是否提供了不恰当的验证错误信息"><span class="nav-number">10.21.4.</span> <span class="nav-text">4. 是否提供了不恰当的验证错误信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-Session是否随机"><span class="nav-number">10.21.5.</span> <span class="nav-text">5. Session是否随机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-校验前后Session是否变更"><span class="nav-number">10.21.6.</span> <span class="nav-text">6. 校验前后Session是否变更</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-会话储存是否安全"><span class="nav-number">10.21.7.</span> <span class="nav-text">7. 会话储存是否安全</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#22-无效验证码"><span class="nav-number">10.22.</span> <span class="nav-text">22. 无效验证码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他类型中的-业务场景-测试详情"><span class="nav-number">11.</span> <span class="nav-text">其他类型中的 业务场景 测试详情</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-注册场景"><span class="nav-number">11.1.</span> <span class="nav-text">1. 注册场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-登录场景"><span class="nav-number">11.2.</span> <span class="nav-text">2. 登录场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-密码重置"><span class="nav-number">11.3.</span> <span class="nav-text">3. 密码重置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-界面锁定"><span class="nav-number">11.4.</span> <span class="nav-text">4. 界面锁定</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见的十大业务逻辑漏洞的检查清单"><span class="nav-number">12.</span> <span class="nav-text">常见的十大业务逻辑漏洞的检查清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#web-安全渗透-检查清单"><span class="nav-number">13.</span> <span class="nav-text">web 安全渗透 检查清单</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-针对安全缺陷漏洞的检查清单"><span class="nav-number">13.1.</span> <span class="nav-text">1. 针对安全缺陷漏洞的检查清单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-针对业务场景的检查清单"><span class="nav-number">13.2.</span> <span class="nav-text">2. 针对业务场景的检查清单</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#漏洞定级"><span class="nav-number">14.</span> <span class="nav-text">漏洞定级</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/01/11/web-penetration-testing/';
+          this.page.identifier = '2022/01/11/web-penetration-testing/';
+          this.page.title = '浅谈之 - web 安全渗透测试方案';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

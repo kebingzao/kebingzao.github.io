@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="browser,webrtc," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言这段时间一直在处理浏览器 webrtc 投屏的事情，不管是其他端(android, ios, win, mac) 投给浏览器， 还是浏览器自己投给浏览器, 都会涉及到双向语音。 在这期间有踩了一些坑， 干脆就记录一下。 webrtc 浏览器要发送语音，那就是要启用麦克风来收集音频，然后传给对方。 因为浏览器可以作为投屏的投屏端(source)，以及接受投屏的客户端(node), 这两种情况下的">
+<meta name="keywords" content="browser,webrtc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="webrtc 浏览器启用麦克风将其当做 audio track 传给对方">
+<meta property="og:url" content="http://kebingzao.com/2022/07/04/webrtc-add-microPhone-track/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言这段时间一直在处理浏览器 webrtc 投屏的事情，不管是其他端(android, ios, win, mac) 投给浏览器， 还是浏览器自己投给浏览器, 都会涉及到双向语音。 在这期间有踩了一些坑， 干脆就记录一下。 webrtc 浏览器要发送语音，那就是要启用麦克风来收集音频，然后传给对方。 因为浏览器可以作为投屏的投屏端(source)，以及接受投屏的客户端(node), 这两种情况下的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2022-07-05T13:31:38.459Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="webrtc 浏览器启用麦克风将其当做 audio track 传给对方">
+<meta name="twitter:description" content="前言这段时间一直在处理浏览器 webrtc 投屏的事情，不管是其他端(android, ios, win, mac) 投给浏览器， 还是浏览器自己投给浏览器, 都会涉及到双向语音。 在这期间有踩了一些坑， 干脆就记录一下。 webrtc 浏览器要发送语音，那就是要启用麦克风来收集音频，然后传给对方。 因为浏览器可以作为投屏的投屏端(source)，以及接受投屏的客户端(node), 这两种情况下的">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/07/04/webrtc-add-microPhone-track/"/>
+
+
+
+
+
+  <title>webrtc 浏览器启用麦克风将其当做 audio track 传给对方 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/07/04/webrtc-add-microPhone-track/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">webrtc 浏览器启用麦克风将其当做 audio track 传给对方</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-07-04T17:51:03+08:00">
+                2022-07-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
+                    <span itemprop="name">webrtc相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/07/04/webrtc-add-microPhone-track/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/07/04/webrtc-add-microPhone-track/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/07/04/webrtc-add-microPhone-track/" class="leancloud_visitors" data-flag-title="webrtc 浏览器启用麦克风将其当做 audio track 传给对方">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这段时间一直在处理浏览器 webrtc 投屏的事情，不管是其他端(android, ios, win, mac) 投给浏览器， 还是浏览器自己投给浏览器, 都会涉及到双向语音。</p>
+<p>在这期间有踩了一些坑， 干脆就记录一下。</p>
+<p>webrtc 浏览器要发送语音，那就是要启用麦克风来收集音频，然后传给对方。 因为浏览器可以作为投屏的投屏端(source)，以及接受投屏的客户端(node), 这两种情况下的处理方式是不一样的，所以就分开讲。</p>
+<h2 id="浏览器作为客户端-node-启用麦克风将语音传给对方的几种方式"><a href="#浏览器作为客户端-node-启用麦克风将语音传给对方的几种方式" class="headerlink" title="浏览器作为客户端(node)启用麦克风将语音传给对方的几种方式"></a>浏览器作为客户端(node)启用麦克风将语音传给对方的几种方式</h2><blockquote>
+<p>本文不是科普文，所以对于 webrtc 的一些技术，不在这边进行基础讲解</p>
+</blockquote>
+<p>浏览器作为客户端(node)启用麦克风将语音传给对方，在我的实作中， 其实有 3 种:<br><a id="more"></a></p>
+<h3 id="1-进行-webrtc-刚连接的时候，就收集音频"><a href="#1-进行-webrtc-刚连接的时候，就收集音频" class="headerlink" title="1. 进行 webrtc 刚连接的时候，就收集音频"></a>1. 进行 webrtc 刚连接的时候，就收集音频</h3><p>第一种最简单，就是在我初始化完 peerconnection 之后， 这时候还没有交换 SDP 的时候，就将后面要启用的音频先收集好，先传过去</p>
+<p>所以代码也最简单</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> stream = <span class="keyword">await</span> navigator.mediaDevices.getUserMedia(&#123; <span class="attr">video</span>: <span class="literal">false</span>, <span class="attr">audio</span>: <span class="literal">true</span> &#125;)</span><br><span class="line"><span class="comment">// 初始化 peerconnection</span></span><br><span class="line">this.#initPc(turnInfo)</span><br><span class="line">stream.getTracks().forEach(<span class="function"><span class="params">track</span> =&gt;</span> &#123;</span><br><span class="line">  this.#pc.addTrack(track, stream)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>这样子的好处就是，因为我一开始就收集音轨信息，并且在 SDP 交换的时候，就会带上本客户端的 audio track 了。 所以 source 端其实就可以得到这个 track 了， 直接取出来就可以了(<code>ontrack</code> 监听得到)。</p>
+<p>然后对于客户端来说， 用户没有真正点击之前，可以设置 muted 静音， 等用户真的要语音之后， 再把 muted 去掉就行了。</p>
+<p>当然坏处也很明显， 用户本来只是想投屏， 但是却要求要开启麦克风权限， 这个体验肯定是不好的(第一次授权的时候，要用户手动点击允许才行)</p>
+<h3 id="2-临时要用语音的时候，再去开启麦克风权限"><a href="#2-临时要用语音的时候，再去开启麦克风权限" class="headerlink" title="2. 临时要用语音的时候，再去开启麦克风权限"></a>2. 临时要用语音的时候，再去开启麦克风权限</h3><p>第一种的体验是不太好， 麦克风权限获取的时候，肯定是用户当下要用的时候，才去获取才对，如果用户不需要的话，不能去干扰用户。</p>
+<p>所以我们可以这样子做，等用户想语音的时候，再去获取，但是这样子会有一个问题，当我 webrtc 连接之后，如果我要新加 media stream， 是需要重新交换 sdp 信息， 让 sdp 重新带上这个新加的 track， 这样子 source 端才能识别</p>
+<p>所以代码会稍微复杂一点，不过只需要第一次添加 media stream， 需要去交换 sdp， 后面的开关就不需要了，直接 replace track 就行了。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// target端的 sdp 数据, 用来开启 audio 的时候，重新交换 sdp</span></span><br><span class="line">#targetSdpData = &#123;&#125;</span><br><span class="line"><span class="comment">// 本次 webrtc 连接是否有开启过 audio</span></span><br><span class="line">#hadOpenAudio = false</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line">openLocalAudio()&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    this.addLocalAudioTrack(!this.#hadOpenAudio).then( stream =&gt;&#123;</span><br><span class="line">      <span class="comment">//这时候要重新交换sdp 的内容，不然只有 addtrack 是不行</span></span><br><span class="line">      <span class="comment">// 当然一次 webrtc 连接只需要交换过一次就行了</span></span><br><span class="line">      if(this.#hadOpenAudio)&#123;</span><br><span class="line">        resolve(stream)</span><br><span class="line">      &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        this.#resendSdp().then(() =&gt; &#123;</span><br><span class="line">          this.#hadOpenAudio = true</span><br><span class="line">          resolve(stream)</span><br><span class="line">        &#125;, err =&gt; reject(err))</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;, err =&gt; &#123;</span><br><span class="line">      reject(err)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 重新交互 sdp， client 开启麦克风的时候， 需要将麦克风的 sender 信息重新交互给 target, 不然 track 没法同步过去</span></span><br><span class="line">async #resendSdp()&#123;</span><br><span class="line">  const SDPAnswer = await this.setSdp(this.#targetSdpData)</span><br><span class="line">  const setRemoteSDPResult = await this.#mqttPub('toTarget', 'webrtc.setRemoteSDP', [SDPAnswer.sdp])</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置 sdp</span></span><br><span class="line">setSdp(offerSDP) &#123;</span><br><span class="line">  <span class="keyword">const</span> sdpConstraints = &#123;</span><br><span class="line">      <span class="string">'mandatory'</span>: &#123;</span><br><span class="line">          <span class="string">'OfferToReceiveAudio'</span>: <span class="literal">true</span>,</span><br><span class="line">          <span class="string">'OfferToReceiveVideo'</span>: <span class="literal">true</span></span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> RTCSessionDescription = <span class="built_in">window</span>.RTCSessionDescription || <span class="built_in">window</span>.mozRTCSessionDescription || <span class="built_in">window</span>.webkitRTCSessionDescription</span><br><span class="line">  <span class="keyword">const</span> offer = <span class="keyword">new</span> RTCSessionDescription(&#123; <span class="string">"sdp"</span>: offerSDP, <span class="string">"type"</span>: <span class="string">"offer"</span> &#125;)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> sdpAnswer = <span class="literal">null</span></span><br><span class="line">  return this.#pc.setRemoteDescription(offer).then(() =&gt; &#123;</span><br><span class="line">      logger.debug(<span class="string">`[PeerConnection]: setRemoteDescription success`</span>)</span><br><span class="line">      return this.#pc.createAnswer(sdpConstraints)</span><br><span class="line">  &#125;).then(<span class="function">(<span class="params">answer</span>) =&gt;</span> &#123;</span><br><span class="line">      logger.debug(<span class="string">`[PeerConnection]: createAnswer success`</span>)</span><br><span class="line">      sdpAnswer = answer</span><br><span class="line">      return this.#pc.setLocalDescription(answer)</span><br><span class="line">  &#125;).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      logger.debug(<span class="string">`[PeerConnection]: setLocalDescription success`</span>)</span><br><span class="line">      <span class="keyword">return</span> sdpAnswer</span><br><span class="line">  &#125;).catch(<span class="function">(<span class="params">error</span>) =&gt;</span> &#123;</span><br><span class="line">      logger.error(<span class="string">`[PeerConnection]: set sdp err: <span class="subst">$&#123;error&#125;</span>, sdp: <span class="subst">$&#123;offerSDP&#125;</span>`</span>)</span><br><span class="line">      <span class="keyword">throw</span> error</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 开启本地音频</span></span><br><span class="line"><span class="comment"> * @returns &#123;Promise&lt;void&gt;&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">addLocalAudioTrack(isFirst) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// doc: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia</span></span><br><span class="line">    navigator.mediaDevices.getUserMedia(&#123; <span class="attr">video</span>: <span class="literal">false</span>, <span class="attr">audio</span>: <span class="literal">true</span> &#125;).then( <span class="function"><span class="params">stream</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="comment">// https://github.com/webrtc/samples/blob/gh-pages/src/content/peerconnection/upgrade/js/main.js</span></span><br><span class="line">      <span class="comment">// 从这边来看的话，如果之前没有开启过 audio track，就连接上 webrtc 的话， 那么 sdp 的 sender 是不会包含 audio 信息，所以这时候客户端添加 addTrack 的话是没有效果的。 要重新同 target 端进行 sdp 的交换才行</span></span><br><span class="line">      <span class="comment">// 除非一开始在 sdp 交换之前就 addtrack。 否则在连接之后，再进行 addtrack 就会有这个问题</span></span><br><span class="line">      <span class="keyword">let</span> audioTrack = stream.getAudioTracks()[<span class="number">0</span>]</span><br><span class="line">      <span class="keyword">if</span>(isFirst)&#123;</span><br><span class="line">        <span class="comment">// 第一次直接 add 进去，生成 sender</span></span><br><span class="line">        this.#localAudioTrackSender = this.#pc.addTrack(audioTrack, stream)</span><br><span class="line">      &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">// 如果不是第一次，就用 replace 的方式。 不然反复开启，每次都 addtrack 的话，就会导致第二次开启的时候，声音传不过去</span></span><br><span class="line">        this.#localAudioTrackSender?.replaceTrack(audioTrack)</span><br><span class="line">      &#125;</span><br><span class="line">      resolve(stream)</span><br><span class="line">    &#125;).catch(<span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="comment">// 错误列表如下</span></span><br><span class="line">      <span class="comment">/**</span></span><br><span class="line"><span class="comment">       * AbortError  -&gt; 硬件阻止</span></span><br><span class="line"><span class="comment">       * NotAllowedError -&gt; 用户拒绝</span></span><br><span class="line"><span class="comment">       * NotFoundError -&gt; 找不到麦克风</span></span><br><span class="line"><span class="comment">       * NotReadableError -&gt; 硬件不可读</span></span><br><span class="line"><span class="comment">       * SecurityError -&gt; 安全问题</span></span><br><span class="line"><span class="comment">       * TypeError -&gt; 其他类型错误</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">      <span class="keyword">switch</span>(e.name) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">"NotFoundError"</span>:</span><br><span class="line">          logger.error(<span class="string">`[getUserMedia] error: Unable to open your call because no camera and/or microphone were found.`</span>)</span><br><span class="line">          <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">case</span> <span class="string">"NotAllowedError"</span>:</span><br><span class="line">          logger.error(<span class="string">`[getUserMedia] error: because reject!!!!!`</span>)</span><br><span class="line">          <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">          logger.error(<span class="string">`[getUserMedia] error: Error opening your camera and/or microphone: <span class="subst">$&#123;e.message&#125;</span>`</span>)</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      logger.error(<span class="string">`[getUserMedia] error: <span class="subst">$&#123;e&#125;</span>`</span>)</span><br><span class="line">      reject(&#123; <span class="attr">code</span>: <span class="number">-2</span>,  <span class="attr">msg</span>: e &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 关闭本地音频</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">stopLocalAudioTrack() &#123;</span><br><span class="line">  this.#localAudioTrackSender?.track?.stop()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后这个 <code>this.#targetSdpData</code> 其实就是之前 source 返回的 sdp 数据，这个要保存起来，后面生成新的 answer 给 source 端。</p>
+<p>client 端这样子处理就行了，不过 source 那边也要处理，因为在 webrtc 连接成功的时候再去重新 setRemoteSDP 是会报这个错误的:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Failed to <span class="keyword">set</span> remote answer sdp: Called <span class="keyword">in</span> wrong state: stable</span><br></pre></td></tr></table></figure></p>
+<p>具体代码就是收到 client 端的 setRemoteSDP 指令的时候，然后重置一下本地的 <code>localDescription</code>，然后再去设置 <code>setRemoteDescription</code><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">this</span>.mqttModel.onMsg(<span class="string">'webrtc.setRemoteSDP'</span>, data =&gt; &#123;</span><br><span class="line">  <span class="keyword">this</span>.mqttModel.pub(<span class="string">`<span class="subst">$&#123;<span class="keyword">this</span>.#commandPrefix&#125;</span>toClient`</span>, &#123;</span><br><span class="line">    id: data?.id</span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    useAes: <span class="literal">false</span></span><br><span class="line">  &#125;)</span><br><span class="line">  if(this.#connectStatus === SourceWebRtcProcess.CONNECT_STATUS.COMPLETE)&#123;</span><br><span class="line">    <span class="comment">// 连接结束的交互, 这时候要重新设置本地的 sdp，才不会报这个错 : Failed to set remote answer sdp: Called in wrong state: stable</span></span><br><span class="line">    this.#pc.setLocalDescription(this.#pc.localDescription).then(result =&gt; &#123;</span><br><span class="line">      <span class="keyword">const</span> offer = <span class="keyword">new</span> RTCSessionDescription(&#123; <span class="string">"sdp"</span>: data.params[<span class="number">0</span>], <span class="string">"type"</span>: <span class="string">"answer"</span> &#125;)</span><br><span class="line">      this.#pc.setRemoteDescription(offer).then(() =&gt; &#123;</span><br><span class="line">        <span class="comment">// 这时候就返回 ice</span></span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    <span class="comment">// 连接过程中</span></span><br><span class="line">    <span class="comment">// 接下来处理写入 answer        </span></span><br><span class="line">    <span class="keyword">const</span> offer = <span class="keyword">new</span> RTCSessionDescription(&#123; <span class="string">"sdp"</span>: data.params[<span class="number">0</span>], <span class="string">"type"</span>: <span class="string">"answer"</span> &#125;)</span><br><span class="line">    this.#pc.setRemoteDescription(offer).then(() =&gt; &#123;</span><br><span class="line">      <span class="comment">// 这时候就返回 ice</span></span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>这样子就可以实现，刚开始 webrtc 连接的时候，不启用 audio track， 后面临时要用的时候，再临时添加。</p>
+<p>缺点就是 source 也要相应的调整代码</p>
+<h3 id="3-刚开始添加一段无意义的音轨，后面直接替换"><a href="#3-刚开始添加一段无意义的音轨，后面直接替换" class="headerlink" title="3. 刚开始添加一段无意义的音轨，后面直接替换"></a>3. 刚开始添加一段无意义的音轨，后面直接替换</h3><p>还有一种更好的交互方式，就是不需要再去重新交换 sdp，而是刚开始的时候，client 就把音轨加进去了， 只不过是一段无意义的空白音轨， 后面真的启用麦克风权限的时候，再将这一段音轨替换成麦克风的音轨就行了。</p>
+<p>整个过程都不需要再去交换 sdp， 具体代码:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化 peerconnection</span></span><br><span class="line">this.#initPc(turnInfo)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这边可以考虑初始化一段空白的音轨，然后添加到 pc，这样子，后面只需要 replacetrack 的操作就可以了</span></span><br><span class="line"><span class="comment">// 这边将一段很短的无声 mp3 转换为 base64 编码，然后直接播放，这样子就不需要再去加载音频资源</span></span><br><span class="line"><span class="keyword">const</span> url = URL.createObjectURL(dataURLtoBlob(<span class="string">`data:audio/mpeg;base64,SUQzBAAAAAACBFRYWFgAAAASAAADbWFqb3JfYnJhbmQATTRBIABUWFhYAAAAEwAAA21pbm9yX3ZlcnNpb24ANTEyAFRYWFgAAAAcAAADY29tcGF0aWJsZV9icmFuZHMAaXNvbWlzbzIAVElUMgAAACAAAAPhhJDhhaHhhrwh4pmhX+Wui+aXu+a1qV8oTUlOTykAVFBFMQAAAAsAAAPosK3lt6fmnpcAVENPTQAAAAsAAAPosK3lt6fmnpcAVEFMQgAAABQAAAPosK3lt6fmnpfnmoTkuJPovpEAVERSQwAAAAYAAAMyMDIyAFRTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAJAAAEfABFRUVFRUVFRUVFRVxcXFxcXFxcXFxcdHR0dHR0dHR0dHSLi4uLi4uLi4uLi6KioqKioqKioqKiurq6urq6urq6urrR0dHR0dHR0dHR0ejo6Ojo6Ojo6Ojo//////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAYbAAAAAAAABHw6c4BSAAAAAAAAAAAAAAAAAAAAAP/7EGQAD/AAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sSZCIP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQZESP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xJkZo/wAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xBkiQ/wAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7EmSrD/AAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7EGTNj/AAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sSZN0P8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQZN2P8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=`</span>))</span><br><span class="line"><span class="keyword">let</span> audio = <span class="keyword">new</span> Audio(url)</span><br><span class="line"><span class="keyword">let</span> audioStream = audio.mozCaptureStream ? audio.mozCaptureStream() : audio.captureStream()</span><br><span class="line"><span class="keyword">await</span> audio.play()</span><br><span class="line"><span class="comment">// 这边一定要等待开始播放，或者播放结束后，才会有 audio track </span></span><br><span class="line"><span class="keyword">let</span> audioTrack = audioStream.getAudioTracks()[<span class="number">0</span>]</span><br><span class="line">this.#pc.addTrack(audioTrack, audioStream)</span><br></pre></td></tr></table></figure></p>
+<p>简单的来说，就是初始化 peerconnection 之后，将一段本地播放完的 audio stream 的 audio track 添加到 peerconnection 对象，所以接下来的 sdp 交换，就会有这个 audio track 的信息。</p>
+<blockquote>
+<p>这边的 mp3 音频文件，最好是那种很小的，时间非常短的白噪音，让用户没办法感知到</p>
+</blockquote>
+<p>然后只需要在开启麦克风的时候，replace 这个 audio track 就行了<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// doc: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia</span></span><br><span class="line">navigator.mediaDevices.getUserMedia(&#123; <span class="attr">video</span>: <span class="literal">false</span>, <span class="attr">audio</span>: <span class="literal">true</span> &#125;).then( <span class="function"><span class="params">stream</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> audioTrack = stream.getAudioTracks()[<span class="number">0</span>]</span><br><span class="line">  this.#localAudioTrackSender = this.#pc.getSenders().find(s =&gt; s.track.kind === audioTrack.kind)</span><br><span class="line">  this.#localAudioTrackSender.replaceTrack(audioTrack)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>不过这种方式会有一个浏览器兼容问题，就是 safari 浏览器并没有 <code>captureStream</code> 这个方法， 所以在 safari 浏览器会失败。</p>
+<p>所以如果 safari 浏览器要支持的话，只能用 第一种或者第二种 方式来处理。</p>
+<h2 id="浏览器作为投屏端-source-启用麦克风将语音传给对方的方式"><a href="#浏览器作为投屏端-source-启用麦克风将语音传给对方的方式" class="headerlink" title="浏览器作为投屏端(source)启用麦克风将语音传给对方的方式"></a>浏览器作为投屏端(source)启用麦克风将语音传给对方的方式</h2><p>参照上一种的第三方方式，当浏览器作为投屏端的时候，也是在建立 webrtc 的时候，初始化 peerconnection， 就将一个本地的 audio track 添加进去<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取分享桌面</span></span><br><span class="line"><span class="keyword">async</span> getDisplayMedia() &#123;</span><br><span class="line">  <span class="comment">// 获取桌面</span></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 相关文档</span></span><br><span class="line"><span class="comment">   * https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API/Using_Screen_Capture</span></span><br><span class="line"><span class="comment">   * https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">let</span> mediaStream = <span class="keyword">await</span> navigator.mediaDevices.getDisplayMedia(&#123;</span><br><span class="line">    audio: <span class="literal">false</span>,</span><br><span class="line">    video: &#123;</span><br><span class="line">        frameRate: <span class="number">20</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">let</span> stopEventHandle = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// 同时触发 media stop 事件</span></span><br><span class="line">    <span class="keyword">this</span>.emit(<span class="string">"mediaStop"</span>, <span class="literal">null</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 这边要监听 stop 事件， 这个用户直接点击外面的停止共享屏幕按钮的监听</span></span><br><span class="line">  mediaStream.getVideoTracks()[<span class="number">0</span>].removeEventListener(<span class="string">'ended'</span>, stopEventHandle)</span><br><span class="line">  mediaStream.getVideoTracks()[<span class="number">0</span>].addEventListener(<span class="string">'ended'</span>, stopEventHandle)</span><br><span class="line">  <span class="keyword">return</span> mediaStream</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 判断是否支持相关api。</span></span><br><span class="line"><span class="keyword">if</span> (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) &#123;</span><br><span class="line">  alert(<span class="string">'getDisplayMedia is not supported!'</span>)</span><br><span class="line">  <span class="keyword">return</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取分享桌面</span></span><br><span class="line">this.#mediaStream = await this.getDisplayMedia()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 刚开始的时候，这边可以创建一个基本上等于空白的 audio track 来占位， 后面直接就可以 replacetrack </span></span><br><span class="line"><span class="keyword">const</span> url = URL.createObjectURL(dataURLtoBlob(<span class="string">`data:audio/mpeg;base64,SUQzBAAAAAACBFRYWFgAAAASAAADbWFqb3JfYnJhbmQATTRBIABUWFhYAAAAEwAAA21pbm9yX3ZlcnNpb24ANTEyAFRYWFgAAAAcAAADY29tcGF0aWJsZV9icmFuZHMAaXNvbWlzbzIAVElUMgAAACAAAAPhhJDhhaHhhrwh4pmhX+Wui+aXu+a1qV8oTUlOTykAVFBFMQAAAAsAAAPosK3lt6fmnpcAVENPTQAAAAsAAAPosK3lt6fmnpcAVEFMQgAAABQAAAPosK3lt6fmnpfnmoTkuJPovpEAVERSQwAAAAYAAAMyMDIyAFRTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAJAAAEfABFRUVFRUVFRUVFRVxcXFxcXFxcXFxcdHR0dHR0dHR0dHSLi4uLi4uLi4uLi6KioqKioqKioqKiurq6urq6urq6urrR0dHR0dHR0dHR0ejo6Ojo6Ojo6Ojo//////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAYbAAAAAAAABHw6c4BSAAAAAAAAAAAAAAAAAAAAAP/7EGQAD/AAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FMy4xMDBVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sSZCIP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQZESP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xJkZo/wAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xBkiQ/wAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7EmSrD/AAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7EGTNj/AAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sSZN0P8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQZN2P8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=`</span>))</span><br><span class="line"><span class="keyword">let</span> audio = <span class="keyword">new</span> Audio(url)</span><br><span class="line"><span class="keyword">let</span> audioStream = audio.mozCaptureStream ? audio.mozCaptureStream() : audio.captureStream()</span><br><span class="line"><span class="keyword">await</span> audio.play()</span><br><span class="line"><span class="comment">// 这边一定要等待开始播放，或者播放结束后，才会有 audio track </span></span><br><span class="line"><span class="keyword">let</span> audioTrack = audioStream.getAudioTracks()[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">this.#mediaStream.addTrack(audioTrack)</span><br><span class="line"></span><br><span class="line">this.#initPc(turnInfo)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 添加本地视频轨到 peerConnection 之中</span></span><br><span class="line">this.#mediaStream.getTracks().forEach(track =&gt; &#123;</span><br><span class="line">  this.#pc().addTrack(track, this.#mediaStream)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<p>然后真的要开启的时候，再去 replace track 就行了<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">  <span class="comment">// 打开本地的 audio， 也就是麦克风</span></span><br><span class="line">  openLocalAudio()&#123;</span><br><span class="line">    navigator.mediaDevices.getUserMedia(&#123; <span class="attr">video</span>: <span class="literal">false</span>, <span class="attr">audio</span>: <span class="literal">true</span> &#125;).then( <span class="function"><span class="params">stream</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> audioTrack = stream.getAudioTracks()[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">let</span> sender = <span class="keyword">this</span>.rtcModel.getPc().getSenders().find(<span class="function"><span class="params">s</span> =&gt;</span> s.track.kind === audioTrack.kind)</span><br><span class="line">        sender.replaceTrack(audioTrack)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 关闭本地音频</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> stopLocalAudio() &#123;</span><br><span class="line">  let sender = this.#pc.getSenders().find(s =&gt; s.track.kind === "audio")</span><br><span class="line">  sender?.track?.stop()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="公共方法"><a href="#公共方法" class="headerlink" title="公共方法"></a>公共方法</h2><p>上面会用到两个公共方法:</p>
+<ol>
+<li><p>一个是将 音频文件，比如 mp3 文件，转换为 base64 格式字符串, 事先转好</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;input type=<span class="string">"file"</span> id=<span class="string">"fileInput"</span>&gt;</span><br><span class="line"> &lt;script&gt;</span><br><span class="line">    　　<span class="keyword">var</span> fileInput = <span class="built_in">document</span>.querySelector(<span class="string">'#fileInput'</span>);</span><br><span class="line">        fileInput.onchange = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> file = <span class="keyword">this</span>.files[<span class="number">0</span>];</span><br><span class="line">            <span class="keyword">var</span> reader = <span class="keyword">new</span> FileReader();</span><br><span class="line">            reader.readAsDataURL(file);</span><br><span class="line">            reader.onload = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">                <span class="keyword">var</span> data = reader.result;</span><br><span class="line">                <span class="built_in">console</span>.log(<span class="string">'data'</span>, data);</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;;</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将 base64 格式的音频转换为 blob 格式，然后再转换为 url，这样子就可以直接应用</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">dataURLtoBlob</span>(<span class="params">dataurl</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> arr = dataurl.split(<span class="string">','</span>),</span><br><span class="line">      mime = arr[<span class="number">0</span>].match(<span class="regexp">/:(.*?);/</span>)[<span class="number">1</span>],</span><br><span class="line">      bstr = atob(arr[<span class="number">1</span>]),</span><br><span class="line">      n = bstr.length,</span><br><span class="line">      u8arr = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>(n)</span><br><span class="line">  <span class="keyword">while</span> (n--) &#123;</span><br><span class="line">      u8arr[n] = bstr.charCodeAt(n)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> Blob([u8arr], &#123; <span class="attr">type</span>: mime &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这样子就可以不用再引入一个 音频资源 了，也就少了一次 http 加载请求</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://webrtc.github.io/samples/" target="_blank" rel="noopener">webrtc demo</a></li>
+<li><a href="https://webrtc.github.io/samples/src/content/peerconnection/upgrade/" target="_blank" rel="noopener">Upgrade a call and turn video on</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/07/04/webrtc-add-microPhone-track/" title="webrtc 浏览器启用麦克风将其当做 audio track 传给对方">http://kebingzao.com/2022/07/04/webrtc-add-microPhone-track/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/browser/" rel="tag"># browser</a>
+          
+            <a href="/tags/webrtc/" rel="tag"># webrtc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/04/26/lets-encrypt-cert-error/" rel="next" title="记一次 Let's Encrypt https 证书在旧设备上显示错误的情况">
+                <i class="fa fa-chevron-left"></i> 记一次 Let's Encrypt https 证书在旧设备上显示错误的情况
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/07/05/mail-instead-of-send/" rel="prev" title="AWS SES 发送邮件出现的代发字样问题">
+                AWS SES 发送邮件出现的代发字样问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">70</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#浏览器作为客户端-node-启用麦克风将语音传给对方的几种方式"><span class="nav-number">2.</span> <span class="nav-text">浏览器作为客户端(node)启用麦克风将语音传给对方的几种方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-进行-webrtc-刚连接的时候，就收集音频"><span class="nav-number">2.1.</span> <span class="nav-text">1. 进行 webrtc 刚连接的时候，就收集音频</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-临时要用语音的时候，再去开启麦克风权限"><span class="nav-number">2.2.</span> <span class="nav-text">2. 临时要用语音的时候，再去开启麦克风权限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-刚开始添加一段无意义的音轨，后面直接替换"><span class="nav-number">2.3.</span> <span class="nav-text">3. 刚开始添加一段无意义的音轨，后面直接替换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#浏览器作为投屏端-source-启用麦克风将语音传给对方的方式"><span class="nav-number">3.</span> <span class="nav-text">浏览器作为投屏端(source)启用麦克风将语音传给对方的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#公共方法"><span class="nav-number">4.</span> <span class="nav-text">公共方法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/07/04/webrtc-add-microPhone-track/';
+          this.page.identifier = '2022/07/04/webrtc-add-microPhone-track/';
+          this.page.title = 'webrtc 浏览器启用麦克风将其当做 audio track 传给对方';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

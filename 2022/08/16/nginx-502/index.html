@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="nginx," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前段时间我们官网要做一个活动页面， 但是活动页面是用另一个活动页域名， activity.example.com, 但是运营人员需要对外展示的落地页是以官网 www 的域名来处理，所以这时候就会需要在官网的 nginx 指向那边进行页面的代理转发:1234location  /promo/student-discount &amp;#123;    resolver 8.8.8.8;    proxy">
+<meta name="keywords" content="nginx">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次 nginx 转发代理 https 出现 502 的情况">
+<meta property="og:url" content="http://kebingzao.com/2022/08/16/nginx-502/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前段时间我们官网要做一个活动页面， 但是活动页面是用另一个活动页域名， activity.example.com, 但是运营人员需要对外展示的落地页是以官网 www 的域名来处理，所以这时候就会需要在官网的 nginx 指向那边进行页面的代理转发:1234location  /promo/student-discount &amp;#123;    resolver 8.8.8.8;    proxy">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2022-09-20T14:28:11.986Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="记一次 nginx 转发代理 https 出现 502 的情况">
+<meta name="twitter:description" content="前言前段时间我们官网要做一个活动页面， 但是活动页面是用另一个活动页域名， activity.example.com, 但是运营人员需要对外展示的落地页是以官网 www 的域名来处理，所以这时候就会需要在官网的 nginx 指向那边进行页面的代理转发:1234location  /promo/student-discount &amp;#123;    resolver 8.8.8.8;    proxy">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/08/16/nginx-502/"/>
+
+
+
+
+
+  <title>记一次 nginx 转发代理 https 出现 502 的情况 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/08/16/nginx-502/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">记一次 nginx 转发代理 https 出现 502 的情况</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-08-16T20:35:49+08:00">
+                2022-08-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/08/16/nginx-502/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/08/16/nginx-502/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/08/16/nginx-502/" class="leancloud_visitors" data-flag-title="记一次 nginx 转发代理 https 出现 502 的情况">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间我们官网要做一个活动页面， 但是活动页面是用另一个活动页域名， activity.example.com, 但是运营人员需要对外展示的落地页是以官网 www 的域名来处理，所以这时候就会需要在官网的 nginx 指向那边进行页面的代理转发:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">location  /promo/student-discount &#123;</span><br><span class="line">    resolver 8.8.8.8;</span><br><span class="line">    proxy_pass https://activity.example.com/promo/student-discount;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>但是实测的过程中， 却发现代理转发的时候，报了一个 502 的错误<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2022/08/16 11:58:22 [error] 2293#0: *213338285 SSL_do_handshake() failed (SSL: error:1408F10B:SSL routines:ssl3_get_record:wrong version number) while SSL handshaking to upstream, client: 14.xxx.1.86, server: www.example.com, request: "HEAD /promo/student-discount HTTP/1.1", upstream: "https://13.xxx.xxx.101:443/promo/student-discount", host: "www.example.com"</span><br><span class="line">2022/08/16 11:58:22 [warn] 2293#0: *213338285 upstream server temporarily disabled while SSL handshaking to upstream, client: 14.xxx.1.86, server: www.example.com, request: "HEAD /promo/student-discount HTTP/1.1", upstream: "https://13.xxx.125.101:443/promo/student-discount", host: "www.example.com"</span><br></pre></td></tr></table></figure></p>
+<p>看了一下，应该是 nginx 在进行代理请求的时候，就报错了， 应该是 ssl 的握手的错误 <code>SSL_do_handshake()</code><br><a id="more"></a></p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>因为我这个活动页程序是部署在 aws 的 s3 上的，并且使用 cloudfront 来做 cdn。 所以去查了一下 cloudfront 的文档，确实有对应的文档:</p>
+<blockquote><p>如果您使用自定义源并将 CloudFront 配置为要求 CloudFront 与源之间使用 HTTPS，则问题可能在于域名不匹配。在源上安装的 SSL/TLS 证书的公用名字段中包含一个域名，使用者备用名称字段中可能包含更多域名。（CloudFront 支持证书域名中的通配符。） 证书中必须有一个域名与下面的一个或两个值匹配：</p>
+<p>您为分配中适用源的源域名指定的值。</p>
+<ul>
+<li>如果您将 CloudFront 配置为将 Host 标头转发到您的源，则为该 Host 标头的值。有关将 Host 标头转发到源的更多信息，请参阅根据请求标头缓存内容。</li>
+<li>如果域名不匹配，SSL/TLS 握手将失败，CloudFront 将返回 HTTP 状态代码 502（无效网关）并将 X-Cache 标头设置为 Error from cloudfront。</li>
+</ul>
+<p>要确定证书中的域名是否与分配或 Host 标头中的 Origin Domain Name 匹配，可以使用在线 SSL 检查程序或 OpenSSL。</p>
+<footer><strong>AmazonCloudFront</strong><cite><a href="https://docs.aws.amazon.com/zh_cn/AmazonCloudFront/latest/DeveloperGuide/http-502-bad-gateway.html" target="_blank" rel="noopener">docs.aws.amazon.com/zh_cn/AmazonCloudFront/latest/DeveloperGuide/http-502-bad-gateway.html</a></cite></footer></blockquote>
+<p>他的文档中也有提供用 openssl 的测试方式:</p>
+<blockquote><p>要帮助纠正来自 CloudFront 的 HTTP 502 错误，您可以使用 OpenSSL 尝试与源服务器建立 SSL/TLS 连接。如果 OpenSSL 无法建立连接，则可能表明源服务器的 SSL/TLS 配置出错。如果 OpenSSL 能够建立连接，它将返回有关源服务器证书的信息，包括证书的公用名称（Subject CN 字段）和使用者备用名称（Subject Alternative Name 字段）。</p>
+<p>使用以下 OpenSSL 命令测试与源服务器的连接（将源域名 替换为源服务器的域名，如 example.com）：</p>
+<p><code>openssl s_client -connect origin domain name:443</code></p>
+<p>如果满足以下条件：</p>
+<ol>
+<li>您的源服务器支持具有多个 SSL/TLS 证书的多个域名</li>
+<li>您的分配已配置为将 Host 标头转发到源</li>
+</ol>
+<p>然后，将 -servername 选项添加到 OpenSSL 命令中，如以下示例所示（将 CNAME 替换为分配中配置的 CNAME）：</p>
+<p><code>openssl s_client -connect origin domain name:443 -servername CNAME</code></p>
+<footer><strong>AmazonCloudFront</strong><cite><a href="https://docs.aws.amazon.com/zh_cn/AmazonCloudFront/latest/DeveloperGuide/http-502-bad-gateway.html" target="_blank" rel="noopener">docs.aws.amazon.com/zh_cn/AmazonCloudFront/latest/DeveloperGuide/http-502-bad-gateway.html</a></cite></footer></blockquote>
+<p>而我们的官网的原服务器，其实是有存在多个 tls 证书的域名的，比如:</p>
+<ul>
+<li><a href="http://www.example.com" target="_blank" rel="noopener">www.example.com</a></li>
+<li>example.at</li>
+<li>example.info</li>
+</ul>
+<p>所以确实符合上述的第一点条件。</p>
+<h2 id="使用-openssl-实验"><a href="#使用-openssl-实验" class="headerlink" title="使用 openssl 实验"></a>使用 openssl 实验</h2><p>既然是 ssl 的握手错误，那就可以用 openssl 尝试握手一下:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-9-centos ~]$ openssl version</span><br><span class="line">OpenSSL 1.0.2k-fips  26 Jan 2017</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[kbz@VM-16-9-centos ~]$ openssl s_client -connect activity.example.com:443</span><br><span class="line">CONNECTED(00000003)</span><br><span class="line">139703956457360:error:140770FC:SSL routines:SSL23_GET_SERVER_HELLO:unknown protocol:s23_clnt.c:794:</span><br><span class="line"><span class="comment">---</span></span><br><span class="line">no peer certificate available</span><br><span class="line"><span class="comment">---</span></span><br><span class="line">No client certificate CA names sent</span><br><span class="line"><span class="comment">---</span></span><br><span class="line">SSL handshake has read 7 bytes and written 289 bytes</span><br><span class="line"><span class="comment">---</span></span><br><span class="line">New, (NONE), Cipher is (NONE)</span><br><span class="line">Secure Renegotiation IS NOT supported</span><br><span class="line">Compression: NONE</span><br><span class="line">Expansion: NONE</span><br><span class="line">No ALPN negotiated</span><br><span class="line">SSL-Session:</span><br><span class="line">    Protocol  : TLSv1.2</span><br><span class="line">    Cipher    : 0000</span><br><span class="line">    Session-ID: </span><br><span class="line">    Session-ID-ctx: </span><br><span class="line">    Master-Key: </span><br><span class="line">    Key-Arg   : None</span><br><span class="line">    Krb5 Principal: None</span><br><span class="line">    PSK identity: None</span><br><span class="line">    PSK identity hint: None</span><br><span class="line">    <span class="keyword">Start</span> <span class="keyword">Time</span>: <span class="number">1660726052</span></span><br><span class="line">    <span class="keyword">Timeout</span>   : <span class="number">300</span> (sec)</span><br><span class="line">    <span class="keyword">Verify</span> <span class="keyword">return</span> code: <span class="number">0</span> (ok)</span><br><span class="line"><span class="comment">---</span></span><br></pre></td></tr></table></figure></p>
+<p>发现确实连证书都不给返回。 跟文章说的效果一样， 接下来我们加上 <code>-servername</code>:<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-9-centos ~]$ openssl s_client -connect activity.example.com:443 -servername activity.example.com</span><br><span class="line">CONNECTED(00000003)</span><br><span class="line">depth=3 C = US, O = "The Go Daddy Group, Inc.", OU = Go Daddy Class 2 Certification Authority</span><br><span class="line">verify return:1</span><br><span class="line">depth=2 C = US, ST = Arizona, L = Scottsdale, O = "GoDaddy.com, Inc.", CN = Go Daddy Root Certificate Authority - G2</span><br><span class="line">verify return:1</span><br><span class="line">depth=1 C = US, ST = Arizona, L = Scottsdale, O = "GoDaddy.com, Inc.", OU = http://certs.godaddy.com/repository/, CN = Go Daddy Secure Certificate Authority - G2</span><br><span class="line">verify return:1</span><br><span class="line">depth=0 CN = *.example.com</span><br><span class="line">verify return:1</span><br><span class="line"><span class="comment">---</span></span><br><span class="line">Certificate chain</span><br><span class="line"> 0 s:/CN=*.example.com</span><br><span class="line">   i:/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./OU=http://certs.godaddy.com/repository//CN=Go Daddy Secure Certificate Authority - G2</span><br><span class="line"> 1 s:/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./OU=http://certs.godaddy.com/repository//CN=Go Daddy Secure Certificate Authority - G2</span><br><span class="line">   i:/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./CN=Go Daddy Root Certificate Authority - G2</span><br><span class="line"> 2 s:/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./CN=Go Daddy Root Certificate Authority - G2</span><br><span class="line">   i:/C=US/O=The Go Daddy Group, Inc./OU=Go Daddy Class 2 Certification Authority</span><br><span class="line"> 3 s:/C=US/O=The Go Daddy Group, Inc./OU=Go Daddy Class 2 Certification Authority</span><br><span class="line">   i:/C=US/O=The Go Daddy Group, Inc./OU=Go Daddy Class 2 Certification Authority</span><br><span class="line"><span class="comment">---</span></span><br><span class="line">Server certificate</span><br><span class="line"><span class="comment">-----BEGIN CERTIFICATE-----</span></span><br></pre></td></tr></table></figure></p>
+<p>发现确实是可以了。</p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>既然知道问题了，其实就很好解决，就是在 nginx 转发代理的时候，加上 <code>proxy_ssl_server_name on</code><br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Syntax:	proxy_ssl_server_name on | off;</span><br><span class="line">Default:	</span><br><span class="line">proxy_ssl_server_name off;</span><br><span class="line">Context:	http, server, location</span><br><span class="line">This directive appeared in version 1.7.0.</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>Enables or disables passing of the server name through TLS Server Name Indication extension (SNI, RFC 6066) when establishing a connection with the proxied HTTPS server.</p>
+</blockquote>
+<p>事实上，只要是需要针对 SNI 返回 server name 的后端服务，都会需要 nginx 代理转发的时候携带这个配置。 所以最后改成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">location  /promo/student-discount &#123;</span><br><span class="line">    resolver 8.8.8.8;</span><br><span class="line">    proxy_ssl_server_name on;</span><br><span class="line">    proxy_pass https://activity.example.com/promo/student-discount;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样子就正常了。</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://docs.aws.amazon.com/zh_cn/AmazonCloudFront/latest/DeveloperGuide/http-502-bad-gateway.html" target="_blank" rel="noopener">CloudFront 与自定义源服务器之间的 SSL/TLS 协商失败</a></li>
+<li><a href="https://www.jianshu.com/p/999ac06e3934" target="_blank" rel="noopener">nginx反向代理https访问502</a></li>
+<li><a href="http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ssl_server_name" target="_blank" rel="noopener">proxy_ssl_server_name</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/08/16/nginx-502/" title="记一次 nginx 转发代理 https 出现 502 的情况">http://kebingzao.com/2022/08/16/nginx-502/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nginx/" rel="tag"># nginx</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/08/16/webrtc-ios-black-screen/" rel="next" title="webrtc 视频流在 IOS 下会出现黑屏">
+                <i class="fa fa-chevron-left"></i> webrtc 视频流在 IOS 下会出现黑屏
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/08/17/nginx-connections-not-enough/" rel="prev" title="记一次 nginx worker_connections 最大可连接数不够用的情况">
+                记一次 nginx worker_connections 最大可连接数不够用的情况 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">281</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">71</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-openssl-实验"><span class="nav-number">3.</span> <span class="nav-text">使用 openssl 实验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决"><span class="nav-number">4.</span> <span class="nav-text">解决</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/08/16/nginx-502/';
+          this.page.identifier = '2022/08/16/nginx-502/';
+          this.page.title = '记一次 nginx 转发代理 https 出现 502 的情况';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

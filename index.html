@@ -307,6 +307,1047 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/09/20/php-encry-yp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/09/20/php-encry-yp/" itemprop="url">使用 yakpro-po 对 PHP 项目进行混淆加密</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-09-20T16:57:38+08:00">
+                2022-09-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/php相关/" itemprop="url" rel="index">
+                    <span itemprop="name">php相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/09/20/php-encry-yp/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/09/20/php-encry-yp/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/09/20/php-encry-yp/" class="leancloud_visitors" data-flag-title="使用 yakpro-po 对 PHP 项目进行混淆加密">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有讨论 <a href="/2022/09/20/php-encry/" title="浅谈之 - PHP 项目代码加密方案">浅谈之 - PHP 项目代码加密方案</a>, 所以本次我们尝试使用 <code>yakpro-po</code> 对我们的 PHP 项目进行混淆加密</p>
+<ul>
+<li><a href="https://github.com/pk-fr/yakpro-po" target="_blank" rel="noopener">YAK Pro - Php Obfuscator</a></li>
+<li><a href="https://github.com/nikic/PHP-Parser/tree/4.x/" target="_blank" rel="noopener">PHP Parser</a></li>
+</ul>
+<h2 id="环境需求"><a href="#环境需求" class="headerlink" title="环境需求"></a>环境需求</h2><p>因为 <code>yakpro-po</code> 是基于 <code>PHP Parser 4.x</code> 的语法解析器做的。 而 <code>PHP Parser 4.x</code> 库的运行环境要求是要在 PHP 7.0 以上环境才能运行， 不过混淆后的代码可以在 PHP 5.2 到 7.3 之间都可以工作。</p>
+<p>而我们的 PHP 程序是跑在 PHP 5.6 上面的。 所以可以满足混淆之后运行代码的环境。 而且为了更直观的表现出混淆加密和针对加密文件的运行可以在不同的服务器和 PHP 环境上，本次的测试用两台测试机器来测试，这样子会显得更直观</p>
+<ol>
+<li>一台服务器 -&gt; <code>混淆加密服务器</code>，上面安装了 7.4 的 PHP 版本， 采用 docker-compose 安装的，参照: <a href="https://github.com/yeszao/dnmp" target="_blank" rel="noopener">LNMP一键安装程序</a>， 这一台用来混淆加密 PHP 代码。</li>
+<li>一台服务器 -&gt; <code>加密文件运行服务器</code>, 用来运行混淆过的 PHP 程序的代码，PHP 5.6 的环境， 看是否可以成功运行。</li>
+</ol>
+<blockquote>
+<p>嫌麻烦的可以直接用一台，然后在各自的 docker 里面跑<br></p></blockquote>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2022/09/20/php-encry-yp/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/09/20/php-encry/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/09/20/php-encry/" itemprop="url">浅谈之 - PHP 项目代码加密方案</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-09-20T16:57:29+08:00">
+                2022-09-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/php相关/" itemprop="url" rel="index">
+                    <span itemprop="name">php相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/09/20/php-encry/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/09/20/php-encry/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/09/20/php-encry/" class="leancloud_visitors" data-flag-title="浅谈之 - PHP 项目代码加密方案">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前因"><a href="#前因" class="headerlink" title="前因"></a>前因</h2><p>未来有个项目需要对客户进行远程部署交付，意味着我们的服务会部署在用户自己的服务器上，考虑到商业代码的安全性，有一些服务是用 PHP 开发的项目，PHP 这种解释性语言，其实是直接源文件显示的， 这样子其实就相当于把我们的源代码暴露出来。 这样子肯定是不行的。</p>
+<p>所以我们要对 PHP 的代码进行加密，所以结合网上针对 PHP 加密的一些文章， 我这边再次加工自己总结了一份。</p>
+<h2 id="PHP-的几种加密方式"><a href="#PHP-的几种加密方式" class="headerlink" title="PHP 的几种加密方式"></a>PHP 的几种加密方式</h2><p>按照加密的方式来看， PHP 可以包含以下几种方式:</p>
+<h3 id="1-壳”加密”"><a href="#1-壳”加密”" class="headerlink" title="1. 壳”加密”"></a>1. 壳”加密”</h3><p>这一类“加密”包括：</p>
+<ul>
+<li>无扩展加密：<code>phpjiami</code>、<code>zhaoyuanma</code> 的免费版本等</li>
+<li>有扩展的加密：<code>php-beast</code>、<code>php_screw</code>、<code>screw_plus</code>、<code>ZoeeyGuard</code>、<code>tonyenc</code> 等市面上几乎所有的开源PHP加密扩展。</li>
+</ul>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2022/09/20/php-encry/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/08/17/vue-router-cloud-redirect/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/08/17/vue-router-cloud-redirect/" itemprop="url">vue-router history 路由模式的后端配置</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-08-17T20:24:47+08:00">
+                2022-08-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/08/17/vue-router-cloud-redirect/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/08/17/vue-router-cloud-redirect/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/08/17/vue-router-cloud-redirect/" class="leancloud_visitors" data-flag-title="vue-router history 路由模式的后端配置">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有用 vue3 + vue-router 做了一个前端的单页面应用程序， 那时候为了让路由看起来更美观一点，使用了 vue-router 的 history 模式 (还有一种就是 hash 模式)。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">const router = createRouter(&#123;</span><br><span class="line">  history: createWebHistory(),</span><br><span class="line">  routes</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>虽然 <code>history</code>和 <code>hash</code> 都是利用浏览器的两种特性实现前端路由，<code>history</code> 是利用浏览历史记录栈的API实现，<code>hash</code> 是监听 <code>location</code> 对象 <code>hash</code> 值变化事件来实现。</p>
+<p>但是 history 模式因为是直接走 url 的 pathname 中，所以首次访问或者刷新的时候，都会请求到后端的服务器的。 所以后端的服务器是要适配路由的。 </p>
+<p>这时候因为是单页面应用程序，所以适配路由其实是全部回到首页，简单的来说，就是在请求路由 404 的情况下， 请求首页 index.html 就行了。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2022/08/17/vue-router-cloud-redirect/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/08/17/nginx-connections-not-enough/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/08/17/nginx-connections-not-enough/" itemprop="url">记一次 nginx worker_connections 最大可连接数不够用的情况</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-08-17T20:24:18+08:00">
+                2022-08-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/08/17/nginx-connections-not-enough/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/08/17/nginx-connections-not-enough/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/08/17/nginx-connections-not-enough/" class="leancloud_visitors" data-flag-title="记一次 nginx worker_connections 最大可连接数不够用的情况">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间在对某一个长连接的 wss 服务进行端口优化的时候， 因为原先的端口是一个不常用端口，想改成一个常用的端口，比如 tls 的 443 端口， 又因为这一台服务器已经有安装 nginx，并启用了 443 端口。</p>
+<p>所以就采用了 nginx 转发 ws 端口， 然后变成 wss 的 443 端口。 具体可以看:  <a href="/2021/10/21/nginx-proxy-wss-https/" title="nginx 转发代理 wss 和 https (目标程序是 ws 和 http)">nginx 转发代理 wss 和 https (目标程序是 ws 和 http)</a></p>
+<p>因为 nginx 的端口转发会需要映射到服务器的可用端口，所以就将服务器的可用端口调成一个比较大的值:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-9-centos ~]$ cat /proc/sys/net/ipv4/ip_local_port_range</span><br><span class="line">1024    65000</span><br></pre></td></tr></table></figure></p>
+<p>但是只顾了这个要扩大端口号，而忘了也要调整 nginx 的最大可连接数。 导致上线之后没有多久就出现长连接连不上的情况，查看了一下 nginx 的 error log，发现:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[alert] 23725#0: *1972528 8000 worker_connections are not enough while connecting to upstream, client: 109.xxx.xxx.92,</span><br></pre></td></tr></table></figure></p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>查了一下，确实是 nginx 的配置文件中，配置的单核最大可连接数只有 8000:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">events &#123;</span><br><span class="line">  worker_connections 8000;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后 <code>worker_processes</code> 是 2 核 (几个 CPU 一般就可以调用几个)， 所以 nginx 的最大可连接数就是 2 * 8000 = 16000 个， 所以一旦长连接超过了这个数量，就会报上述的错误。</p>
+<p>所以解决的方式也很简单，后面将其改成了 50000， 配合我们的 2 核(2 个 cpu)， 最大可支持 10w 的最大可连接数 (不可能到 7w， 因为服务器本身的可转发端口就满了)</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/08/16/nginx-502/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/08/16/nginx-502/" itemprop="url">记一次 nginx 转发代理 https 出现 502 的情况</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-08-16T20:35:49+08:00">
+                2022-08-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/08/16/nginx-502/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/08/16/nginx-502/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/08/16/nginx-502/" class="leancloud_visitors" data-flag-title="记一次 nginx 转发代理 https 出现 502 的情况">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间我们官网要做一个活动页面， 但是活动页面是用另一个活动页域名， activity.example.com, 但是运营人员需要对外展示的落地页是以官网 www 的域名来处理，所以这时候就会需要在官网的 nginx 指向那边进行页面的代理转发:<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">location  /promo/student-discount &#123;</span><br><span class="line">    resolver 8.8.8.8;</span><br><span class="line">    proxy_pass https://activity.example.com/promo/student-discount;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>但是实测的过程中， 却发现代理转发的时候，报了一个 502 的错误<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2022/08/16 11:58:22 [error] 2293#0: *213338285 SSL_do_handshake() failed (SSL: error:1408F10B:SSL routines:ssl3_get_record:wrong version number) while SSL handshaking to upstream, client: 14.xxx.1.86, server: www.example.com, request: "HEAD /promo/student-discount HTTP/1.1", upstream: "https://13.xxx.xxx.101:443/promo/student-discount", host: "www.example.com"</span><br><span class="line">2022/08/16 11:58:22 [warn] 2293#0: *213338285 upstream server temporarily disabled while SSL handshaking to upstream, client: 14.xxx.1.86, server: www.example.com, request: "HEAD /promo/student-discount HTTP/1.1", upstream: "https://13.xxx.125.101:443/promo/student-discount", host: "www.example.com"</span><br></pre></td></tr></table></figure></p>
+<p>看了一下，应该是 nginx 在进行代理请求的时候，就报错了， 应该是 ssl 的握手的错误 <code>SSL_do_handshake()</code><br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2022/08/16/nginx-502/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/08/16/webrtc-ios-black-screen/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/08/16/webrtc-ios-black-screen/" itemprop="url">webrtc 视频流在 IOS 下会出现黑屏</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-08-16T14:38:32+08:00">
+                2022-08-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
+                    <span itemprop="name">webrtc相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/08/16/webrtc-ios-black-screen/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/08/16/webrtc-ios-black-screen/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/08/16/webrtc-ios-black-screen/" class="leancloud_visitors" data-flag-title="webrtc 视频流在 IOS 下会出现黑屏">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前在实作 webrtc 浏览器对浏览器的远程投屏的时候， 有发现了一种情况，就是在 IOS 下， 远程传输过来的视频流 (mediaStream), 不管是在 chrome 还是 safari 下都没有办法播放, 不同版本的 IOS 表现还不一样:</p>
+<ol>
+<li>IOS 14 及以下，会出现只播放第一帧， 就卡住</li>
+<li>IOS 14 以上， 整个视频流直接黑屏</li>
+</ol>
+<p>因为是自动播放，之前的代码是这样子的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">video.play()?.catch(<span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="comment">// 刚开始初始化的时候，要禁音，不然 chrome 会报这个错误 Uncaught (in promise) DOMException: play() failed because the user didn't interact with the document first.</span></span><br><span class="line">  video.muted = <span class="literal">true</span></span><br><span class="line">  video.play()</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>因为相当于也是自动播放， 在 PC 和 android 浏览器都正常，就是 IOS 浏览器不正常。</p>
+<p>后面查了一下，发现还真是要加一个 IOS 系统特有的属性:<a href="https://stackoverflow.com/questions/60233093/webrtc-with-firebase-how-to-fix-black-screen-on-ios-safari" target="_blank" rel="noopener">webrtc with firebase :how to fix black screen on ios/safari</a></p>
+<p>在调用 <code>video.play()</code> 之前，要加上这个设置项:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">video.playsInline = <span class="literal">true</span></span><br></pre></td></tr></table></figure></p>
+<p>就可以正常播放了</p>
+<p>后面查了一下，原来在 IOS 系统上，如果要实现自动播放， 直接在标签上添加 <code>autoplay</code>, 或者 js 直接调用 <code>video.play()</code>, 是不行的。</p>
+<p>还要加上 playsInline 属性才行， 其实就是允许视频内屏播放(没有这个属性也不一定是默认全屏播放，不过对于 IOS 来说，没有这个属性， 自动播放都不行)。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/07/05/mail-instead-of-send/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2728,1042 +3769,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/10/11/chrome-private-cors-error/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/10/11/chrome-private-cors-error/" itemprop="url">chrome 94 之后 http 远程站点请求 ip 地址报 CORS 错误</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-10-11T11:55:24+08:00">
-                2021-10-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/前端相关/" itemprop="url" rel="index">
-                    <span itemprop="name">前端相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/10/11/chrome-private-cors-error/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/10/11/chrome-private-cors-error/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/10/11/chrome-private-cors-error/" class="leancloud_visitors" data-flag-title="chrome 94 之后 http 远程站点请求 ip 地址报 CORS 错误">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间，有用户反馈 chrome 最新版本，无法在我们的远程站点连接本地的设备。 后面查了一下， 发现控制台有报了这个错误:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Access to script at &apos;http://192.168.197.81:8888/sdctl/comm/ping/?product=intl&amp;des=1&amp;callback=_jqjsp&amp;_1633681289908=&apos; from origin &apos;http://example.com&apos; has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `private`.</span><br></pre></td></tr></table></figure></p>
-<p>而且有些用户的 chrome 更奇葩， 请求 google 机器人校验的验证码的 api.js 也报了这个错:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">index.html:1 Access to script at &apos;https://www.recaptcha.net/recaptcha/api.js&apos; from origin &apos;http://example.com&apos; has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.</span><br></pre></td></tr></table></figure></p>
-<h2 id="排查"><a href="#排查" class="headerlink" title="排查"></a>排查</h2><p>后面查了一下， 是 chrome 新版本 94 的问题， 他不允许线上远端的站点请求 本地local 的地址，比如 ip 地址，所以会报 CORS 错误。 </p>
-<p>但是为啥我们的一些 chrome 94 没有问题， 猜测应该是 A/B 测的原因。<br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/10/11/chrome-private-cors-error/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/09/09/redirect-safe-url/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/09/09/redirect-safe-url/" itemprop="url">web 安全之 - 登录之后的重定向 url 要有白名单机制</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-09-09T15:02:45+08:00">
-                2021-09-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/web安全/" itemprop="url" rel="index">
-                    <span itemprop="name">web安全</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/09/09/redirect-safe-url/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/09/09/redirect-safe-url/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/09/09/redirect-safe-url/" class="leancloud_visitors" data-flag-title="web 安全之 - 登录之后的重定向 url 要有白名单机制">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有一个好心的白帽子给我们反馈了一个安全问题，就是官网登录之后的重定向 url 存在安全隐患，导致有可能会泄露用户的 oauth token。</p>
-<p>具体是这样子操作的, 因为我们的好多产品线，都是同一个地方做单点登录的(其实就是在官网), 然后登录之后，会根据不同的产品，然后在登录校验成功之后，返回对应产品线的 oauth token。 并拼接到 redirect url 后面。</p>
-<p>正常情况下， 我们当然会在登录成功之后， 校验 redirect url 的合理性。 但是这个校验是有漏洞的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/^http[s]?:\/\/.+\.example.com/ig.test(redirectUrl)</span><br></pre></td></tr></table></figure></p>
-<p>因为只判断域名是否有包含 <code>.example.com</code> 域名。并没有去判断一定是要 <code>.example.com</code> 域名结尾的。 导致最后被 <code>biz.example.com.com</code> 这种冒充的域名给通过了。</p>
-<p>所以我如果是黑客的话， 我只要搞一个类似的 <code>biz.example.com.com</code> 的域名， 然后将这个我构建出来的登录页面 url 发送给受害者，让受害者去登录， 那么这个 oauth token 就会带到我的站点上来了。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://my.example.com/en/signin/?redirect=https%3A%2F%2Fbiz.example.com.com</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/09/09/redirect-safe-url/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/08/26/qiniu-s3-verify-md5/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/08/26/qiniu-s3-verify-md5/" itemprop="url">在进行七牛或者S3文件上传的时候，怎么保证上传文件的完整性</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-26T13:54:19+08:00">
-                2021-08-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/golang相关/" itemprop="url" rel="index">
-                    <span itemprop="name">golang相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/08/26/qiniu-s3-verify-md5/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/08/26/qiniu-s3-verify-md5/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/08/26/qiniu-s3-verify-md5/" class="leancloud_visitors" data-flag-title="在进行七牛或者S3文件上传的时候，怎么保证上传文件的完整性">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们的业务有上传服务，不管是我们自己的文件，还是用户生成的文件， 都会传到第三方的存储云服务中。 如果是国内用户，我们用的是七牛云服务， 如果是国外用户，我们用的是 aws 的 s3 存储服务。</p>
-<p>如果是存放用户上传文件，一般我们建立的 bucket 就是私有桶。 正常情况下如果上传成功的话，一般文件都是完整的。 但是不排除网络丢包的情况， 那么我们怎么去保证我们上传的文件，一定是完整的呢。</p>
-<p>最简单的方法，就是在上传到云服务之前，先把本地的文件进行 md5 计算，得到一个 md5 的 hash 值。 然后上传到云服务之后， 再去云服务请求这个文件的 md5 的值，两者对比，如果一致的话，那么文件就是完整的。<br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/08/26/qiniu-s3-verify-md5/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/08/19/use-web-logan/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/08/19/use-web-logan/" itemprop="url">使用 Logan 来做前端日志系统</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-19T14:18:05+08:00">
-                2021-08-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/实用工具集/" itemprop="url" rel="index">
-                    <span itemprop="name">实用工具集</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/08/19/use-web-logan/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/08/19/use-web-logan/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/08/19/use-web-logan/" class="leancloud_visitors" data-flag-title="使用 Logan 来做前端日志系统">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间，业务要上线一个 web 的业务，他是使用 webrtc 的技术去远程控制手机的。 但是使用 webrtc 连接过程中， 会涉及到大量的信息交互， 比如接口交互， signal 交互， ice 交互， sdp 交互。 有时候出现连接失败的情况， 需要开发人员去排查到底卡在哪一个环节。 但是 web 不像其他客户端，可以让用户提供某个目录下的某一个日志文件。 他在浏览器跑的， 一般关掉浏览器， log 也就没有了。 而且我们也不希望线上的产品，在浏览器的 console 控制台上输出一堆的 log， 显得很不专业。 而且也没有哪个用户会在运行的时候，打开 console 控制台的。</p>
-<p>因为将这些连接失败的 log 上抛到服务端是必要的，虽然可以借助 indexDB 或者 localstorage 之类的 浏览器存储来暂时存放。 但是如果一整套都要自己做的话，真的太累了。 所以就萌生了直接找第三方开源解决方案的想法。 刚好有找到一个 美团点评开源的前端日志系统: Logan</p>
-<h2 id="Logan"><a href="#Logan" class="headerlink" title="Logan"></a>Logan</h2><p>Logan 开源的是一整套日志体系，包括日志的收集存储，上报分析以及可视化展示。它提供了五个组件，包括端上日志收集存储 、iOS SDK、Android SDK、Web SDK，后端日志存储分析 Server，日志分析平台 LoganSite。并且提供了一个 Flutter 插件Flutter 插件。</p>
-<p>相关资讯这边不再说，本文也不是科普文，而是实操文，具体资料可以看:</p>
-<ul>
-<li><a href="https://github.com/Meituan-Dianping/Logan/blob/master/README-zh.md" target="_blank" rel="noopener">Logan</a></li>
-<li><a href="https://github.com/Meituan-Dianping/Logan/blob/master/Logan/WebSDK/README.ch.md" target="_blank" rel="noopener">Logan Web SDK</a></li>
-<li><a href="https://tech.meituan.com/2020/01/09/meituan-logan.html" target="_blank" rel="noopener">美团开源 Logan Web：前端日志在 Web 端的实现</a></li>
-</ul>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/08/19/use-web-logan/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/08/11/webrtc-install-kurento/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/08/11/webrtc-install-kurento/" itemprop="url">云服务器裸机安装 Kurento 并应用</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-08-11T18:13:59+08:00">
-                2021-08-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
-                    <span itemprop="name">webrtc相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/08/11/webrtc-install-kurento/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/08/11/webrtc-install-kurento/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/08/11/webrtc-install-kurento/" class="leancloud_visitors" data-flag-title="云服务器裸机安装 Kurento 并应用">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>早在 <code>2020-06-19</code> 的时候，就有安装了 webrtc 的 SFU 开源框架 Kurento: <a href="/2020/06/19/webrtc-sfu-kurento/" title="初试 webrtc SFU 开源框架 - Kurento">初试 webrtc SFU 开源框架 - Kurento</a>, 那时候 node demo 脚本， kurento 服务， turnserver 是属于 3 台机器的。 本次搞了一个 16 核 32 G 的竞价型 云服务器。 打算在裸机的基础上， 直接在这台服务器上全部部署，并应用起来。 直接在这台性能比较强的机器上， 开个直播看看， 看看性能怎么样。</p>
-<h2 id="本次部署云服务器"><a href="#本次部署云服务器" class="headerlink" title="本次部署云服务器"></a>本次部署云服务器</h2><p>16 核 32 G CentOS 7, 裸机</p>
-<h2 id="前置安装软件"><a href="#前置安装软件" class="headerlink" title="前置安装软件"></a>前置安装软件</h2><h3 id="安装翻墙软件"><a href="#安装翻墙软件" class="headerlink" title="安装翻墙软件"></a>安装翻墙软件</h3><h4 id="安装-shadowsocks"><a href="#安装-shadowsocks" class="headerlink" title="安装 shadowsocks"></a>安装 shadowsocks</h4><p>安装过程中，有些需要翻墙 (比如 docker， node 的安装)，所以要先把  翻墙环境搞定。  所以首先应该先处理翻墙环境， 参照我以前的教程: <a href="/2019/02/14/centos7-ss-proxy/" title="CentOS7 配置 shadowsocks 全局代理">CentOS7 配置 shadowsocks 全局代理</a><br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/08/11/webrtc-install-kurento/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/06/21/s3-subdomain-takeover/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/06/21/s3-subdomain-takeover/" itemprop="url">记一次因为 S3 bucket 删除而导致的子域名接管(subdomain takeover)的安全问题</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-06-21T18:22:44+08:00">
-                2021-06-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/web安全/" itemprop="url" rel="index">
-                    <span itemprop="name">web安全</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/06/21/s3-subdomain-takeover/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/06/21/s3-subdomain-takeover/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/06/21/s3-subdomain-takeover/" class="leancloud_visitors" data-flag-title="记一次因为 S3 bucket 删除而导致的子域名接管(subdomain takeover)的安全问题">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有位好心的 researcher 发了一封邮件过来，说我们有一个域名存在 子域名接管(<code>subdomain tokeover</code>) 的安全缺陷， 让我们赶紧处理。</p>
-<p>还附上了他的 POC 截图</p>
-<p><img src="/2021/06/21/s3-subdomain-takeover/1.png" alt="1"></p>
-<p>后面查了一下，确实这个我们的域名被接管了， 里面的 <code>index.html</code> 是 researcher 的。<br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/06/21/s3-subdomain-takeover/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -3813,7 +3823,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">275</span>
+                  <span class="site-state-item-count">281</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3835,7 +3845,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">70</span>
+                  <span class="site-state-item-count">71</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

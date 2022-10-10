@@ -307,6 +307,177 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/12/24/nginx-301-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/12/24/nginx-301-5/" itemprop="url">nginx 针对某个路由设置 301 跳转，并且排除某一个符合条件的路由</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-24T10:38:06+08:00">
+                2021-12-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/24/nginx-301-5/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/12/24/nginx-301-5/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/12/24/nginx-301-5/" class="leancloud_visitors" data-flag-title="nginx 针对某个路由设置 301 跳转，并且排除某一个符合条件的路由">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前官网重构的时候，为了保证原页面的 seo 权重，就有针对一些旧页面路由进行 301 重定向到新路由。 具体看 <a href="/2021/05/18/nginx-301-4/" title="nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上">nginx 通过 301 跳转将旧页面的 seo 权重转移到新页面上</a>， 但是后面又提了一个新需求， 就是针对一些路由进行目录结构上的调整。</p>
+<p>比如原先是 <code>a.html</code> 后面会移动到 <code>product/a.html</code>， 而且 html 的名称还不能变。 所以这时候从用户访问来看就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">访问 www.foo.com/a.html --&gt; 301 重定向 --&gt; www.foo.com/product/a.html</span><br><span class="line">考虑到大部分是有小语种路径的，比如 zh-cn，那么就是</span><br><span class="line">访问 www.foo.com/zh-cn/a.html --&gt; 301 重定向 --&gt; www.foo.com/zh-cn/product/a.html</span><br></pre></td></tr></table></figure></p>
+<h2 id="原先的方法不适用"><a href="#原先的方法不适用" class="headerlink" title="原先的方法不适用"></a>原先的方法不适用</h2><p>如果是原先这种方式的话:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if ($request_uri ~* &quot;a.html&quot;) &#123;</span><br><span class="line">    rewrite ^/(.*)a.html$ /$1product/a.html permanent;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>就会发现其实重定向后的 url 也是符合这个规则的，就会导致 nginx 无限重定向。 所以这样子是不行的<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2021/12/24/nginx-301-5/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3589,180 +3760,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/03/25/s3-cloudfront-add-sub-folder-access/" itemprop="url">使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-03-25T16:06:42+08:00">
-                2021-03-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
-                    <span itemprop="name">aws 相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/03/25/s3-cloudfront-add-sub-folder-access/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/03/25/s3-cloudfront-add-sub-folder-access/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/03/25/s3-cloudfront-add-sub-folder-access/" class="leancloud_visitors" data-flag-title="使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有出现过一种情况，就是我们的静态站点是有国内和国外加速的(这个是在 aws 的 router 53 服务配置的)，比如:</p>
-<ul>
-<li>如果是国内访问的，那么就引导到腾讯云的 COS 存储服务 + CDN 服务</li>
-<li>如果是国外访问的，那么就引导到 aws 的  S3 存储服务 + Cloudfront CDN 服务</li>
-</ul>
-<p>正常的文件当然没问题，但是有时候会出现如果 url 后面不输入 index.html，直接子目录斜杠结尾，比如 <code>https://m.foo.com/cast/</code> ，这时候腾讯云表现是正常的，因为他会索引到 <code>https://m.foo.com/cast/index.html</code>, 但是 aws 的 cloudfront 就不行，会直接报错， 显示获取 S3 对象失败:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_9_centos ~]$ curl https://m.foo.com/cast/</span><br><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><br><span class="line">&lt;Error&gt;&lt;Code&gt;AccessDenied&lt;/Code&gt;&lt;Message&gt;Access Denied&lt;/Message&gt;&lt;RequestId&gt;QABCT7FCM4M3T4AR&lt;/RequestId&gt;&lt;HostId&gt;VnPLeZeR2KQkIMDrFhukmVLUGp+RBWbZO/V8qHeS0dGKLa1N8KOTbWvwNW/J2NKbQWqQXyP5wdw=&lt;/HostId&gt;&lt;/Error&gt;</span><br></pre></td></tr></table></figure></p>
-<p>更有甚者，如果我连子目录的斜杠都没有写全，直接子目录的话，比如 <code>https://m.foo.com/cast</code>， 这时候腾讯云的表现也是对的，他如果找不到 cast 这个文件的话，就会将其当做一个子目录，再去检索这个子目录下的 index.html 文件。所以你用 curl 请求的话，会返回一个 302 跳转，然后 location 头部就会带上 <code>https://m.foo.com/cast/</code>, 这时候就会跳转到正确的页面:</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/03/25/s3-cloudfront-add-sub-folder-access/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3817,7 +3814,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">284</span>
+                  <span class="site-state-item-count">285</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

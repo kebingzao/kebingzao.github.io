@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Sentry," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前花了两个篇幅，讲了 sentry 的 部署和邮件客户端的配置:  bug 追踪系统 Sentry (1) -- 单机安装 bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置   本篇我们讲一下，怎么在项目中引入 sdk 并且抛送 bug 统计, 因为 sentry 支持很多语言:">
+<meta name="keywords" content="Sentry">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug">
+<meta property="og:url" content="http://kebingzao.com/2022/10/31/sentry-3/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前花了两个篇幅，讲了 sentry 的 部署和邮件客户端的配置:  bug 追踪系统 Sentry (1) -- 单机安装 bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置   本篇我们讲一下，怎么在项目中引入 sdk 并且抛送 bug 统计, 因为 sentry 支持很多语言:">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/1.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/2.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/3.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/4.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/5.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/6.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/7.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/8.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/9.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/10.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/11.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/12.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/13.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/14.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/15.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/16.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/17.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-3/18.png">
+<meta property="og:updated_time" content="2022-11-01T12:27:21.101Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug">
+<meta name="twitter:description" content="前言之前花了两个篇幅，讲了 sentry 的 部署和邮件客户端的配置:  bug 追踪系统 Sentry (1) -- 单机安装 bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置   本篇我们讲一下，怎么在项目中引入 sdk 并且抛送 bug 统计, 因为 sentry 支持很多语言:">
+<meta name="twitter:image" content="http://kebingzao.com/2022/10/31/sentry-3/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/10/31/sentry-3/"/>
+
+
+
+
+
+  <title>bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/10/31/sentry-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-31T14:29:25+08:00">
+                2022-10-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用工具集/" itemprop="url" rel="index">
+                    <span itemprop="name">实用工具集</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/10/31/sentry-3/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/10/31/sentry-3/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/10/31/sentry-3/" class="leancloud_visitors" data-flag-title="bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前花了两个篇幅，讲了 sentry 的 部署和邮件客户端的配置:</p>
+<ul>
+<li><a href="/2022/10/28/sentry-1/" title="bug 追踪系统 Sentry (1) -- 单机安装">bug 追踪系统 Sentry (1) -- 单机安装</a></li>
+<li><a href="/2022/10/31/sentry-2/" title="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置</a>
+</li>
+</ul>
+<p>本篇我们讲一下，怎么在项目中引入 sdk 并且抛送 bug 统计, 因为 sentry 支持很多语言:</p>
+<p><img src="/2022/10/31/sentry-3/1.png" alt=""></p>
+<a id="more"></a>
+<p>但是我们的初衷是用来做前端 bug 追踪系统的， 所以还是以 js 为主， 但是即使平台是 js，但是 sdk 也是很多种:</p>
+<ul>
+<li>@sentry/browser: SDK for Browsers</li>
+<li>@sentry/node: SDK for Node including integrations for Express</li>
+<li>@sentry/angular: Browser SDK with Angular integration enabled</li>
+<li>@sentry/ember: Browser SDK with Ember integration enabled</li>
+<li>@sentry/react: Browser SDK with React integration enabled</li>
+<li>@sentry/svelte: Browser SDK with Svelte integration enabled</li>
+<li>@sentry/vue: Browser SDK with Vue integration enabled</li>
+<li>@sentry/gatsby: SDK for Gatsby</li>
+<li>@sentry/nextjs: SDK for Next.js</li>
+<li>@sentry/remix: SDK for Remix</li>
+<li>@sentry/integrations: Pluggable integrations that can be used to enhance JS SDKs</li>
+<li>@sentry/serverless: SDK for Serverless Platforms (AWS, GCP)</li>
+<li>@sentry/electron: SDK for Electron with support for native crashes</li>
+<li>@sentry/react-native: SDK for React Native with support for native crashes</li>
+<li>@sentry/capacitor: SDK for Capacitor Apps and Ionic with support for native crashes</li>
+</ul>
+<p>看了一下他的开发文档: <a href="https://docs.sentry.io/platforms/javascript/install/" target="_blank" rel="noopener">Installation Methods</a>, 他主要有 3 种方式来引入 js</p>
+<ul>
+<li>NPM 包 引入</li>
+<li>CDN js 引入</li>
+<li>懒加载方式(使用加载器) 引入</li>
+</ul>
+<p>本节我们就各自演示一下这个 demo</p>
+<h2 id="1-CDN-的方式引入-js"><a href="#1-CDN-的方式引入-js" class="headerlink" title="1. CDN 的方式引入 js"></a>1. CDN 的方式引入 js</h2><p>先建一个 team， 叫做 demo ，然后在里面再创建一个项目，叫做 <code>test_1</code></p>
+<p><img src="/2022/10/31/sentry-3/2.png" alt=""></p>
+<p>创建的时候，会选择语言平台， 我们的 <code>test_1</code>, 就直接用原生的 js 来测试，所以选择 <code>javascript</code></p>
+<p><img src="/2022/10/31/sentry-3/3.png" alt=""></p>
+<p>这边选择有报错的时候， 直接发警报。然后接下来就有 代码示例了，不过他这个代码示例走的是 NPM 包的方式，我们要改成 CDN 的方式引入， 在<a href="https://docs.sentry.io/platforms/javascript/install/cdn/" target="_blank" rel="noopener">这边</a> 有提供的官网的 cdn 链接</p>
+<h3 id="1-demo-1"><a href="#1-demo-1" class="headerlink" title="1. demo 1"></a>1. demo 1</h3><p>然后我们选择的是 browser + tracing 这两个包合并打包的 js 文件(项目示例也是导入这两个包)，即 <code>bundle.tracing.min.js</code>, 简单的代码如下:</p>
+<p>就两个文件，一个是 html 文件，一个是 app.js<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>sentry CDN SDK examples<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span></span></span><br><span class="line"><span class="tag">    <span class="attr">src</span>=<span class="string">"https://browser.sentry-cdn.com/7.16.0/bundle.tracing.min.js"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">integrity</span>=<span class="string">"sha384-wXU9CL14HxNQidSEdsPNgsvTyYYWogbqur94ac59B5M+zWrBqgC7NRLzv1AHdz0j"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">crossorigin</span>=<span class="string">"anonymous"</span></span></span><br><span class="line"><span class="tag">    &gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"app.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    demo test_1</span><br><span class="line">  <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Sentry.init(&#123;</span><br><span class="line">  dsn: <span class="string">"http://558a61696844461d898defb56a1d029e@43.xx.xx.96:9000/2"</span>,</span><br><span class="line">  integrations: [<span class="keyword">new</span> Sentry.BrowserTracing()],</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// Set tracesSampleRate to 1.0 to capture 100%</span></span><br><span class="line">  <span class="comment">// of transactions for performance monitoring.</span></span><br><span class="line">  <span class="comment">// We recommend adjusting this value in production</span></span><br><span class="line">  tracesSampleRate: <span class="number">1.0</span>,</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 执行这个方法会报错</span></span><br><span class="line">myUndefineFun();</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意这个 dsn 就是具体抛送的后端所在项目的地址，可以在具体项目的配置页面的 <code>Client Keys(CSN)</code> 看到，每一个项目的 dsn 都是不一样的</p>
+</blockquote>
+<p>因为这个 <code>myUndefineFun()</code> 会报错，  所以访问一下，就会出现抛送数据了:</p>
+<p><img src="/2022/10/31/sentry-3/4.png" alt=""></p>
+<p>可以看到抛送了两个请求，看了一下 payload，发现一个是 <code>event</code> ，一个是 <code>transaction</code>, 其中 event 事件就是抛送那个 undefined 的那个错误回报，也就是 browser sdk 的行为。</p>
+<p>而另一个 <code>transaction</code> 抛送的是该页面的一些性能数据，就是 tracing sdk 处理的。</p>
+<p>然后这时候回到后台就可以看到这个报错的记录了:</p>
+<p><img src="/2022/10/31/sentry-3/5.png" alt=""></p>
+<p>这边 issue 记录就有一条， 点进去看详情</p>
+<p><img src="/2022/10/31/sentry-3/6.png" alt=""></p>
+<p>这边可以看到具体的 issues 错误类型， 而且因为创建项目的时候，有设置 mail alert，所以我的邮件也会收到这个 issue 的通知</p>
+<p><img src="/2022/10/31/sentry-3/7.png" alt=""></p>
+<h3 id="2-demo2-去除-tracing"><a href="#2-demo2-去除-tracing" class="headerlink" title="2. demo2 - 去除 tracing"></a>2. demo2 - 去除 tracing</h3><p>因为引入的 tracing 这个 sdk 只是用来对页面进行性能加载分析的， 也就是 web 指标那些，比如  lcp ， fcp ， cls 之类的， 对 bug 追踪没有用处。</p>
+<p><img src="/2022/10/31/sentry-3/8.png" alt=""></p>
+<p>在页面初始化的时候，就会抛送这个请求， 然后可以在后台查看项目的加载性能相关</p>
+<p><img src="/2022/10/31/sentry-3/9.png" alt=""></p>
+<p>所以如果你的项目有对这方面的性能加载需求的话， 是可以引入的， 但是如果只是单纯的想抛送 bug 的话，那么是没必要引入这个 js 的。 所以可以写(换成 <code>bundle.min.js</code>):<br><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>sentry CDN SDK examples<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span></span></span><br><span class="line"><span class="tag">    <span class="attr">src</span>=<span class="string">"https://browser.sentry-cdn.com/7.16.0/bundle.min.js"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">integrity</span>=<span class="string">"sha384-70hBom53vQV6XVoqnEzSlfP8AYzEm6CSuti85YyRLtmm/jbx0GryCQ1z5StcQwsz"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">crossorigin</span>=<span class="string">"anonymous"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"app.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    demo test_1</span><br><span class="line">  <span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Sentry.init(&#123;</span><br><span class="line">  dsn: <span class="string">"http://558a61696844461d898defb56a1d029e@43.xx.xx.96:9000/2"</span>,</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 执行这个方法会报错</span></span><br><span class="line">myUndefineFun();</span><br></pre></td></tr></table></figure>
+<p>执行一下，这样子就只会抛送一个 event， 不会再抛送 transaction 了。</p>
+<h3 id="3-demo3-自定义抛送错误信息"><a href="#3-demo3-自定义抛送错误信息" class="headerlink" title="3. demo3 - 自定义抛送错误信息"></a>3. demo3 - 自定义抛送错误信息</h3><p>之前的两个 demo 都是因为语法错误导致的错误信息抛送的， 其实我们更常用到的是自定义错误的抛送， sentry 提供了两个方法来抛送自定义错误，比如:</p>
+<ul>
+<li><code>Sentry.captureException(new Error(&quot;custom error&quot;));});</code> -&gt; 抛送一个 json 格式的错误信息</li>
+<li><code>Sentry.captureMessage(&quot;Something went wrong&quot;);</code> -&gt; 抛送一个文本格式的错误信息</li>
+</ul>
+<p>我们一般都是用第一种，也就是抛送一个 json 格式的错误信息，比如下面的例子就是抛送了一个附带额外信息的一个错误类型，并且有设置了一个 tag 标签(tag 其实很好用，可以用来快速过滤和检索)<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Sentry.captureException(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">"webrtc something went wrong"</span>), &#123;</span><br><span class="line">  <span class="comment">// 添加 tag</span></span><br><span class="line">  tags: &#123;</span><br><span class="line">    action: <span class="string">"webrtc"</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 添加额外数据</span></span><br><span class="line">  extra: &#123;</span><br><span class="line">    deviceId: <span class="string">"12123445"</span>,</span><br><span class="line">    msg: <span class="string">"webrtc connect err"</span>,</span><br><span class="line">    detail: [</span><br><span class="line">      <span class="string">"11111111111111111111111111111111"</span>,</span><br><span class="line">      <span class="string">"222222222222222222222222222222222"</span>,</span><br><span class="line">      <span class="string">"322222222222222222222222222222222"</span>,</span><br><span class="line">      <span class="string">"422222222222222222222222222222222"</span>,</span><br><span class="line">      <span class="string">"522222222222222222222222222222222"</span></span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这时候在后台就可以看到</p>
+<p><img src="/2022/10/31/sentry-3/10.png" alt=""></p>
+<p>点进去就可以看到自定义的标签有显示:</p>
+<p><img src="/2022/10/31/sentry-3/11.png" alt=""></p>
+<p>抛送的附加数据也有显示:</p>
+<p><img src="/2022/10/31/sentry-3/12.png" alt=""></p>
+<p>还可以再更近一步，就是自定义错误类型，不然列表页显示的标题都是 <code>Error</code>, 辨识度非常低，所以可以自定义 Error 对象:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">WebRtcError</span>(<span class="params">message</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.message = message</span><br><span class="line">  <span class="keyword">this</span>.name = <span class="string">'WebRtcError'</span></span><br><span class="line">  <span class="comment">/*</span></span><br><span class="line"><span class="comment">  * Error.captureStackTrace(targetObject[, constructorOpt])</span></span><br><span class="line"><span class="comment">  * 参数 targetObject -&gt; 表示一个对象</span></span><br><span class="line"><span class="comment">  * 参数 constructorOpt -&gt; 表示对象的构造函数</span></span><br><span class="line"><span class="comment">  * 在targetObject上创建一个.stack属性， 调用是返回一个调用 Error.captureStackTrace() 的位置的字符串。</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">  <span class="built_in">Error</span>.captureStackTrace(<span class="keyword">this</span>, WebRtcError)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">WebRtcError.prototype = <span class="keyword">new</span> <span class="built_in">Error</span>()</span><br><span class="line">WebRtcError.prototype.constructor = WebRtcError</span><br><span class="line"></span><br><span class="line">Sentry.captureException(<span class="keyword">new</span> WebRtcError(<span class="string">"webrtc something went wrong"</span>), &#123;</span><br><span class="line">  <span class="comment">// 添加 tag</span></span><br><span class="line">  tags: &#123;</span><br><span class="line">    action: <span class="string">"webrtc"</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="comment">// 添加额外数据</span></span><br><span class="line">  extra: &#123;</span><br><span class="line">    deviceId: <span class="string">"12123445"</span>,</span><br><span class="line">    msg: <span class="string">"webrtc connect err"</span>,</span><br><span class="line">    detail: [</span><br><span class="line">      <span class="string">"11111111111111111111111111111111"</span>,</span><br><span class="line">      <span class="string">"222222222222222222222222222222222"</span>,</span><br><span class="line">      <span class="string">"322222222222222222222222222222222"</span>,</span><br><span class="line">      <span class="string">"422222222222222222222222222222222"</span>,</span><br><span class="line">      <span class="string">"522222222222222222222222222222222"</span></span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这时候抛送的时候，标题就不是千遍一律的 Error 了，而是变成我们自定义的 WebRtcError:</p>
+<p><img src="/2022/10/31/sentry-3/13.png" alt=""></p>
+<p>而且上面还可以根据标签来筛选:</p>
+<p><img src="/2022/10/31/sentry-3/14.png" alt=""></p>
+<h2 id="2-NPM-包的方式引入-js"><a href="#2-NPM-包的方式引入-js" class="headerlink" title="2. NPM 包的方式引入 js"></a>2. NPM 包的方式引入 js</h2><p>这一次就新建一个 vue3 的项目来引入 sdk，一样先创建一个新的项目 <code>test_vue</code>，选择 vue 平台，这时候创建的时候，就有很详细的实例代码了。</p>
+<p>因为都要新项目，所以为了简单一点，我直接用 vue 的脚手架来创建项目:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm install -g @vue/cli</span><br><span class="line">vue create test-vue</span><br></pre></td></tr></table></figure></p>
+<p>这样子新项目就创建完了，接下来添加这两个包 (可以决定是否需要 tracing 包):<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add @sentry/vue @sentry/tracing</span><br></pre></td></tr></table></figure></p>
+<p>然后调整 main.js 的代码如下:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; createApp &#125; <span class="keyword">from</span> <span class="string">'vue'</span></span><br><span class="line"><span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App.vue'</span></span><br><span class="line"><span class="keyword">import</span> &#123; createRouter, createWebHashHistory &#125; <span class="keyword">from</span> <span class="string">'vue-router'</span></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> Sentry <span class="keyword">from</span> <span class="string">"@sentry/vue"</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; BrowserTracing &#125; <span class="keyword">from</span> <span class="string">"@sentry/tracing"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = createApp(App);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> router = createRouter(&#123;</span><br><span class="line">  history: createWebHashHistory(),</span><br><span class="line">  routes: [</span><br><span class="line">    &#123;</span><br><span class="line">    path: <span class="string">'/'</span>,</span><br><span class="line">    name: <span class="string">'Index'</span>,</span><br><span class="line">    component: App</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">    path: <span class="string">'/:pathMatch(.*)*'</span>,</span><br><span class="line">    name: <span class="string">'NotFound'</span>,</span><br><span class="line">    redirect: <span class="string">'/'</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">Sentry.init(&#123;</span><br><span class="line">  app,</span><br><span class="line">  dsn: <span class="string">"http://ff67a890253e4a1ba5874656e8afbd77@43.xx.xx.96:9000/3"</span>,</span><br><span class="line">  integrations: [</span><br><span class="line">    <span class="keyword">new</span> BrowserTracing(&#123;</span><br><span class="line">      routingInstrumentation: Sentry.vueRouterInstrumentation(router),</span><br><span class="line">      tracingOrigins: [<span class="string">"localhost"</span>, <span class="string">"my-site-url.com"</span>, /^\<span class="comment">//],</span></span><br><span class="line">    &#125;),</span><br><span class="line">  ],</span><br><span class="line">  <span class="comment">// Set tracesSampleRate to 1.0 to capture 100%</span></span><br><span class="line">  <span class="comment">// of transactions for performance monitoring.</span></span><br><span class="line">  <span class="comment">// We recommend adjusting this value in production</span></span><br><span class="line">  tracesSampleRate: <span class="number">1.0</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.use(router);</span><br><span class="line">app.mount(<span class="string">"#app"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>然后运行起来就可以看到有抛送 transaction 请求了</p>
+<p><img src="/2022/10/31/sentry-3/15.png" alt=""></p>
+<p>这时候可以在 vue 组件中，随便抛送一个错误，比如这样子:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Sentry.captureException(<span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">"pay something went wrong"</span>), &#123;</span><br><span class="line">  tags: &#123;</span><br><span class="line">    action: <span class="string">"pay"</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  extra: &#123;</span><br><span class="line">    accountId: <span class="string">"123"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>这时候就可以看到这个错误信息抛送了。跟 cdn 引入的方式没啥差别</p>
+<h2 id="3-用加载器进行来加载的方式"><a href="#3-用加载器进行来加载的方式" class="headerlink" title="3. 用加载器进行来加载的方式"></a>3. 用加载器进行来加载的方式</h2><p>他的官方文档有介绍第三方引入 sdk 的方式: <a href="https://docs.sentry.io/platforms/javascript/install/lazy-load-sentry/" target="_blank" rel="noopener">Lazy-Loading Sentry</a>, 通过这种方式，刚开始只需要下载一个不到  1kb 的 加载器，然后等待真的有抛送错误的时候，再去加载实际的 js</p>
+<p>按照他的配置方式，我确实有在后台上找到这个 loader js</p>
+<p><img src="/2022/10/31/sentry-3/16.png" alt=""></p>
+<p>先到项目的 Client Keys 页面，然后点击右上角的 Configure， 这时候就可以看到这个 loader 的 配置</p>
+<p><img src="/2022/10/31/sentry-3/17.png" alt=""></p>
+<p>但是直接加载这个 js，发现报了这个错误</p>
+<p><img src="/2022/10/31/sentry-3/18.png" alt=""></p>
+<p>显示这种方式已经不再使用，不知道是只有本地部署的时候，不能用， 还是连线上他们 SAAS 服务也不能用，这个也不得知，反正我自己搭建的这个，应该是用不了的</p>
+<h2 id="其他相关配置"><a href="#其他相关配置" class="headerlink" title="其他相关配置"></a>其他相关配置</h2><p>上面的 demo 只是很简单的使用，实际上 sentry 的用法还是很丰富的，建议仔细读一下他们的官方文档: <a href="https://docs.sentry.io/platforms/javascript/" target="_blank" rel="noopener">Sentry javascript platforms</a></p>
+<p>sentry 这个对象的主要方法就这几个:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Sentry = &#123;</span><br><span class="line">  addBreadcrumb: _sentry_noopWarning,</span><br><span class="line">  captureEvent: _sentry_noopWarning,</span><br><span class="line">  captureException: _sentry_noopWarning,</span><br><span class="line">  captureMessage: _sentry_noopWarning,</span><br><span class="line">  configureScope: _sentry_noopWarning,</span><br><span class="line">  forceLoad: _sentry_noopWarning,</span><br><span class="line">  init: _sentry_noopWarning,</span><br><span class="line">  onLoad: _sentry_noopWarning,</span><br><span class="line">  showReportDialog: _sentry_noopWarning,</span><br><span class="line">  withScope: _sentry_noopWarning,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>但是最核心的其实就是他的初始化配置，也就是 init 方法: 官网大部分的篇幅都在将 init 的各个配置项的含义: <a href="https://docs.sentry.io/platforms/javascript/configuration/" target="_blank" rel="noopener">Configuration</a></p>
+<p>有一个大家经常会用到的场景就是怎么限制抛送速率，尤其是对不同类型错误的抛送速率，其实有几个配置可以设置:</p>
+<ol>
+<li>直接通过 <code>sampleRate</code> 配置，这个就很简单粗暴了，范围为 0.0 到 1.0。默认值为 1.0，这意味着发送 100% 的错误事件。如果设置为 0.1，则只会发送 10% 的错误事件。事件是随机挑选的</li>
+<li>通过 <code>denyUrls</code> 和 <code>allowUrls</code> 配置不允许抛送和允许抛送的 url，以 denyUrls 来说，默认情况下，将发送所有错误。这是对整个文件 URL 的“包含”匹配。因此，如果您将 foo.com 添加到其中，它也会在 <code>https://bar.com/myfile/foo.com</code> 上匹配。 也就是在这个页面上，他不会抛送错误</li>
+<li><code>enabled: true</code>, 如果为 false， 直接就不抛送事件</li>
+<li><code>beforeSend</code>, 抛送之前执行的钩子，在这个函数里面，你可以对要抛送的数据进行二次编辑(类似于脱敏)， 也可以直接返回 false，不抛送， 比较常见的用法除了对某些数据进行脱敏之前，还有就是对一些常见的错误可以抛弃掉，只抛送哪些不常见的或者是纯业务的错误数据</li>
+<li>通过 <code>ignoreErrors</code> 过滤一些常见的，不重要的 error</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">Sentry.init(&#123;</span><br><span class="line">  ignoreErrors: [</span><br><span class="line">    <span class="comment">// Random plugins/extensions</span></span><br><span class="line">    <span class="string">"top.GLOBALS"</span>,</span><br><span class="line">    <span class="comment">// See: http://blog.errorception.com/2012/03/tale-of-unfindable-js-error.html</span></span><br><span class="line">    <span class="string">"originalCreateNotification"</span>,</span><br><span class="line">    <span class="string">"canvas.contentDocument"</span>,</span><br><span class="line">    <span class="string">"MyApp_RemoveAllHighlights"</span>,</span><br><span class="line">    <span class="string">"http://tt.epicplay.com"</span>,</span><br><span class="line">    <span class="string">"Can't find variable: ZiteReader"</span>,</span><br><span class="line">    <span class="string">"jigsaw is not defined"</span>,</span><br><span class="line">    <span class="string">"ComboSearch is not defined"</span>,</span><br><span class="line">    <span class="string">"http://loading.retry.widdit.com/"</span>,</span><br><span class="line">    <span class="string">"atomicFindClose"</span>,</span><br><span class="line">    <span class="comment">// Facebook borked</span></span><br><span class="line">    <span class="string">"fb_xd_fragment"</span>,</span><br><span class="line">    <span class="comment">// ISP "optimizing" proxy - `Cache-Control: no-transform` seems to</span></span><br><span class="line">    <span class="comment">// reduce this. (thanks @acdha)</span></span><br><span class="line">    <span class="comment">// See http://stackoverflow.com/questions/4113268</span></span><br><span class="line">    <span class="string">"bmi_SafeAddOnload"</span>,</span><br><span class="line">    <span class="string">"EBCallBackMessageReceived"</span>,</span><br><span class="line">    <span class="comment">// See http://toolbar.conduit.com/Developer/HtmlAndGadget/Methods/JSInjection.aspx</span></span><br><span class="line">    <span class="string">"conduitPage"</span>,</span><br><span class="line">  ],</span><br><span class="line">  denyUrls: [</span><br><span class="line">    <span class="comment">// Facebook flakiness</span></span><br><span class="line">    /graph\.facebook\.com/i,</span><br><span class="line">    <span class="comment">// Facebook blocked</span></span><br><span class="line">    /connect\.facebook\.net\/en_US\/all\.js/i,</span><br><span class="line">    <span class="comment">// Woopra flakiness</span></span><br><span class="line">    /eatdifferent\.com\.woopra-ns\.com/i,</span><br><span class="line">    /<span class="keyword">static</span>\.woopra\.com\/js\/woopra\.js/i,</span><br><span class="line">    <span class="comment">// Chrome extensions</span></span><br><span class="line">    /extensions\<span class="comment">//i,</span></span><br><span class="line">    /^chrome:\/\<span class="comment">//i,</span></span><br><span class="line">    <span class="comment">// Other plugins</span></span><br><span class="line">    /<span class="number">127</span>\<span class="number">.0</span>\<span class="number">.0</span>\<span class="number">.1</span>:<span class="number">4001</span>\/isrunning/i, <span class="comment">// Cacaoweb</span></span><br><span class="line">    /webappstoolbarba\.texthelp\.com\<span class="comment">//i,</span></span><br><span class="line">    /metrics\.itunes\.apple\.com\.edgesuite\.net\<span class="comment">//i,</span></span><br><span class="line">  ],</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>或者<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Sentry.init(&#123;</span><br><span class="line">  dsn: <span class="string">"https://examplePublicKey@o0.ingest.sentry.io/0"</span>,</span><br><span class="line">  beforeSend(event) &#123;</span><br><span class="line">    <span class="comment">// Modify the event here</span></span><br><span class="line">    <span class="keyword">if</span> (event.user) &#123;</span><br><span class="line">      <span class="comment">// Don't send user's email address</span></span><br><span class="line">      <span class="keyword">delete</span> event.user.email;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> event;</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Sentry.init(&#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  beforeSend(event, hint) &#123;</span><br><span class="line">    <span class="keyword">const</span> error = hint.originalException;</span><br><span class="line">    <span class="keyword">if</span> (</span><br><span class="line">    error &amp;&amp;</span><br><span class="line">    error.message &amp;&amp;</span><br><span class="line">    error.message.match(<span class="regexp">/database unavailable/i</span>)</span><br><span class="line">    ) &#123;</span><br><span class="line">      event.fingerprint = [<span class="string">"database-unavailable"</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> event;</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>或者<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">document</span>.body.addEventListener(</span><br><span class="line">  <span class="string">"error"</span>,</span><br><span class="line">  event =&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span> (!event.target) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (event.target.tagName === <span class="string">"IMG"</span>) &#123;</span><br><span class="line">      Sentry.captureMessage(</span><br><span class="line">        <span class="string">`Failed to load image: <span class="subst">$&#123;event.target.src&#125;</span>`</span>,</span><br><span class="line">        <span class="string">"warning"</span></span><br><span class="line">      );</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (event.target.tagName === <span class="string">"LINK"</span>) &#123;</span><br><span class="line">      Sentry.captureMessage(</span><br><span class="line">        <span class="string">`Failed to load css: <span class="subst">$&#123;event.target.href&#125;</span>`</span>,</span><br><span class="line">        <span class="string">"warning"</span></span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="literal">true</span> <span class="comment">// useCapture - necessary for resource loading errors</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<hr>
+<p>相关 Sentry 系列文章:</p>
+<ul>
+<li><a href="/2022/10/28/sentry-1/" title="bug 追踪系统 Sentry (1) -- 单机安装">bug 追踪系统 Sentry (1) -- 单机安装</a></li>
+<li><a href="/2022/10/31/sentry-2/" title="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置</a></li>
+<li><a href="/2022/10/31/sentry-3/" title="bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug">bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug</a></li>
+<li><a href="/2022/11/01/sentry-4/" title="bug 追踪系统 Sentry (4) -- 关联 sourceMap">bug 追踪系统 Sentry (4) -- 关联 sourceMap</a>
+</li>
+</ul>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://docs.sentry.io/platforms/javascript/" target="_blank" rel="noopener">Sentry javascript platforms</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/10/31/sentry-3/" title="bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug">http://kebingzao.com/2022/10/31/sentry-3/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Sentry/" rel="tag"># Sentry</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/10/31/sentry-2/" rel="next" title="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">
+                <i class="fa fa-chevron-left"></i> bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/11/01/sentry-4/" rel="prev" title="bug 追踪系统 Sentry (4) -- 关联 sourceMap">
+                bug 追踪系统 Sentry (4) -- 关联 sourceMap <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">291</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">72</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-CDN-的方式引入-js"><span class="nav-number">2.</span> <span class="nav-text">1. CDN 的方式引入 js</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-demo-1"><span class="nav-number">2.1.</span> <span class="nav-text">1. demo 1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-demo2-去除-tracing"><span class="nav-number">2.2.</span> <span class="nav-text">2. demo2 - 去除 tracing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-demo3-自定义抛送错误信息"><span class="nav-number">2.3.</span> <span class="nav-text">3. demo3 - 自定义抛送错误信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-NPM-包的方式引入-js"><span class="nav-number">3.</span> <span class="nav-text">2. NPM 包的方式引入 js</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-用加载器进行来加载的方式"><span class="nav-number">4.</span> <span class="nav-text">3. 用加载器进行来加载的方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他相关配置"><span class="nav-number">5.</span> <span class="nav-text">其他相关配置</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/10/31/sentry-3/';
+          this.page.identifier = '2022/10/31/sentry-3/';
+          this.page.title = 'bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

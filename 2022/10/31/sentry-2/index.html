@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Sentry," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前通过 bug 追踪系统 Sentry (1) -- 单机安装 我们成功在单机上部署了 sentry 服务，这一节我们讲进入后台的账号初始化和邮件发送配置。 账号初始化其实在执行 instaill.sh 脚本的时候， 就会有用户初始化账号的引导流程，只不过我之前是通过 --skip-user-prompt 来跳过这个交互。 所以安装完之后，我们就要通过 docker-compose run">
+<meta name="keywords" content="Sentry">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">
+<meta property="og:url" content="http://kebingzao.com/2022/10/31/sentry-2/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前通过 bug 追踪系统 Sentry (1) -- 单机安装 我们成功在单机上部署了 sentry 服务，这一节我们讲进入后台的账号初始化和邮件发送配置。 账号初始化其实在执行 instaill.sh 脚本的时候， 就会有用户初始化账号的引导流程，只不过我之前是通过 --skip-user-prompt 来跳过这个交互。 所以安装完之后，我们就要通过 docker-compose run">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-2/1.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-2/2.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-2/3.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-2/4.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-2/5.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-2/6.png">
+<meta property="og:image" content="http://kebingzao.com/2022/10/31/sentry-2/7.png">
+<meta property="og:updated_time" content="2022-11-01T12:27:21.086Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">
+<meta name="twitter:description" content="前言之前通过 bug 追踪系统 Sentry (1) -- 单机安装 我们成功在单机上部署了 sentry 服务，这一节我们讲进入后台的账号初始化和邮件发送配置。 账号初始化其实在执行 instaill.sh 脚本的时候， 就会有用户初始化账号的引导流程，只不过我之前是通过 --skip-user-prompt 来跳过这个交互。 所以安装完之后，我们就要通过 docker-compose run">
+<meta name="twitter:image" content="http://kebingzao.com/2022/10/31/sentry-2/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/10/31/sentry-2/"/>
+
+
+
+
+
+  <title>bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/10/31/sentry-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-31T12:09:01+08:00">
+                2022-10-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/实用工具集/" itemprop="url" rel="index">
+                    <span itemprop="name">实用工具集</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/10/31/sentry-2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/10/31/sentry-2/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/10/31/sentry-2/" class="leancloud_visitors" data-flag-title="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前通过 <a href="/2022/10/28/sentry-1/" title="bug 追踪系统 Sentry (1) -- 单机安装">bug 追踪系统 Sentry (1) -- 单机安装</a> 我们成功在单机上部署了 sentry 服务，这一节我们讲进入后台的账号初始化和邮件发送配置。</p>
+<h2 id="账号初始化"><a href="#账号初始化" class="headerlink" title="账号初始化"></a>账号初始化</h2><p>其实在执行 <code>instaill.sh</code> 脚本的时候， 就会有用户初始化账号的引导流程，只不过我之前是通过 <code>--skip-user-prompt</code> 来跳过这个交互。</p>
+<p>所以安装完之后，我们就要通过 <code>docker-compose run --rm web createuser</code> 来创建初始账号，具体执行如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos self-hosted-master]# docker-compose run --rm web createuser</span><br></pre></td></tr></table></figure></p>
+<p>并且在设置的过程中，也可以指定设置为 superuser 权限<br><a id="more"></a><br>接下来就可以成功用这个账号登录后台了， 刚登录的时候，有一个配置项页面:</p>
+<p><img src="/2022/10/31/sentry-2/1.png" alt=""></p>
+<p>主要是邮件发送的配置， 这一块先不在这边配(因为没办法在这边配置 mail from， 所以后面统一通过配置文件配置)，直接点击 <code>Coutinue</code> 进入主页面</p>
+<h2 id="邮件发送客户端配置"><a href="#邮件发送客户端配置" class="headerlink" title="邮件发送客户端配置"></a>邮件发送客户端配置</h2><p>接下来我们进行邮件客户端配置，qq 邮箱有提供 IMAP 服务(Internet Message Access Protocol（互联网邮件访问协议）), 我们可以用他来做邮件客户端，来发送邮件。</p>
+<h3 id="1-开始-qq-邮箱的-IMAP-服务"><a href="#1-开始-qq-邮箱的-IMAP-服务" class="headerlink" title="1. 开始 qq 邮箱的 IMAP 服务"></a>1. 开始 qq 邮箱的 IMAP 服务</h3><p>首先先开启我的 qq 邮箱的 IMAP 服务，这边有教程: <a href="https://service.mail.qq.com/cgi-bin/help?subtype=1&amp;&amp;id=28&amp;&amp;no=331" target="_blank" rel="noopener">如何使用IMAP服务？</a></p>
+<ol>
+<li>首先进入 qq 邮箱后台，然后点击设置</li>
+</ol>
+<p><img src="/2022/10/31/sentry-2/2.png" alt=""></p>
+<ol start="2">
+<li>选择 【帐户】，再选中开启 IMAP 服务</li>
+</ol>
+<p><img src="/2022/10/31/sentry-2/3.png" alt=""></p>
+<p>点击开启， 这边会有一个简单的短信验证， 短信验证通过之后，就会有一个授权码 (这个就是下面配置邮件客户端的密码)</p>
+<p><img src="/2022/10/31/sentry-2/4.png" alt=""></p>
+<h3 id="2-在-sentry-配置邮件客户端"><a href="#2-在-sentry-配置邮件客户端" class="headerlink" title="2. 在 sentry 配置邮件客户端"></a>2. 在 sentry 配置邮件客户端</h3><p>接下来直接修改 <code>sentry/config.yml</code> (docker-compose 执行所在目录)，将原来的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">###############</span><br><span class="line"># Mail Server #</span><br><span class="line">###############</span><br><span class="line"></span><br><span class="line"># mail.backend: &apos;smtp&apos;  # Use dummy if you want to disable email entirely</span><br><span class="line">mail.host: &apos;smtp&apos;</span><br><span class="line"># mail.port: 25</span><br><span class="line"># mail.username: &apos;&apos;</span><br><span class="line"># mail.password: &apos;&apos;</span><br><span class="line"># mail.use-tls: false</span><br><span class="line"># mail.use-ssl: false</span><br><span class="line"></span><br><span class="line"># NOTE: The following 2 configs (mail.from and mail.list-namespace) are set</span><br><span class="line">#       through SENTRY_MAIL_HOST in sentry.conf.py so remove those first if</span><br><span class="line">#       you want your values in this file to be effective!</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># The email address to send on behalf of</span><br><span class="line"># mail.from: &apos;root@localhost&apos; or ...</span><br></pre></td></tr></table></figure></p>
+<p>改成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">###############</span><br><span class="line"># Mail Server #</span><br><span class="line">###############</span><br><span class="line"></span><br><span class="line"># mail.backend: &apos;smtp&apos;  # Use dummy if you want to disable email entirely</span><br><span class="line">mail.host: &apos;smtp.qq.com&apos;</span><br><span class="line">mail.port: 587</span><br><span class="line">mail.username: &apos;xxx@foxmail.com&apos;</span><br><span class="line">mail.password: &apos;xxxxxxxnvvcnbcea&apos;</span><br><span class="line">mail.use-tls: true</span><br><span class="line">mail.use-ssl: false</span><br><span class="line"></span><br><span class="line"># NOTE: The following 2 configs (mail.from and mail.list-namespace) are set</span><br><span class="line"># #       through SENTRY_MAIL_HOST in sentry.conf.py so remove those first if</span><br><span class="line"># #       you want your values in this file to be effective!</span><br><span class="line">#</span><br><span class="line">#</span><br><span class="line"># # The email address to send on behalf of</span><br><span class="line">mail.from: &apos;xxx@foxmail.com&apos;</span><br></pre></td></tr></table></figure></p>
+<p>注意几个细节:</p>
+<ol>
+<li>这边的 username 和 mail.from 就是刚才开启 qq 邮箱 IMAP 服务的那个邮箱账号， 对于 qq 邮箱来说， 这两个要一致</li>
+<li>password 就是上面的授权码</li>
+<li>这边有开启 tls 验证 (use-tls: true)，所以上面的 port 要填 587 才行，如果不开启 tls 验证 (use-tls: false), port 填默认的 25 就行了</li>
+</ol>
+<p>然后接下来重启 compose 服务，让配置生效:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker-compose restart</span><br></pre></td></tr></table></figure></p>
+<p>然后接下来进入后台，点击 <code>admin - mail - 点击邮箱测试验证</code>, 就可以看到发送验证邮件成功</p>
+<p><img src="/2022/10/31/sentry-2/5.png" alt=""></p>
+<p>这时候就可以收到这一封验证邮件了</p>
+<p><img src="/2022/10/31/sentry-2/6.png" alt=""></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这时候 sentry 的邮件客户端配置就成功了， 接下来不管是邀请成员，还是 issue alert 都会需要用到邮件发送功能。</p>
+<p>注意，对于 qq 邮箱来说，<code>mail.from</code> 也要改成跟 <code>username</code> 一样，不然就会报下面那个错误:</p>
+<blockquote>
+<p>有些邮箱不需要，但是国内的很多邮箱如果要开启 IMAP 服务的话，经常要保证你的 mail from 和 sender 要一致，具体可以看我之前的文章: <a href="/2022/07/05/mail-instead-of-send/" title="AWS SES 发送邮件出现的代发字样问题">AWS SES 发送邮件出现的代发字样问题</a></p>
+</blockquote>
+<p><img src="/2022/10/31/sentry-2/7.png" alt=""></p>
+<p>这也是为啥刚开始登录初始化的时候， 直接点 continue 就行了。 因为那个地方没办法改 <code>mail from</code> 的配置， 只能通过  <code>sentry/config.yml</code> 的这个配置才能修改。</p>
+<p>所以后面就统一修改 <code>sentry/config.yml</code> 配置就行了 (记得重启 compose )。</p>
+<hr>
+<p>相关 Sentry 系列文章:</p>
+<ul>
+<li><a href="/2022/10/28/sentry-1/" title="bug 追踪系统 Sentry (1) -- 单机安装">bug 追踪系统 Sentry (1) -- 单机安装</a></li>
+<li><a href="/2022/10/31/sentry-2/" title="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置</a></li>
+<li><a href="/2022/10/31/sentry-3/" title="bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug">bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug</a></li>
+<li><a href="/2022/11/01/sentry-4/" title="bug 追踪系统 Sentry (4) -- 关联 sourceMap">bug 追踪系统 Sentry (4) -- 关联 sourceMap</a>
+</li>
+</ul>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://develop.sentry.dev/self-hosted/email/" target="_blank" rel="noopener">Self-Hosted Email</a></li>
+<li><a href="https://service.mail.qq.com/cgi-bin/help?subtype=1&amp;&amp;id=28&amp;&amp;no=331" target="_blank" rel="noopener">如何使用IMAP服务？</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/10/31/sentry-2/" title="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">http://kebingzao.com/2022/10/31/sentry-2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Sentry/" rel="tag"># Sentry</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/10/28/sentry-1/" rel="next" title="bug 追踪系统 Sentry (1) -- 单机安装">
+                <i class="fa fa-chevron-left"></i> bug 追踪系统 Sentry (1) -- 单机安装
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/10/31/sentry-3/" rel="prev" title="bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug">
+                bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">291</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">72</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#账号初始化"><span class="nav-number">2.</span> <span class="nav-text">账号初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#邮件发送客户端配置"><span class="nav-number">3.</span> <span class="nav-text">邮件发送客户端配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-开始-qq-邮箱的-IMAP-服务"><span class="nav-number">3.1.</span> <span class="nav-text">1. 开始 qq 邮箱的 IMAP 服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-在-sentry-配置邮件客户端"><span class="nav-number">3.2.</span> <span class="nav-text">2. 在 sentry 配置邮件客户端</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/10/31/sentry-2/';
+          this.page.identifier = '2022/10/31/sentry-2/';
+          this.page.title = 'bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

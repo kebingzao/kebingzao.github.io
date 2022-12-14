@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="prometheus,grafana,alertmanager," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前我们已经尝试了在 prometheus 上创建警报，并且使用 alertmanager 来发送通知了: 基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报 但是正常情况下，我们都是在 grafana 后台查看我们所创建的 dashboard 仪表盘。 同时 grafana 后台也可以显示我们在 prometheus 上创建的规则 (包含警报规">
+<meta name="keywords" content="prometheus,grafana,alertmanager">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 prometheus 打造监控报警后台 (7) - grafana 后台创建警报">
+<meta property="og:url" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前我们已经尝试了在 prometheus 上创建警报，并且使用 alertmanager 来发送通知了: 基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报 但是正常情况下，我们都是在 grafana 后台查看我们所创建的 dashboard 仪表盘。 同时 grafana 后台也可以显示我们在 prometheus 上创建的规则 (包含警报规">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/1.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/2.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/3.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/4.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/5.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/6.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/7.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/8.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/9.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/10.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/11.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/12.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/13.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/14.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/17.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/15.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/16.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/18.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/19.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/20.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/21.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/27.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/22.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/23.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/24.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/25.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/28.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/29.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/30.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/31.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/32.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/33.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/39.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/26.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/38.png">
+<meta property="og:updated_time" content="2022-12-14T13:10:09.496Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于 prometheus 打造监控报警后台 (7) - grafana 后台创建警报">
+<meta name="twitter:description" content="前言之前我们已经尝试了在 prometheus 上创建警报，并且使用 alertmanager 来发送通知了: 基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报 但是正常情况下，我们都是在 grafana 后台查看我们所创建的 dashboard 仪表盘。 同时 grafana 后台也可以显示我们在 prometheus 上创建的规则 (包含警报规">
+<meta name="twitter:image" content="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/"/>
+
+
+
+
+
+  <title>基于 prometheus 打造监控报警后台 (7) - grafana 后台创建警报 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于 prometheus 打造监控报警后台 (7) - grafana 后台创建警报</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-12-07T14:01:09+08:00">
+                2022-12-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/12/07/prometheus-7-grafana-alert/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/12/07/prometheus-7-grafana-alert/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/12/07/prometheus-7-grafana-alert/" class="leancloud_visitors" data-flag-title="基于 prometheus 打造监控报警后台 (7) - grafana 后台创建警报">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前我们已经尝试了在 prometheus 上创建警报，并且使用 alertmanager 来发送通知了: <a href="/2022/11/29/prometheus-4-alertmanager/" title="基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报">基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报</a></p>
+<p>但是正常情况下，我们都是在 grafana 后台查看我们所创建的 dashboard 仪表盘。 同时 grafana 后台也可以显示我们在 prometheus 上创建的规则 (包含警报规则和记录规则)</p>
+<blockquote>
+<p>不同版本的 grafana 可能界面会有差，甚至操作也会有区别，本节演示的 grafana 的版本是 <code>v9.2.5 (042e4d216b)</code></p>
+</blockquote>
+<h2 id="grafana-显示-prometheus-创建的规则"><a href="#grafana-显示-prometheus-创建的规则" class="headerlink" title="grafana 显示 prometheus 创建的规则"></a>grafana 显示 prometheus 创建的规则</h2><p>继续延伸上一节的规则配置 (配置了两个 rule 文件，一个是警报规则，一个是记录规则)，当我们查看 grafana 后台的 alerting 的时候，可以看到他也有把我们创建的规则一起显示出来<br><a id="more"></a></p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/1.png" alt=""></p>
+<p>可以看到他展示的是 prometheus 作为数据源所创建的规则， 当有触发预警的时候，也可以正常显示</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/2.png" alt=""></p>
+<p>但是其实 grafana 自己也可以创建警报规则，并且也可以发送警报通知。 而且这个是 grafana 这个系统自己创建的警报规则，跟 prometheus 不冲突，也就是你完全可以在 prometheus.yml 中将 alertmanager 和 rule 的配置去掉，不创建任何的警报规则:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">alerting:</span><br><span class="line">  alertmanagers:</span><br><span class="line">    - static_configs:</span><br><span class="line">        - targets:</span><br><span class="line">          #- &quot;localhost:9093&quot;</span><br><span class="line"></span><br><span class="line">rule_files:</span><br><span class="line">  #- &quot;rules/*.yml&quot;</span><br></pre></td></tr></table></figure></p>
+<p>然后在 grafana 上创建警报规则就可以代替了</p>
+<h3 id="1-创建警报规则"><a href="#1-创建警报规则" class="headerlink" title="1. 创建警报规则"></a>1. 创建警报规则</h3><p>点击这个，到创建规则页面</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/3.png" alt=""></p>
+<p>这边创建分为 4 个小步骤:</p>
+<h3 id="2-step-1-设置规则"><a href="#2-step-1-设置规则" class="headerlink" title="2. step 1 设置规则"></a>2. step 1 设置规则</h3><p>选择数据源是 Prometheus， 因为我们只导入了这个数据源，所以默认就选择这个，然后设置警报规则</p>
+<blockquote>
+<p>这边跟 prometheus 的警报规则一样，也可以用 记录规则的指标</p>
+</blockquote>
+<p>我们设置一个跟 prometheus 的节点存活的表达式一样的规则:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">up&#123;job=&quot;vmware-host&quot;&#125; == 0</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/4.png" alt=""></p>
+<p>其实就是先选择指标 (A 面板)，然后再根据选择的指标选择表达式内容(B 面板)，所以规则就是 <code>up{job=&quot;vmware-host&quot;} &lt; 1</code></p>
+<blockquote>
+<p>这边也可以设置很复杂的规则，或者可以使用 记录规则 先把复杂的计算 先变成指标，然后表达式就会比较好写</p>
+</blockquote>
+<h3 id="3-step-2-设置评估时间和等待时间"><a href="#3-step-2-设置评估时间和等待时间" class="headerlink" title="3. step 2 设置评估时间和等待时间"></a>3. step 2 设置评估时间和等待时间</h3><p>这个就很好理解了，其实就是 prometheus 的警报规则的 interval 和 for 参数，也就是评估周期和等待周期，这边设置为 30s 和 1m</p>
+<blockquote>
+<p>这些概念在讲述 alertmanager 的时候，已经讲的很清楚了，这边不赘述</p>
+</blockquote>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/5.png" alt=""></p>
+<h3 id="4-step-3-设置警报名称和描述"><a href="#4-step-3-设置警报名称和描述" class="headerlink" title="4. step 3 设置警报名称和描述"></a>4. step 3 设置警报名称和描述</h3><p>这一步就跟我们在设置 prometheus 的警报规则一样，照填就行了</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/6.png" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">rules:</span><br><span class="line">      - alert: 节点存活</span><br><span class="line">        expr: up&#123;job=&quot;vmware-host&quot;&#125; == 0</span><br><span class="line">        for: 1m</span><br><span class="line">        labels:</span><br><span class="line">          serverity: critical</span><br><span class="line">        annotations:</span><br><span class="line">          summary: &quot;[监控报警] 机器 &#123;&#123; $labels.instance &#125;&#125; 挂了&quot;</span><br><span class="line">          description: &quot;&#123;&#123;$labels.instance&#125;&#125; 宕机(当前值: &#123;&#123; $value &#125;&#125;)&quot;</span><br></pre></td></tr></table></figure>
+<p>然后创建了一个 alert 的目录来存放这个规则，然后设置组别为 node</p>
+<h3 id="5-step-4-设置通知手段"><a href="#5-step-4-设置通知手段" class="headerlink" title="5. step 4 设置通知手段"></a>5. step 4 设置通知手段</h3><p>这一块可以自定义，但是我们直接用默认的 root route 就行了，他跟 alertmanager 的配置一样，只不过他没有设置的时候，是会自动给默认的接收者来发送</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/7.png" alt=""></p>
+<p>最后点击右上角的 <code>save and exit</code>, 最后就可以创建好了</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/8.png" alt=""></p>
+<h2 id="配置通知接收者"><a href="#配置通知接收者" class="headerlink" title="配置通知接收者"></a>配置通知接收者</h2><p>上面我们虽然配置了一个警报规则， 但是我们最后走的是 grafana 默认的接收者</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/9.png" alt=""></p>
+<p>默认用的通知手段是 mail，然后联系人是 <code>grafana-default-email</code>, 所以我们接下来要配置这个邮件接收者的 smtp 服务，在 <code>Contact points</code> 标签页</p>
+<p>如果我们没有配置的话，那么当警报触发的时候，就会出现这个错误</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/10.png" alt=""></p>
+<h3 id="1-配置邮件-smtp-服务"><a href="#1-配置邮件-smtp-服务" class="headerlink" title="1. 配置邮件 smtp 服务"></a>1. 配置邮件 smtp 服务</h3><p>这个是在 <code>/etc/grafana/grafana.ini</code> 这个配置文件的  smtp 节点配置</p>
+<p>默认这一节是这样子配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[smtp]</span><br><span class="line">;enabled = false</span><br><span class="line">;host = localhost:25</span><br><span class="line">;user =</span><br><span class="line"># If the password contains # or ; you have to wrap it with triple quotes. Ex &quot;&quot;&quot;#password;&quot;&quot;&quot;</span><br><span class="line">;password =</span><br><span class="line">;cert_file =</span><br><span class="line">;key_file =</span><br><span class="line">;skip_verify = false</span><br><span class="line">;from_address = admin@grafana.localhost</span><br><span class="line">;from_name = Grafana</span><br><span class="line"># EHLO identity in SMTP dialog (defaults to instance_name)</span><br><span class="line">;ehlo_identity = dashboard.example.com</span><br><span class="line"># SMTP startTLS policy (defaults to &apos;OpportunisticStartTLS&apos;)</span><br><span class="line">;startTLS_policy = NoStartTLS</span><br></pre></td></tr></table></figure></p>
+<p>后面改成用 qq 的邮箱代理发送， 所以改成这样子就可以了</p>
+<blockquote>
+<p>关于怎么用 qq 邮箱配置 smtp 邮箱服务，可以看我之前的文章: <a href="/2022/10/31/sentry-2/" title="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置</a></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[smtp]</span><br><span class="line">enabled = true</span><br><span class="line">host = smtp.qq.com:25</span><br><span class="line">user = zxxxxe@foxmail.com</span><br><span class="line"># If the password contains # or ; you have to wrap it with triple quotes. Ex &quot;&quot;&quot;#password;&quot;&quot;&quot;</span><br><span class="line">password = ypgxxxxxxxxxxxx</span><br><span class="line">;cert_file =</span><br><span class="line">;key_file =</span><br><span class="line">;skip_verify = false</span><br><span class="line">from_address = zxxxxe@foxmail.com</span><br><span class="line">;from_name = Grafana</span><br><span class="line"># EHLO identity in SMTP dialog (defaults to instance_name)</span><br><span class="line">;ehlo_identity = dashboard.example.com</span><br><span class="line"># SMTP startTLS policy (defaults to &apos;OpportunisticStartTLS&apos;)</span><br><span class="line">;startTLS_policy = NoStartTLS</span><br></pre></td></tr></table></figure>
+<p>然后重启一下 grafana<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos grafana]# systemctl restart grafana-server.service</span><br></pre></td></tr></table></figure></p>
+<p>接下来我们就在后台确认一下邮箱配置是否正常, 在 <code>Contact points</code> 标签页点击 <code>grafana-default-email</code> 这一行最右边的编辑按钮，进入编辑验证页面，在 address 那边填入收件人邮箱，最后点击发送测试通知</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/11.png" alt=""></p>
+<p>这样子我的 gmail 邮箱就可以收到这一份测试邮件了</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/12.png" alt=""></p>
+<p>这样子邮箱发送设置就配置好了</p>
+<h3 id="2-配置钉钉通知"><a href="#2-配置钉钉通知" class="headerlink" title="2. 配置钉钉通知"></a>2. 配置钉钉通知</h3><p>跟 alertmanager 一个接收者(receivers) 可以有多种通知手段类似，grafana 的一个 Contact points 也可以有多个通知手段，我们刚才已经配置好了邮件发送设置了，接下来我们再配置一下 钉钉 通知</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/13.png" alt=""></p>
+<p>因为本来就有支持 钉钉 webhook 通知，所以直接输入 url 就行了</p>
+<p>这样子这个 Contact points 就有两种通知手段了，一个是邮箱，一个是 钉钉通知</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/14.png" alt=""></p>
+<p>从上面的截图来看，这个是有配置 <code>send resolved</code> 的，就是警报恢复之后，还会有 resolved 通知</p>
+<p>而且也可以看到，我们其实并没有配置 通知内容的模板， 默认的都是 grafana 默认的模板。</p>
+<h2 id="触发警报"><a href="#触发警报" class="headerlink" title="触发警报"></a>触发警报</h2><p>接下来测试一下警报的触发，先把其中一台的 node_exporter 关掉</p>
+<p>这时候看预警面板</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/17.png" alt=""></p>
+<p>这时候就可以收到了</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/15.png" alt=""></p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/16.png" alt=""></p>
+<p>查看发送记录正常</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/18.png" alt=""></p>
+<p>接下来恢复之后，也会有对应的恢复数据</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/19.png" alt=""></p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/20.png" alt=""></p>
+<p>不过我看了一下，之前配置跟 prometheus 一样的 summary， description 这两个字段并没有成功传递具体的变量值，而是变成 <code>&lt;no value&gt;</code>, 说明 grafana 找不到值。</p>
+<p>所以变量应该不是用这种方式的, 对了一下发现 <code>$value</code> 这个值等于:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[ var=&apos;B0&apos; metric=&apos;Value&apos; labels=&#123;__name__=up, instance=43.153.11.234:9100, job=vmware-host&#125; value=0 ]</span><br></pre></td></tr></table></figure></p>
+<p>后面查了一下 <a href="https://grafana.com/docs/grafana/latest/alerting/fundamentals/annotation-label/variables-label-annotation/" target="_blank" rel="noopener">Templating labels and annotations</a>, 发现确实有变量可以注入，但是有前提条件的</p>
+<p>展开标签和注解时可以使用以下模板变量：</p>
+<table>
+<thead>
+<tr>
+<th>姓名</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$labels</td>
+<td>来自查询或条件的标签。例如，<code>$labels.instance</code> 和 <code>$labels.job</code>。这在规则使用 <code>classic condition</code> 时不可用。</td>
+</tr>
+<tr>
+<td>$values</td>
+<td>为此警报规则评估的所有 reduce 和数学表达式的值。 例如，<code>$values.A</code> 、<code>$values.A.Labels</code> 和 <code>$values.A.Value</code>，其中 A 是 reduce 或数学表达式的 refID。 如果规则使用 <code>classic condition</code> 而不是 reduce 和数学表达式，则 <code>$values</code> 包含条件的 refID 和位置的组合。</td>
+</tr>
+<tr>
+<td>$value</td>
+<td>警报实例的值字符串。例如，<code>[ var=&#39;A&#39; labels={instance=foo} value=10 ]</code>。</td>
+</tr>
+</tbody>
+</table>
+<p>因为我们用的是 <code>classic condition</code> 的匹配方式，所以没办法走 <code>$labels</code> 来注入模板变量，只能用 <code>$values</code> 的方式， 所以 refID 对于本例来说就是 <code>BO</code>, 所以 summary 和 description 应该改成:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">description: &#123;&#123; $values.B0.Labels.instance &#125;&#125; 宕机(当前值: &#123;&#123; $values.B0.Value &#125;&#125;)</span><br><span class="line">summary: [监控报警] 机器 &#123;&#123; $values.B0.Labels.instance &#125;&#125; 挂了</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这边之所以是 <code>B0</code>, 我猜测可能是因为我们这个警报采取的是 <code>B-expression</code> 的方式，并且是创建的第一个警报，所以是 <code>B0</code>， 所以如果是采用 <code>B-expression</code> 的方式创建的第二个警报，那么 id 就应该是 <code>B1</code>， 反之如果采用的是 <code>A-query</code> 的方式，那么就是 A 开头的，比如 <code>A0</code>, <code>A1</code> 按顺序排下去</p>
+</blockquote>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/21.png" alt=""></p>
+<p>当然也可以从这个地方看，预览的时候触发预警的话，也可以看到完整的 value 字串，里面就有 id</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/27.png" alt=""></p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/22.png" alt=""></p>
+<p>这时候就可以看到警报的信息正常了</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/23.png" alt=""></p>
+<h2 id="自定义警报模板"><a href="#自定义警报模板" class="headerlink" title="自定义警报模板"></a><a href="https://grafana.com/docs/grafana/v9.2/alerting/contact-points/message-templating/" target="_blank" rel="noopener">自定义警报模板</a></h2><p>刚才虽然我们可以发送警报了，但是警报的内容其实用的是默认的模板，mail 的还好，至少还可以看， 但是 钉钉通知的模板简直没法看， 所以还是要自定义一下警报的模板</p>
+<p>grafana 的警报模板和 alertmanager 的警报模板的方式是一样，都是通过 <a href="https://pkg.go.dev/text/template" target="_blank" rel="noopener">Go templating system</a></p>
+<h3 id="1-默认的邮件-html-模板"><a href="#1-默认的邮件-html-模板" class="headerlink" title="1. 默认的邮件 html 模板"></a>1. 默认的邮件 html 模板</h3><p>grafana 有提供了一个默认的模板内容: <a href="https://github.com/grafana/grafana/blob/main/pkg/services/ngalert/notifier/channels/default_template.go" target="_blank" rel="noopener">granafa default template</a></p>
+<p>然后关于邮件的警报内容，用的是 html 文件，是放在这个路径:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;grafana-install-dir&gt;/public/emails/ng_alert_notification.html</span><br></pre></td></tr></table></figure></p>
+<p>对于本例来说，就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos local]# head /usr/share/grafana/public/emails/ng_alert_notification.html</span><br><span class="line">&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;&gt;</span><br><span class="line">&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">	&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;</span><br><span class="line">	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width&quot; /&gt;</span><br><span class="line">	</span><br><span class="line">&lt;style&gt;body &#123;</span><br><span class="line">width: 100% !important; min-width: 100%; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; margin: 0; padding: 0;</span><br><span class="line">&#125;</span><br><span class="line">img &#123;</span><br></pre></td></tr></table></figure></p>
+<p>我们可以直接修改这个 html 文件来改变默认的 邮件通知样式。</p>
+<h3 id="2-创建自定义模板"><a href="#2-创建自定义模板" class="headerlink" title="2. 创建自定义模板"></a>2. 创建自定义模板</h3><p>在 grafana 创建通知模板，也很简单，在 <code>Contact points</code> 中点击 <code>New template</code> 按钮</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/24.png" alt=""></p>
+<p>这时候我们就可以创建模板了，然后还很贴心的将模板的参数都列出来了</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/25.png" alt=""></p>
+<p>接下来创建两个模板，一个是标题 <code>my.title</code>, 一个是内容 <code>my.message</code></p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/28.png" alt=""></p>
+<p>具体内容:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;/* 定义消息体片段 */&#125;&#125;</span><br><span class="line">&#123;&#123; define &quot;my_text_alert_list&quot; &#125;&#125;&#123;&#123; range . &#125;&#125;</span><br><span class="line"></span><br><span class="line">【value】: &#123;&#123;.ValueString&#125;&#125;</span><br><span class="line"></span><br><span class="line">【标签组】:</span><br><span class="line">&#123;&#123; range .Labels.SortedPairs &#125;&#125; - &#123;&#123; .Name &#125;&#125; = &#123;&#123; .Value &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">【备注】:</span><br><span class="line">&#123;&#123; range .Annotations.SortedPairs &#125;&#125; - &#123;&#123; .Name &#125;&#125; = &#123;&#123; .Value &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; if gt (len .GeneratorURL) 0 &#125;&#125; 来源: &#123;&#123; .GeneratorURL &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; if gt (len .SilenceURL) 0 &#125;&#125; 设置静默: &#123;&#123; .SilenceURL &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; if gt (len .DashboardURL) 0 &#125;&#125; 仪表盘: &#123;&#123; .DashboardURL &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; if gt (len .PanelURL) 0 &#125;&#125; 所属面板: &#123;&#123; .PanelURL &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">发生时间: &#123;&#123; .StartsAt &#125;&#125;</span><br><span class="line">&#123;&#123; if eq .Status &quot;resolved&quot; &#125;&#125;</span><br><span class="line">恢复时间: &#123;&#123; .EndsAt &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#123;&#123;/* 定义消息体 */&#125;&#125;</span><br><span class="line">&#123;&#123; define &quot;my.message&quot; &#125;&#125;</span><br><span class="line">&#123;&#123; if gt (len .Alerts.Firing) 0 &#125;&#125;**--------Firing---------**</span><br><span class="line">&#123;&#123; template &quot;my_text_alert_list&quot; .Alerts.Firing &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; if gt (len .Alerts.Resolved) 0 &#125;&#125;**-------Resolved------**</span><br><span class="line">&#123;&#123; template &quot;my_text_alert_list&quot; .Alerts.Resolved &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; define &quot;my.title&quot; &#125;&#125;[监控报警]: [&#123;&#123; .Status | toUpper &#125;&#125;&#123;&#123; if eq .Status &quot;firing&quot; &#125;&#125;:&#123;&#123; .Alerts.Firing | len &#125;&#125;&#123;&#123; if gt (.Alerts.Resolved | len) 0 &#125;&#125;, RESOLVED:&#123;&#123; .Alerts.Resolved | len &#125;&#125;&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;] &#123;&#123; .GroupLabels.SortedPairs.Values | join &quot; &quot; &#125;&#125; &#123;&#123; if gt (len .CommonLabels) (len .GroupLabels) &#125;&#125;(&#123;&#123; with .CommonLabels.Remove .GroupLabels.Names &#125;&#125;&#123;&#123; .Values | join &quot; &quot; &#125;&#125;&#123;&#123; end &#125;&#125;)&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>然后接下来填充 mail 和 钉钉 通知的内容体:</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/29.png" alt=""></p>
+<p>接下来就是测试预警和恢复了，将其中一台的 node_exporter stop 掉，就可以收到邮件了</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/30.png" alt=""></p>
+<p>钉钉就是</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/31.png" alt=""></p>
+<p>然后后面将其再开起来，就可以收到 resolved 的恢复通知了</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/32.png" alt=""></p>
+<p>钉钉就是</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/33.png" alt=""></p>
+<p>不过有看到这边的 <code>来源</code> 和 <code>设置静默</code> 的连接都是 localhost，所以点进去其实落地页是错的， 我们要改成正确的 url 地址， 这个是需要在 grafana 的配置文件上改的: <code>/etc/grafana/grafana.ini</code>， 其实就是将 domain 改成正确的 ip 地址，或者域名(本例就是 ip):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># The public facing domain name used to access grafana from a browser</span><br><span class="line">;domain = localhost</span><br><span class="line">domain = 43.153.96.96</span><br></pre></td></tr></table></figure></p>
+<p>然后重启 grafana， 这样子链接就对了</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/39.png" alt=""></p>
+<h4 id="遇到的几个坑"><a href="#遇到的几个坑" class="headerlink" title="遇到的几个坑"></a>遇到的几个坑</h4><ol>
+<li>刚开始是 <code>my.title</code> 和 <code>my.message</code> 是写在一起的，就跟我那时候在 alertmanager 那样子，但是 <code>my.title</code> 会一直报错:</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Dec 09 16:49:55 VM-64-9-centos grafana-server[15553]: logger=alerting.notifier.email t=2022-12-09T16:49:55.537719997+08:00 level=warn msg=&quot;failed to template email message&quot; err=&quot;template: myTemplate:5:37: executing \&quot;my.title\&quot; at &lt;toUpper&gt;: invalid value; expected string&quot;</span><br></pre></td></tr></table></figure>
+<p>后面发现，分开就可以。 但是写在一起就是不行，甚至我试过直接写在 mail 或者 钉钉 的消息体输入框，也是可以的，就是写在一起不行。 最后没办法就分开定义了</p>
+<ol start="2">
+<li>resolved 邮件的时候，发现 <code>.ValueString</code> 这个变量竟然为空，甚至 summary 里面的变量也没有，不知道是不是 bug 的原因，但是 alertmanager 是可以的， 后面查了一下 grafana 的 issues， 发现确实有人提了这个 issue: <a href="https://github.com/grafana/grafana/issues/45459" target="_blank" rel="noopener">valueString webhook body is empty</a>, 并且在最新的版本依然问题存在，所以我猜测这个应该是 grafana 的 bug。</li>
+</ol>
+<h2 id="创建通知策略"><a href="#创建通知策略" class="headerlink" title="创建通知策略"></a>创建通知策略</h2><p>grafana 的通知策略也允许跟 alertmanager 一样，创建这三个参数:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">group_wait: 30s</span><br><span class="line">group_interval: 5m</span><br><span class="line">repeat_interval: 10m</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/26.png" alt=""></p>
+<p>这个就没啥好说的， 不再赘述</p>
+<h2 id="静默策略-和-分组"><a href="#静默策略-和-分组" class="headerlink" title="静默策略 和 分组"></a>静默策略 和 分组</h2><p>grafana 也有跟 alertmanager 一样的静默策略， 不再赘述</p>
+<p><img src="/2022/12/07/prometheus-7-grafana-alert/38.png" alt=""></p>
+<p>分组策略也是跟 alertmanager 差不多，不再赘述</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从本节的实践来看， grafana 和 prometheus + alertmanager 的警报通知是相互独立， 不过都是读 prometheus 的数据。</p>
+<p>然后整个特性和概念也是几乎一样。 如果之前熟悉了 alertmanager 的特性，再去用 grafana 创建警报的话，就会变得很容易</p>
+<p>当然，在生产环境中， 看是要用 grafana 自己的警报系统，还是用 alertmanager ，这个要看个人的喜好。</p>
+<p>如果是重度依赖监控 + 警报 的用户，我是觉得 alertmanager 其实会更加的灵活和可定制化。 毕竟 alertmanager 至少有两个功能是 grafana 的警报没有的:</p>
+<ol>
+<li>抑制规则</li>
+<li>可配置的有效时间和静默时间</li>
+</ol>
+<p>但是 grafana 有一个优点就是，直接在 grafana 后台配置即可，不需要上服务器修改 <code>alertmanager.yml</code> 和 <code>rule/*.yml</code> 系列配置文件。 这一个是真的方便。</p>
+<p>接下来我们将重心重新回到 prometheus 上，之前我们的数据采集都是用现成的 exporter，但是其实生产环境上， 我们的业务程序也是要抛送 prometheus 数据，那么怎么在我们的业务程序上使用 prometheus 来采集自定义数据呢?</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://grafana.com/docs/grafana/latest/alerting/alerting-rules/create-grafana-managed-rule/" target="_blank" rel="noopener">Create a Grafana managed alerting rule</a></li>
+<li><a href="https://grafana.com/docs/grafana/v9.2/alerting/contact-points/message-templating/#message-templating" target="_blank" rel="noopener">Message templating</a></li>
+<li><a href="https://grafana.com/docs/grafana/v9.2/alerting/contact-points/message-templating/template-data/" target="_blank" rel="noopener">Template data</a></li>
+<li><a href="https://grafana.com/docs/grafana/v9.2/alerting/contact-points/message-templating/create-message-template/" target="_blank" rel="noopener">Create a message template</a></li>
+<li><a href="https://sbcode.net/grafana/email-alert-template/" target="_blank" rel="noopener">Change Email Alert Template</a></li>
+<li><a href="https://community.grafana.com/t/how-to-use-alert-message-templates-in-grafana/67537" target="_blank" rel="noopener">How To Use Alert Message Templates in Grafana</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/" title="基于 prometheus 打造监控报警后台 (7) - grafana 后台创建警报">http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/prometheus/" rel="tag"># prometheus</a>
+          
+            <a href="/tags/grafana/" rel="tag"># grafana</a>
+          
+            <a href="/tags/alertmanager/" rel="tag"># alertmanager</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/12/07/prometheus-6-record-rule/" rel="next" title="基于 prometheus 打造监控报警后台 (6) - 记录规则(recording rule)">
+                <i class="fa fa-chevron-left"></i> 基于 prometheus 打造监控报警后台 (6) - 记录规则(recording rule)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/12/12/prometheus-8-customize/" rel="prev" title="基于 prometheus 打造监控报警后台 (8) - 业务程序自定义添加指标">
+                基于 prometheus 打造监控报警后台 (8) - 业务程序自定义添加指标 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">301</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#grafana-显示-prometheus-创建的规则"><span class="nav-number">2.</span> <span class="nav-text">grafana 显示 prometheus 创建的规则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-创建警报规则"><span class="nav-number">2.1.</span> <span class="nav-text">1. 创建警报规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-step-1-设置规则"><span class="nav-number">2.2.</span> <span class="nav-text">2. step 1 设置规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-step-2-设置评估时间和等待时间"><span class="nav-number">2.3.</span> <span class="nav-text">3. step 2 设置评估时间和等待时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-step-3-设置警报名称和描述"><span class="nav-number">2.4.</span> <span class="nav-text">4. step 3 设置警报名称和描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-step-4-设置通知手段"><span class="nav-number">2.5.</span> <span class="nav-text">5. step 4 设置通知手段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置通知接收者"><span class="nav-number">3.</span> <span class="nav-text">配置通知接收者</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-配置邮件-smtp-服务"><span class="nav-number">3.1.</span> <span class="nav-text">1. 配置邮件 smtp 服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-配置钉钉通知"><span class="nav-number">3.2.</span> <span class="nav-text">2. 配置钉钉通知</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#触发警报"><span class="nav-number">4.</span> <span class="nav-text">触发警报</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义警报模板"><span class="nav-number">5.</span> <span class="nav-text">自定义警报模板</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-默认的邮件-html-模板"><span class="nav-number">5.1.</span> <span class="nav-text">1. 默认的邮件 html 模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-创建自定义模板"><span class="nav-number">5.2.</span> <span class="nav-text">2. 创建自定义模板</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#遇到的几个坑"><span class="nav-number">5.2.1.</span> <span class="nav-text">遇到的几个坑</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建通知策略"><span class="nav-number">6.</span> <span class="nav-text">创建通知策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#静默策略-和-分组"><span class="nav-number">7.</span> <span class="nav-text">静默策略 和 分组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/12/07/prometheus-7-grafana-alert/';
+          this.page.identifier = '2022/12/07/prometheus-7-grafana-alert/';
+          this.page.title = '基于 prometheus 打造监控报警后台 (7) - grafana 后台创建警报';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="prometheus," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前从 基于 prometheus 打造监控报警后台 (1) - 初试和安装 我们安装了 prometheus 服务，并且监控了当前的主机。 但是数据是有抓取了，怎么看指标乃至图表呢? 从后台查询指标我们可以从 prometheus ui 后台的 graph 里面来查看， 他有两个 tab 视图展示，一个是 Graph 的图表展示，一个是 Table 的表格展示， 通过输入某一个指标 （Met">
+<meta name="keywords" content="prometheus">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型">
+<meta property="og:url" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前从 基于 prometheus 打造监控报警后台 (1) - 初试和安装 我们安装了 prometheus 服务，并且监控了当前的主机。 但是数据是有抓取了，怎么看指标乃至图表呢? 从后台查询指标我们可以从 prometheus ui 后台的 graph 里面来查看， 他有两个 tab 视图展示，一个是 Graph 的图表展示，一个是 Table 的表格展示， 通过输入某一个指标 （Met">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/1.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/11.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/2.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/3.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/4.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/5.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/6.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/7.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/8.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/9.png">
+<meta property="og:updated_time" content="2022-12-14T13:10:09.431Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型">
+<meta name="twitter:description" content="前言之前从 基于 prometheus 打造监控报警后台 (1) - 初试和安装 我们安装了 prometheus 服务，并且监控了当前的主机。 但是数据是有抓取了，怎么看指标乃至图表呢? 从后台查询指标我们可以从 prometheus ui 后台的 graph 里面来查看， 他有两个 tab 视图展示，一个是 Graph 的图表展示，一个是 Table 的表格展示， 通过输入某一个指标 （Met">
+<meta name="twitter:image" content="http://kebingzao.com/2022/11/28/prometheus-2-metrics/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/11/28/prometheus-2-metrics/"/>
+
+
+
+
+
+  <title>基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/11/28/prometheus-2-metrics/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-28T16:21:49+08:00">
+                2022-11-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/11/28/prometheus-2-metrics/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/11/28/prometheus-2-metrics/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/11/28/prometheus-2-metrics/" class="leancloud_visitors" data-flag-title="基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前从 <a href="/2022/11/28/prometheus-1-install/" title="基于 prometheus 打造监控报警后台 (1) - 初试和安装">基于 prometheus 打造监控报警后台 (1) - 初试和安装</a> 我们安装了 prometheus 服务，并且监控了当前的主机。 但是数据是有抓取了，怎么看指标乃至图表呢?</p>
+<h2 id="从后台查询指标"><a href="#从后台查询指标" class="headerlink" title="从后台查询指标"></a>从后台查询指标</h2><p>我们可以从 prometheus ui 后台的 graph 里面来查看， 他有两个 tab 视图展示，一个是 Graph 的图表展示，一个是 Table 的表格展示， 通过输入某一个指标 （Metric），我们就可以查看所有实例中有关于这个指标的所有的数据。 其中有表格形式展示的， 也有图表形式展示，图表形式还可以自己选择时间区间</p>
+<p>然后查询的方式，提供了一种称为 PromQL 的函数式查询语言，可以让用户实时选择和聚合时间序列数据。表达式的结果可以显示为图形，也可以以表格数据的形式查看，或者由外部系统通过HTTP API 使用。</p>
+<blockquote>
+<p>PromQL（Prometheus Query Language）是 Prometheus 自己开发的表达式语言，语言表现力很丰富，内置函数也很多。使用它可以对时序数据进行筛选和聚合。</p>
+</blockquote>
+<p>关于查询的话，官网有提供了几个查询实例可供参考: <a href="https://prometheus.io/docs/prometheus/latest/querying/examples/" target="_blank" rel="noopener">查询示例</a></p>
+<p>其中包括几个常见的，比如:<br><a id="more"></a><br>返回所有带有指标的时间序列 <code>prometheus_http_requests_total</code> (这个是一个瞬时向量)：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prometheus_http_requests_total</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2022/11/28/prometheus-2-metrics/1.png" alt=""></p>
+<p>返回所有带有度量<code>prometheus_http_requests_total</code> 和给定 <code>job</code> 标签 <code>handler</code> 的时间序列：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prometheus_http_requests_total&#123;job=&quot;prometheus&quot;,handler=&quot;/metrics&quot;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>返回同一向量的整个时间范围（在本例中为查询时间之前的 5 分钟），使其成为一个范围向量：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prometheus_http_requests_total&#123;handler=&quot;/metrics&quot;&#125;[5m]</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>请注意，在 <code>Graph tab</code> 页面无法直接绘制生成范围向量的表达式 ，但可以在 <code>Table tab</code> 视图中查看。 比如这个</p>
+</blockquote>
+<p><img src="/2022/11/28/prometheus-2-metrics/11.png" alt=""></p>
+<p>当然也可以使用正则表达式，您可以仅为名称与特定模式匹配的作业选择时间序列，在本例中，所有以以下结尾的作业 server：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http_requests_total&#123;job=~&quot;.*server&quot;&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>Prometheus 中的所有正则表达式都使用 <a href="https://github.com/google/re2/wiki/Syntax" target="_blank" rel="noopener">RE2 语法</a>。</p>
+</blockquote>
+<h3 id="PromQL-表达式语言数据类型"><a href="#PromQL-表达式语言数据类型" class="headerlink" title="PromQL 表达式语言数据类型"></a><a href="https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types" target="_blank" rel="noopener">PromQL 表达式语言数据类型</a></h3><p>在 Prometheus 的表达式语言中，表达式或子表达式可以计算为四种类型之一：</p>
+<ul>
+<li><strong>即时向量(Instant vector)</strong> - 一组时间序列，每个时间序列包含一个样本，所有样本共享相同的时间戳。也就是说，表达式的返回值中只会包含该时间序列中的最新的一个样本值。而相应的这样的表达式称之为瞬时向量表达式</li>
+<li><strong>范围向量(Range vector)</strong> - 一组时间序列，其中包含每个时间序列随时间变化的一系列数据点。这些是通过将时间选择器附加到方括号中的瞬时向量（例如<code>[5m]</code> 5 分钟）而生成的</li>
+<li><strong>标量(Scalar)</strong>- 一个简单的数字浮点值</li>
+<li><strong>字符串(String)</strong> - 一个简单的字符串值；目前未使用</li>
+</ul>
+<blockquote>
+<p>关于 PromQL 的更多的语法，可以看: <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">QUERYING PROMETHEUS</a>, 后面会单独找个篇幅讲一下这个</p>
+</blockquote>
+<p>接下来要分析这些指标数据之前，我们先熟悉几个概念。</p>
+<h2 id="作业-job-和实例-instance"><a href="#作业-job-和实例-instance" class="headerlink" title="作业(job)和实例(instance)"></a>作业(job)和实例(instance)</h2><p>在查看指标之前，先科普一个概念 -&gt; <a href="https://prometheus.io/docs/concepts/jobs_instances/" target="_blank" rel="noopener">作业和实例</a></p>
+<p>这一块官方文档其实描述的很清楚，在 Prometheus 术语中，可以抓取的端点称为实例，通常对应于单个进程。具有相同目的的实例集合，例如为可伸缩性或可靠性而复制的过程，称为作业。</p>
+<p>简单来说，就是作业其实就是配置文件 <code>scrape_configs</code> 节点中的 job 节点， 而实例就是 job 节点中的 target 节点，以上个例子的配置文件的抓取配置来看:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">scrape_configs:</span><br><span class="line">  - job_name: &quot;prometheus&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">      - targets: [&quot;localhost:9090&quot;]</span><br><span class="line"></span><br><span class="line">  - job_name: &quot;node1&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">      - targets: [&quot;localhost:9100&quot;]</span><br></pre></td></tr></table></figure></p>
+<p>说明有两个作业:</p>
+<ul>
+<li>prometheus</li>
+<li>node1</li>
+</ul>
+<p>每一个作业都对应一台实例 (可以配置多个)。 而 prometheus server 就会去定期(根据 <code>scrape_interval</code> 参数)去执行这些作业，然后具体体现在去这些作业下配置的实例的 url 上去拉数据。</p>
+<h3 id="自动生成的标签和时间序列"><a href="#自动生成的标签和时间序列" class="headerlink" title="自动生成的标签和时间序列"></a>自动生成的标签和时间序列</h3><p>prometheus 他是一个时序数据库， 从根本上存储的所有数据都是时间序列数据（Time Series Data，简称时序数据）。时序数据是具有时间戳的数据流，该数据流属于某个度量指标（metrics name）和该度量指标下的多个标签（labelset）。</p>
+<p>每个时间序列（Time Series，简称时序）由度量指标和一组标签键值对唯一确定。</p>
+<p>以我们刚才装的 prometheus server 来说， 他的抛送请求的数据是这样子的</p>
+<p><img src="/2022/11/28/prometheus-2-metrics/2.png" alt=""></p>
+<p>而这个每一行(非 <code>#</code> 开头的注释行)就是一个时间序列数据，都会被 prometheus 存入到时序数据库。</p>
+<p>当 Prometheus 抓取目标时，它会自动将一些标签附加到抓取的时间序列上，用于识别抓取的目标：</p>
+<ul>
+<li><strong>job</strong>：目标所属的已配置作业名称。</li>
+<li><strong>instance</strong>：<code>&lt;host&gt;:&lt;port&gt;</code> 被抓取的目标 URL 部分。</li>
+</ul>
+<p>所以我们可以看到在抛送的时候，没有 job 和 instance 这两个标签，但是查询的时候，会出现这两个标签，因为这两个是自动添加</p>
+<p><img src="/2022/11/28/prometheus-2-metrics/3.png" alt=""></p>
+<p>不仅如此，在 prometheus 每次抓取的时候，都会自动添加以下的几个 时间序列数据:</p>
+<ul>
+<li><code>up{job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;}</code>：<code>1</code> 如果实例健康，即可达，或者<code>0</code> 如果抓取失败。</li>
+<li><code>scrape_duration_seconds{job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;}</code>：抓取的持续时间。</li>
+<li><code>scrape_samples_post_metric_relabeling{job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;}</code>：应用度量重新标记后剩余的样本数。</li>
+<li><code>scrape_samples_scraped{job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;}</code>：目标暴露的样本数。</li>
+<li><code>scrape_series_added{job=&quot;&lt;job-name&gt;&quot;, instance=&quot;&lt;instance-id&gt;&quot;}</code>：本次抓取中新系列的大概数量。v2.10 中的新功能</li>
+</ul>
+<blockquote>
+<p>up 时间序列对于实例可用性监控很有用。</p>
+</blockquote>
+<p>所以虽然我们在 metrics 接口看不到这些数据， 但是在后台使用指标查询的时候，是可以查询到的，比如这样子</p>
+<p><img src="/2022/11/28/prometheus-2-metrics/4.png" alt=""></p>
+<h2 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h2><p>上述说过，每个时间序列（Time Series，简称时序）由度量指标和一组标签键值对唯一确定。 而在 prometheus 中，会将所有的数据存储为时间序列，属于同一指标和同一组标记维度的时间戳值流。</p>
+<p>Prometheus 会将所有采集到的样本数据以时间序列的方式保存在内存数据库中，并且定时保存到硬盘上(默认2小时，可以根据启动参数进行修改)。时间序列是按照时间戳和值的序列顺序存放的，我们称之为向量(vector)，每条时间序列通过指标名称(metrics name)和一组标签集(labelset)命名。</p>
+<p>如下所示，可以将时间序列理解为一个以时间为 X 轴的数字矩阵：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">^</span><br><span class="line">│ . . . . . . . . . . . . . . . . . . . node_cpu_seconds_total&#123;cpu=&quot;cpu0&quot;,mode=&quot;idle&quot;&#125;</span><br><span class="line">│ . . . . . . . . . . . . . . . . . . . node_cpu_seconds_total&#123;cpu=&quot;cpu0&quot;,mode=&quot;system&quot;&#125;</span><br><span class="line">│ . . . . . . . . . . . . . . . . . . node_load1&#123;&#125;</span><br><span class="line">│ . . . . . . . . . . . . . . . . . .</span><br><span class="line">v</span><br><span class="line">&lt;------------------ 时间 ----------------&gt;</span><br></pre></td></tr></table></figure>
+<p>在时间序列中的每一个点称为一个样本（sample），样本由以下三部分组成：</p>
+<ul>
+<li><strong>指标(metric)</strong>：指标名和描述当前样本特征的标签集合。 </li>
+<li><strong>时间戳(timestamp)</strong>：一个精确到毫秒的时间戳</li>
+<li><strong>样本值(value)</strong>： 一个 float64 的浮点型数据表示当前样本的值</li>
+</ul>
+<p>其中指标(metric) 由两部分组成: <code>指标名称</code> + <code>标签组键值对</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[metric name]&#123;[label name]=[label value], ...&#125;</span><br></pre></td></tr></table></figure></p>
+<p>比如度量指标为 <code>prometheus_http_requests_total</code>，标签为 <code>code=&quot;200&quot;</code>、<code>handler=&quot;/metrics&quot;</code> 的抛送数据可以这样子写<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prometheus_http_requests_total&#123;code=&quot;200&quot;,handler=&quot;/metrics&quot;&#125; 23641</span><br></pre></td></tr></table></figure></p>
+<p>但是这个并不是完整的一个时间序列样本的数据模型，因为时序数据肯定是要带上时间的， 所以真的入库，是以这样子的方式入库的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;---------------------------- metric -----------------------&gt;&lt;-- timestamp --&gt;&lt;-value-&gt;</span><br><span class="line">prometheus_http_requests_total&#123;code=&quot;200&quot;,handler=&quot;/metrics&quot;&#125; @1434417560938 =&gt; 23641</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>之所以 <code>&quot;/metrics&quot;</code> 不显示时间戳是因为这个是 prometheus 自己当下采集的时候统一标记加的。不需要数据抛送接口额外加</p>
+</blockquote>
+<blockquote>
+<p>指标的名称可以反映被监控样本的含义（比如，<code>http_request_total</code> 表示当前系统接收到的 HTTP 请求总量）。指标名称只能由 ASCII 字符、数字、下划线以及冒号组成并必须符合正则表达式 <code>[a-zA-Z_:][a-zA-Z0-9_:]*</code>。</p>
+</blockquote>
+<blockquote>
+<p>标签(label)反映了当前样本的特征维度，通过这些维度 Prometheus 可以对样本数据进行过滤，聚合等。标签的名称只能由 ASCII 字符、数字以及下划线组成并满足正则表达式 <code>[a-zA-Z_][a-zA-Z0-9_]*</code>。 标签值可以包含任何 Unicode 字符。</p>
+</blockquote>
+<blockquote>
+<p>具有空标签值的标签被认为等同于不存在的标签。</p>
+</blockquote>
+<h2 id="指标类型"><a href="#指标类型" class="headerlink" title="指标类型"></a><a href="https://prometheus.io/docs/tutorials/understanding_metric_types/" target="_blank" rel="noopener">指标类型</a></h2><p>从存储上来讲所有的监控指标都是相同的，但是在不同的场景下这些指标又有一些细微的差异。 </p>
+<p>例如，在 Node Exporter 返回的样本中指标 <code>node_load1</code> 反应的是当前系统的负载状态，随着时间的变化这个指标返回的样本数据是在不断变化的。而指标 <code>node_cpu_seconds_total</code> 所获取到的样本数据却不同，它是一个持续增大的值，因为其反应的是 CPU 的累计使用时间，从理论上讲只要系统不关机，这个值是会一直变大。</p>
+<p>为了能够帮助用户理解和区分这些不同监控指标之间的差异，Prometheus 定义了 4 种不同的指标类型：</p>
+<ul>
+<li>Counter（计数器）</li>
+<li>Gauge（仪表盘）</li>
+<li>Histogram（直方图）</li>
+<li>Summary（摘要）</li>
+</ul>
+<p>正常情况下，我们可以在抛送的时序数据的对应的注释中，来查看这个指标的类型，比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># HELP prometheus_http_requests_total Counter of HTTP requests.</span><br><span class="line"># TYPE prometheus_http_requests_total counter</span><br><span class="line">prometheus_http_requests_total&#123;code=&quot;200&quot;,handler=&quot;/-/ready&quot;&#125; 8</span><br></pre></td></tr></table></figure></p>
+<h3 id="1-Counter（计数器）"><a href="#1-Counter（计数器）" class="headerlink" title="1. Counter（计数器）"></a>1. Counter（计数器）</h3><p>Counter (只增不减的计数器) 类型的指标其工作方式和计数器一样，只增不减，所以它对于存储诸如服务的 HTTP 请求数量或使用的 CPU 时间之类的信息非常有用。</p>
+<p>常见的监控指标，如 <code>http_requests_total</code>、<code>node_cpu_seconds_total</code> 都是 Counter 类型的监控指标。</p>
+<p><img src="/2022/11/28/prometheus-2-metrics/5.png" alt=""></p>
+<p>这个就是一个很明显的 Counter 类型的监控指标</p>
+<p>可能你会觉得一直增加的数据没什么用处，了解服务从开始有多少请求有什么价值吗？但是需要记住，每个指标都存储了时间戳的，所有你的 HTTP 请求数现在可能是 1000 万，但是 Prometheus 也会记录之前某个时间点的值，我们可以去查询过去一个小时内的请求数，当然更多的时候我们想要看到的是请求数增加或减少的速度有多快，因此通常情况对于 Counter 指标我们都是去查看变化率而不是本身的数字。</p>
+<p>PromQL 内置的聚合操作和函数可以让用户对这些数据进行进一步的分析，例如，通过 rate() 函数获取 prometheus server HTTP 请求的增长率：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rate(prometheus_http_requests_total&#123;job=&quot;prometheus&quot;&#125;[5m])</span><br></pre></td></tr></table></figure>
+<p><img src="/2022/11/28/prometheus-2-metrics/6.png" alt=""></p>
+<h3 id="2-Gauge-（仪表盘）"><a href="#2-Gauge-（仪表盘）" class="headerlink" title="2. Gauge （仪表盘）"></a>2. Gauge （仪表盘）</h3><p>与 Counter 不同，Gauge（可增可减的仪表盘）类型的指标侧重于反应系统的当前状态，因此这类指标的样本数据可增可减。</p>
+<p>常见指标如 <code>node_memory_MemFree_bytes</code>（当前主机空闲的内存大小）、<code>node_memory_MemAvailable_bytes</code>（可用内存大小）都是 Gauge 类型的监控指标。</p>
+<p>由于 Gauge 指标仍然带有时间戳存储，所有我们可以看到随时间变化的值，通常可以直接把它们绘制出来，这样就可以看到值本身而不是变化率了，通过 Gauge 指标，用户可以直接查看系统的当前状态。</p>
+<p><img src="/2022/11/28/prometheus-2-metrics/7.png" alt=""></p>
+<p>PromQL 的功能类似于 <code>max_over_time</code>，<code>min_over_time</code> 并且 <code>avg_over_time</code>, <code>delta</code> 可以用于仪表指标, 比如计算 CPU 温度在两个小时内的差异:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">delta(cpu_temp_celsius&#123;host=&quot;node01&quot;&#125;[2h])</span><br></pre></td></tr></table></figure></p>
+<p>还可以直接使用 <code>predict_linear()</code> 对数据的变化趋势进行预测。例如，预测系统磁盘空间在 4 个小时之后的剩余情况：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">predict_linear(node_filesystem_free_bytes[1h], 4 * 3600)</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-Histogram（直方图）"><a href="#3-Histogram（直方图）" class="headerlink" title="3. Histogram（直方图）"></a>3. Histogram（直方图）</h3><p>与前两种相比，直方图是一种更复杂的度量类型。直方图可用于任何基于桶值计算的计算值。桶边界可以由开发者配置。一个常见的例子是回复请求所需的时间，称为延迟。</p>
+<p>举例：假设我们想要观察处理 API 请求所花费的时间。直方图允许我们将它们存储在桶中，而不是存储每个请求的请求时间。</p>
+<p>我们为所用时间定义桶，例如 <code>lower or equal 0.3</code>、<code>le 0.5</code>、<code>le 0.7</code>、<code>le 1</code>和<code>le 1.2</code>。 所以这些是我们的桶，一旦计算出请求所花费的时间，它就会被添加到桶边界高于测量值的所有桶的计数中。</p>
+<p>在 Prometheus Server 自身返回的样本数据中，我们也能找到类型为 Histogram 的监控指标 <code>prometheus_http_request_duration_seconds_bucket</code> , 也就是上述所说的，用于按区间计算某一个 api 的直方图<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># HELP prometheus_http_request_duration_seconds Histogram of latencies for HTTP requests.</span><br><span class="line"># TYPE prometheus_http_request_duration_seconds histogram</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;0.1&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;0.2&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;0.4&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;1&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;3&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;8&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;20&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;60&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;120&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_bucket&#123;handler=&quot;/graph&quot;,le=&quot;+Inf&quot;&#125; 4</span><br><span class="line">prometheus_http_request_duration_seconds_sum&#123;handler=&quot;/graph&quot;&#125; 0.000327554</span><br><span class="line">prometheus_http_request_duration_seconds_count&#123;handler=&quot;/graph&quot;&#125; 4</span><br></pre></td></tr></table></figure></p>
+<p>上述就是 prometheus server 用来统计 <code>/graph</code> 路由请求时间的直方图， 可以看到他分为了这几个区间</p>
+<table>
+<thead>
+<tr>
+<th>bucket</th>
+<th>count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 - 0.1</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 0.2</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 0.4</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 1</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 3</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 8</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 20</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 60</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 120</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - <code>&gt; 120</code> (+Inf)</td>
+<td>4 个</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注意：+Inf 桶是默认添加的。</p>
+</blockquote>
+<p>而且这个直方图是累计叠加的，所有大于该值的桶都要加 1 (所以大区间的值会包含小区间的值)。 从上面可以看出所有的区间都是 4 个， 所以在这个时间周期之类， prometheus server 有响应了 4 次的 <code>/graph</code> 请求，并且所有的响应时间都小于 0.1s</p>
+<p>假设这时候服务器的负载高一点，有一个请求的响应时间是 0.5s 的情况下，那么上面的区间数字就会变成</p>
+<table>
+<thead>
+<tr>
+<th>bucket</th>
+<th>count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 - 0.1</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 0.2</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 0.4</td>
+<td>4 个</td>
+</tr>
+<tr>
+<td>0 - 1</td>
+<td>5 个</td>
+</tr>
+<tr>
+<td>0 - 3</td>
+<td>5 个</td>
+</tr>
+<tr>
+<td>0 - 8</td>
+<td>5 个</td>
+</tr>
+<tr>
+<td>0 - 20</td>
+<td>5 个</td>
+</tr>
+<tr>
+<td>0 - 60</td>
+<td>5 个</td>
+</tr>
+<tr>
+<td>0 - 120</td>
+<td>5 个</td>
+</tr>
+<tr>
+<td>0 - <code>&gt; 120</code> (+Inf)</td>
+<td>5 个</td>
+</tr>
+</tbody>
+</table>
+<p>这时候就可以看到 0.5s 以下的区间还是 4 个， 但是 0.5 以上的区间就会变成 5 个了。</p>
+<p>而一组直方图数据中，除了一组对应的区间之外，还有有两个带有 <code>_sum</code> 和 <code>_count</code> 后缀的总结数据，对于上例就是这两个:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">prometheus_http_request_duration_seconds_sum&#123;handler=&quot;/graph&quot;&#125; 0.000327554</span><br><span class="line">prometheus_http_request_duration_seconds_count&#123;handler=&quot;/graph&quot;&#125; 4</span><br></pre></td></tr></table></figure></p>
+<p>这个也很好理解，count 表示当前时间周期内请求该 api 的总次数， 而 sum 表示当前时间周期内所有该 api 的请求时间总和。</p>
+<p>而且为了更方便的对直方图进行理解，我们可以在 prometheus 后台的 graph 中去应用一些函数</p>
+<p><img src="/2022/11/28/prometheus-2-metrics/8.png" alt=""></p>
+<p>比如 <code>histogram_quantile()</code> 函数可用于从直方图中计算分位数</p>
+<p><img src="/2022/11/28/prometheus-2-metrics/9.png" alt=""></p>
+<p>该图显示第 90 个百分位数为 0.09</p>
+<h3 id="4-Summary（摘要）"><a href="#4-Summary（摘要）" class="headerlink" title="4. Summary（摘要）"></a>4. Summary（摘要）</h3><p>summary 类似于 histogram，也是一组数据。不同的是，它统计的不是区间的个数而是统计分位数。</p>
+<p>summary 用于记录某些东西的平均大小，可能是计算所需的时间或处理的文件大小，摘要显示两个相关的信息：count（事件发生的次数）和 sum（所有事件的总大小）</p>
+<p>还是一样以 prometheus server 的某一个指标为例:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># HELP prometheus_target_interval_length_seconds Actual intervals between scrapes.</span><br><span class="line"># TYPE prometheus_target_interval_length_seconds summary</span><br><span class="line">prometheus_target_interval_length_seconds&#123;interval=&quot;15s&quot;,quantile=&quot;0.01&quot;&#125; 14.999039337</span><br><span class="line">prometheus_target_interval_length_seconds&#123;interval=&quot;15s&quot;,quantile=&quot;0.05&quot;&#125; 14.999308066</span><br><span class="line">prometheus_target_interval_length_seconds&#123;interval=&quot;15s&quot;,quantile=&quot;0.5&quot;&#125; 14.999972474</span><br><span class="line">prometheus_target_interval_length_seconds&#123;interval=&quot;15s&quot;,quantile=&quot;0.9&quot;&#125; 15.000511797</span><br><span class="line">prometheus_target_interval_length_seconds&#123;interval=&quot;15s&quot;,quantile=&quot;0.99&quot;&#125; 15.000882762</span><br><span class="line">prometheus_target_interval_length_seconds_sum&#123;interval=&quot;15s&quot;&#125; 1.06375554951154e+06</span><br><span class="line">prometheus_target_interval_length_seconds_count&#123;interval=&quot;15s&quot;&#125; 70917</span><br></pre></td></tr></table></figure></p>
+<p>这个是一组 summary 类型的指标， 表示每间隔 15s 抓取的配置，而实际情况执行的抓取间隔指标。 可以看到 summary 和 histogram， 都是一组指标再加两个总结 (sum 和 count)</p>
+<p>不过他跟 histogram 不一样，他是以统计分位数来做区间统计。 也就是对于上例的数据来说，对于间隔 15s 的抓取配置来说， 总共执行了 70917 了，总的执行时间是 <code>1.06375554951154e+06</code>, 其中中位数(quantile=0.5) 的真实抓取的间隔时间为 <code>14.999972474</code></p>
+<blockquote>
+<p>summary 非常有用，但是因为是平均值，所以会隐藏一些细节，比如想查看时间都花在哪里了， 这时候就只需要 histogram 这种更详细的区间桶的方式来展示。 而因为它们是在应用程序级别计算的，因此不可能聚合​​来自同一进程的多个实例的指标。 但是用 histogram 可以做到</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本节主要是解释了 prometheus 最重要的数据模型和指标类型， 只有先理解这些概念，在后续更深入的学习中才不会有理解障碍。</p>
+<p>并且简单使用了 prometheus 的 ui 后台通过使用 PromQL 语法来查询数据， 结果值有瞬时向量的值，也有范围向量。</p>
+<p>但是也反应出了 prometheus 的数据查询后台其实功能是薄弱的，最多用来 debug 一下还行，如果要做成图表面板乃至 dashboard 的仪表盘，根本没办法做</p>
+<p>所以官方也推荐要另外找一个视图渲染的后台来对 prometheus 的数据进行更好的数据渲染， 目前最流行的就是用 <a href="http://grafana.com/" target="_blank" rel="noopener">Grafana</a> 来做数据渲染</p>
+<p>所以下一节，我们就安装一下 Grafana 来对我们之前抓取的数据进行图表和仪表盘(dashboard)渲染。</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://prometheus.io/docs/concepts/data_model/" target="_blank" rel="noopener">prometheus 数据模型</a></li>
+<li><a href="https://prometheus.io/docs/tutorials/understanding_metric_types/" target="_blank" rel="noopener">prometheus 指标类型</a></li>
+<li><a href="https://prometheus.io/docs/concepts/jobs_instances/" target="_blank" rel="noopener">prometheus 作业实例</a></li>
+<li><a href="https://prometheus.io/docs/concepts/metric_types/" target="_blank" rel="noopener">prometheus 指标类型 sdk 使用文档</a></li>
+<li><a href="https://prometheus.io/docs/practices/naming/#metric-names" target="_blank" rel="noopener">prometheus 指标和标签命名</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/107213754" target="_blank" rel="noopener">入门Prometheus监控系统之基础概念和Metric</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/583251555" target="_blank" rel="noopener">Prometheus基础相关–数据模型</a></li>
+<li><a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">QUERYING PROMETHEUS</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/11/28/prometheus-2-metrics/" title="基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型">http://kebingzao.com/2022/11/28/prometheus-2-metrics/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/prometheus/" rel="tag"># prometheus</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/11/28/prometheus-1-install/" rel="next" title="基于 prometheus 打造监控报警后台 (1) - 初试和安装">
+                <i class="fa fa-chevron-left"></i> 基于 prometheus 打造监控报警后台 (1) - 初试和安装
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/11/29/prometheus-3-grafana/" rel="prev" title="基于 prometheus 打造监控报警后台 (3) - 使用 grafana 创建仪表盘">
+                基于 prometheus 打造监控报警后台 (3) - 使用 grafana 创建仪表盘 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">301</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从后台查询指标"><span class="nav-number">2.</span> <span class="nav-text">从后台查询指标</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PromQL-表达式语言数据类型"><span class="nav-number">2.1.</span> <span class="nav-text">PromQL 表达式语言数据类型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#作业-job-和实例-instance"><span class="nav-number">3.</span> <span class="nav-text">作业(job)和实例(instance)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#自动生成的标签和时间序列"><span class="nav-number">3.1.</span> <span class="nav-text">自动生成的标签和时间序列</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据模型"><span class="nav-number">4.</span> <span class="nav-text">数据模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#指标类型"><span class="nav-number">5.</span> <span class="nav-text">指标类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Counter（计数器）"><span class="nav-number">5.1.</span> <span class="nav-text">1. Counter（计数器）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Gauge-（仪表盘）"><span class="nav-number">5.2.</span> <span class="nav-text">2. Gauge （仪表盘）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Histogram（直方图）"><span class="nav-number">5.3.</span> <span class="nav-text">3. Histogram（直方图）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Summary（摘要）"><span class="nav-number">5.4.</span> <span class="nav-text">4. Summary（摘要）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/11/28/prometheus-2-metrics/';
+          this.page.identifier = '2022/11/28/prometheus-2-metrics/';
+          this.page.title = '基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

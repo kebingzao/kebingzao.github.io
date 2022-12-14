@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="prometheus,alertmanager," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报 我们已经能够在 prometheus 创建警报规则，并且使用 alertmanager 发送警报预警了。 但是 alertmanager 还有几个特性，并没有在上述文章讲述，本节继续延续上节的内容，讲一下 alertmanager 的几个概念。 1. 分组(Grouping)Groupin">
+<meta name="keywords" content="prometheus,alertmanager">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 prometheus 打造监控报警后台 (5) - alertmanager 的三个概念(Grouping, Inhibition, Silences)">
+<meta property="og:url" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报 我们已经能够在 prometheus 创建警报规则，并且使用 alertmanager 发送警报预警了。 但是 alertmanager 还有几个特性，并没有在上述文章讲述，本节继续延续上节的内容，讲一下 alertmanager 的几个概念。 1. 分组(Grouping)Groupin">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/2.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/1.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/3.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/4.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/5.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/6.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/9.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/7.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/8.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/10.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/9.png">
+<meta property="og:updated_time" content="2022-12-14T13:10:09.478Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于 prometheus 打造监控报警后台 (5) - alertmanager 的三个概念(Grouping, Inhibition, Silences)">
+<meta name="twitter:description" content="前言通过 基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报 我们已经能够在 prometheus 创建警报规则，并且使用 alertmanager 发送警报预警了。 但是 alertmanager 还有几个特性，并没有在上述文章讲述，本节继续延续上节的内容，讲一下 alertmanager 的几个概念。 1. 分组(Grouping)Groupin">
+<meta name="twitter:image" content="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/2.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/"/>
+
+
+
+
+
+  <title>基于 prometheus 打造监控报警后台 (5) - alertmanager 的三个概念(Grouping, Inhibition, Silences) | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于 prometheus 打造监控报警后台 (5) - alertmanager 的三个概念(Grouping, Inhibition, Silences)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-12-05T13:51:58+08:00">
+                2022-12-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/12/05/prometheus-5-alertmanager-pro/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/12/05/prometheus-5-alertmanager-pro/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/12/05/prometheus-5-alertmanager-pro/" class="leancloud_visitors" data-flag-title="基于 prometheus 打造监控报警后台 (5) - alertmanager 的三个概念(Grouping, Inhibition, Silences)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2022/11/29/prometheus-4-alertmanager/" title="基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报">基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报</a> 我们已经能够在 prometheus 创建警报规则，并且使用 alertmanager 发送警报预警了。</p>
+<p>但是 alertmanager 还有几个特性，并没有在上述文章讲述，本节继续延续上节的内容，讲一下 alertmanager 的几个<a href="https://prometheus.io/docs/alerting/latest/alertmanager/" target="_blank" rel="noopener">概念</a>。</p>
+<h2 id="1-分组-Grouping"><a href="#1-分组-Grouping" class="headerlink" title="1. 分组(Grouping)"></a>1. 分组(Grouping)</h2><p>Grouping 是把同类型的警报进行分组，合并多条警报到一个通知中。在生产环境中，特别是云环境下的业务之间密集耦合时，若出现多台 Instance 故障，可能会导致成千上百条警报触发。在这种情况下使用分组机制， 可以把这些被触发的警报合并为一个警报进行通知，从而避免瞬间突发性的接受大量警报通知，使得管理员无法对问题进行快速定位。</p>
+<p>举个例子，比如我在 aws 的美西部署了 100 台服务器， 上面都部署了 node_exporter，然后突然有一天， aws 的美西服务商出现网络波动，导致 prometheus server 连接不到这 100 台服务器，这时候这 100 个节点就会全部触发告警， 瞬间往你的邮箱发送了 100 封邮件，直接给你造成邮件轰炸。</p>
+<p>但是如果你有设置分组，将 100 台的主机的 up 检测都放到同一个分组内，那么这个 100 封告警就会合并成一条发送。<br><a id="more"></a></p>
+<h3 id="1-1-demo-1"><a href="#1-1-demo-1" class="headerlink" title="1.1 demo 1"></a>1.1 demo 1</h3><p>事实上，我们之前的 alertmanager 配置的分组策略，就是按照标签 alertname 来分组的: <code>alertmanager.yml</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">route:</span><br><span class="line">  group_by: [&apos;alertname&apos;]</span><br><span class="line">  group_wait: 30s</span><br><span class="line">  group_interval: 5m</span><br><span class="line">  repeat_interval: 10m</span><br><span class="line">  receiver: default-receiver</span><br></pre></td></tr></table></figure></p>
+<p>而我们在 <code>rules/test-1.yml</code> 的配置的 alertname 就是 <code>节点存活</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rules:</span><br><span class="line">  - alert: 节点存活</span><br><span class="line">    expr: up&#123;job=&quot;vmware-host&quot;&#125; == 0</span><br></pre></td></tr></table></figure></p>
+<p>所以只要是 <code>job=&quot;vmware-host&quot;</code> 的节点，都是同一个组的，他们在 30s 的等待时间内(<code>group_wait</code>配置)，如果都有触发警报，那么就会合在一起。</p>
+<p>所以一旦出现两台节点都挂掉的情况下， 他们的警报信息就会合并成一封 (因为他们的 <code>alertname</code> 标签都是 <code>节点存活</code>)</p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/2.png" alt=""></p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/1.png" alt=""></p>
+<h3 id="1-2-demo2"><a href="#1-2-demo2" class="headerlink" title="1.2 demo2"></a>1.2 demo2</h3><p>demo1 的 alertmanager 分组方式是按照 alertname 这个标签来分组，而这个标签是在生效 警报规则的时候，prometheus 的 指标追加进去的。  所以我们也可以用原先的指标的标签组来分组</p>
+<p>为了方便测试，我这边再创建两个规则，用来监控主机的一些性能指标</p>
+<p>一个是用来监控主机的内存不足预警(不足 10%)，一个是监控主机的 cpu 负载(负载超过 80%)，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 内存不足 10%</span><br><span class="line">node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 &lt; 10</span><br><span class="line"># cpu 负载超过 80%</span><br><span class="line">100 - (avg by(instance) (rate(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;[2m])) * 100) &gt; 80</span><br></pre></td></tr></table></figure></p>
+<p>但是测试机没有那么高的，所以条件反过来， 将 <code>&lt; 10</code> 改成 <code>&gt; 10</code>, 将 <code>&gt; 80</code> 改成 <code>&lt; 80</code>, 这样子就可以马上触发</p>
+<p>其实就是在 test-1.yml 最下面增加这两串<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"># 修改 rule 规则文件</span><br><span class="line">[root@VM-64-9-centos rules]# cat test-1.yml </span><br><span class="line"># rules/test-1.yml</span><br><span class="line">groups:</span><br><span class="line">  - name: test-1</span><br><span class="line">    rules:</span><br><span class="line">      - alert: 节点存活</span><br><span class="line">        expr: up&#123;job=&quot;vmware-host&quot;&#125; == 0</span><br><span class="line">        for: 1m</span><br><span class="line">        labels:</span><br><span class="line">          serverity: critical</span><br><span class="line">        annotations:</span><br><span class="line">          summary: &quot;[监控报警] 机器 &#123;&#123; $labels.instance &#125;&#125; 挂了&quot;</span><br><span class="line">          description: &quot;&#123;&#123;$labels.instance&#125;&#125; 宕机(当前值: &#123;&#123; $value &#125;&#125;)&quot;</span><br><span class="line">     </span><br><span class="line">      - alert: 主机内存不足</span><br><span class="line">        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 &gt; 10</span><br><span class="line">        for: 1m</span><br><span class="line">        labels:</span><br><span class="line">          severity: warning</span><br><span class="line">        annotations:</span><br><span class="line">          summary: &quot;[监控报警] 主机内存不足 (实例: &#123;&#123; $labels.instance &#125;&#125;)&quot;</span><br><span class="line">          description: &quot;节点内存已满 (&lt; 10% left)\n  VALUE = &#123;&#123; $value &#125;&#125;\n  LABELS = &#123;&#123; $labels &#125;&#125;&quot;</span><br><span class="line"></span><br><span class="line">      - alert: 主机 cpu 负载高</span><br><span class="line">        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total&#123;mode=&quot;idle&quot;&#125;[2m])) * 100) &lt; 80</span><br><span class="line">        for: 1m</span><br><span class="line">        labels:</span><br><span class="line">          severity: warning</span><br><span class="line">        annotations:</span><br><span class="line">          summary: &quot;[监控报警] cpu 负载高 (实例 &#123;&#123; $labels.instance &#125;&#125;)&quot;</span><br><span class="line">          description: &quot;CPU load is &gt; 80%\n  VALUE = &#123;&#123; $value &#125;&#125;\n  LABELS = &#123;&#123; $labels &#125;&#125;&quot;  </span><br><span class="line"> </span><br><span class="line"># 检验语法         </span><br><span class="line">[root@VM-64-9-centos rules]# ../promtool check rules test-1.yml </span><br><span class="line">Checking test-1.yml</span><br><span class="line">  SUCCESS: 3 rules found</span><br><span class="line"></span><br><span class="line"># 重刷生效</span><br><span class="line">[root@VM-64-9-centos rules]# curl -X POST localhost:9090/-/reload</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/3.png" alt=""></p>
+<p>这时候就会触发警报，因为默认是按照 alertname 来分组的，所以就会分成两台警报 (之所以每一种有两条警报，是因为当前有两台主机都触发)</p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/4.png" alt=""></p>
+<p>如果要将这两个警报合并成一台，就要改一下分组，改成用 <code>severity=&quot;warning&quot;</code> 这个上述两个新增警报共有的标签来分组，所以 alertmanager.yml 要添加这个<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos alertmanager]# cat alertmanager.yml </span><br><span class="line">global:</span><br><span class="line">  smtp_smarthost: &apos;smtp.qq.com:25&apos;</span><br><span class="line">  smtp_from: &apos;z***e@foxmail.com&apos;</span><br><span class="line">  smtp_auth_username: &apos;z***e@foxmail.com&apos;</span><br><span class="line">  smtp_auth_password: &apos;ypgtxxxxxxxxxxxxx&apos; </span><br><span class="line">  smtp_require_tls: false</span><br><span class="line">templates:</span><br><span class="line">  - &apos;/usr/local/prometheus/templates/mail.tmpl&apos;</span><br><span class="line">route:</span><br><span class="line">  group_by: [&apos;alertname&apos;]</span><br><span class="line">  group_wait: 30s</span><br><span class="line">  group_interval: 5m</span><br><span class="line">  repeat_interval: 10m</span><br><span class="line">  receiver: default-receiver</span><br><span class="line">  # 子路由节点</span><br><span class="line">  routes:</span><br><span class="line">  - group_by: [&quot;severity&quot;]</span><br><span class="line">    matchers:</span><br><span class="line">    - severity=&quot;warning&quot;</span><br><span class="line"></span><br><span class="line">receivers:</span><br><span class="line">  - name: &apos;default-receiver&apos;</span><br><span class="line">    email_configs:</span><br><span class="line">    - to: &apos;k****o@gmail.com&apos;</span><br><span class="line">      send_resolved: true</span><br><span class="line">      headers:</span><br><span class="line">        subject: &apos;&#123;&#123; template &quot;custom_mail_subject&quot; .  &#125;&#125;&apos;</span><br><span class="line">      html: &apos;&#123;&#123; template &quot;custom_mail_html&quot; . &#125;&#125;&apos;</span><br><span class="line">    webhook_configs:</span><br><span class="line">    - url: http://localhost:8070/dingtalk/webhook_1/send</span><br><span class="line">      send_resolved: true</span><br><span class="line">    </span><br><span class="line">[root@VM-64-9-centos alertmanager]# ./amtool check-config alertmanager.yml </span><br><span class="line">Checking &apos;alertmanager.yml&apos;  SUCCESS</span><br><span class="line">Found:</span><br><span class="line"> - global config</span><br><span class="line"> - route</span><br><span class="line"> - 0 inhibit rules</span><br><span class="line"> - 1 receivers</span><br><span class="line"> - 1 templates</span><br><span class="line">  SUCCESS</span><br><span class="line"></span><br><span class="line">[root@VM-64-9-centos alertmanager]# curl -X POST localhost:9093/-/reload</span><br></pre></td></tr></table></figure></p>
+<p>其实就是加了一个子路由，来匹配 <code>severity=&quot;warning&quot;</code>, 并且警报的组别按 severity 标签排序<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 子路由节点</span><br><span class="line">routes:</span><br><span class="line">- group_by: [&quot;severity&quot;]</span><br><span class="line">  matchers:</span><br><span class="line">  - severity=&quot;warning&quot;</span><br></pre></td></tr></table></figure></p>
+<p>这时候就可以看到 4 条警报合并成一起了 (因为有两台主机，所以会有 4 条)</p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/5.png" alt=""></p>
+<p>如果只想指定某一台, 可以设置多条匹配规则:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 子路由节点</span><br><span class="line">routes:</span><br><span class="line">- group_by: [&quot;severity&quot;]</span><br><span class="line">  matchers:</span><br><span class="line">  - severity=&quot;warning&quot;</span><br><span class="line">  - instance=&quot;localhost:9100&quot;</span><br></pre></td></tr></table></figure></p>
+<p>这样子就只会指定 localhost 这一台的报警级别为 warning 的，才会合并成一条</p>
+<h2 id="2-抑制-Inhibition"><a href="#2-抑制-Inhibition" class="headerlink" title="2. 抑制(Inhibition)"></a>2. 抑制(<code>Inhibition</code>)</h2><p>抑制是一个概念，如果某些其他警报已经触发，则抑制某些警报的通知。</p>
+<p>比如正在触发一个警报，通知整个集群无法访问。 alertmanager 可以配置为在触发该特定警报时将所有其他有关该集群的警报静音。这可以防止与实际问题无关的成百上千个触发警报的通知。</p>
+<p>这个是需要配置在 alertmanager.yml 中的 <code>inhibit_rules</code> 节点， 具体规则如下: <a href="https://prometheus.io/docs/alerting/latest/configuration/#inhibit_rule" target="_blank" rel="noopener">inhibit_rule</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 当前要判断被应用抑制规则的警报</span><br><span class="line">target_matchers:</span><br><span class="line">  [ - &lt;matcher&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 已经存在的警报</span><br><span class="line">source_matchers:</span><br><span class="line">  [ - &lt;matcher&gt; ... ]</span><br><span class="line"></span><br><span class="line"># target 和 source 要存在相同的标签</span><br><span class="line">[ equal: &apos;[&apos; &lt;labelname&gt;, ... &apos;]&apos; ]</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>当存在与另一组匹配器匹配的警报（源）时，禁止规则使匹配一组匹配器的警报（目标）静音。对于列表中的标签名称，目标和源警报必须具有相同的标签值equal。</p>
+</blockquote>
+<blockquote>
+<p>从语义上讲，缺少标签和具有空值的标签是同一回事。因此，如果源警报和目标警报中都缺少 equal 中列出的所有标签名称，则将应用抑制规则。</p>
+</blockquote>
+<p>举个例子，假设当我这一台节点挂的情况下，那么这一台节点报的其他的警报，都不要受理，也就是被 抑制住了，具体表现在当我这一台发生了 <code>serverity=&quot;critical&quot;</code> 的警报的时候(比如节点挂掉)，这时候其他发生的具有 <code>severity=&quot;warning&quot;</code> 的警报(同一个实例)都将被抑制，不再触发(比如内存不足，cpu 过高)</p>
+<p>因此在之前的基础上，我们调整了一下 alertmanager.yml, 去掉了刚才调整的分组子路由， 添加了 <code>inhibit_rule</code> 子节点<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">inhibit_rules:</span><br><span class="line">  - target_matchers:</span><br><span class="line">      - severity=&quot;warning&quot;</span><br><span class="line">    source_matchers:</span><br><span class="line">      - severity=&quot;critical&quot;</span><br><span class="line">    equal: [&apos;instance&apos;]</span><br></pre></td></tr></table></figure></p>
+<p>也就是如果是同一个节点实例服务，如果已经存在 <code>severity=&quot;critical&quot;</code> 的警报，那么 <code>severity=&quot;warning&quot;</code> 就会被抑制住，不会发送通知</p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/6.png" alt=""></p>
+<p>所以可以看到虽然 3 个警报都触发了，但是只收到了 节点存活 的 mail 通知， 另外两家就没有收到，因为被抑制了</p>
+<blockquote>
+<p>下图只显示另一台主机 234 的 cpu 和 内存的警报，没有 localhost 这一台的，因为被抑制了</p>
+</blockquote>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/9.png" alt=""></p>
+<p>然后当我将 node 的节点重新启动的时候，这时候就可以收到这两封的警报了</p>
+<h2 id="3-静默-Silences"><a href="#3-静默-Silences" class="headerlink" title="3. 静默(Silences)"></a>3. 静默(<code>Silences</code>)</h2><p>Silences 是一种简单的方法，可以在给定时间内使警报静音。</p>
+<p>沉默是基于匹配器配置的，就像路由树一样。检查传入警报是否与活动静默的所有相等或正则表达式匹配器匹配。一旦匹配，就不会针对该警报发送任何通知。</p>
+<p>这个其实很好理解，比如我们有个业务要维护，比如数据库升级，那么关于数据库的警报一定会触发，所以我们可以设置一个时间段再发送警告通知。</p>
+<p>设置 Sliences 有两种方式:</p>
+<ul>
+<li>通过 alertmanager 的 Web 界面设置</li>
+<li>通过 amtool 工具在命令行进行设置</li>
+</ul>
+<h3 id="3-1-web-ui-方式"><a href="#3-1-web-ui-方式" class="headerlink" title="3.1 web ui 方式"></a>3.1 web ui 方式</h3><p>比如我们可以在 alertmanager 后台添加一条静默规则</p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/7.png" alt=""></p>
+<p>创建完之后，可以点击查看当前是否有警报会影响到，可以看到，当创建这一台静默规则的时候，现在正在触发的这两个警报，将会马上生效</p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/8.png" alt=""></p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/10.png" alt=""></p>
+<p>也就是接下来的这两个小时之内，这两个警报将不会再触发警告发送行为。 可以看到只收到 234 这一台的警报，不会再收到 localhost 这一台的警报了</p>
+<p><img src="/2022/12/05/prometheus-5-alertmanager-pro/9.png" alt=""></p>
+<blockquote>
+<p>这边还有一个 Expire 按钮，点击可以让这一条直接过期，可以用来模拟时间到期的情况</p>
+</blockquote>
+<h3 id="3-2-amtool-方式"><a href="#3-2-amtool-方式" class="headerlink" title="3.2 amtool 方式"></a>3.2 amtool 方式</h3><p>关于使用 amtool 这个命令行来创建和查看静默(<code>Sliences</code>), 可以看: <a href="https://github.com/prometheus/alertmanager/blob/main/README.md#amtool" target="_blank" rel="noopener">amtool</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"># 这个配置文件要先创建，指定具体的实例地址即可</span><br><span class="line">[root@VM-64-9-centos alertmanager]# cat /etc/amtool/config.yml</span><br><span class="line"># Define the path that `amtool` can find your `alertmanager` instance</span><br><span class="line">alertmanager.url: &quot;http://localhost:9093&quot;</span><br><span class="line"></span><br><span class="line"># Override the default author. (unset defaults to your username)</span><br><span class="line"># author: me@example.com</span><br><span class="line">#</span><br><span class="line"># # Force amtool to give you an error if you don&apos;t include a comment on a silence</span><br><span class="line"># comment_required: true</span><br><span class="line">#</span><br><span class="line"># # Set a default output format. (unset defaults to simple)</span><br><span class="line"># output: extended</span><br><span class="line">#</span><br><span class="line"># # Set a default receiver</span><br><span class="line"># receiver: team-X-pager</span><br><span class="line"></span><br><span class="line"># 查询当前未过期的静默</span><br><span class="line">[root@VM-64-9-centos alertmanager]# ./amtool silence query</span><br><span class="line">ID                                    Matchers                   Ends At                  Created By  Comment  </span><br><span class="line">86a0e7e6-ccd9-49e3-b921-1879cbda4183  instance=&quot;localhost:9100&quot;  2022-12-06 14:10:16 UTC  zachke      1        </span><br><span class="line"></span><br><span class="line"># 将某一条静默规则设置为过期</span><br><span class="line">[root@VM-64-9-centos alertmanager]# ./amtool silence expire 86a0e7e6-ccd9-49e3-b921-1879cbda4183</span><br><span class="line">[root@VM-64-9-centos alertmanager]# ./amtool silence query</span><br><span class="line">ID  Matchers  Ends At  Created By  Comment</span><br></pre></td></tr></table></figure></p>
+<h2 id="更多的警报规则"><a href="#更多的警报规则" class="headerlink" title="更多的警报规则"></a>更多的警报规则</h2><p>其实要写好警报规则，尤其是一些现成的 exporter 的导出器，其实不仅仅是要熟悉他们抛送的指标含义，同时还要用好 promql 语法。</p>
+<p>所以其实有一个站点就是: <a href="https://awesome-prometheus-alerts.grep.to/rules" target="_blank" rel="noopener">很棒的普罗米修斯警报-报警规则集合</a></p>
+<p>这个是一个非常棒的站点，上面列举上绝大多数我们日常用的服务的对应的警报规则， 直接拿过来用， 上述关于 node_exporter 的两条警报(内存和cpu)就是从这个站点摘抄的规则。</p>
+<h2 id="高可用"><a href="#高可用" class="headerlink" title="高可用"></a>高可用</h2><p>alertmanager 支持配置以创建集群以实现高可用性。这可以使用 <a href="https://github.com/prometheus/alertmanager#high-availability" target="_blank" rel="noopener">–cluster-*</a> 标志进行配置。</p>
+<p>这个其实并不复杂，因为重要的是不要在 prometheus 和它的 alertmanagers 之间负载均衡流量，而是将 prometheus 指向所有 alertmanagers 的列表。 这样子就算有其他挂掉了，只要还有一台 alive， 那么就可以正常工作。</p>
+<p>同理，为了提升 prometheus 的服务可靠性，我们会部署两个或多个的 prometheus 服务，两个 prometheus 具有相同的配置（Job配、告警规则、等），当其中一个 Down 掉了以后，可以保证 prometheus 持续可用。</p>
+<p>alertmanager 自带警报分组机制，即使不同的 prometheus 分别发送相同的警报给 alertmanager，alertmanager 也会自动把这些警报合并处理。</p>
+<p>关于 alertmanager 的高可用实践，后面可以单独搞个小节来讲。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本节通过简单的讲述了一下 alertmanager 的 三个特性，来更近一步的强化对 alertmanager 的理解。</p>
+<p>下一节我们将 prometheus 的另一种规则 – 记录规则</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://blog.csdn.net/qq_42883074/article/details/115510359" target="_blank" rel="noopener">prometheus使用 (十五) alertmanager特性–分组</a></li>
+<li><a href="https://blog.csdn.net/qq_42883074/article/details/115544031" target="_blank" rel="noopener">prometheus使用 (十六) alertmanager特性–告警抑制</a></li>
+<li><a href="https://blog.csdn.net/qq_42883074/article/details/115554668" target="_blank" rel="noopener">prometheus使用 (十七) alertmanager特性–静默</a></li>
+<li><a href="https://blog.csdn.net/qq_42883074/article/details/115302077" target="_blank" rel="noopener">prometheus使用 (十一) alertmanager集群部署</a></li>
+<li><a href="https://blog.csdn.net/wang7531838/article/details/108214881" target="_blank" rel="noopener">Prometheus监控神器-Alertmanager篇(4)</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/" title="基于 prometheus 打造监控报警后台 (5) - alertmanager 的三个概念(Grouping, Inhibition, Silences)">http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/prometheus/" rel="tag"># prometheus</a>
+          
+            <a href="/tags/alertmanager/" rel="tag"># alertmanager</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/11/29/prometheus-4-alertmanager/" rel="next" title="基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报">
+                <i class="fa fa-chevron-left"></i> 基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/12/07/prometheus-6-record-rule/" rel="prev" title="基于 prometheus 打造监控报警后台 (6) - 记录规则(recording rule)">
+                基于 prometheus 打造监控报警后台 (6) - 记录规则(recording rule) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">301</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-分组-Grouping"><span class="nav-number">2.</span> <span class="nav-text">1. 分组(Grouping)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-demo-1"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 demo 1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-demo2"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 demo2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-抑制-Inhibition"><span class="nav-number">3.</span> <span class="nav-text">2. 抑制(Inhibition)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-静默-Silences"><span class="nav-number">4.</span> <span class="nav-text">3. 静默(Silences)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-web-ui-方式"><span class="nav-number">4.1.</span> <span class="nav-text">3.1 web ui 方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-amtool-方式"><span class="nav-number">4.2.</span> <span class="nav-text">3.2 amtool 方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更多的警报规则"><span class="nav-number">5.</span> <span class="nav-text">更多的警报规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高可用"><span class="nav-number">6.</span> <span class="nav-text">高可用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/12/05/prometheus-5-alertmanager-pro/';
+          this.page.identifier = '2022/12/05/prometheus-5-alertmanager-pro/';
+          this.page.title = '基于 prometheus 打造监控报警后台 (5) - alertmanager 的三个概念(Grouping, Inhibition, Silences)';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

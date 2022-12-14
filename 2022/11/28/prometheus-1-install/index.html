@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="prometheus," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="prometheus 介绍1. 诞生背景 IT 环境中，监控系统陈旧，监控指标单一，监控误报等，基于 zabbix 搭建，不能有效针对测试环境中k8s和容器的原生支持 IT 环境监控类型繁多，有主机监控，也有应用监控。如：物理服务器、VMWare vSphere 虚拟化体系、交换机等网络设备、其他特殊主机、应用类监控，如 nginx 和 mysql 等 IT 环境监控链路长，并指标复杂  2. 什">
+<meta name="keywords" content="prometheus">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 prometheus 打造监控报警后台 (1) - 初试和安装">
+<meta property="og:url" content="http://kebingzao.com/2022/11/28/prometheus-1-install/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="prometheus 介绍1. 诞生背景 IT 环境中，监控系统陈旧，监控指标单一，监控误报等，基于 zabbix 搭建，不能有效针对测试环境中k8s和容器的原生支持 IT 环境监控类型繁多，有主机监控，也有应用监控。如：物理服务器、VMWare vSphere 虚拟化体系、交换机等网络设备、其他特殊主机、应用类监控，如 nginx 和 mysql 等 IT 环境监控链路长，并指标复杂  2. 什">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/1.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/2.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/3.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/4.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/5.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/6.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/7.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/8.png">
+<meta property="og:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/9.png">
+<meta property="og:updated_time" content="2022-12-14T13:10:09.420Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于 prometheus 打造监控报警后台 (1) - 初试和安装">
+<meta name="twitter:description" content="prometheus 介绍1. 诞生背景 IT 环境中，监控系统陈旧，监控指标单一，监控误报等，基于 zabbix 搭建，不能有效针对测试环境中k8s和容器的原生支持 IT 环境监控类型繁多，有主机监控，也有应用监控。如：物理服务器、VMWare vSphere 虚拟化体系、交换机等网络设备、其他特殊主机、应用类监控，如 nginx 和 mysql 等 IT 环境监控链路长，并指标复杂  2. 什">
+<meta name="twitter:image" content="http://kebingzao.com/2022/11/28/prometheus-1-install/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/11/28/prometheus-1-install/"/>
+
+
+
+
+
+  <title>基于 prometheus 打造监控报警后台 (1) - 初试和安装 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/11/28/prometheus-1-install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于 prometheus 打造监控报警后台 (1) - 初试和安装</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-28T14:05:57+08:00">
+                2022-11-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/11/28/prometheus-1-install/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/11/28/prometheus-1-install/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/11/28/prometheus-1-install/" class="leancloud_visitors" data-flag-title="基于 prometheus 打造监控报警后台 (1) - 初试和安装">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="prometheus-介绍"><a href="#prometheus-介绍" class="headerlink" title="prometheus 介绍"></a>prometheus 介绍</h2><h3 id="1-诞生背景"><a href="#1-诞生背景" class="headerlink" title="1. 诞生背景"></a>1. 诞生背景</h3><ol>
+<li>IT 环境中，监控系统陈旧，监控指标单一，监控误报等，基于 zabbix 搭建，不能有效针对测试环境中k8s和容器的原生支持</li>
+<li>IT 环境监控类型繁多，有主机监控，也有应用监控。如：物理服务器、VMWare vSphere 虚拟化体系、交换机等网络设备、其他特殊主机、应用类监控，如 nginx 和 mysql 等</li>
+<li>IT 环境监控链路长，并指标复杂</li>
+</ol>
+<h3 id="2-什么是-prometheus"><a href="#2-什么是-prometheus" class="headerlink" title="2. 什么是 prometheus"></a>2. <a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">什么是 prometheus</a></h3><p><a href="https://github.com/prometheus" target="_blank" rel="noopener">Prometheus</a> 是一个开源系统监控和警报工具包，最初由 <a href="https://soundcloud.com" target="_blank" rel="noopener">SoundCloud</a> 构建。自 2012 年启动以来，许多公司和组织都采用了 Prometheus，该项目拥有非常活跃的开发者和用户社区。它现在是一个独立的开源项目，独立于任何公司进行维护。为了强调这一点，并明确项目的治理结构，Prometheus 于 2016 年作为继 <a href="https://kubernetes.io/" target="_blank" rel="noopener">Kubernetes</a> 之后的第二个托管项目加入了<a href="https://cncf.io/" target="_blank" rel="noopener">云原生计算基金会(CNCF)</a>。</p>
+<p>Prometheus 将其指标收集并存储为时间序列数据，即指标信息与记录时的时间戳以及称为标签的可选键值对一起存储。</p>
+<p>说是现在最流行的系统监控后台，一点都不为过<br><a id="more"></a></p>
+<h3 id="3-特点"><a href="#3-特点" class="headerlink" title="3. 特点"></a>3. 特点</h3><p>prometheus 的主要特点是:</p>
+<ul>
+<li>多维数据模型，可以按照实例，服务，端点和方法之类的维度随意对数据进行切片和切块</li>
+<li>有自己的查询语言 <a href="https://prometheus.io/docs/prometheus/latest/querying/basics/" target="_blank" rel="noopener">PromQL</a>，可以进行非常灵活和多样的查询</li>
+<li>不依赖分布式存储；单个服务器节点是自治的, 可以随时随地部署监控服务</li>
+<li>时间序列收集通过 HTTP 上的拉模型进行</li>
+<li>通过中间网关(pushgateway)支持推送时间序列</li>
+<li>通过服务发现或静态配置发现目标实例</li>
+<li>多种图形和仪表板支持模式</li>
+</ul>
+<h3 id="4-数据采集对象"><a href="#4-数据采集对象" class="headerlink" title="4. 数据采集对象"></a>4. 数据采集对象</h3><p>prometheus 可以采集的对象实例非常广泛，小到一个程序的中间件，大到一个 kubernetes 的集群都可以</p>
+<table>
+<thead>
+<tr>
+<th>对象类型</th>
+<th>采集器</th>
+<th>导出器</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>网络协议</td>
+<td>HTTP、HTTPS、DNS、TCP、ICMP 和 gRPC等</td>
+<td>blackbox_exporter</td>
+</tr>
+<tr>
+<td>网络设备</td>
+<td>路由器、交换机等</td>
+<td>snmp_exporter</td>
+</tr>
+<tr>
+<td>主机节点</td>
+<td>虚拟主机、物理主机等</td>
+<td>node_exporter</td>
+</tr>
+<tr>
+<td>应用</td>
+<td>延迟、错误、QPS、内部状态等</td>
+<td>Prometheus Client</td>
+</tr>
+<tr>
+<td>中间件</td>
+<td>资源用量、服务状态等</td>
+<td>Prometheus Client</td>
+</tr>
+<tr>
+<td>容器</td>
+<td>资源用量、状态等</td>
+<td>cAdvisor</td>
+</tr>
+<tr>
+<td>编排工具</td>
+<td>集群资源用量、调度等</td>
+<td>Kubernetes Components</td>
+</tr>
+</tbody>
+</table>
+<h3 id="5-架构"><a href="#5-架构" class="headerlink" title="5. 架构"></a>5. <a href="https://prometheus.io/docs/introduction/overview/#architecture" target="_blank" rel="noopener">架构</a></h3><p>这边直接套用官网的架构图</p>
+<p><img src="/2022/11/28/prometheus-1-install/1.png" alt=""></p>
+<p>上面的架构其实很好理解，就分为几点，以 <code>prometheus server</code> 为服务端</p>
+<ol>
+<li><code>prometheus server</code> 定期去执行对应的 作业(<code>job</code>) 到对应的有安装类似于 exporters 的实例 (<code>instance</code>) 去拉取数据</li>
+<li>有些生命周期比较短的服务，在执行完之后可以将数据先抛送给 <code>pushgateway</code> 服务，然后 <code>pushgateway</code> 服务会等到 <code>prometheus server</code> 过来拉数据</li>
+<li><code>prometheus server</code> 可以通过类似 <code>k8s</code> 或者 <code>文件服务发现</code> 类似的机制自动发现要拉取的实例 </li>
+<li><code>prometheus server</code> 可以设置监控的 rule 规则，当触发规则的时候，可以将这一台预警抛送到 <code>alertmanager</code> 服务，然后 <code>alertmanager</code> 会去执行各种预警通知手段，比如 mail， 钉钉通知等等</li>
+<li><code>prometheus server</code> 存储的采集数据，可以通过 <code>grafana</code> 等 web ui 来渲染从而得到用户交互良好的监控界面</li>
+</ol>
+<p>基于上面的监控体系，我们就可以自己来搭建内部的 IT 监控体系</p>
+<p><img src="/2022/11/28/prometheus-1-install/2.png" alt=""></p>
+<h2 id="实操安装"><a href="#实操安装" class="headerlink" title="实操安装"></a>实操安装</h2><p>prometheus 有三种安装方式: <a href="https://prometheus.io/docs/prometheus/latest/installation/" target="_blank" rel="noopener">installation</a></p>
+<ul>
+<li>二进制安装</li>
+<li>github 源码安装</li>
+<li>docker 安装</li>
+</ul>
+<p>其实三种都不难， 本次就采用 二进制 安装的方式来处理 (因为 prometheus 是 golang 语言写的，所以直接就是已经编译后的二进制文件了， 对环境几乎不存在依赖)</p>
+<blockquote>
+<p>当然也可以直接用一整套的 docker-compose，包含 prometheus + grafana + pushgateway + alertmanager 一整套。这个在网上有不少，比如这个 <a href="https://github.com/FX-Max/docker-install-everything/blob/master/prometheus/docker-compose.yml" target="_blank" rel="noopener">docker-compose.yml</a>, 因为本教程遵循循循渐进的方式，所以一开始并不会直接安装整个全家桶，而是需要的时候，再去临时安装对应的服务。</p>
+</blockquote>
+<p>所以直接去官网查看要拉取的二进制的版本: <a href="https://prometheus.io/download/" target="_blank" rel="noopener">下载地址</a></p>
+<p>因为我的系统是 CentOS7， 所以选择的是这个版本的二进制文件， <code>2.40.1</code> 版本</p>
+<p><img src="/2022/11/28/prometheus-1-install/3.png" alt=""></p>
+<p>具体安装指令如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"># 下载解压</span><br><span class="line">[root@VM-64-9-centos ~]# cd /usr/local/</span><br><span class="line">[root@VM-64-9-centos local]# wget https://github.com/prometheus/prometheus/releases/download/v2.40.1/prometheus-2.40.1.linux-amd64.tar.gz</span><br><span class="line">[root@VM-64-9-centos local]# tar -zxf prometheus-2.40.1.linux-amd64.tar.gz</span><br><span class="line">[root@VM-64-9-centos local]# mv prometheus-2.40.1.linux-amd64/ prometheus</span><br><span class="line"></span><br><span class="line"># 指定 owner (这边也可以单独创建一个 prometheus 的用户来作为这个目录的拥有者)</span><br><span class="line">[root@VM-64-9-centos local]# chown root.root prometheus -R</span><br><span class="line"></span><br><span class="line"># 创建 system 启动脚本</span><br><span class="line">[root@VM-64-9-centos system]# cat  /usr/lib/systemd/system/prometheus.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=Prometheus</span><br><span class="line">Documentation=https//prometheus.io/</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">ExecStart=/usr/local/prometheus/prometheus --config.file=/usr/local/prometheus/prometheus.yml</span><br><span class="line">ExecStop=/bin/kill -s QUIT $MAINPID</span><br><span class="line">Restart=on-failure</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line"># 设置开启自启动，并启动服务</span><br><span class="line">[root@VM-64-9-centos local]# systemctl daemon-reload</span><br><span class="line">[root@VM-64-9-centos local]# systemctl enable prometheus</span><br><span class="line">[root@VM-64-9-centos local]# systemctl start prometheus</span><br><span class="line"></span><br><span class="line"># 检查端口是否启动，如果启动的话，会有 9090 端口</span><br><span class="line">[root@VM-64-9-centos system]# netstat -anlp  | grep  9090</span><br><span class="line">tcp6       0      0 :::9090                 :::*                    LISTEN      7669/prometheus</span><br></pre></td></tr></table></figure></p>
+<p>上面都完成了之后，就可以进入到 web 控制台了: <code>http://ip:9090</code></p>
+<p><img src="/2022/11/28/prometheus-1-install/4.png" alt=""></p>
+<h2 id="配置文件分析"><a href="#配置文件分析" class="headerlink" title="配置文件分析"></a>配置文件分析</h2><p>我们可以在后台看到当前的 target 监控对象</p>
+<p><img src="/2022/11/28/prometheus-1-install/5.png" alt=""></p>
+<p>可以看到目前的监控对象，只有他自己。那么这个是在哪里配置的呢， 就是在 <code>prometheus.yml</code> 这个配置文件中配置, 而这个配置文件排除掉注释行， 有效内容如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos ~]# cat /usr/local/prometheus/prometheus.yml</span><br><span class="line">global:</span><br><span class="line">  scrape_interval: 15s </span><br><span class="line">  evaluation_interval: 15s </span><br><span class="line"></span><br><span class="line">alerting:</span><br><span class="line">  alertmanagers:</span><br><span class="line">    - static_configs:</span><br><span class="line">        - targets:</span><br><span class="line">         </span><br><span class="line">scrape_configs:</span><br><span class="line">  - job_name: &quot;prometheus&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">      - targets: [&quot;localhost:9090&quot;]</span><br></pre></td></tr></table></figure></p>
+<p>可以看到有分为 3 块节点配置，分别是:</p>
+<ul>
+<li>global 块全局配置</li>
+<li>alerting 块警报配置，但是因为没有配置目标实例 targets， 所以这一块其实也是无效的</li>
+<li>scrape_configs 块抓取配置， 这个也是最核心的，配置要抓取的作业以及对应的实例地址，目前这个配置的 <code>localhost:9090</code> 其实就是 prometheus 这个服务自身， 所以就是自己监控自己</li>
+</ul>
+<p>其实上面还有一些是默认的配置，没有放出来，上面那一份的配置文件，最全的应该是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">  scrape_interval: 15s</span><br><span class="line">  scrape_timeout: 10s</span><br><span class="line">  evaluation_interval: 15s</span><br><span class="line">alerting:</span><br><span class="line">  alertmanagers:</span><br><span class="line">  - follow_redirects: true</span><br><span class="line">    enable_http2: true</span><br><span class="line">    scheme: http</span><br><span class="line">    timeout: 10s</span><br><span class="line">    api_version: v2</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: []</span><br><span class="line">scrape_configs:</span><br><span class="line">- job_name: prometheus</span><br><span class="line">  honor_timestamps: true</span><br><span class="line">  scrape_interval: 15s</span><br><span class="line">  scrape_timeout: 10s</span><br><span class="line">  metrics_path: /metrics</span><br><span class="line">  scheme: http</span><br><span class="line">  follow_redirects: true</span><br><span class="line">  enable_http2: true</span><br><span class="line">  static_configs:</span><br><span class="line">  - targets:</span><br><span class="line">    - localhost:9090</span><br></pre></td></tr></table></figure></p>
+<p>这个可以在 web 控制台的 config 路由看到完整的配置文件:</p>
+<p><img src="/2022/11/28/prometheus-1-install/6.png" alt=""></p>
+<p>而 prometheus 的所有的监控策略都是在这个配置文件上配置的， 可以说非常的简单和粗暴</p>
+<p>接下来我们就看看上面的配置都是啥意思， 首先找到官方的说明文档: <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/" target="_blank" rel="noopener">configuration</a></p>
+<blockquote>
+<p>因为我们安装的 2.40.1 是当前的最新版本，所以直接看最新版本的文档即可</p>
+</blockquote>
+<p>如果要真的了解配置具体信息的话，因为他的配置其实非常的丰富和多样， 每一个小节点都有自己的配置项，直接去官方文档看最快，这边只是简单针对一些小节点做一下描述，以及最常用的节点监控的参数 (<code>scrape_configs</code>) 和 全局参数 (<code>global</code>) 进行说明</p>
+<p>首先所有的小节点如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">  # 默认抓取目标的频率, 默认一分钟，可以后面具体监控的时候再单独指定来覆盖这个全局配置</span><br><span class="line">  [ scrape_interval: &lt;duration&gt; | default = 1m ]</span><br><span class="line">  </span><br><span class="line">  # 抓取请求超时，默认 10s 没有响应就算超时，可以后面具体监控的时候再单独指定来覆盖这个全局配置</span><br><span class="line">  [ scrape_timeout: &lt;duration&gt; | default = 10s ]</span><br><span class="line">  </span><br><span class="line">  # 评估规则的频率，也是默认一分钟</span><br><span class="line">  [ evaluation_interval: &lt;duration&gt; | default = 1m ]</span><br><span class="line"></span><br><span class="line">  # 外部系统的扩展标签，包含远程存储或者警报</span><br><span class="line">  # 外部系统（联合、远程存储、Alertmanager）</span><br><span class="line">  external_labels:</span><br><span class="line">    [ &lt;labelname&gt;: &lt;labelvalue&gt; ... ]</span><br><span class="line">  </span><br><span class="line">  # PromQL 查询记录到的文件</span><br><span class="line">  # 重新加载配置将重新打开文件</span><br><span class="line">  [ query_log_file: &lt;string&gt; ]</span><br><span class="line"></span><br><span class="line"># 规则文件(一个 glob 列表). 相应规则和报警都会从里面读取</span><br><span class="line">rule_files:</span><br><span class="line">  [ - &lt;filepath_glob&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 抓取配置列表</span><br><span class="line">scrape_configs:</span><br><span class="line">  [ - &lt;scrape_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Alerting 指定与 Alertmanager 相关的设置</span><br><span class="line">alerting:</span><br><span class="line">  alert_relabel_configs:</span><br><span class="line">    [ - &lt;relabel_config&gt; ... ]</span><br><span class="line">  alertmanagers:</span><br><span class="line">    [ - &lt;alertmanager_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 与远程写入功能相关的设置</span><br><span class="line">remote_write:</span><br><span class="line">  [ - &lt;remote_write&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 与远程读取功能相关的设置</span><br><span class="line">remote_read:</span><br><span class="line">  [ - &lt;remote_read&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 运行时可重新加载的存储相关设置</span><br><span class="line">storage:</span><br><span class="line">  [ tsdb: &lt;tsdb&gt; ]</span><br><span class="line">  [ exemplars: &lt;exemplars&gt; ]</span><br><span class="line"></span><br><span class="line"># 配置导出跟踪</span><br><span class="line">tracing:</span><br><span class="line">  [ &lt;tracing_config&gt; ]</span><br></pre></td></tr></table></figure></p>
+<p>接下来就是具体抓取的配置了，也就是 <code>scrape_configs</code> 的这个配置节，因为配置项比较多， 所以单独拉出来。</p>
+<p><code>scrape_config</code> 部分指定了一组目标和描述如何抓取它们的参数。 在一般情况下，一个抓取配置指定一个作业。 在高级配置中，这可能会改变。 可以通过 <code>static_configs</code> 参数静态配置目标，也可以使用支持的服务发现机制之一动态发现目标。</p>
+<p>此外，<code>relabel_configs</code> 允许在抓取之前对任何目标及其标签进行高级修改。</p>
+<blockquote>
+<p>relabel 是功能强大的工具，可以在 target 被抓取之前动态重写目标的标签集, 每个 scrape 可以配置多个 relabel ，对不同的标签进行不同的操作, 后面会单独开一个篇章来讲一下这个 relabel 的机制</p>
+</blockquote>
+<p>而 scrape_configs 这个配置节，其实就是一组的 job 的配置，所以我们只需要看 job 的配置参数即可:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br></pre></td><td class="code"><pre><span class="line"># 作业名称</span><br><span class="line">job_name: &lt;job_name&gt;</span><br><span class="line"></span><br><span class="line"># 抓取频率，如果没有单独设置就走全局配置</span><br><span class="line">[ scrape_interval: &lt;duration&gt; | default = &lt;global_config.scrape_interval&gt; ]</span><br><span class="line"></span><br><span class="line"># 超时设置，如果没有单独设置就走全局配置</span><br><span class="line">[ scrape_timeout: &lt;duration&gt; | default = &lt;global_config.scrape_timeout&gt; ]</span><br><span class="line"></span><br><span class="line"># 从目标获取指标的 HTTP 资源路径，没有设置就默认为  /metrics</span><br><span class="line">[ metrics_path: &lt;path&gt; | default = /metrics ]</span><br><span class="line"></span><br><span class="line"># 控制 Prometheus 如何处理标签之间的冲突</span><br><span class="line">[ honor_labels: &lt;boolean&gt; | default = false ]</span><br><span class="line"></span><br><span class="line"># 也是解决标签冲突的配置，当 honor_labels 为 true 的时候，这个配置才有效</span><br><span class="line">[ honor_timestamps: &lt;boolean&gt; | default = true ]</span><br><span class="line"></span><br><span class="line"># 拉取的协议，默认 http</span><br><span class="line">[ scheme: &lt;scheme&gt; | default = http ]</span><br><span class="line"></span><br><span class="line"># 可选的 HTTP URL 参数</span><br><span class="line">params:</span><br><span class="line">  [ &lt;string&gt;: [&lt;string&gt;, ...] ]</span><br><span class="line"></span><br><span class="line"># basic auth 的配置</span><br><span class="line">basic_auth:</span><br><span class="line">  [ username: &lt;string&gt; ]</span><br><span class="line">  [ password: &lt;secret&gt; ]</span><br><span class="line">  [ password_file: &lt;string&gt; ]</span><br><span class="line"></span><br><span class="line"># 请求上设置 `Authorization` 标头</span><br><span class="line">authorization:</span><br><span class="line">  [ type: &lt;string&gt; | default: Bearer ]</span><br><span class="line">  [ credentials: &lt;secret&gt; ]</span><br><span class="line">  [ credentials_file: &lt;filename&gt; ]</span><br><span class="line"></span><br><span class="line"># 可选的 OAuth 2.0 配置</span><br><span class="line"># 不能与basic_auth或授权同时使用</span><br><span class="line">oauth2:</span><br><span class="line">  [ &lt;oauth2&gt; ]</span><br><span class="line"></span><br><span class="line"># 配置抓取请求是否遵循 HTTP 3xx 重定向</span><br><span class="line">[ follow_redirects: &lt;boolean&gt; | default = true ]</span><br><span class="line"></span><br><span class="line"># 是否开启HTTP2</span><br><span class="line">[ enable_http2: &lt;bool&gt; | default: true ]</span><br><span class="line"></span><br><span class="line"># 配置抓取请求的 TLS 设置，https 的时候会用到</span><br><span class="line">tls_config:</span><br><span class="line">  [ &lt;tls_config&gt; ]</span><br><span class="line"></span><br><span class="line"># 可选代理 URL</span><br><span class="line">[ proxy_url: &lt;string&gt; ]</span><br><span class="line"></span><br><span class="line"># Azure 服务发现配置列表</span><br><span class="line">azure_sd_configs:</span><br><span class="line">  [ - &lt;azure_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Consul 服务发现配置列表</span><br><span class="line">consul_sd_configs:</span><br><span class="line">  [ - &lt;consul_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># DigitalOcean 服务发现配置列表</span><br><span class="line">digitalocean_sd_configs:</span><br><span class="line">  [ - &lt;digitalocean_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Docker 服务发现配置列表</span><br><span class="line">docker_sd_configs:</span><br><span class="line">  [ - &lt;docker_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Docker Swarm 服务发现配置列表</span><br><span class="line">dockerswarm_sd_configs:</span><br><span class="line">  [ - &lt;dockerswarm_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># DNS 服务发现配置列表</span><br><span class="line">dns_sd_configs:</span><br><span class="line">  [ - &lt;dns_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># EC2 服务发现配置列表</span><br><span class="line">ec2_sd_configs:</span><br><span class="line">  [ - &lt;ec2_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Eureka 服务发现配置列表</span><br><span class="line">eureka_sd_configs:</span><br><span class="line">  [ - &lt;eureka_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 文件服务发现配置列表</span><br><span class="line">file_sd_configs:</span><br><span class="line">  [ - &lt;file_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># GCE 服务发现配置列表</span><br><span class="line">gce_sd_configs:</span><br><span class="line">  [ - &lt;gce_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Hetzner 服务发现配置列表</span><br><span class="line">hetzner_sd_configs:</span><br><span class="line">  [ - &lt;hetzner_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># HTTP 服务发现配置列表</span><br><span class="line">http_sd_configs:</span><br><span class="line">  [ - &lt;http_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># IONOS 服务发现配置列表</span><br><span class="line">ionos_sd_configs:</span><br><span class="line">  [ - &lt;ionos_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Kubernetes 服务发现配置列表</span><br><span class="line">kubernetes_sd_configs:</span><br><span class="line">  [ - &lt;kubernetes_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Kuma 服务发现配置列表</span><br><span class="line">kuma_sd_configs:</span><br><span class="line">  [ - &lt;kuma_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Lightsail 服务发现配置列表</span><br><span class="line">lightsail_sd_configs:</span><br><span class="line">  [ - &lt;lightsail_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Linode 服务发现配置列表</span><br><span class="line">linode_sd_configs:</span><br><span class="line">  [ - &lt;linode_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Marathon 服务发现配置列表</span><br><span class="line">marathon_sd_configs:</span><br><span class="line">  [ - &lt;marathon_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># AirBnB 的 Nerve 服务发现配置列表</span><br><span class="line">nerve_sd_configs:</span><br><span class="line">  [ - &lt;nerve_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Nomad 服务发现配置列表</span><br><span class="line">nomad_sd_configs:</span><br><span class="line">  [ - &lt;nomad_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># OpenStack 服务发现配置列表</span><br><span class="line">openstack_sd_configs:</span><br><span class="line">  [ - &lt;openstack_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># OVHcloud 服务发现配置列表</span><br><span class="line">ovhcloud_sd_configs:</span><br><span class="line">  [ - &lt;ovhcloud_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># PuppetDB 服务发现配置列表</span><br><span class="line">puppetdb_sd_configs:</span><br><span class="line">  [ - &lt;puppetdb_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Scaleway 服务发现配置列表</span><br><span class="line">scaleway_sd_configs:</span><br><span class="line">  [ - &lt;scaleway_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Zookeeper Serverset 服务发现配置列表</span><br><span class="line">serverset_sd_configs:</span><br><span class="line">  [ - &lt;serverset_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Triton 服务发现配置列表</span><br><span class="line">triton_sd_configs:</span><br><span class="line">  [ - &lt;triton_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># Uyuni 服务发现配置列表</span><br><span class="line">uyuni_sd_configs:</span><br><span class="line">  [ - &lt;uyuni_sd_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 此作业的标记静态配置目标列表</span><br><span class="line">static_configs:</span><br><span class="line">  [ - &lt;static_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 目标重新标记配置列表</span><br><span class="line">relabel_configs:</span><br><span class="line">  [ - &lt;relabel_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 指标重新标记配置列表</span><br><span class="line">metric_relabel_configs:</span><br><span class="line">  [ - &lt;relabel_config&gt; ... ]</span><br><span class="line"></span><br><span class="line"># 抓取 body 体的最大值， 0 代表不限制</span><br><span class="line">[ body_size_limit: &lt;size&gt; | default = 0 ]</span><br><span class="line"># 抓取的样本比例，0 表示没有限制</span><br><span class="line">[ sample_limit: &lt;int&gt; | default = 0 ]</span><br><span class="line"></span><br><span class="line"># 每一个样本所允许的最大标签限制，0 表示没有限制</span><br><span class="line">[ label_limit: &lt;int&gt; | default = 0 ]</span><br><span class="line"></span><br><span class="line"># 标签的 name 最大长度限制，0 表示没有限制</span><br><span class="line">[ label_name_length_limit: &lt;int&gt; | default = 0 ]</span><br><span class="line"></span><br><span class="line"># 标签的 value 最大长度限制，0 表示没有限制</span><br><span class="line">[ label_value_length_limit: &lt;int&gt; | default = 0 ]</span><br><span class="line"></span><br><span class="line"># 改作用所抓取的主机的最大限制，0 表示没有限制</span><br><span class="line">[ target_limit: &lt;int&gt; | default = 0 ]</span><br></pre></td></tr></table></figure></p>
+<p>看似很长，其实有一大部分都是各种第三方服务发现的兼容配置。 绝大部分下都用不到</p>
+<p>job 还有一个次级节点，也就是 static_config 也是经常用到，这个就是要抓取的目标实例， 这个就比较简单，其实就两个配置项，一个是 目标实例 (instances)，一个是 label<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># The targets specified by the static config.</span><br><span class="line">targets:</span><br><span class="line">[ - &apos;&lt;host&gt;&apos; ]</span><br><span class="line"></span><br><span class="line"># Labels assigned to all metrics scraped from the targets.</span><br><span class="line">labels:</span><br><span class="line">[ &lt;labelname&gt;: &lt;labelvalue&gt; ... ]</span><br></pre></td></tr></table></figure></p>
+<p>官方也有提供了一个配置文件的 demo 来参考: <a href="https://github.com/prometheus/prometheus/blob/release-2.40/config/testdata/conf.good.yml" target="_blank" rel="noopener">prometheus 的配置 demo 参考</a></p>
+<p>所以回到刚安装的那个配置文件，我们就可以知道是什么意思:</p>
+<ol>
+<li>首先全局配置了抓取的间隔是 15s，然后默认 10s 没有响应就超时 (这边虽然有配置 evaluation_interval(规则评估间隔) 为 15s，但是因为我们并没有设置 rules，所以这个配置不会用到)。</li>
+<li>同时有设置一个抓取服务对象， 也就是 prometheus 自身， 然后服务所在地址是 <code>localhost:9090</code>， 然后协议是 <code>http</code> ， 抓取的 url 路由是  <code>/metrics</code></li>
+</ol>
+<p>因此在没有设置 basic_auth 或者其他需要验证的情况下，我们就可以自己请求这个地址，来得到数据</p>
+<p><img src="/2022/11/28/prometheus-1-install/7.png" alt=""></p>
+<p>因为 prometheus 这个程序是用 golang 写的，所以可以看到抓取的指标就有很多 golang 的运行指标，比如当前的 go 版本是 1.19.3， 当前相关的 gc 参数之类的。</p>
+<h2 id="安装-node-exporter-来监控主机"><a href="#安装-node-exporter-来监控主机" class="headerlink" title="安装 node_exporter 来监控主机"></a>安装 node_exporter 来监控主机</h2><p>我们知道 prometheus 要抓取的服务，这个服务要暴露一个用于抓取的 url，并且要提供符合相关规则的数据，才能匹配抓取。 这时候有些服务，他会兼容 prometheus 的抓取，会暴露对应的端口和路由以供抓取 (比如 prometheus 自身以及接下来要安装的 grafana 都有暴露)。 但是有些服务没有，对于这些服务，就要借助 exporter 这种客户端包来进行采集，然后等待 prometheus 过来 拉数据 (pull)</p>
+<p>prometheus 有提供了很多的导出器(exporters)用于供 prometheus server 来拉取数据, 具体可以看: <a href="https://prometheus.io/docs/instrumenting/exporters/" target="_blank" rel="noopener">导出器和集成</a></p>
+<p>我们就取一个最常用的监控整个主机的包，也就是 node_exporter, 这个包就是用来收集当前主机的各个信息，然后让 prometheus server 过来拉取这些数据</p>
+<blockquote>
+<p>node_exporter 的作用: 收集操作系统的基本系统，例如cpu，内存，硬盘空间等基本信息，并对外提供api接口用于prometheus查询存储。<br>启动会通过 9100 端口来进行监控数据的暴露，这个端口也可以在启动的时候通过参数指定来修改。</p>
+</blockquote>
+<p>接下来我们安装一下， 一样取一个最新的下载包(一样走二进制包安装的方式)，下载地址是: <a href="https://prometheus.io/download/" target="_blank" rel="noopener">node_exporter</a></p>
+<p><img src="/2022/11/28/prometheus-1-install/8.png" alt=""></p>
+<p>具体安装指令:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"># 下载，加压</span><br><span class="line">[root@VM-64-9-centos ~]# cd /usr/local/</span><br><span class="line">[root@VM-64-9-centos local]# wget https://github.com/prometheus/node_exporter/releases/download/v1.4.0/node_exporter-1.4.0.linux-amd64.tar.gz</span><br><span class="line">[root@VM-64-9-centos local]# tar xf node_exporter-1.4.0.linux-amd64.tar.gz</span><br><span class="line">[root@VM-64-9-centos local]# mv node_exporter-1.4.0.linux-amd64 node_exporter</span><br><span class="line"></span><br><span class="line"># 添加到 system 服务</span><br><span class="line">[root@VM-64-9-centos local]# cat /usr/lib/systemd/system/node_exporter.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=The node_exporter Server</span><br><span class="line">Documentation=https://github.com/prometheus/node_exporter</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">ExecStart=/usr/local/node_exporter/node_exporter</span><br><span class="line">ExecStop=/bin/kill -s QUIT $MAINPID</span><br><span class="line">Restart=on-failure</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line"># 设置服务自启动并且启动服务</span><br><span class="line">[root@VM-64-9-centos local]# systemctl daemon-reload</span><br><span class="line">[root@VM-64-9-centos local]# systemctl enable node_exporter</span><br><span class="line">[root@VM-64-9-centos local]# systemctl start node_exporter</span><br><span class="line">[root@VM-64-9-centos local]# systemctl status node_exporter</span><br><span class="line">● node_exporter.service - The node_exporter Server</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/node_exporter.service; enabled; vendor preset: disabled)</span><br><span class="line">   Active: active (running) since Wed 2022-11-23 17:57:53 CST; 6s ago</span><br><span class="line"></span><br><span class="line"># 查看 9100 端口，这个也是暴露给 prometheus 的采集端口</span><br><span class="line">[root@VM-64-9-centos local]# netstat -anlp | grep  9100</span><br><span class="line">tcp6       0      0 :::9100                 :::*                    LISTEN      2425/node_exporter</span><br></pre></td></tr></table></figure></p>
+<p>安装成功之后， 接下来我们就要将这一个实例添加到 prometheus 的采集 job 中，在 prometheus.yml 最后面补上这个:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- job_name: &quot;node1&quot;</span><br><span class="line">  static_configs:</span><br><span class="line">    - targets: [&quot;localhost:9100&quot;]</span><br></pre></td></tr></table></figure></p>
+<p>最后变成这样子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos local]# cat  prometheus/prometheus.yml</span><br><span class="line"># my global config</span><br><span class="line">global:</span><br><span class="line">  scrape_interval: 15s</span><br><span class="line">  evaluation_interval: 15s </span><br><span class="line"></span><br><span class="line">alerting:</span><br><span class="line">  alertmanagers:</span><br><span class="line">    - static_configs:</span><br><span class="line">        - targets:</span><br><span class="line">          # - alertmanager:9093</span><br><span class="line"></span><br><span class="line">scrape_configs:</span><br><span class="line">  - job_name: &quot;prometheus&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">      - targets: [&quot;localhost:9090&quot;]</span><br><span class="line"></span><br><span class="line">  - job_name: &quot;node1&quot;</span><br><span class="line">    static_configs:</span><br><span class="line">      - targets: [&quot;localhost:9100&quot;]</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>这边要注意格式的缩进，可以使用 promtool 来检测配置文件是否配置正确</p>
+</blockquote>
+<p>然后重启服务让配置生效， 有一种是可以热更新加载配置文件的，后面会说到<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart prometheus.service</span><br></pre></td></tr></table></figure></p>
+<p>这时候就可以在 prometheus 后台的 target 看到多了这一个实例了</p>
+<p><img src="/2022/11/28/prometheus-1-install/9.png" alt=""></p>
+<h2 id="其他小细节"><a href="#其他小细节" class="headerlink" title="其他小细节"></a>其他小细节</h2><h3 id="1-使用-promtool-检测配置文件是否正确"><a href="#1-使用-promtool-检测配置文件是否正确" class="headerlink" title="1. 使用 promtool 检测配置文件是否正确"></a>1. 使用 promtool 检测配置文件是否正确</h3><p>因为 yml 格式的文件对缩进的格式有一定要求，所以建议在修改完配置文件之后， 用 promtool 工具来检测一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos prometheus]# ./promtool check config prometheus.yml </span><br><span class="line">Checking prometheus.yml</span><br><span class="line">  SUCCESS: 1 rule files found</span><br><span class="line"> SUCCESS: prometheus.yml is valid prometheus config file syntax</span><br><span class="line"></span><br><span class="line">Checking test-rule.yml</span><br><span class="line">  SUCCESS: 2 rules found</span><br></pre></td></tr></table></figure></p>
+<p>他不仅可以检测 prometheus.yml 的格式是否正确，连同里面包含的 rule 的 yml 文件也会检测</p>
+<p>因为我用的是 二进制包的方式来安装， 所以这个 promtool 是自带的，跟 prometheus 的二进制文件在同一个目录下，直接用就行了</p>
+<h3 id="2-开启配置文件热更新"><a href="#2-开启配置文件热更新" class="headerlink" title="2. 开启配置文件热更新"></a>2. 开启配置文件热更新</h3><p>每次改完 yml 配置文件，都要重启服务。 但是 prometheus 有提供了一种方式可以通过 http api 的方式来热更新配置文件:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST localhost:9090/-/reload</span><br></pre></td></tr></table></figure></p>
+<p>不过这个配置默认是不开启的, 直接执行会报这个问题:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos prometheus]# curl -X POST localhost:9090/-/reload</span><br><span class="line">Lifecycle API is not enabled.</span><br></pre></td></tr></table></figure></p>
+<p>所以我们要开启 lifecycle api 才行， 这个是在启动的时候， 加上这个参数 <code>--web.enable-lifecycle</code>, 因此我们只需要在原先的 system 的启动文件中的 start 指令补上这个配置就行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ExecStart=/usr/local/prometheus/prometheus --config.file=/usr/local/prometheus/prometheus.yml  --web.enable-lifecycle</span><br></pre></td></tr></table></figure></p>
+<p>这样子就可以实现通过 curl http api 来达到动态加载配置文件的目的，不需要再去重启服务了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本节主要简单描述了一下 prometheus 是什么，为啥要用它， 以及安装了 prometheus server 服务，同时也部署这个 node_exporter 来监控当前这一台主机。</p>
+<p>但是数据是都有抓了， 那么怎么看呢? 去哪里看呢? 以及 prometheus 是怎么抓数据的， 数据模型是什么， 这个我们会在下一节来讲到。</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">什么是普罗米修斯？</a></li>
+<li><a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/" target="_blank" rel="noopener">官方配置文件文档</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/574729059" target="_blank" rel="noopener">基于Prometheus + Grafana搭建IT监控报警最佳实践(1)</a></li>
+<li><a href="https://blog.51cto.com/kaliarch/4921421" target="_blank" rel="noopener">Prometheus + Grafana详解</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/11/28/prometheus-1-install/" title="基于 prometheus 打造监控报警后台 (1) - 初试和安装">http://kebingzao.com/2022/11/28/prometheus-1-install/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/prometheus/" rel="tag"># prometheus</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/11/01/sentry-4/" rel="next" title="bug 追踪系统 Sentry (4) -- 关联 sourceMap">
+                <i class="fa fa-chevron-left"></i> bug 追踪系统 Sentry (4) -- 关联 sourceMap
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/11/28/prometheus-2-metrics/" rel="prev" title="基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型">
+                基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">301</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#prometheus-介绍"><span class="nav-number">1.</span> <span class="nav-text">prometheus 介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-诞生背景"><span class="nav-number">1.1.</span> <span class="nav-text">1. 诞生背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-什么是-prometheus"><span class="nav-number">1.2.</span> <span class="nav-text">2. 什么是 prometheus</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-特点"><span class="nav-number">1.3.</span> <span class="nav-text">3. 特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-数据采集对象"><span class="nav-number">1.4.</span> <span class="nav-text">4. 数据采集对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-架构"><span class="nav-number">1.5.</span> <span class="nav-text">5. 架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实操安装"><span class="nav-number">2.</span> <span class="nav-text">实操安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置文件分析"><span class="nav-number">3.</span> <span class="nav-text">配置文件分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装-node-exporter-来监控主机"><span class="nav-number">4.</span> <span class="nav-text">安装 node_exporter 来监控主机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他小细节"><span class="nav-number">5.</span> <span class="nav-text">其他小细节</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-使用-promtool-检测配置文件是否正确"><span class="nav-number">5.1.</span> <span class="nav-text">1. 使用 promtool 检测配置文件是否正确</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-开启配置文件热更新"><span class="nav-number">5.2.</span> <span class="nav-text">2. 开启配置文件热更新</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/11/28/prometheus-1-install/';
+          this.page.identifier = '2022/11/28/prometheus-1-install/';
+          this.page.title = '基于 prometheus 打造监控报警后台 (1) - 初试和安装';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

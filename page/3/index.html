@@ -307,6 +307,530 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/11/02/golang-mod-replace/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/11/02/golang-mod-replace/" itemprop="url">记一次 go module 因为内部公共包使用 replace 导致当前程序拉取公共包最新版本失败的情况</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-11-02T13:12:12+08:00">
+                2021-11-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang相关/" itemprop="url" rel="index">
+                    <span itemprop="name">golang相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/11/02/golang-mod-replace/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/11/02/golang-mod-replace/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/11/02/golang-mod-replace/" class="leancloud_visitors" data-flag-title="记一次 go module 因为内部公共包使用 replace 导致当前程序拉取公共包最新版本失败的情况">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>事情是这样子的， 我们现在 golang 版本是 <code>1.13</code>, 并且采用了 Go Module 作为第三方包管理工具: <a href="/2020/02/20/go-module/" title="初试 Go Module">初试 Go Module</a>, 正常情况下我们有一个内部的公共库，比如叫 igong， 存放一些公共抽象出来的方法， 供各个程序去调用。</p>
+<p>有一次，我正常给 igong 包打 tag 之后，tag 版本号为 <code>v1.8.7</code>, 这时候我们的具体程序去更新这个 igong 包的时候， 却报错了:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">F:\example_code\gopush-air&gt;go get -u gitlab.example.com/example-utils/iGong</span><br><span class="line">go: downloading gitlab.example.com/example-utils/iGong v1.8.7</span><br><span class="line">go: extracting gitlab.example.com/example-utils/iGong v1.8.7</span><br><span class="line">go get: gitlab.example.com/example-utils/iGong@v1.8.7 requires</span><br><span class="line">        github.com/qiniu/bytes@v0.0.0-00010101000000-000000000000: invalid version: git fetch -f https://github.com/qiniu/bytes refs/heads/*:refs/heads/* refs/tags/*:refs/tags/* in F:\example_code\go\pkg\mod\cache\vcs\9343a7564b</span><br><span class="line">b508f7f517b255feef5381fea307ce6fb5426727e018b089363563: exit status 128:</span><br><span class="line">        fatal: could not read Username for &apos;https://github.com&apos;: terminal prompts disabled</span><br></pre></td></tr></table></figure>
+<p>发现在更新这个 igong 包版本的时候， 获取某一个依赖的时候， 一直报错。 好像一直去下载一个不存在的资源 <code>https://github.com/qiniu/bytes</code>， 这个包在 github 上已经找不到了。</p>
+<p>后面去 igong 包看了一下，发现 igong 项目的 go.mod 确实是有间接引用这个包，不过之前是因为这个包已经不在 github 上面了， 所以就用 replace 将下载地址引入到我们自己的内部私有库，让其可以下载并应用:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">replace github.com/qiniu/bytes =&gt; gitlab.example.com/qiniu/bytes v0.0.0-20191012100200-92558a444c07</span><br></pre></td></tr></table></figure></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2021/11/02/golang-mod-replace/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/10/21/nginx-proxy-wss-https/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/10/21/nginx-proxy-wss-https/" itemprop="url">nginx 转发代理 wss 和 https (目标程序是 ws 和 http)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-10-21T19:25:35+08:00">
+                2021-10-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/10/21/nginx-proxy-wss-https/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/10/21/nginx-proxy-wss-https/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/10/21/nginx-proxy-wss-https/" class="leancloud_visitors" data-flag-title="nginx 转发代理 wss 和 https (目标程序是 ws 和 http)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有用户反馈我们的一个服务有问题， 查了一下，发现我们的一个 wss 的长连接服务被挡掉， 后面原因是因为这个 wss 的长连接服务的端口因为不是常见端口，导致被有些公司内网的路由策略屏蔽掉了。 而如果是常见的 443 的 tls 端口的话， 大部分都是跟 80 一样默认开放的，也就不会有这些问题。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\Marco\Downloads\paping_1.5.5_x86_windows\paping_1.5.5_x86_windows&gt;paping.exe 192.xx.xx.162 -p 9088 -c 4</span><br><span class="line">paping v1.5.5 - Copyright (c) 2011 Mike Lovell</span><br><span class="line"></span><br><span class="line">Connecting to 192.xx.xx.162 on TCP 9088:</span><br><span class="line"></span><br><span class="line">Connection timed out</span><br><span class="line">Connection timed out</span><br><span class="line">Connection timed out</span><br><span class="line">Connection timed out</span><br><span class="line"></span><br><span class="line">Connection statistics:</span><br><span class="line">        Attempted = 4, Connected = 0, Failed = 4 (100.00%)</span><br><span class="line">Approximate connection times:</span><br><span class="line">        Minimum = 0.00ms, Maximum = 0.00ms, Average = 0.00ms</span><br></pre></td></tr></table></figure>
+<p>而且还有遇到过 联通/电信的物联网卡的问题, 这种卡对 tls 加密通道以及对应走的端口其实是有限制的:</p>
+<ol>
+<li>联通的物联网卡， 如果服务用的是 tls 加密的， 那么端口只能是 443， 但是他不需要强制要走 tls 加密通道</li>
+<li>电信的物联网卡， 服务要强制走 tls 加密通道， 不过端口不会限制只能走 443。 </li>
+</ol>
+<p>但是问题来了，因为我们的这种 wss 的长连接服务比较多，有时候一个服务器就要部署好几个， 而一台服务器的 443 端口只能被一个程序接管， 如果这个 wss 程序接管了， 那么同一台服务器的另一个 wss 程序就无法接管了。</p>
+<p>然后就想到我们的一台服务器同时部署多个 https API 服务， 然后统一由 nginx 这个程序来托管并代理 443 端口。 这样子就大家都可以用 443 端口的 https 服务了。 因此 wss 应该也是类似的。</p>
+<p>所以我们本次实验要实现两个效果:</p>
+<ol>
+<li>本地服务跑 http 服务， 然后 nginx 起 https 服务，代理并且转发到 本地的 http 服务</li>
+<li>本地服务跑 ws 服务， 然后 nginx 起 wss 服务，代理并且转发到 本地的 ws 服务</li>
+</ol>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2021/10/21/nginx-proxy-wss-https/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/10/11/chrome-private-cors-error/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/10/11/chrome-private-cors-error/" itemprop="url">chrome 94 之后 http 远程站点请求 ip 地址报 CORS 错误</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-10-11T11:55:24+08:00">
+                2021-10-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端相关/" itemprop="url" rel="index">
+                    <span itemprop="name">前端相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/10/11/chrome-private-cors-error/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/10/11/chrome-private-cors-error/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/10/11/chrome-private-cors-error/" class="leancloud_visitors" data-flag-title="chrome 94 之后 http 远程站点请求 ip 地址报 CORS 错误">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间，有用户反馈 chrome 最新版本，无法在我们的远程站点连接本地的设备。 后面查了一下， 发现控制台有报了这个错误:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Access to script at &apos;http://192.168.197.81:8888/sdctl/comm/ping/?product=intl&amp;des=1&amp;callback=_jqjsp&amp;_1633681289908=&apos; from origin &apos;http://example.com&apos; has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `private`.</span><br></pre></td></tr></table></figure></p>
+<p>而且有些用户的 chrome 更奇葩， 请求 google 机器人校验的验证码的 api.js 也报了这个错:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">index.html:1 Access to script at &apos;https://www.recaptcha.net/recaptcha/api.js&apos; from origin &apos;http://example.com&apos; has been blocked by CORS policy: The request client is not a secure context and the resource is in more-private address space `local`.</span><br></pre></td></tr></table></figure></p>
+<h2 id="排查"><a href="#排查" class="headerlink" title="排查"></a>排查</h2><p>后面查了一下， 是 chrome 新版本 94 的问题， 他不允许线上远端的站点请求 本地local 的地址，比如 ip 地址，所以会报 CORS 错误。 </p>
+<p>但是为啥我们的一些 chrome 94 没有问题， 猜测应该是 A/B 测的原因。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2021/10/11/chrome-private-cors-error/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/09/09/redirect-safe-url/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3239,514 +3763,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/02/22/cookie-samesite/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/22/cookie-samesite/" itemprop="url">chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-22T18:01:30+08:00">
-                2021-02-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/前端相关/" itemprop="url" rel="index">
-                    <span itemprop="name">前端相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/22/cookie-samesite/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/02/22/cookie-samesite/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/02/22/cookie-samesite/" class="leancloud_visitors" data-flag-title="chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有用户遇到一个问题，就是在访问一个我们的站点的时候，https 模式下没有问题，但是用 http 模式下(因为某些特殊原因，要保留站点的 http 模式的访问)，就会出现接口报错的情况，导致用不了。</p>
-<p>而且都是 chrome 才有， 其他浏览器都正常， 而且 chrome 的版本还是比较新的， 87 或者 88。 我自己本身 86 好像挺正常的。 为了验证一下，也将 chrome 版本也升级到 88， 结果还真重现了。</p>
-<h2 id="SameSite-的问题"><a href="#SameSite-的问题" class="headerlink" title="SameSite 的问题"></a>SameSite 的问题</h2><p>发现是登录接口的时候，原本要写进去的 cookie 虽然写了，但是再访问其他接口的时候，这些 cookie 根本不会带过去， 这样就导致没办法进行 cookie 校验了。 因为 cookie 在跨域的时候，并不会随着请求过去。<br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/02/22/cookie-samesite/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/02/03/request-use-gzip/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/03/request-use-gzip/" itemprop="url">http 请求的时候使用 gzip 压缩来减少流量消耗</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-03T11:57:39+08:00">
-                2021-02-03
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
-                    <span itemprop="name">nginx相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/03/request-use-gzip/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/02/03/request-use-gzip/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/02/03/request-use-gzip/" class="leancloud_visitors" data-flag-title="http 请求的时候使用 gzip 压缩来减少流量消耗">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们知道一般无论是 CDN 还是 服务端的接口(<a href="/2018/06/10/nginx-gzip/" title="nginx 配置gzip以优化站点资源加载速度">nginx 配置gzip以优化站点资源加载速度</a>)，在响应返回的时候，都会配置 gzip 来压缩响应数据，以达到减少体积，加快网络传输的效能。 但是 gzip 压缩只用于 response 的响应数据，一般来说针对 pc 端的站点来说，足够了。</p>
-<p>但是有时候针对手机 app 来说，光是 response 用 gzip 压缩还不够， 因为 request 请求的时候，如果有时候 body 体带上很多数据的话，还是会导致体积很大，从而消耗流量。 手机的流量可比 pc 的流量贵多了。 因此对于有些比较注重流量消耗的 app 来说，最好也要做到 request 请求的时候，也用上 gzip 来压缩数据，然后服务端在 nginx 或者程序的网关那边，再根据请求头 <code>Content-Encoding</code> 是否为 <code>gzip</code> 来判断是否要对请求的数据进行 gzip 解压缩。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/02/03/request-use-gzip/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/01/26/gzip-min-length/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/01/26/gzip-min-length/" itemprop="url">gzip 配置 gzip_min_length 来判断 response 是否要 gzip 压缩</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-01-26T13:29:27+08:00">
-                2021-01-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
-                    <span itemprop="name">nginx相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/01/26/gzip-min-length/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/01/26/gzip-min-length/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/01/26/gzip-min-length/" class="leancloud_visitors" data-flag-title="gzip 配置 gzip_min_length 来判断 response 是否要 gzip 压缩">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前服务端的 nginx 服务有配置 gzip 压缩: <a href="/2018/06/10/nginx-gzip/" title="nginx 配置gzip以优化站点资源加载速度">nginx 配置gzip以优化站点资源加载速度</a>, 但是在之前有一次服务优化中， 发现同一个服务的不同接口的请求，有些 response 有 gzip 压缩，有些 response 没有 gzip 压缩 ??</p>
-<p><img src="/2021/01/26/gzip-min-length/1.png" alt="1"> </p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/01/26/gzip-min-length/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3801,7 +3817,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">301</span>
+                  <span class="site-state-item-count">304</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3823,7 +3839,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">77</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -3870,7 +3886,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

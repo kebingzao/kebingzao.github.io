@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="aws,s3,ses,dynamodb,aws-cli," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前段时间在项目的安全审计中，有发现了一个关于后端开发中，使用 aws sdk 的一个安全隐患，就是后端的一些项目中，有用到了 aws 的一些功能，包含 s3，ses，dynamodb 等，而这些功能用的 key 都是同一个 key， 都是属于在 aws 后台创建的 develop 用户。 这个 develop 用户在 aws 后台具有以下的策略权限(policy):  dynamodb 功能的">
+<meta name="keywords" content="aws,s3,ses,dynamodb,aws-cli">
+<meta property="og:type" content="article">
+<meta property="og:title" content="后端开发针对 aws 用户权限进行细分和设置 ip 白名单">
+<meta property="og:url" content="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前段时间在项目的安全审计中，有发现了一个关于后端开发中，使用 aws sdk 的一个安全隐患，就是后端的一些项目中，有用到了 aws 的一些功能，包含 s3，ses，dynamodb 等，而这些功能用的 key 都是同一个 key， 都是属于在 aws 后台创建的 develop 用户。 这个 develop 用户在 aws 后台具有以下的策略权限(policy):  dynamodb 功能的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/1.png">
+<meta property="og:image" content="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/2.png">
+<meta property="og:image" content="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/3.png">
+<meta property="og:image" content="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/4.png">
+<meta property="og:image" content="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/5.png">
+<meta property="og:image" content="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/6.png">
+<meta property="og:updated_time" content="2023-01-28T06:04:11.510Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="后端开发针对 aws 用户权限进行细分和设置 ip 白名单">
+<meta name="twitter:description" content="前言前段时间在项目的安全审计中，有发现了一个关于后端开发中，使用 aws sdk 的一个安全隐患，就是后端的一些项目中，有用到了 aws 的一些功能，包含 s3，ses，dynamodb 等，而这些功能用的 key 都是同一个 key， 都是属于在 aws 后台创建的 develop 用户。 这个 develop 用户在 aws 后台具有以下的策略权限(policy):  dynamodb 功能的">
+<meta name="twitter:image" content="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/"/>
+
+
+
+
+
+  <title>后端开发针对 aws 用户权限进行细分和设置 ip 白名单 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">后端开发针对 aws 用户权限进行细分和设置 ip 白名单</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-01-18T13:36:05+08:00">
+                2023-01-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">aws 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/01/18/aws-policy-deny-ip/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/01/18/aws-policy-deny-ip/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/01/18/aws-policy-deny-ip/" class="leancloud_visitors" data-flag-title="后端开发针对 aws 用户权限进行细分和设置 ip 白名单">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间在项目的安全审计中，有发现了一个关于后端开发中，使用 aws sdk 的一个安全隐患，就是后端的一些项目中，有用到了 aws 的一些功能，包含 s3，ses，dynamodb 等，而这些功能用的 key 都是同一个 key， 都是属于在 aws 后台创建的 develop 用户。</p>
+<p>这个 develop 用户在 aws 后台具有以下的策略权限(policy):</p>
+<ul>
+<li>dynamodb 功能的所有权限 –&gt; <code>AmazonDynamoDBFullAccess</code></li>
+<li>s3 功能的所有权限 –&gt; <code>AmazonS3FullAccess</code></li>
+<li>ses 功能的所有权限 – <code>AmazonSESFullAccess</code></li>
+</ul>
+<p>因为这个 develop 用户拥有的权限太大了， 一旦 key+secret 泄露了， 黑客就可以通过类似于 aws-cli 的命令行工具来做一些不好的事情，比如:</p>
+<ul>
+<li>往 s3 上的 bucket 随意上传某些木马文件</li>
+<li>修改 s3 bucket 的 acl 权限，将所有的 bucket 都改成公开桶，直接暴露在外网，或者给自己插入一个另一个账号的登录后门</li>
+<li>直接使用 ses 发送垃圾邮件，然后受到投诉过多之后，就会可能导致这个 aws 账号被封禁</li>
+<li>删除 dynamodb 的记录或者表</li>
+</ul>
+<p>因此我们必须在后端开发中，根据具体项目所使用到的 aws 的功能，尽可能做最小化的权限分配，并且要设置请求的 ip 白名单，这样子一来，哪怕不小心这个用户的 key+secret 泄露了，我们也不用担心会造成太大的影响。<br><a id="more"></a><br>当然最重要的是，这些用于后端开发的 key，一定要定时更换，最好是 3 个月或者 6 个月替换一次，这样子可以更加的安全。</p>
+<p>接下来我们做一下将原先的 develop 用户的权限，拆分开来，拆分成这 3 个用户来替换:</p>
+<ol>
+<li><code>develop_uc</code> -&gt; 承载 s3 的上传下载 (正常公开桶的下载不需要特意设置权限，但是如果是未公开桶的下载，尤其是有过期时间的那种，是需要走 key+secret 的签名然后生成下载链接的)</li>
+<li><code>develop_ses</code> -&gt; 承载邮件的发送</li>
+<li><code>develop_dynamodb</code> -&gt; 承载 dynamodb 相关功能</li>
+</ol>
+<p>然后最好各自都要设置 ip 白名单的策略，防止一旦真的泄露的，也可以让黑客无法访问</p>
+<p>接下来各自实践一下这个过程，并且通过 aws-cli 来模拟接口行为。</p>
+<h2 id="接入-develop-ses-用户"><a href="#接入-develop-ses-用户" class="headerlink" title="接入 develop_ses 用户"></a>接入 <code>develop_ses</code> 用户</h2><p>开始我们直接在 aws 的后台创建一个叫 <code>develop_ses</code> 的用户，并且只赋予 ses 的策略权限 (这个策略是本身 aws 有提供的，不需要我们自己建)</p>
+<p><img src="/2023/01/18/aws-policy-deny-ip/1.png" alt=""></p>
+<p>接下来我们就可以用 aws-cli 工具测试一下 (首先要先通过 <code>aws configure</code> 来配置这个用户的 key+secret)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># 发送邮件</span><br><span class="line">$ aws ses send-email --from no-reply@example.com --to kebingzao@gmail.com --subject hello --text &quot;hello zach2&quot;</span><br><span class="line">&#123;</span><br><span class="line">    &quot;MessageId&quot;: &quot;0100018580c912a1-eef4adcf-3a9a-4e01-b0de-7afe0a628950-000000&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 获取某一个 bucket 的 policy 策略</span><br><span class="line">$  aws s3api get-bucket-policy --bucket feedback-example</span><br><span class="line">An error occurred (AccessDenied) when calling the GetBucketPolicy operation: Access Denied</span><br><span class="line"></span><br><span class="line"># 列出 s3 的所有 bucket</span><br><span class="line">$ aws s3 ls</span><br><span class="line">An error occurred (AccessDenied) when calling the ListBuckets operation: Access Denied</span><br><span class="line"></span><br><span class="line"># 获取某一个 bucket 的 acl 权限</span><br><span class="line">$ aws s3api get-bucket-acl --bucket feedback-example</span><br><span class="line">An error occurred (AccessDenied) when calling the GetBucketAcl operation: Access Denied</span><br><span class="line"></span><br><span class="line"># 删除某一个bucket的某一个对象</span><br><span class="line">$ aws s3api delete-object --bucket test-kbz --key zach1.jpg</span><br><span class="line">An error occurred (AccessDenied) when calling the DeleteObject operation: Access Denied</span><br></pre></td></tr></table></figure></p>
+<p>可以看到除了发送邮件可以之外， 其他的 s3 的操作，都没有权限， 这个是对的。</p>
+<h3 id="附加-ip-白名单策略，限制该角色的操作-ip"><a href="#附加-ip-白名单策略，限制该角色的操作-ip" class="headerlink" title="附加 ip 白名单策略，限制该角色的操作 ip"></a>附加 ip 白名单策略，限制该角色的操作 ip</h3><p>接下来我们在 aws 后台添加一个策略，叫做 <code>ses_deny_ip</code>, 用来限制使用 ses 功能的角色的 ip 白名单</p>
+<p><img src="/2023/01/18/aws-policy-deny-ip/2.png" alt=""></p>
+<p>上面的白名单，并没有包含我的本机测试的外网 ip，所以就可以看到，之前可以成功发送的邮件，现在也都失败，提示没有权限<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ aws ses send-email --from no-reply@example.com --to kebingzao@gmail.com --subject hello --text &quot;hello zach4&quot;</span><br><span class="line">An error occurred (AccessDenied) when calling the SendEmail operation: User `arn:aws:iam::5166688837:user/develop_ses&apos; is not authorized to perform `ses:SendEmail&apos; on resource `arn:aws:ses:us-east-1:5166688837:identity/no-reply@example.com&apos;</span><br></pre></td></tr></table></figure></p>
+<p>所以最后赋予这个 <code>develop_ses</code> 用户的策略就是这两个:</p>
+<p><img src="/2023/01/18/aws-policy-deny-ip/3.png" alt=""></p>
+<p>这两个策略，一个是权限策略，表示这个角色只能用 ses 的功能， 一个是限制策略， 表示只有 ip 白名单内的 ip 登录这个用户，才能使用</p>
+<h2 id="接入-develop-dynamodb-用户"><a href="#接入-develop-dynamodb-用户" class="headerlink" title="接入 develop_dynamodb 用户"></a>接入 <code>develop_dynamodb</code> 用户</h2><p>跟之前的做法一样， 我们一样建了 <code>develop_dynamodb</code> 用户，然后并赋予了两个策略，一个表示这个角色只能使用 dynamodb 的功能， 一个是表示只有 ip 白名单内的 ip 登录这个用户，才能使用</p>
+<p><img src="/2023/01/18/aws-policy-deny-ip/4.png" alt=""></p>
+<p>类似的情况，上面的 <code>develop_ses</code> 其实已经有描述了，这边不再赘述， 贴出使用 aws-cli 的测试结果<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br></pre></td><td class="code"><pre><span class="line"># 没有 s3 bucket 的索引权限</span><br><span class="line">$ aws s3 ls</span><br><span class="line">An error occurred (AccessDenied) when calling the ListBuckets operation: Access Denied</span><br><span class="line"></span><br><span class="line"># 也没有某一个 bucket 的删除 object 权限</span><br><span class="line">$ aws s3api delete-object --bucket test-kbz --key zach1.jpg</span><br><span class="line">An error occurred (AccessDenied) when calling the DeleteObject operation: Access Denied</span><br><span class="line"></span><br><span class="line"># 也没有 ses 的发送权限</span><br><span class="line">$ aws ses send-email --from no-reply@example.com --to kebingzao@gmail.com --subject hello --text &quot;hello zach2&quot;</span><br><span class="line">An error occurred (AccessDenied) when calling the SendEmail operation: User `arn:aws:iam::5166688837:user/develop_dynamodb&apos; is not authorized to perform `ses:SendEmail&apos; on resource `arn:aws:ses:us-west-1:5166688837:identity/kebingzao@gmail.com&apos;</span><br><span class="line"></span><br><span class="line"># 根据 uid 查询某一个用户的所有记录</span><br><span class="line">$ aws dynamodb query --table-name team_msg --key-condition-expression &quot;#kn0=:kv0&quot; --expression-attribute-names &apos;&#123;&quot;#kn0&quot;: &quot;uid&quot;&#125;&apos; --expression-attribute-values &apos;&#123;&quot;:kv0&quot;: &#123;&quot;N&quot;: &quot;25677003&quot;&#125;&#125;&apos; --return-consumed-capacity TOTAL</span><br><span class="line">&#123;</span><br><span class="line">    &quot;Items&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;is_sent&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;1&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;fid&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;2467749&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;msg&quot;: &#123;</span><br><span class="line">                &quot;S&quot;: &quot;66666&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;collect_from&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;2&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;app_ver&quot;: &#123;</span><br><span class="line">                &quot;S&quot;: &quot;3.6.4.0&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;pid&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;1557891486797&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;device_type&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;2&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;nick_name&quot;: &#123;</span><br><span class="line">                &quot;S&quot;: &quot;ffff&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;msg_type&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;2&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;uid&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;25677003&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;create_date&quot;: &#123;</span><br><span class="line">                &quot;S&quot;: &quot;2019-05-15 03:38:06&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        ... 省略后面 9 条记录</span><br><span class="line">    ],</span><br><span class="line">    &quot;Count&quot;: 10,</span><br><span class="line">    &quot;ScannedCount&quot;: 10,</span><br><span class="line">    &quot;ConsumedCapacity&quot;: &#123;</span><br><span class="line">        &quot;TableName&quot;: &quot;team_msg&quot;,</span><br><span class="line">        &quot;CapacityUnits&quot;: 0.5</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 查询，根据 uid 和 pid 查询某一条记录</span><br><span class="line">$ aws dynamodb query --table-name team_msg --key-condition-expression &quot;#kn0=:kv0 AND #kn1=:kv1&quot; --expression-attribute-names &apos;&#123;&quot;#kn0&quot;: &quot;uid&quot;, &quot;#kn1&quot;: &quot;pid&quot;&#125;&apos; --expression-attribute-values &apos;&#123;&quot;:kv0&quot;: &#123;&quot;N&quot;: &quot;25677003&quot;&#125;, &quot;:kv1&quot;: &#123;&quot;N&quot;: &quot;1674010228810&quot;&#125;&#125;&apos; --return-consumed-capacity TOTAL</span><br><span class="line">&#123;</span><br><span class="line">    &quot;Items&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;is_sent&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;1&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;fid&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;2467749&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;collect_from&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;2&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;app_ver&quot;: &#123;</span><br><span class="line">                &quot;S&quot;: &quot;3.7.0.0&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;pid&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;1674010228810&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;device_type&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;2&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;nick_name&quot;: &#123;</span><br><span class="line">                &quot;S&quot;: &quot;ffff&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;msg_type&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;1&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;uid&quot;: &#123;</span><br><span class="line">                &quot;N&quot;: &quot;25677003&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;create_date&quot;: &#123;</span><br><span class="line">                &quot;S&quot;: &quot;2023-01-18 02:50:28&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;file_key&quot;: &#123;</span><br><span class="line">                &quot;S&quot;: &quot;25677003_2467749_1674010223259191901.png&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    &quot;Count&quot;: 1,</span><br><span class="line">    &quot;ScannedCount&quot;: 1,</span><br><span class="line">    &quot;ConsumedCapacity&quot;: &#123;</span><br><span class="line">        &quot;TableName&quot;: &quot;team_msg&quot;,</span><br><span class="line">        &quot;CapacityUnits&quot;: 0.5</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 使用 get-item 获取某条记录， 但是一定要传 分区键(uid) 和 排序键(pid)</span><br><span class="line">$ aws dynamodb get-item --table-name team_msg --key &apos;&#123;&quot;uid&quot;: &#123;&quot;N&quot;: &quot;25677003&quot;&#125;, &quot;pid&quot;: &#123;&quot;N&quot;: &quot;1674010228810&quot;&#125;&#125;&apos; --return-consumed-capacity TOTAL                                                                                                     &#123;</span><br><span class="line">    &quot;Item&quot;: &#123;</span><br><span class="line">        &quot;is_sent&quot;: &#123;</span><br><span class="line">            &quot;N&quot;: &quot;1&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;fid&quot;: &#123;</span><br><span class="line">            &quot;N&quot;: &quot;2467749&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;collect_from&quot;: &#123;</span><br><span class="line">            &quot;N&quot;: &quot;2&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;app_ver&quot;: &#123;</span><br><span class="line">            &quot;S&quot;: &quot;3.7.0.0&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;pid&quot;: &#123;</span><br><span class="line">            &quot;N&quot;: &quot;1674010228810&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;device_type&quot;: &#123;</span><br><span class="line">            &quot;N&quot;: &quot;2&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;nick_name&quot;: &#123;</span><br><span class="line">            &quot;S&quot;: &quot;ffff&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;msg_type&quot;: &#123;</span><br><span class="line">            &quot;N&quot;: &quot;1&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;uid&quot;: &#123;</span><br><span class="line">            &quot;N&quot;: &quot;25677003&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;create_date&quot;: &#123;</span><br><span class="line">            &quot;S&quot;: &quot;2023-01-18 02:50:28&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;file_key&quot;: &#123;</span><br><span class="line">            &quot;S&quot;: &quot;25677003_2467749_1674010223259191901.png&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;ConsumedCapacity&quot;: &#123;</span><br><span class="line">        &quot;TableName&quot;: &quot;team_msg&quot;,</span><br><span class="line">        &quot;CapacityUnits&quot;: 0.5</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 如果执行 ip 不在白名单之内的话，就会报错</span><br><span class="line">$ aws dynamodb get-item --table-name team_msg --key &apos;&#123;&quot;uid&quot;: &#123;&quot;N&quot;: &quot;46783674&quot;&#125;, &quot;fid&quot;: &#123;&quot;N&quot;: &quot;2467749&quot;&#125;&#125;&apos; --return-consumed-capacity TOTAL</span><br><span class="line">An error occurred (AccessDeniedException) when calling the GetItem operation: User: arn:aws:iam::5166688837:user/develop_dynamodb is not authorized to perform: dynamodb:GetItem on resource: arn:aws:dynamodb:us-west-1:5166688837:table/team_msg with an explicit deny in an identity-based policy</span><br></pre></td></tr></table></figure></p>
+<p>添加的 ip 白名单的策略:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    &quot;Version&quot;: &quot;2012-10-17&quot;,</span><br><span class="line">    &quot;Statement&quot;: &#123;</span><br><span class="line">        &quot;Effect&quot;: &quot;Deny&quot;,</span><br><span class="line">        &quot;Action&quot;: [</span><br><span class="line">            &quot;*&quot;</span><br><span class="line">        ],</span><br><span class="line">        &quot;Resource&quot;: &quot;*&quot;,</span><br><span class="line">        &quot;Condition&quot;: &#123;</span><br><span class="line">            &quot;NotIpAddress&quot;: &#123;</span><br><span class="line">                &quot;aws:SourceIp&quot;: [</span><br><span class="line">                    &quot;43.xx.xx.xx/32&quot;, </span><br><span class="line">                    &quot;49.xx.xx.xx/32&quot;</span><br><span class="line">                ]</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="接入-develop-uc-用户"><a href="#接入-develop-uc-用户" class="headerlink" title="接入 develop_uc 用户"></a>接入 <code>develop_uc</code> 用户</h2><p>这个用户主要用于承担某些 s3 bucket 的上传下载行为，因此我们要做到最小化的策略管控，不能直接给 s3 的所有权限，用到几个 bucket，我们就给几个 bucket，用到哪些 api，我们就只给这几个 api， 多一个都不行。</p>
+<p>通过 <a href="https://awspolicygen.s3.amazonaws.com/policygen.html" target="_blank" rel="noopener">AWS Policy Generator</a>, 我们可以很快生成这个策略:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;Id&quot;: &quot;Policy1673424131664&quot;,</span><br><span class="line">  &quot;Version&quot;: &quot;2012-10-17&quot;,</span><br><span class="line">  &quot;Statement&quot;: [</span><br><span class="line">    &#123;</span><br><span class="line">      &quot;Sid&quot;: &quot;Stmt1673424121459&quot;,</span><br><span class="line">      &quot;Action&quot;: [</span><br><span class="line">        &quot;s3:GetObject&quot;,</span><br><span class="line">        &quot;s3:GetObjectAcl&quot;,</span><br><span class="line">        &quot;s3:GetObjectAttributes&quot;,</span><br><span class="line">        &quot;s3:PutObject&quot;,</span><br><span class="line">        &quot;s3:PutObjectAcl&quot;</span><br><span class="line">      ],</span><br><span class="line">      &quot;Effect&quot;: &quot;Allow&quot;,</span><br><span class="line">      &quot;Resource&quot;: [</span><br><span class="line">        &quot;arn:aws:s3:::mybucket-1/*&quot;,</span><br><span class="line">        &quot;arn:aws:s3:::mybucket-2/*&quot;,</span><br><span class="line">        &quot;arn:aws:s3:::mybucket-3/*&quot;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>他的这个 resource 可以非常细，甚至可以定位到某一个 bucket 的某一个目录，或者某一个 object 对象，只不过对于本例来说，只给这个 bucket 就够了</p>
+</blockquote>
+<blockquote>
+<p>action 方面，一般我们就是用于上传和生成受限制的下载链接，所以上述这几个 api 其实就够了，一些很危险的比如 <code>put-bucket-acl</code> 这种，绝对不能给</p>
+</blockquote>
+<p>接下来试一下策略结果:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"># 上传一个对象，并且设置 acl 策略</span><br><span class="line">$ aws s3api put-object --bucket mybucket-1 --key zach11.jpg --body e:/tmp/zach1.jpg --acl public-read-write</span><br><span class="line">&#123;</span><br><span class="line">    &quot;ETag&quot;: &quot;\&quot;743a89a2687d7f634956844c5b6c2720\&quot;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 获取对象的 acl 策略</span><br><span class="line">$ aws s3api get-object-acl --bucket mybucket-1 --key zach11.jpg</span><br><span class="line">&#123;</span><br><span class="line">    &quot;Owner&quot;: &#123;</span><br><span class="line">        &quot;DisplayName&quot;: &quot;814087434&quot;,</span><br><span class="line">        &quot;ID&quot;: &quot;01837f398501a862514659c4e8c7b0cc9abcba1c3fc4ecfb6ede19bdb86def4f&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;Grants&quot;: [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;Grantee&quot;: &#123;</span><br><span class="line">                &quot;DisplayName&quot;: &quot;814087434&quot;,</span><br><span class="line">                &quot;ID&quot;: &quot;01837f398501a862514659c4e8c7b0cc9abcba1c3fc4ecfb6ede19bdb86def4f&quot;,</span><br><span class="line">                &quot;Type&quot;: &quot;CanonicalUser&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;Permission&quot;: &quot;FULL_CONTROL&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;Grantee&quot;: &#123;</span><br><span class="line">                &quot;Type&quot;: &quot;Group&quot;,</span><br><span class="line">                &quot;URI&quot;: &quot;http://acs.amazonaws.com/groups/global/AllUsers&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;Permission&quot;: &quot;READ&quot;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;Grantee&quot;: &#123;</span><br><span class="line">                &quot;Type&quot;: &quot;Group&quot;,</span><br><span class="line">                &quot;URI&quot;: &quot;http://acs.amazonaws.com/groups/global/AllUsers&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;Permission&quot;: &quot;WRITE&quot;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 上传文件并且设置 content-type 的值</span><br><span class="line">$ aws s3api put-object --bucket mybucket-1 --key test.htm --body e:/tmp/test.htm --content-type text/html</span><br><span class="line">&#123;</span><br><span class="line">    &quot;ETag&quot;: &quot;\&quot;3b366df5ffc28c87f878fbda7e36cb42\&quot;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># ses 发送邮件不行</span><br><span class="line">$ aws ses send-email --from no-reply@example.com --to kebingzao@gmail.com --subject hello --text &quot;hello zach5&quot;</span><br><span class="line">An error occurred (AccessDenied) when calling the SendEmail operation: User `arn:aws:iam::5166688837:user/develop_lambda&apos; is not authorized to perform `ses:SendEmail&apos; on resource `arn:aws:ses:us-east-1:5166688837:identity/no-reply@example.com&apos;</span><br><span class="line"></span><br><span class="line"># 删除 bucket 对象也不行</span><br><span class="line">$ aws s3api delete-object --bucket mybucket-1 --key zach1.jpg</span><br><span class="line">An error occurred (AccessDenied) when calling the DeleteObject operation: Access Denied</span><br><span class="line"></span><br><span class="line"># 列出 s3 bucket 索引也不行</span><br><span class="line">$ aws s3 ls</span><br><span class="line">An error occurred (AccessDenied) when calling the ListBuckets operation: Access Denied</span><br><span class="line"></span><br><span class="line"># 连这个 bucket 的索引权限都没有</span><br><span class="line">$ aws s3 ls s3://mybucket-1</span><br><span class="line">An error occurred (AccessDenied) when calling the ListObjectsV2 operation: Access Denied</span><br><span class="line"></span><br><span class="line"># 带 acl 的上传也是可以的</span><br><span class="line">$ aws s3api put-object --bucket mybucket-1 --key test_zach1.jpg --body e:/tmp/zach1.jpg --acl public-read --content-type image/jpeg</span><br><span class="line">&#123;</span><br><span class="line">    &quot;ETag&quot;: &quot;\&quot;743a89a2687d7f634956844c5b6c2720\&quot;&quot;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># 下载对象是可以的</span><br><span class="line">$ aws s3api get-object --bucket mybucket-1 --key test_zach1.jpg e:/tmp/11.jpg</span><br></pre></td></tr></table></figure></p>
+<h3 id="添加-ip-白名单会有问题"><a href="#添加-ip-白名单会有问题" class="headerlink" title="添加 ip 白名单会有问题"></a>添加 ip 白名单会有问题</h3><p>刚开始也是一样给这个用户添加了一个 ip 白名单的策略，上面只有我们线上和测试服的服务器的外网 ip。</p>
+<p>但是在测试过程发现了一个问题，就是我们的接口会通过 aws 的签名算法下发给客户端的 auth token，然后让客户端自己去上传，这样子一来可以节省服务端的资源，另一方面因为云存储我们国内走 七牛，国外走 s3， 所以客户端可以根据他们的地区自己选择要上传的方式。</p>
+<p>但是发现客户端在得到服务端下发的 auth token 之后，然后再调用 aws 的 sdk 上传之后，会报 403 的错误</p>
+<p>为此我还写了一个 demo 来测试， 这个 demo 去请求我们服务器的 auth 接口，然后直接走 post 表单上传:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> requestLib = <span class="built_in">require</span>(<span class="string">'request'</span>);</span><br><span class="line"><span class="keyword">const</span> fs = <span class="built_in">require</span>(<span class="string">'fs'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> accountId = <span class="number">1866666641</span></span><br><span class="line"><span class="keyword">const</span> fileName = <span class="string">'zach1.jpg'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> url = <span class="string">`https://test.example.com/upload/auth?a=<span class="subst">$&#123;accountId&#125;</span>&amp;filename=<span class="subst">$&#123;fileName&#125;</span>`</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getUploadTokenAndUpload</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    requestLib(&#123;</span><br><span class="line">        url: url,</span><br><span class="line">        method: <span class="string">"GET"</span>,</span><br><span class="line">    &#125;,<span class="function"><span class="keyword">function</span> (<span class="params">error, response, body</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.error(<span class="string">'error:'</span>, error); <span class="comment">// Print the error if one occurred</span></span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'statusCode:'</span>, response &amp;&amp; response.statusCode); <span class="comment">// Print the response status code if a response was received</span></span><br><span class="line">        <span class="keyword">if</span>(response &amp;&amp; response.statusCode == <span class="number">200</span>)&#123;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">"get token success!!!"</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'body:'</span>, body);</span><br><span class="line">        <span class="keyword">let</span> uploadInfo = <span class="built_in">JSON</span>.parse(body.substr(<span class="number">1</span>, body.length<span class="number">-2</span>))</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'uploadInfo:'</span>, <span class="built_in">JSON</span>.stringify(uploadInfo))</span><br><span class="line">        <span class="comment">// 进行上传</span></span><br><span class="line">        uploadFile(uploadInfo)</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// let uploadInfo  = &#123;</span></span><br><span class="line"><span class="comment">//  "avatar_url": "https://my-test.s3.amazonaws.com/1866666641_160.jpg",</span></span><br><span class="line"><span class="comment">//  "cloud": "a",</span></span><br><span class="line"><span class="comment">//  "data": &#123;</span></span><br><span class="line"><span class="comment">//      "form_action": "https://my-test.s3.amazonaws.com",</span></span><br><span class="line"><span class="comment">//      "key": "1866666641_160.jpg",</span></span><br><span class="line"><span class="comment">//      "acl": "public-read",</span></span><br><span class="line"><span class="comment">//      "x_amz_credential": "Axxxxxxxxxxxxx67/20230104/us-east-1/s3/aws4_request",</span></span><br><span class="line"><span class="comment">//      "x_amz_algorithm": "AWS4-HMAC-SHA256",</span></span><br><span class="line"><span class="comment">//      "x_amz_date": "20230104T000000Z",</span></span><br><span class="line"><span class="comment">//      "Content-Diposition": "",</span></span><br><span class="line"><span class="comment">//      "policy": "ewogICAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxImtleSI6xxxxxxxxxxxxxMjY0MV8xNjAuanBnIn0xxxxxxxxxxxxxxxxxxxxxxxxhdGFyLWFpcmRyb2lkLXRlc3QifSwKICAgICAgICB7ImFjbCI6ICJwdWJsaWMtcmVhZCJ9LAogICAgICAgIHsieC1hbXotYWxnb3JpdGhtIjogIkFXUzQtSE1BQy1TSEEyNTYifSwKICAgICAgICB7IngtYW16LWNyZWRlbnRpYWwiOiAiQUtJQVhPUFZHU0JJWEUyVVBMNjcvMjAyMzAxMDQvdXMtZWFzdC0xL3MzL2F3czRfcmVxdWVzdCJ9LAogICAgICAgIHsieC1hbXotZGF0ZSI6ICIyMDIzMDEwNFQwMDAwMDBaIn0KICAgIF0KfQ==",</span></span><br><span class="line"><span class="comment">//      "x_amz_signature": "a632e4c1xxxxxxxxxxxxec40d7d8efxxxxxxxxxxxxxxxxxxxxxx76e2",</span></span><br><span class="line"><span class="comment">//      "success_action_redirect": ""</span></span><br><span class="line"><span class="comment">//  &#125;,</span></span><br><span class="line"><span class="comment">//  "token": "d26xxxxxxxxxxxxxxxxx366ea8"</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 上传</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">uploadFile</span>(<span class="params">uploadInfo</span>)</span>&#123;</span><br><span class="line">    uploadInfo = uploadInfo[<span class="string">'data'</span>];</span><br><span class="line">    <span class="keyword">let</span> action = uploadInfo[<span class="string">'form_action'</span>];</span><br><span class="line">    <span class="keyword">let</span> data = &#123;</span><br><span class="line">        <span class="string">'key'</span>: uploadInfo[<span class="string">'key'</span>],</span><br><span class="line">        <span class="string">'acl'</span>: uploadInfo[<span class="string">'acl'</span>],</span><br><span class="line">        <span class="string">'X-Amz-Credential'</span>: uploadInfo[<span class="string">'x_amz_credential'</span>],</span><br><span class="line">        <span class="string">'X-Amz-Algorithm'</span>: uploadInfo[<span class="string">'x_amz_algorithm'</span>],</span><br><span class="line">        <span class="string">'X-Amz-Date'</span>: uploadInfo[<span class="string">'x_amz_date'</span>],</span><br><span class="line">        <span class="string">'Policy'</span>: uploadInfo[<span class="string">'policy'</span>],</span><br><span class="line">        <span class="string">'X-Amz-Signature'</span>: uploadInfo[<span class="string">'x_amz_signature'</span>],</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    data[<span class="string">'file'</span>] = fs.createReadStream(<span class="string">'./'</span> + fileName)</span><br><span class="line"></span><br><span class="line">    requestLib(&#123;</span><br><span class="line">        url: action,</span><br><span class="line">        method: <span class="string">"POST"</span>,</span><br><span class="line">        headers: &#123;</span><br><span class="line">            <span class="string">'Content-Type'</span>: <span class="string">'multipart/form-data'</span></span><br><span class="line">        &#125;,  </span><br><span class="line">        formData: data</span><br><span class="line">    &#125;,<span class="function"><span class="keyword">function</span> (<span class="params">error, response, body</span>)</span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.error(<span class="string">'error:'</span>, error); <span class="comment">// Print the error if one occurred</span></span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'statusCode:'</span>, response &amp;&amp; response.statusCode); <span class="comment">// Print the response status code if a response was received</span></span><br><span class="line">    <span class="keyword">if</span>(response &amp;&amp; (response.statusCode == <span class="number">200</span> || response.statusCode == <span class="number">204</span>))&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">"upload success!!!"</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'body:'</span>, body);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">getUploadTokenAndUpload()</span><br></pre></td></tr></table></figure></p>
+<p>结果因为我的本机出口不在 ip 白名单内，导致虽然拿到了后端返回的 auth info，依然没办法上传到 s3 的 bucket 上，会报 403 (Access Denied) 的错误。</p>
+<p>但是一旦将我的本机 ip 加入到 ip 白名单策略中，就可以正常上传成功。</p>
+<p>后面查了一下，发现我们这种使用 key+secret 的调用是基于 IAM 的方式进行调用的，客户端基于签名实际上也是基于 aksk 加服务的签名4算法进行的，本质上依然是基于 IAM 进行调用的，所以会受到 ip 白名单的策略限制。</p>
+<p>所以如果是基于服务端下发 upload token，然后让客户端自己去进行上传的，那么就没办法应用 ip 白名单的策略方式，不过有两种解决方式可供参考:</p>
+<ol>
+<li>一个是继续走 IAM 授权， 但是在 aws sdk 的调用上，要分成服务器上传的 aws 用户角色(也就是本例的 <code>develop_uc</code>)，和下发签名给客户端的用户角色 (<code>develop_auth</code>)。 服务器上传的用户角色要设置 ip 白名单， 下发给客户端的用户角色不能设置 ip 白名单，但是因为只有少数几个 bucket 需要允许客户端上传，因此可以指定更具体的 policy 权限策略。</li>
+<li>第二种方式就是将角色跟 aws 的 EC2 绑定，这样子就不需要走 key+secret 的方式操作了，因为只有关联角色的EC2实例，可以执行角色的权限(也不需要白名单)。好处就是不用担心 key 泄露，因为执行权限的时候，不需要走 key+secret 校验， 坏处就是耦合性太强， 不利于横向扩展和跨平台。</li>
+</ol>
+<h2 id="关于-aws-的用户和角色-这两个概念"><a href="#关于-aws-的用户和角色-这两个概念" class="headerlink" title="关于 aws 的用户和角色 这两个概念"></a>关于 aws 的用户和角色 这两个概念</h2><p>在 aws 后台中，用户和角色 其实是两个概念， 本次我们创建的这三个都是属于 aws 的用户。</p>
+<p>aws 的用户和角色都可以赋予各种各样的策略(Policy), 他们的不同之处在于，用户是可以设置 key+secret 来提供给外部的程序作为 sdk 的权限初始化来使用的，也就是我们现在后端用的这种方式，初始化 sdk 的时候，用的就是这个用户的 key+secret， 这个用户本身所赋予的策略，决定了他可以在 sdk 中做到什么事情。</p>
+<p>而角色他是没有生成 key+secret 供外部程序调用的，他一般是用于 aws 各个服务间的调用存在的，因此也更加的安全，因为他不存在泄露 key 的情况。</p>
+<p>举个例子，我早期写的这个文章: <a href="/2018/08/13/use-lambda-s3/" title="项目使用 aws 的 lambda服务来生成s3的缩略图">项目使用 aws 的 lambda服务来生成s3的缩略图</a>，就是通过使用 aws 的 lambda 程序，将某一个图片生成缩略图并上传到对应的 s3 bucket，这时候我程序在初始化上传程序的时候，并没有向下面那样子还要初始化 key+secret:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">session = boto3.session.Session(aws_access_key_id=conf.get(<span class="string">"s3"</span>,<span class="string">"access_key"</span>),aws_secret_access_key=conf.get(<span class="string">"s3"</span>,<span class="string">"secret_access_key"</span>))</span><br><span class="line">    s3_client = session.client(<span class="string">'s3'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>而是直接用:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">s3_client = boto3.client(<span class="string">'s3'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>原因就是因为我这个 lambda 函数，在运行的时候，是可以指定角色的，而我指定了这个内置的角色 <code>lambda-s3-execution-role</code></p>
+<p><img src="/2023/01/18/aws-policy-deny-ip/5.png" alt=""></p>
+<p>而这个角色所附加的权限策略是有包含 S3 的 <code>put-object</code> 和 <code>put-object-acl</code> 这两个动作的:</p>
+<p><img src="/2023/01/18/aws-policy-deny-ip/6.png" alt=""></p>
+<p>因此如果是 aws 内部服务相关调用的情况，那么更安全的应该直接用角色来控制权限。这样子就不会有 key 泄露的安全隐患。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我们通过将 aws 的用户的策略权限根据各自的服务类型进行细分，并且通过添加 ip 白名单的策略，可以很好的防止 key+secret 泄露之后，黑客的非法调用。</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://docs.aws.amazon.com/zh_cn/IAM/latest/UserGuide/reference_policies_examples_aws_deny-ip.html" target="_blank" rel="noopener">AWS：基于源 IP 拒绝对 AWS 的访问</a></li>
+<li><a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/acl-overview.html#CannedACL" target="_blank" rel="noopener">Access control list (ACL) overview</a></li>
+<li><a href="https://www.howtogeek.com/devops/how-to-whitelist-ip-addresses-to-access-an-aws-s3-bucket/" target="_blank" rel="noopener">How to Whitelist IP Addresses to Access an AWS S3 Bucket</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/getting-started-install.html" target="_blank" rel="noopener">安装或更新最新版本的 AWS CLI</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-services-s3-commands.html" target="_blank" rel="noopener">通过 AWS CLI 使用高级别 (s3) 命令</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-services-s3-apicommands.html" target="_blank" rel="noopener">通过 AWS CLI 使用 API 级 (s3api) 命令</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-services-s3-lifecycle-example.html" target="_blank" rel="noopener">Amazon S3 存储桶生命周期操作脚本示例</a></li>
+<li><a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/s3api/index.html" target="_blank" rel="noopener">AWS CLI 所有的 s3api 的指令</a></li>
+<li><a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/s3/index.html" target="_blank" rel="noopener">AWS CLI 所有的 s3 的指令(旧版)</a></li>
+<li><a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ses/send-email.html" target="_blank" rel="noopener">使用 AWS CLI 发送 ses 邮件</a></li>
+<li><a href="https://dynobase.dev/dynamodb-cli-query-examples/" target="_blank" rel="noopener">DynamoDB CLI Commands &amp; Query Examples Cheat Sheet</a></li>
+<li><a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/dynamodb/index.html" target="_blank" rel="noopener">AWS CLI 所有的 dynamodb 指令</a></li>
+<li><a href="https://awscli.amazonaws.com/v2/documentation/api/latest/reference/dynamodb/query.html" target="_blank" rel="noopener">dynamodb query 指令</a></li>
+<li><a href="https://awspolicygen.s3.amazonaws.com/policygen.html" target="_blank" rel="noopener">aws 策略模拟生成工具</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/" title="后端开发针对 aws 用户权限进行细分和设置 ip 白名单">http://kebingzao.com/2023/01/18/aws-policy-deny-ip/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/aws/" rel="tag"># aws</a>
+          
+            <a href="/tags/s3/" rel="tag"># s3</a>
+          
+            <a href="/tags/ses/" rel="tag"># ses</a>
+          
+            <a href="/tags/dynamodb/" rel="tag"># dynamodb</a>
+          
+            <a href="/tags/aws-cli/" rel="tag"># aws-cli</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/12/30/prometheus-best-practices-2-nginx/" rel="next" title="prometheus + grafana 实战篇(2) - nginx">
+                <i class="fa fa-chevron-left"></i> prometheus + grafana 实战篇(2) - nginx
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">304</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接入-develop-ses-用户"><span class="nav-number">2.</span> <span class="nav-text">接入 develop_ses 用户</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#附加-ip-白名单策略，限制该角色的操作-ip"><span class="nav-number">2.1.</span> <span class="nav-text">附加 ip 白名单策略，限制该角色的操作 ip</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接入-develop-dynamodb-用户"><span class="nav-number">3.</span> <span class="nav-text">接入 develop_dynamodb 用户</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#接入-develop-uc-用户"><span class="nav-number">4.</span> <span class="nav-text">接入 develop_uc 用户</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#添加-ip-白名单会有问题"><span class="nav-number">4.1.</span> <span class="nav-text">添加 ip 白名单会有问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于-aws-的用户和角色-这两个概念"><span class="nav-number">5.</span> <span class="nav-text">关于 aws 的用户和角色 这两个概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2023/01/18/aws-policy-deny-ip/';
+          this.page.identifier = '2023/01/18/aws-policy-deny-ip/';
+          this.page.title = '后端开发针对 aws 用户权限进行细分和设置 ip 白名单';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="nginx,prometheus,grafana," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言经过上一节我们初步定义了一些标签的规范: prometheus + grafana 实战篇(1) - 定义标签组和规范, 本节我们来讲一下怎么监控 nginx nginxnginx 作为最受欢迎的 web server 之一，我的不少文章都有涉及到 nginx， 这边不再赘述。 我们假设在使用 prometheus 采集 nginx 之前，我们线上环境已经有 nginx 服务来跑了。  关于">
+<meta name="keywords" content="nginx,prometheus,grafana">
+<meta property="og:type" content="article">
+<meta property="og:title" content="prometheus + grafana 实战篇(2) - nginx">
+<meta property="og:url" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言经过上一节我们初步定义了一些标签的规范: prometheus + grafana 实战篇(1) - 定义标签组和规范, 本节我们来讲一下怎么监控 nginx nginxnginx 作为最受欢迎的 web server 之一，我的不少文章都有涉及到 nginx， 这边不再赘述。 我们假设在使用 prometheus 采集 nginx 之前，我们线上环境已经有 nginx 服务来跑了。  关于">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/1.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/2.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/3.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/4.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/5.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/6.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/7.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/8.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/9.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/10.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/11.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/12.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/13.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/14.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/15.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/16.png">
+<meta property="og:updated_time" content="2023-01-28T06:04:11.521Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="prometheus + grafana 实战篇(2) - nginx">
+<meta name="twitter:description" content="前言经过上一节我们初步定义了一些标签的规范: prometheus + grafana 实战篇(1) - 定义标签组和规范, 本节我们来讲一下怎么监控 nginx nginxnginx 作为最受欢迎的 web server 之一，我的不少文章都有涉及到 nginx， 这边不再赘述。 我们假设在使用 prometheus 采集 nginx 之前，我们线上环境已经有 nginx 服务来跑了。  关于">
+<meta name="twitter:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/"/>
+
+
+
+
+
+  <title>prometheus + grafana 实战篇(2) - nginx | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">prometheus + grafana 实战篇(2) - nginx</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-12-30T18:13:24+08:00">
+                2022-12-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/12/30/prometheus-best-practices-2-nginx/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/12/30/prometheus-best-practices-2-nginx/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/12/30/prometheus-best-practices-2-nginx/" class="leancloud_visitors" data-flag-title="prometheus + grafana 实战篇(2) - nginx">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>经过上一节我们初步定义了一些标签的规范: <a href="/2022/12/30/prometheus-best-practices-1-labels/" title="prometheus + grafana 实战篇(1) - 定义标签组和规范">prometheus + grafana 实战篇(1) - 定义标签组和规范</a>, 本节我们来讲一下怎么监控 nginx</p>
+<h2 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h2><p>nginx 作为最受欢迎的 web server 之一，我的不少文章都有涉及到 nginx， 这边不再赘述。</p>
+<p>我们假设在使用 prometheus 采集 nginx 之前，我们线上环境已经有 nginx 服务来跑了。</p>
+<blockquote>
+<p>关于 nginx 的安装，可以看我的这一篇文章: <a href="/2020/09/15/centos7-install-nginx/" title="CentOS 7 安装 Nginx">CentOS 7 安装 Nginx</a></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-223-centos sbin]# netstat -anlp | grep 80</span><br><span class="line">tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      29841/nginx: master</span><br><span class="line">tcp        0      0 172.26.16.223:37134     169.254.0.4:80          TIME_WAIT   -                   </span><br><span class="line">udp6       0      0 fe80::5054:ff:fe23::123 :::*                                656/ntpd</span><br></pre></td></tr></table></figure>
+<h2 id="nginx-vts-export"><a href="#nginx-vts-export" class="headerlink" title="nginx-vts-export"></a>nginx-vts-export</h2><p>prometheus 常用的 nginx 的导出器，目前比较常用的是 <a href="https://github.com/hnlq715/nginx-vts-exporter" target="_blank" rel="noopener">nginx-vts-exporter</a></p>
+<p><code>nginx_vts_exporter</code> 依赖 nginx 的这个 <code>nginx-module-vts</code> 模块, 因此我们要先在 nginx 上重新编译安装 <code>nginx-module-vts</code> 模块</p>
+<a id="more"></a>
+<h3 id="1-nginx-重新编译安装-nginx-module-vts-模块"><a href="#1-nginx-重新编译安装-nginx-module-vts-模块" class="headerlink" title="1. nginx 重新编译安装 nginx-module-vts 模块"></a>1. nginx 重新编译安装 nginx-module-vts 模块</h3><p>直接从 github 下载 zip 包: <a href="https://github.com/vozlt/nginx-module-vts/releases" target="_blank" rel="noopener">下载地址</a></p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/1.png" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 解压下载的 .tar.gz 的包</span><br><span class="line">[root@VM-16-223-centos ~]# tar -zxvf nginx-module-vts-0.2.1.tar.gz</span><br><span class="line"></span><br><span class="line"># 将这个模块移到 nginx 目录下</span><br><span class="line">[root@VM-16-223-centos ~]# cd nginx-1.18.0/</span><br><span class="line">[root@VM-16-223-centos nginx-1.18.0]# mv ../nginx-module-vts-0.2.1 nginx-module-vts</span><br><span class="line"></span><br><span class="line"># 这时候就可以重新配置了</span><br><span class="line">[root@VM-16-223-centos nginx-1.18.0]#  ./configure --prefix=/usr/local/nginx  --with-http_stub_status_module  --add-module=nginx-module-vts</span><br><span class="line"></span><br><span class="line"># 这时候执行 make 编译</span><br><span class="line">[root@VM-16-223-centos nginx-1.18.0]# make</span><br><span class="line">make -f objs/Makefile</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>上面要注意一个细节，就是 configure 配置的时候，原先装的 nginx 是什么配置，就直接在原先的配置补上这两个配置即可:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--with-http_stub_status_module  --add-module=nginx-module-vts</span><br></pre></td></tr></table></figure></p>
+<p>比如我是白板配置，那么 configure arguments 就是: <code>--prefix=/usr/local/nginx</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-223-centos nginx-1.18.0]# /usr/local/nginx/sbin/nginx -V</span><br><span class="line">nginx version: nginx/1.18.0</span><br><span class="line">built by gcc 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC)</span><br><span class="line">configure arguments: --prefix=/usr/local/nginx</span><br></pre></td></tr></table></figure></p>
+<p>如果之前就有支持 ssl 模块，那么就应该是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--prefix=/usr/local/nginx --with-http_ssl_module</span><br></pre></td></tr></table></figure></p>
+<p>因此不管原先的 configure arguments 是什么，直接在后面补上我们新增的这两个配置即可</p>
+<p>刚才已经编译完了，接下来不要进行安装执行 <code>make install</code>, 否则就是覆盖安装,原来的 nginx 还有一堆的配置文件，不能被覆盖。我们应该只覆盖编译出来的 nginx 可执行程序</p>
+<p>也就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 先停止服务</span><br><span class="line">[root@VM-16-223-centos nginx-1.18.0]# sudo systemctl stop nginx.service</span><br><span class="line"># 旧的可执行程序拷贝出来</span><br><span class="line">[root@VM-16-223-centos nginx-1.18.0]# cp /usr/local/nginx/sbin/nginx /usr/local/nginx/sbin/nginx.bak</span><br><span class="line"># 用新的替换旧的可执行程序</span><br><span class="line">[root@VM-16-223-centos nginx-1.18.0]# cp ./objs/nginx /usr/local/nginx/sbin/</span><br><span class="line">cp: overwrite ‘/usr/local/nginx/sbin/nginx’? y</span><br><span class="line"># 最后启动服务</span><br><span class="line">[root@VM-16-223-centos nginx-1.18.0]# sudo systemctl start  nginx.service</span><br></pre></td></tr></table></figure></p>
+<p>接下来查看模块是否有成功编译进去:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-223-centos nginx-1.18.0]# /usr/local/nginx/sbin/nginx -V</span><br><span class="line">nginx version: nginx/1.18.0</span><br><span class="line">built by gcc 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC)</span><br><span class="line">configure arguments: --prefix=/usr/local/nginx --with-http_stub_status_module --add-module=nginx-module-vts</span><br></pre></td></tr></table></figure></p>
+<p>接下来修改配置文件 nginx.conf, 将这个统计启动，在 http 里面 和 server 里面，各补上这个:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-223-centos nginx-1.18.0]# cat /usr/local/nginx/conf/nginx.conf</span><br><span class="line">#---隐藏其他配置</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    </span><br><span class="line">    #---隐藏其他配置</span><br><span class="line">    </span><br><span class="line">    vhost_traffic_status_zone;</span><br><span class="line">    vhost_traffic_status_filter_by_host on;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        </span><br><span class="line">        #---隐藏其他的路由</span><br><span class="line">        </span><br><span class="line">        location /status &#123;</span><br><span class="line">            vhost_traffic_status_display;</span><br><span class="line">            vhost_traffic_status_display_format html;</span><br><span class="line">        &#125;     </span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其实就是开启流量统计，有开放一个路由(<code>/status</code>)用来显示详情，接下来重启 nginx，然后直接访问这个 status 路由，就可以看到了</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/2.png" alt=""></p>
+<p>这边说一下 http 下面配置的这两个参数:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vhost_traffic_status_zone;</span><br><span class="line">vhost_traffic_status_filter_by_host on;</span><br></pre></td></tr></table></figure></p>
+<p>这两个配置就是用来收集流量状态信息的，其中:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vhost_traffic_status_filter_by_host on;</span><br></pre></td></tr></table></figure></p>
+<p>开启此功能，在 nginx 配置有多个 server_name 的情况下，会根据不同的 server_name 进行流量的统计，否则默认会把流量全部计算到第一个 server_name 上</p>
+<p>当然如果有不想统计流量的 server 区域， 那么就可以禁用 <code>vhost_traffic_status</code>，比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">... vhost_traffic_status off; ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样子这一台虚拟主机就不会统计</p>
+<h3 id="2-安装-nginx-vts-export-导出器"><a href="#2-安装-nginx-vts-export-导出器" class="headerlink" title="2. 安装 nginx-vts-export 导出器"></a>2. 安装 nginx-vts-export 导出器</h3><p>既然 nginx 的模块配置好了， 那么接下来就是安装这个 vts 的 exporter 了</p>
+<p>一样下载 <code>.tar.gz</code> 包 (要下载 <code>0.10.3</code> 版本才有二进制包): <a href="https://github.com/hnlq715/nginx-vts-exporter/releases" target="_blank" rel="noopener">下载地址</a></p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/3.png" alt=""></p>
+<p>具体:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"># 解压</span><br><span class="line">[root@VM-16-223-centos local]# tar -zxvf nginx-vts-exporter-0.10.3.linux-amd64.tar.gz</span><br><span class="line">nginx-vts-exporter-0.10.3.linux-amd64/</span><br><span class="line">...</span><br><span class="line"># 重命名</span><br><span class="line">[root@VM-16-223-centos local]# mv nginx-vts-exporter-0.10.3.linux-amd64 nginx-vts-exporter</span><br><span class="line"></span><br><span class="line"># 设置自启动</span><br><span class="line">[root@VM-16-223-centos nginx-vts-exporter]# cat /usr/lib/systemd/system/nginx-vts-exporter.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=nginx_vts_exporter</span><br><span class="line">Documentation=https://github.com/hnlq715/nginx-vts-exporter</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">ExecStart=/usr/local/nginx-vts-exporter/nginx-vts-exporter  -nginx.scrape_uri http://localhost/status/format/json</span><br><span class="line">ExecStop=/bin/kill -s QUIT $MAINPID</span><br><span class="line">Restart=on-failure</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"></span><br><span class="line">[root@VM-16-223-centos nginx-vts-exporter]# systemctl daemon-reload</span><br><span class="line">[root@VM-16-223-centos nginx-vts-exporter]#  systemctl enable nginx-vts-exporter</span><br><span class="line">Created symlink from /etc/systemd/system/multi-user.target.wants/nginx-vts-exporter.service to /usr/lib/systemd/system/nginx-vts-exporter.service.</span><br><span class="line"></span><br><span class="line">[root@VM-16-223-centos nginx-vts-exporter]#  systemctl start nginx-vts-exporter</span><br><span class="line">[root@VM-16-223-centos nginx-vts-exporter]#  systemctl status nginx-vts-exporter</span><br><span class="line">● nginx-vts-exporter.service - nginx_vts_exporter</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/nginx-vts-exporter.service; enabled; vendor preset: disabled)</span><br><span class="line">   Active: active (running) since Wed 2022-12-28 17:02:03 CST; 8s ago</span><br></pre></td></tr></table></figure></p>
+<p>接下来请求 <code>mertics</code> 接口试试:</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/4.png" alt=""></p>
+<h3 id="3-接入-prometheus-并接入-grafana-模板"><a href="#3-接入-prometheus-并接入-grafana-模板" class="headerlink" title="3. 接入 prometheus 并接入 grafana 模板"></a>3. 接入 prometheus 并接入 grafana 模板</h3><p>接下来就是接入 prometheus 抓取了, 因为我这边按照服务类型分别用文件服务发现的方式，因此这一台主机就加到 <code>file_sd/server-nginx.yml</code> 这个文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">- job_name: &quot;server-nginx&quot;</span><br><span class="line">  file_sd_configs:</span><br><span class="line">  - files:</span><br><span class="line">    - file_sd/server-nginx.yml</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- targets:</span><br><span class="line">  - 172.26.16.223:9913</span><br><span class="line">  labels:</span><br><span class="line">    env: test</span><br><span class="line">    product_line: personal</span><br><span class="line">    region: jp</span><br><span class="line">    cloud_platform: tx</span><br><span class="line">    server_type: nginx</span><br><span class="line">    wan: 43.xx.xx.234</span><br></pre></td></tr></table></figure>
+<p>这样子就可以抓取了，然后接下来再接入到 grafana 的模板中，可以用这个模板: <a href="https://grafana.com/grafana/dashboards/2949-nginx-vts-stats/" target="_blank" rel="noopener">2949-nginx-vts-stats</a></p>
+<p>所以最后的结果就是:</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/5.png" alt=""></p>
+<p>但是后面看了一下，他统计的数据，有状态码，有各个站点 host 的流量以及响应时间:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># Filter Requests</span><br><span class="line">nginx_upstream_requests&#123;code=&quot;1xx&quot;, filter=&quot;country&quot;, filterName=&quot;BY&quot;&#125; 0</span><br><span class="line"></span><br><span class="line"># Filter Bytes</span><br><span class="line">nginx_upstream_bytes&#123;direction=&quot;in&quot;, filter=&quot;country&quot;, filterName=&quot;BY&quot;&#125; 0</span><br><span class="line"></span><br><span class="line"># Filter Response time</span><br><span class="line">nginx_upstream_responseMsec&#123;filter=&quot;country&quot;, filterName=&quot;BY&quot;&#125; 99</span><br></pre></td></tr></table></figure></p>
+<p>但是我发现我最关注的两个维度没有:</p>
+<ol>
+<li>每一个路由 api 的请求数，以及请求方法，状态码</li>
+<li>每一个路由 api 的响应时间</li>
+</ol>
+<p>因此我查了一下官方文档，该导出器其实并没有去采集每一个站点的每一个请求的数据的，包括请求方法，状态码，响应时间这些。 所以这个导出器虽然可以查看 nginx 的一些流量分布，但是并没有办法检测到有哪些 api 是慢返回的，甚至是异常状态码的。</p>
+<h2 id="prometheus-nginxlog-exporter"><a href="#prometheus-nginxlog-exporter" class="headerlink" title="prometheus-nginxlog-exporter"></a>prometheus-nginxlog-exporter</h2><p>如果要解决上述的情况，我们应该是要抓取 nginx 的 access log 才对，因为上面的所有的信息都在 access log 上，因此我们只需要去解析 access log，并采集就行了。</p>
+<p>后面找了一下，还真有专门解析 nginx-log 的 prometheus 的导出器: <a href="https://github.com/martin-helmich/prometheus-nginxlog-exporter" target="_blank" rel="noopener">prometheus-nginxlog-exporter</a></p>
+<p>这个导出器其实很强大，他可以导出多个站点的 nginx 的 access log 并采集，而且可以自定义一些标签</p>
+<h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1. 安装"></a>1. 安装</h3><p>他有三种安装方式，我们可以依然采用二进制包的安装方式，具体安装如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 下载并安装二进制包</span><br><span class="line">[root@VM-16-223-centos ~]# cd /usr/local/</span><br><span class="line">[root@VM-16-223-centos local]# wget https://github.com/martin-helmich/prometheus-nginxlog-exporter/releases/download/v1.9.2/prometheus-nginxlog-exporter_1.9.2_linux_amd64.rpm</span><br><span class="line">[root@VM-16-223-centos local]# yum localinstall prometheus-nginxlog-exporter_1.9.2_linux_amd64.rpm</span><br></pre></td></tr></table></figure></p>
+<p>这样子就安装好了，然后查看一下运行状态:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-223-centos etc]# sudo systemctl enable prometheus-nginxlog-exporter</span><br><span class="line">[root@VM-16-223-centos etc]# systemctl status prometheus-nginxlog-exporter</span><br><span class="line">● prometheus-nginxlog-exporter.service - NGINX metrics exporter for Prometheus</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/prometheus-nginxlog-exporter.service; enabled; vendor preset: disabled)</span><br><span class="line">   Active: inactive (dead)</span><br></pre></td></tr></table></figure></p>
+<p>看样子是没有启动，查看一下 service 文件:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-223-centos etc]# cat /usr/lib/systemd/system/prometheus-nginxlog-exporter.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=NGINX metrics exporter for Prometheus</span><br><span class="line">After=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/usr/sbin/prometheus-nginxlog-exporter -config-file /etc/prometheus-nginxlog-exporter.hcl</span><br><span class="line">Restart=always</span><br><span class="line">ProtectSystem=full</span><br><span class="line">CapabilityBoundingSet=</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure></p>
+<p>然后看了一下，他默认的这个配置文件:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/etc/prometheus-nginxlog-exporter.hcl</span><br></pre></td></tr></table></figure></p>
+<p>发现里面的配置不对，默认的 nginx access log 地址不对，需要要自己改， 而且我不太喜欢用 hcl，所以后面就改成 yml 的格式来处理，假设先获取某一个站点的 access log，所以就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-9-centos ~]$ cat /etc/prometheus-nginxlog-exporter.yml</span><br><span class="line">listen:</span><br><span class="line">  port: 4040</span><br><span class="line">  metrics_endpoint: &quot;/metrics&quot;</span><br><span class="line"></span><br><span class="line">namespaces:</span><br><span class="line">  - name: air_id</span><br><span class="line">    format: &quot;$host $remote_addr \&quot;$clientRealIp\&quot; - - [$time_local] \&quot;$request\&quot; \&quot;$status\&quot; $body_bytes_sent \&quot;$http_referer\&quot; \&quot;$http_user_agent\&quot; $request_time $bytes_sent $request_length [$upstream_response_time]&quot;</span><br><span class="line">    source:</span><br><span class="line">      files:</span><br><span class="line">        - /var/log/nginx/test.example.com.access.log</span><br></pre></td></tr></table></figure></p>
+<p>这边注意几个细节:</p>
+<ol>
+<li>namespaces 的 name 就是我们抛送指标的前缀，所以要符合指标的格式</li>
+<li>format 格式要按照你的 nginx 的 log_format 来搭建，如果发现没有数据，那么就是 format 有问题，这时候就可以看 error log 逐步排查</li>
+</ol>
+<p>然后重新修改 service 文件将执行指令修改成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/sbin/prometheus-nginxlog-exporter -config-file /etc/prometheus-nginxlog-exporter.yml</span><br></pre></td></tr></table></figure></p>
+<p>最后 restart 一下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart prometheus-nginxlog-exporter</span><br></pre></td></tr></table></figure></p>
+<p>就可以看到有开始抛送数据了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-9-centos ~]$ curl http://localhost:4040/metrics</span><br><span class="line"># HELP air_id_http_request_size_bytes Total amount of received bytes</span><br><span class="line"># TYPE air_id_http_request_size_bytes counter</span><br><span class="line">air_id_http_request_size_bytes&#123;method=&quot;GET&quot;,status=&quot;200&quot;&#125; 4107</span><br><span class="line"># HELP air_id_http_response_count_total Amount of processed HTTP requests</span><br><span class="line"># TYPE air_id_http_response_count_total counter</span><br><span class="line">air_id_http_response_count_total&#123;method=&quot;GET&quot;,status=&quot;200&quot;&#125; 7</span><br><span class="line"># HELP air_id_http_response_size_bytes Total amount of transferred bytes</span><br><span class="line"># TYPE air_id_http_response_size_bytes counter</span><br><span class="line">air_id_http_response_size_bytes&#123;method=&quot;GET&quot;,status=&quot;200&quot;&#125; 55841</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>可以看到他的指标采集成功了，并且所有的指标都是以所配置的name <code>air_id</code> 作为前缀</p>
+<h3 id="2-添加到-prometheus-监控-instance"><a href="#2-添加到-prometheus-监控-instance" class="headerlink" title="2. 添加到 prometheus 监控 instance"></a>2. 添加到 prometheus 监控 instance</h3><p>接下来将其添加到 <code>file_sd/server-nginx.yml</code> 的后面 (通过文件服务发现添加的新的实例不需要重启 prometheus)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- targets:</span><br><span class="line">  - 172.19.16.9:4040</span><br><span class="line">  labels:</span><br><span class="line">    env: test</span><br><span class="line">    product_line: personal</span><br><span class="line">    region: jp</span><br><span class="line">    cloud_platform: tx</span><br><span class="line">    server_type: nginx-log</span><br><span class="line">    wan: 43.xx.xx.234</span><br></pre></td></tr></table></figure></p>
+<p>为了跟上面的 vts 导出器分开，这边是 server_type 改成 nginx-log。</p>
+<p>接下来可以在 prometheus 后台查看指标了</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/6.png" alt=""></p>
+<p>但是发现指标有采集正常了，但是标签里面还是没有 api，只有状态码和请求方法 ?? 最重要的 request_uri 标签竟然没有?</p>
+<h3 id="3-添加-request-uri-标签"><a href="#3-添加-request-uri-标签" class="headerlink" title="3. 添加 request_uri 标签"></a>3. 添加 request_uri 标签</h3><p>后面查了一下项目文档，其实是可以设置 request_uri 标签的，但是要改一下配置文件: <a href="https://github.com/kebingzao/prometheus-nginxlog-exporter/blob/master/features/custom_labels.feature" target="_blank" rel="noopener">custom_labels.feature</a></p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/7.png" alt=""></p>
+<p>后面参考了一下配置，最后形成的配置文件如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-9-centos ~]$ cat /etc/prometheus-nginxlog-exporter.yml</span><br><span class="line">listen:</span><br><span class="line">  port: 4040</span><br><span class="line">  metrics_endpoint: &quot;/metrics&quot;</span><br><span class="line"></span><br><span class="line">namespaces:</span><br><span class="line">  - name: air_id</span><br><span class="line">    format: &quot;$host $remote_addr \&quot;$clientRealIp\&quot; - - [$time_local] \&quot;$request\&quot; \&quot;$status\&quot; $body_bytes_sent \&quot;$http_referer\&quot; \&quot;$http_user_agent\&quot; $request_time $bytes_sent $request_length [$upstream_response_time]&quot;</span><br><span class="line">    source:</span><br><span class="line">      files:</span><br><span class="line">        - /var/log/nginx/test.example.com.access.log</span><br><span class="line">    relabel_configs:</span><br><span class="line">    - target_label: request_uri</span><br><span class="line">      from: request</span><br><span class="line">      split: 2</span><br><span class="line">      separator: &apos; &apos;</span><br><span class="line">      matches:</span><br><span class="line">      - regexp: &quot;^(/)(.*)\\?(.*)&quot;</span><br><span class="line">        replacement: &quot;$1$2&quot;</span><br></pre></td></tr></table></figure></p>
+<p>其实就是加了 <code>relabel_configs</code> 配置, 大概的意思就是增加了 <code>request_uri</code> 标签，获取的途径就是获取 access log 中的 request 的值，然后通过空格拆分，获取第二个值，最后应用正则表达式，获取 <code>?</code> 之前的路由，如果没有 <code>?</code> 的话，直接获取全部</p>
+<p>所以原先的一条 access log 为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">test.example.com xx.xx.xx.91 &quot;xx.xx.xx.91&quot; - - [13/Jan/2023:03:59:16 +0000] &quot;GET /getcountrycode?csrf_token=xxxx&amp;www_version=202301131143&amp;callback=_jqjsp&amp;_1673582348074= HTTP/2.0&quot; &quot;200&quot; 65 &quot;https://www.example.com/&quot; &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36&quot; 0.032 346 1344 [0.032]</span><br></pre></td></tr></table></figure></p>
+<p>然后提取到的 request_uri 标签就是 <code>/getcountrycode</code></p>
+<p>因此就可以在 prometheus 后台看到这个 request_uri 的标签:</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/8.png" alt=""></p>
+<h3 id="4-再优化-–-兼容-grafana-的参数模板"><a href="#4-再优化-–-兼容-grafana-的参数模板" class="headerlink" title="4. 再优化 – 兼容 grafana 的参数模板"></a>4. 再优化 – 兼容 grafana 的参数模板</h3><p>试想一下，假设我们这一台服务器有部署了 3 个服务，每一个的 name 都不一样，分别是 id，srv，web。 然后同一个标签我们都要加上这个 name 前缀，才能查到具体的指标数据<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">id_http_response_count_total</span><br><span class="line">srv_http_response_count_total</span><br><span class="line">web_http_response_count_total</span><br></pre></td></tr></table></figure></p>
+<p>这样子看似没问题，但是如果我们放在 grafana 的 dashboard 上， grafana 的 dashboard 是支持参数的，我们要达到点击一下参数，就可以自动换成这个服务的对应的数据模板，比如这样子</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/9.png" alt=""></p>
+<p>如果要达到这个效果，那么当前的这种标签的指定方式是没办法实现的，因为每一个服务的相同含义的指标的名称不一样，没办法带入参数去配置。</p>
+<p>因此我们要将不同服务的指标的命名换一下，换成不同服务的指标名称相同，只不过多了一个 project 标签来表示不同服务，比如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">id_http_response_count_total -&gt; http_response_count_total&#123;project=&quot;id&quot;&#125;</span><br><span class="line">srv_http_response_count_total -&gt; http_response_count_total&#123;project=&quot;srv&quot;&#125;</span><br><span class="line">web_http_response_count_total -&gt; http_response_count_total&#123;project=&quot;web&quot;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样子我们只需要在 grafana 的 dashboard 创建一个 project 的参数，每次切换都可以换成不同服务的数据了。</p>
+<p>后面查了一下官方文档，发现有一种写法是可以重写指标的前缀:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">metrics_override:</span><br><span class="line">  prefix: &quot;xx&quot;</span><br></pre></td></tr></table></figure></p>
+<p>这样子就可以将指标的前缀重写为 xx，对于本例来说，就是为空</p>
+<p>同时可以通过 <code>namespace_label: &quot;project&quot;</code> 增加一个 project 标签，而标签的值就是 namespace 的 name</p>
+<p>所以最后的配置文件如下显示, 同时我们一下配置多个项目(增加一个 srv 项目的抓取):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-9-centos ~]$ cat /etc/prometheus-nginxlog-exporter.yml</span><br><span class="line">listen:</span><br><span class="line">  port: 4040</span><br><span class="line">  metrics_endpoint: &quot;/metrics&quot;</span><br><span class="line"></span><br><span class="line">namespaces:</span><br><span class="line">  - name: id</span><br><span class="line">    format: &quot;$host $remote_addr \&quot;$clientRealIp\&quot; - - [$time_local] \&quot;$request\&quot; \&quot;$status\&quot; $body_bytes_sent \&quot;$http_referer\&quot; \&quot;$http_user_agent\&quot; $request_time $bytes_sent $request_length [$upstream_response_time]&quot;</span><br><span class="line">    source:</span><br><span class="line">      files:</span><br><span class="line">        - /var/log/nginx/test.example.com.access.log</span><br><span class="line">    # 设置前缀为空，后面好可以做参数配置</span><br><span class="line">    metrics_override:</span><br><span class="line">      prefix: &quot;&quot;</span><br><span class="line">    namespace_label: &quot;project&quot;</span><br><span class="line">    relabel_configs:</span><br><span class="line">    - target_label: request_uri</span><br><span class="line">      from: request</span><br><span class="line">      split: 2</span><br><span class="line">      separator: &apos; &apos;</span><br><span class="line">      matches:</span><br><span class="line">      - regexp: &quot;^(/)(.*)\\?(.*)&quot;</span><br><span class="line">        replacement: &quot;$1$2&quot;</span><br><span class="line"></span><br><span class="line">  - name: srv</span><br><span class="line">    format: &quot;$host $remote_addr \&quot;$clientRealIp\&quot; - - [$time_local] \&quot;$request\&quot; \&quot;$status\&quot; $body_bytes_sent \&quot;$http_referer\&quot; \&quot;$http_user_agent\&quot; $request_time $bytes_sent $request_length [$upstream_response_time]&quot;</span><br><span class="line">    source:</span><br><span class="line">      files:</span><br><span class="line">        - /var/log/nginx/srv.example.com.access.log</span><br><span class="line">    metrics_override:</span><br><span class="line">      prefix: &quot;&quot;</span><br><span class="line">    namespace_label: &quot;project&quot;</span><br><span class="line">    relabel_configs:</span><br><span class="line">    - target_label: request_uri</span><br><span class="line">      from: request</span><br><span class="line">      split: 2</span><br><span class="line">      separator: &apos; &apos;</span><br><span class="line">      matches:</span><br><span class="line">      - regexp: &quot;^(/)(.*)\\?(.*)&quot;</span><br><span class="line">        replacement: &quot;$1$2&quot;</span><br></pre></td></tr></table></figure></p>
+<p>这样子我们就可以看到同一个 nginx-log 实例的不同的项目的区别</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/10.png" alt=""></p>
+<h3 id="5-grafana-设置-dashboard"><a href="#5-grafana-设置-dashboard" class="headerlink" title="5. grafana 设置 dashboard"></a>5. grafana 设置 dashboard</h3><p>接下来就是 grafana 后台设置 dashboard， 因为这个自定义的操作很多，因此在 dashboard 模板上，没有找到比较合适， 所以只能自己搭</p>
+<p>同时因为我们标签筛选的层层级别很多，尤其是有些服务会涉及到多个区部署，因此我们设置的 dashboard 模板参数足足有 5 层</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/11.png" alt=""></p>
+<p>这边注意一个细节，到 project 层面上，就不能再用 up 指标了，因为具体收集的项目中，不会有 up 指标，而是要用具体有收集的指标，比如 <code>http_response_size_bytes</code> 等</p>
+<p>所以最后的 dashboard 效果就是:</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/12.png" alt=""></p>
+<p>这样子只要将所有服务的 nginx log 都采集，无论我想看哪个环境，哪条产品线，哪个服务的哪个区域部署的哪台服务器的情况，都可以直接切换， 非常的方便</p>
+<p>关于图表也是一样，要接参数，比如有一个图表叫 <code>路由请求 top 10</code>, 那么他的语句就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum(topk(10, http_response_count_total&#123;job=&quot;server-nginx&quot;, server_type=&quot;nginx-log&quot;, env=&quot;$env&quot;,product_line=&quot;$product_line&quot;, region=&quot;$region&quot;, wan=&quot;$wan&quot;, project=&quot;$project&quot;, request_uri != &quot;&quot;&#125;)) by (request_uri)</span><br></pre></td></tr></table></figure></p>
+<p>比如我想知道有哪些请求的响应时间超过了 5s，那么就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum(http_response_time_seconds&#123;job=&quot;server-nginx&quot;, server_type=&quot;nginx-log&quot;, env=&quot;$env&quot;,product_line=&quot;$product_line&quot;, region=&quot;$region&quot;, wan=&quot;$wan&quot;, project=&quot;$project&quot;, method!=&quot;OPTIONS&quot; ,request_uri!=&quot;&quot;,status=~&quot;2[0-9]*&quot;&#125; &gt; 5) by (request_uri)</span><br></pre></td></tr></table></figure></p>
+<p>比如我想知道 4xx5xx 的占比，那么就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum(rate(http_response_count_total&#123;job=&quot;server-nginx&quot;, server_type=&quot;nginx-log&quot;, env=&quot;$env&quot;,product_line=&quot;$product_line&quot;, region=&quot;$region&quot;, wan=&quot;$wan&quot;, project=&quot;$project&quot;, request_uri!=&quot;&quot;, status=~&quot;4..|5..&quot;&#125;[5m])) / sum(rate(http_response_count_total&#123;job=&quot;server-nginx&quot;, server_type=&quot;nginx-log&quot;, env=&quot;$env&quot;,product_line=&quot;$product_line&quot;, region=&quot;$region&quot;, wan=&quot;$wan&quot;, project=&quot;$project&quot;, request_uri!=&quot;&quot;&#125;[5m])) * 100</span><br></pre></td></tr></table></figure></p>
+<p>图表可以根据你具体业务的情况去调整参数值</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/13.png" alt=""></p>
+<blockquote>
+<p>后面在长期实践中，如果有确实很好用的图表和 PromQL 的话，再整理出来</p>
+</blockquote>
+<h4 id="遇到了一个-grafana-topk-的坑"><a href="#遇到了一个-grafana-topk-的坑" class="headerlink" title="遇到了一个 grafana topk 的坑"></a>遇到了一个 grafana topk 的坑</h4><p>我之前在处理诸如 <code>路由请求 top10</code> 的时候，有使用过类似的 topk PromQL 语法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum(topk(10, http_response_count_total&#123;job=&quot;server-nginx&quot;, server_type=&quot;nginx-log&quot;, env=&quot;$env&quot;,product_line=&quot;$product_line&quot;, region=&quot;$region&quot;, wan=&quot;$wan&quot;, project=&quot;$project&quot;, request_uri != &quot;&quot;&#125;)) by (request_uri)</span><br></pre></td></tr></table></figure></p>
+<p>这个在 grafana 上是正常的。</p>
+<p>但是我用 rate 再配合 topk 语法的话，就会有问题，不会限制最多 10 个，而是全部显示出来，也就是 topk 语法不生效</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/14.png" alt=""></p>
+<p>但是相同的语句在 prometheus 后台是可以的</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/15.png" alt=""></p>
+<p>后面查了一下，其他人也有遇到这个问题:</p>
+<ul>
+<li><a href="https://stackoverflow.com/questions/38783424/prometheus-topk-returns-more-results-than-expected" target="_blank" rel="noopener">Prometheus topk returns more results than expected</a></li>
+<li><a href="https://github.com/grafana/grafana/issues/6561" target="_blank" rel="noopener">Prometheus topk and sort_desc provides additional metrics</a></li>
+</ul>
+<p>后面发现需要开启图表的这个 instant 选项，也就是及时查询，这个就会正确的返回当前这个时间的 top10 了，但是因为是及时查询，所以只会有一个点</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/16.png" alt=""></p>
+<p>但是只有一个点，也满足不了我们的需求，所以就取一个临界值，比如要超过多少，才会显示:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum by (request_uri)(rate(http_response_count_total&#123;job=&quot;server-nginx&quot;, server_type=&quot;nginx-log&quot;, env=&quot;$env&quot;,product_line=&quot;$product_line&quot;, region=&quot;$region&quot;, wan=&quot;$wan&quot;, project=&quot;$project&quot;, request_uri!=&quot;&quot;&#125;[5m]) &gt; 0.2)</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过 <code>nginx-vts-export</code> 和 <code>prometheus-nginxlog-exporter</code> 这两个导出器，我们基本上可以抓取 nginx 上的服务的情况，包括流量，请求等等。</p>
+<p>当然掌握数据只是第一步，接下来就是要在实践中，慢慢摸索出适合你们项目的图表以及对应的预警处理。</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://github.com/martin-helmich/prometheus-nginxlog-exporter" target="_blank" rel="noopener">prometheus-nginxlog-exporter</a></li>
+<li><a href="https://www.jianshu.com/p/bc47fd07fb63" target="_blank" rel="noopener">Nginx虚拟主机流量状态模块（nginx-module-vts）使用说明文档</a></li>
+<li><a href="https://blog.csdn.net/qq_35753140/article/details/113574087" target="_blank" rel="noopener">Prometheus 通过 nginx log 日志监控应用服务</a></li>
+<li><a href="https://grafana.com/docs/grafana/v8.5/variables/variable-types/add-custom-variable/" target="_blank" rel="noopener">grafana dashboard add a custom variable</a></li>
+<li><a href="https://grafana.com/docs/grafana/latest/dashboards/variables/variable-syntax/" target="_blank" rel="noopener">grafana dashboard Variable syntax</a></li>
+<li><a href="https://www.jianshu.com/p/fe8bab704716" target="_blank" rel="noopener">grafana之Variables变量的使用</a></li>
+<li><a href="https://blog.csdn.net/weixin_41539438/article/details/123124504" target="_blank" rel="noopener">Grafana自定义变量使用笔记</a></li>
+<li><a href="https://blog.csdn.net/qq_42883074/article/details/115894190" target="_blank" rel="noopener">prometheus使用 (十九) 标签重写</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/" title="prometheus + grafana 实战篇(2) - nginx">http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/nginx/" rel="tag"># nginx</a>
+          
+            <a href="/tags/prometheus/" rel="tag"># prometheus</a>
+          
+            <a href="/tags/grafana/" rel="tag"># grafana</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2022/12/30/prometheus-best-practices-1-labels/" rel="next" title="prometheus + grafana 实战篇(1) - 定义标签组和规范">
+                <i class="fa fa-chevron-left"></i> prometheus + grafana 实战篇(1) - 定义标签组和规范
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/01/18/aws-policy-deny-ip/" rel="prev" title="后端开发针对 aws 用户权限进行细分和设置 ip 白名单">
+                后端开发针对 aws 用户权限进行细分和设置 ip 白名单 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">304</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx"><span class="nav-number">2.</span> <span class="nav-text">nginx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx-vts-export"><span class="nav-number">3.</span> <span class="nav-text">nginx-vts-export</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-nginx-重新编译安装-nginx-module-vts-模块"><span class="nav-number">3.1.</span> <span class="nav-text">1. nginx 重新编译安装 nginx-module-vts 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-安装-nginx-vts-export-导出器"><span class="nav-number">3.2.</span> <span class="nav-text">2. 安装 nginx-vts-export 导出器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-接入-prometheus-并接入-grafana-模板"><span class="nav-number">3.3.</span> <span class="nav-text">3. 接入 prometheus 并接入 grafana 模板</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#prometheus-nginxlog-exporter"><span class="nav-number">4.</span> <span class="nav-text">prometheus-nginxlog-exporter</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装"><span class="nav-number">4.1.</span> <span class="nav-text">1. 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-添加到-prometheus-监控-instance"><span class="nav-number">4.2.</span> <span class="nav-text">2. 添加到 prometheus 监控 instance</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-添加-request-uri-标签"><span class="nav-number">4.3.</span> <span class="nav-text">3. 添加 request_uri 标签</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-再优化-–-兼容-grafana-的参数模板"><span class="nav-number">4.4.</span> <span class="nav-text">4. 再优化 – 兼容 grafana 的参数模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-grafana-设置-dashboard"><span class="nav-number">4.5.</span> <span class="nav-text">5. grafana 设置 dashboard</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#遇到了一个-grafana-topk-的坑"><span class="nav-number">4.5.1.</span> <span class="nav-text">遇到了一个 grafana topk 的坑</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/';
+          this.page.identifier = '2022/12/30/prometheus-best-practices-2-nginx/';
+          this.page.title = 'prometheus + grafana 实战篇(2) - nginx';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

@@ -307,6 +307,544 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/01/18/aws-policy-deny-ip/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/01/18/aws-policy-deny-ip/" itemprop="url">后端开发针对 aws 用户权限进行细分和设置 ip 白名单</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-01-18T13:36:05+08:00">
+                2023-01-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">aws 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/01/18/aws-policy-deny-ip/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/01/18/aws-policy-deny-ip/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/01/18/aws-policy-deny-ip/" class="leancloud_visitors" data-flag-title="后端开发针对 aws 用户权限进行细分和设置 ip 白名单">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间在项目的安全审计中，有发现了一个关于后端开发中，使用 aws sdk 的一个安全隐患，就是后端的一些项目中，有用到了 aws 的一些功能，包含 s3，ses，dynamodb 等，而这些功能用的 key 都是同一个 key， 都是属于在 aws 后台创建的 develop 用户。</p>
+<p>这个 develop 用户在 aws 后台具有以下的策略权限(policy):</p>
+<ul>
+<li>dynamodb 功能的所有权限 –&gt; <code>AmazonDynamoDBFullAccess</code></li>
+<li>s3 功能的所有权限 –&gt; <code>AmazonS3FullAccess</code></li>
+<li>ses 功能的所有权限 – <code>AmazonSESFullAccess</code></li>
+</ul>
+<p>因为这个 develop 用户拥有的权限太大了， 一旦 key+secret 泄露了， 黑客就可以通过类似于 aws-cli 的命令行工具来做一些不好的事情，比如:</p>
+<ul>
+<li>往 s3 上的 bucket 随意上传某些木马文件</li>
+<li>修改 s3 bucket 的 acl 权限，将所有的 bucket 都改成公开桶，直接暴露在外网，或者给自己插入一个另一个账号的登录后门</li>
+<li>直接使用 ses 发送垃圾邮件，然后受到投诉过多之后，就会可能导致这个 aws 账号被封禁</li>
+<li>删除 dynamodb 的记录或者表</li>
+</ul>
+<p>因此我们必须在后端开发中，根据具体项目所使用到的 aws 的功能，尽可能做最小化的权限分配，并且要设置请求的 ip 白名单，这样子一来，哪怕不小心这个用户的 key+secret 泄露了，我们也不用担心会造成太大的影响。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/01/18/aws-policy-deny-ip/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/12/30/prometheus-best-practices-2-nginx/" itemprop="url">prometheus + grafana 实战篇(2) - nginx</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-12-30T18:13:24+08:00">
+                2022-12-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/12/30/prometheus-best-practices-2-nginx/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/12/30/prometheus-best-practices-2-nginx/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/12/30/prometheus-best-practices-2-nginx/" class="leancloud_visitors" data-flag-title="prometheus + grafana 实战篇(2) - nginx">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>经过上一节我们初步定义了一些标签的规范: <a href="/2022/12/30/prometheus-best-practices-1-labels/" title="prometheus + grafana 实战篇(1) - 定义标签组和规范">prometheus + grafana 实战篇(1) - 定义标签组和规范</a>, 本节我们来讲一下怎么监控 nginx</p>
+<h2 id="nginx"><a href="#nginx" class="headerlink" title="nginx"></a>nginx</h2><p>nginx 作为最受欢迎的 web server 之一，我的不少文章都有涉及到 nginx， 这边不再赘述。</p>
+<p>我们假设在使用 prometheus 采集 nginx 之前，我们线上环境已经有 nginx 服务来跑了。</p>
+<blockquote>
+<p>关于 nginx 的安装，可以看我的这一篇文章: <a href="/2020/09/15/centos7-install-nginx/" title="CentOS 7 安装 Nginx">CentOS 7 安装 Nginx</a></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-223-centos sbin]# netstat -anlp | grep 80</span><br><span class="line">tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      29841/nginx: master</span><br><span class="line">tcp        0      0 172.26.16.223:37134     169.254.0.4:80          TIME_WAIT   -                   </span><br><span class="line">udp6       0      0 fe80::5054:ff:fe23::123 :::*                                656/ntpd</span><br></pre></td></tr></table></figure>
+<h2 id="nginx-vts-export"><a href="#nginx-vts-export" class="headerlink" title="nginx-vts-export"></a>nginx-vts-export</h2><p>prometheus 常用的 nginx 的导出器，目前比较常用的是 <a href="https://github.com/hnlq715/nginx-vts-exporter" target="_blank" rel="noopener">nginx-vts-exporter</a></p>
+<p><code>nginx_vts_exporter</code> 依赖 nginx 的这个 <code>nginx-module-vts</code> 模块, 因此我们要先在 nginx 上重新编译安装 <code>nginx-module-vts</code> 模块</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2022/12/30/prometheus-best-practices-2-nginx/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/12/30/prometheus-best-practices-1-labels/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2022/12/30/prometheus-best-practices-1-labels/" itemprop="url">prometheus + grafana 实战篇(1) - 定义标签组和规范</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-12-30T15:49:12+08:00">
+                2022-12-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2022/12/30/prometheus-best-practices-1-labels/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2022/12/30/prometheus-best-practices-1-labels/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2022/12/30/prometheus-best-practices-1-labels/" class="leancloud_visitors" data-flag-title="prometheus + grafana 实战篇(1) - 定义标签组和规范">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>经过前面的学习，我们已经能够很好的掌握 prometheus 并建立监控后台了，但是那个毕竟是学习篇，用于循循渐进的学习和掌握。</p>
+<ul>
+<li><a href="https://kebingzao.com/categories/prometheus-%E7%9B%B8%E5%85%B3/">基于 prometheus 打造监控报警后台</a></li>
+</ul>
+<p>但是真正涉及到线上的实战，其实复杂度还是跟学习的情况差很多的， 因此我这边结合在实际项目上的一些实战，也捋了个实战篇。</p>
+<h2 id="prometheus-推荐的最佳实践"><a href="#prometheus-推荐的最佳实践" class="headerlink" title="prometheus 推荐的最佳实践"></a>prometheus 推荐的最佳实践</h2><p>在仪表板(dashboard)上显示尽可能多的数据虽然很爽，尤其是当像 Prometheus 这样的系统提供了对应用程序进行如此丰富的检测的能力时。这可能会导致控制台由于包含太多信息而变得难以理解，即使是系统专家也难以从中获得意义。</p>
+<p>所以千万不要将所有的数据都往 dashboard 上面搬，请考虑你建这个 dashboard 的初衷是什么，想要解决什么问题，如果你想要解决的问题是一个很复杂的问题的话，请把他进行拆解，并且分成多个 dashboard 来分批解决。</p>
+<p>prometheus 官方推荐的 dashboard 指南:</p>
+<ol>
+<li>dashboard 上面的图表最好不要超过 5 个</li>
+<li>每张图的图(线) 也不超过 5</li>
+<li>如果使用的是 dashboard 的第三方模板，请避免右侧表格中的条目超过 20-30 个</li>
+</ol>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2022/12/30/prometheus-best-practices-1-labels/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/12/14/prometheus-10-sd/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3270,540 +3808,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/09/27/web-seo-vitals/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/09/27/web-seo-vitals/" itemprop="url">浅谈之 - 怎么有指标和可量化的跟进web站点的性能加载问题</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-09-27T17:51:07+08:00">
-                2022-09-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/seo-相关/" itemprop="url" rel="index">
-                    <span itemprop="name">seo 相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/09/27/web-seo-vitals/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/09/27/web-seo-vitals/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/09/27/web-seo-vitals/" class="leancloud_visitors" data-flag-title="浅谈之 - 怎么有指标和可量化的跟进web站点的性能加载问题">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>随着对 SEO 的越来越重视， 我们也希望我们提供的站点在加载性能上也会越来越快，越来越好。</p>
-<p>但是本质上页面的性能加载是否优越的界限其实是相对比较模糊的，尤其是有一些站点的页面其实服务的是全球的用户，而不同地方用户的不同的网络情况又会极大的影响站点的加载速度。 </p>
-<p>举个简单的例子，在网络通达的日本和韩国，哪怕你页面写的不怎么样，但是架不住人家网络快，冲浪浏览起来就是快。 然后在印度，非洲这种地方，网速本来就慢， 就算你页面优化的非常到位，有可能还是要 load 很久才会出来 (巧妇难为无米之炊)。</p>
-<p>所以如果要跟进和标准量化页面的性能加载问题，那么就要有一套通用的检测和分析的标准。这个标准就会涉及到几个方面:</p>
-<ol>
-<li>检测页面性能的工具</li>
-<li>优化页面性能的固定检测指标</li>
-</ol>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/09/27/web-seo-vitals/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/09/22/php-encry-sc/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/09/22/php-encry-sc/" itemprop="url">使用 swoole compiler 对 PHP 项目进行加密</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-09-22T18:12:47+08:00">
-                2022-09-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/php相关/" itemprop="url" rel="index">
-                    <span itemprop="name">php相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/09/22/php-encry-sc/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/09/22/php-encry-sc/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/09/22/php-encry-sc/" class="leancloud_visitors" data-flag-title="使用 swoole compiler 对 PHP 项目进行加密">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前试了一下 <code>yakpro-po</code> 混淆加密的测试: <a href="/2022/09/20/php-encry-yp/" title="使用 yakpro-po 对 PHP 项目进行混淆加密">使用 yakpro-po 对 PHP 项目进行混淆加密</a></p>
-<p>接下来我们试一下扩展加密 <code>Swoole Compiler</code> 的效果</p>
-<h2 id="Swoole-Compiler"><a href="#Swoole-Compiler" class="headerlink" title="Swoole Compiler"></a>Swoole Compiler</h2><p><code>Swoole Compiler</code> 是swoole官方推出的PHP代码加密和客户端授权解决方案， 通过业内先进的代码加密技术（流程混淆，花指令，变量混淆，函数名混淆，虚拟机保护技术，扁平化代码，sccp优化等）将PHP程序源代码编译为二进制指令，来保护您的源代码，加密技术更先进、更安全。</p>
-<p>与 <code>Zend Guard</code> 等传统的PHP加密器不同，<code>Swoole Compiler</code> 没有软件界面，它提供了API，可将 <code>Swoole Compiler</code> 集成到您的打包发布平台中，完全是可编程的。<code>Swoole Compiler</code> 相比其他传统的PHP加密器，安全强度更高。</p>
-<p><code>Swoole Compiler</code> 使用了特殊定制的ZendVM，与普通的PHP程序运行模式有较大差异。并具有如下特性：</p>
-<ol>
-<li>保护程序源码：避免 PHP 源代码泄漏，避免被编辑</li>
-<li>提升性能：使用<code>Swoole Compiler</code>底层内置了多个编译优化器，可优化 opcode，性能比源码执行有较大提高</li>
-<li>授权管理：内置了授权管理功能，可限制PHP程序运行的机器硬件和网络环境</li>
-</ol>
-<blockquote>
-<p>还有一点，就是国人开发，响应时间快<br></p></blockquote>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/09/22/php-encry-sc/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/09/20/php-encry-yp/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/09/20/php-encry-yp/" itemprop="url">使用 yakpro-po 对 PHP 项目进行混淆加密</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-09-20T16:57:38+08:00">
-                2022-09-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/php相关/" itemprop="url" rel="index">
-                    <span itemprop="name">php相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/09/20/php-encry-yp/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/09/20/php-encry-yp/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/09/20/php-encry-yp/" class="leancloud_visitors" data-flag-title="使用 yakpro-po 对 PHP 项目进行混淆加密">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有讨论 <a href="/2022/09/20/php-encry/" title="浅谈之 - PHP 项目代码加密方案">浅谈之 - PHP 项目代码加密方案</a>, 所以本次我们尝试使用 <code>yakpro-po</code> 对我们的 PHP 项目进行混淆加密</p>
-<ul>
-<li><a href="https://github.com/pk-fr/yakpro-po" target="_blank" rel="noopener">YAK Pro - Php Obfuscator</a></li>
-<li><a href="https://github.com/nikic/PHP-Parser/tree/4.x/" target="_blank" rel="noopener">PHP Parser</a></li>
-</ul>
-<h2 id="环境需求"><a href="#环境需求" class="headerlink" title="环境需求"></a>环境需求</h2><p>因为 <code>yakpro-po</code> 是基于 <code>PHP Parser 4.x</code> 的语法解析器做的。 而 <code>PHP Parser 4.x</code> 库的运行环境要求是要在 PHP 7.0 以上环境才能运行， 不过混淆后的代码可以在 PHP 5.2 到 7.3 之间都可以工作。</p>
-<p>而我们的 PHP 程序是跑在 PHP 5.6 上面的。 所以可以满足混淆之后运行代码的环境。 而且为了更直观的表现出混淆加密和针对加密文件的运行可以在不同的服务器和 PHP 环境上，本次的测试用两台测试机器来测试，这样子会显得更直观</p>
-<ol>
-<li>一台服务器 -&gt; <code>混淆加密服务器</code>，上面安装了 7.4 的 PHP 版本， 采用 docker-compose 安装的，参照: <a href="https://github.com/kebingzao/dnmp" target="_blank" rel="noopener">LNMP一键安装程序</a>， 这一台用来混淆加密 PHP 代码。</li>
-<li>一台服务器 -&gt; <code>加密文件运行服务器</code>, 用来运行混淆过的 PHP 程序的代码，PHP 5.6 的环境， 看是否可以成功运行。</li>
-</ol>
-<blockquote>
-<p>嫌麻烦的可以直接用一台，然后在各自的 docker 里面跑<br></p></blockquote>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/09/20/php-encry-yp/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3858,7 +3862,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">301</span>
+                  <span class="site-state-item-count">304</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3880,7 +3884,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-count">77</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -3927,7 +3931,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2022</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

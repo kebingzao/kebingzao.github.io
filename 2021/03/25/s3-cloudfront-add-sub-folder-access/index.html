@@ -101,7 +101,9 @@
 <meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/3.png">
 <meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/4.png">
 <meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/5.png">
-<meta property="og:updated_time" content="2021-04-01T13:03:38.393Z">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/10.png">
+<meta property="og:image" content="http://kebingzao.com/2021/03/25/s3-cloudfront-add-sub-folder-access/11.png">
+<meta property="og:updated_time" content="2023-03-17T13:13:52.202Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 aws Lambda@Edge 为 S3 CloudFront 静态托管的站点实现子目录默认文件索引">
 <meta name="twitter:description" content="前言之前有出现过一种情况，就是我们的静态站点是有国内和国外加速的(这个是在 aws 的 router 53 服务配置的)，比如:  如果是国内访问的，那么就引导到腾讯云的 COS 存储服务 + CDN 服务 如果是国外访问的，那么就引导到 aws 的  S3 存储服务 + Cloudfront CDN 服务  正常的文件当然没问题，但是有时候会出现如果 url 后面不输入 index.html，直">
@@ -484,11 +486,21 @@
 <h3 id="5-测试有没有部署生效"><a href="#5-测试有没有部署生效" class="headerlink" title="5. 测试有没有部署生效"></a>5. 测试有没有部署生效</h3><p>等部署完之后，我们就可以重新请求了， 这时候用 curl 请求一下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_9_centos ~]$ curl -I https://m.foo.com/cast/</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 10754</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Date: Thu, 25 Mar 2021 08:05:34 GMT</span><br><span class="line">Last-Modified: Thu, 28 Jan 2021 06:18:46 GMT</span><br><span class="line">ETag: &quot;93ff430a043037a9452fe191f6b0320b&quot;</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Server: AmazonS3</span><br><span class="line">Strict-Transport-Security: max-age=7776000</span><br><span class="line">X-Cache: Hit from cloudfront</span><br><span class="line">Via: 1.1 cfa15842f57761e1aba6ea8338d380d5.cloudfront.net (CloudFront)</span><br><span class="line">X-Amz-Cf-Pop: SFO20-C1</span><br><span class="line">X-Amz-Cf-Id: 5oaotoHwXoQT197vrn5ORM1dICkGrgAH-5ILwrDcv0ru9bA1VdczRg==</span><br><span class="line">Age: 2521</span><br></pre></td></tr></table></figure></p>
 <p>这时候就是 200 成功，并且有 hit cloudfront 了。 去掉 最后的 <code>/</code> 再试试:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM_16_9_centos ~]$ curl -I https://m.foo.com/cast</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Content-Length: 10754</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Date: Thu, 25 Mar 2021 08:05:38 GMT</span><br><span class="line">Last-Modified: Thu, 28 Jan 2021 06:18:46 GMT</span><br><span class="line">ETag: &quot;93ff430a043037a9452fe191f6b0320b&quot;</span><br><span class="line">Accept-Ranges: bytes</span><br><span class="line">Server: AmazonS3</span><br><span class="line">Strict-Transport-Security: max-age=7776000</span><br><span class="line">X-Cache: Hit from cloudfront</span><br><span class="line">Via: 1.1 88734c1b1a8053ae83daf0f85731c788.cloudfront.net (CloudFront)</span><br><span class="line">X-Amz-Cf-Pop: SFO20-C1</span><br><span class="line">X-Amz-Cf-Id: U6de8MCZwtoS6zyb4lLgDjZCsUkeJa4n_xW9PXLUb8rBL1K-vGvolg==</span><br><span class="line">Age: 2451</span><br></pre></td></tr></table></figure></p>
 <p>说明成功生效了。</p>
+<h2 id="直接配置-cloudfront-的源域属性"><a href="#直接配置-cloudfront-的源域属性" class="headerlink" title="直接配置 cloudfront 的源域属性"></a>直接配置 cloudfront 的源域属性</h2><p>除了上面的 lambda 方式之后， 后面还发现了一种更简单的方式可以获取子目录的根文件</p>
+<p>之前之所以不行是因为我们在配置 cloudfront 的源域的时候，选择是 s3 作为存储桶的源域名，比如</p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/10.png" alt="1"></p>
+<p>这时候 cloudfront 会提示你是否要将这个源域设置成 <code>S3 存储桶</code>， 还是要设置为 <code>S3 网站端点</code>, 这两种的域名是不一样的，而且效果也不一样。</p>
+<p>如果只是当做云端的存储桶，供用户下载文件， 那么就设置为 <code>S3 存储桶</code>，这时候 cloudfront 只有准确匹配到路径，才会获取文件。</p>
+<p>如果是当做站点来访问的话，那么就要设置为 <code>S3 网站端点</code>, 这时候 cloudfront 在遇到子目录检索的时候，对于缺省的文件路径，是会默认获取根目录文件的，比如 <code>index.html</code> 这种。</p>
+<p>因此对于本例来说，肯定是要设置为 <code>S3 网站端点</code> 才行，也就是点击下面的 <code>使用网站端点</code></p>
+<p><img src="/2021/03/25/s3-cloudfront-add-sub-folder-access/11.png" alt="1"></p>
+<p>这样子就可以了，就可以访问子目录的根文件了。</p>
 <hr>
 <p>参考资料</p>
 <ul>
 <li><a href="https://aws.amazon.com/cn/blogs/compute/implementing-default-directory-indexes-in-amazon-s3-backed-amazon-cloudfront-origins-using-lambdaedge/?nc1=h_ls" target="_blank" rel="noopener">Implementing Default Directory Indexes in Amazon S3-backed Amazon CloudFront Origins Using Lambda@Edge</a></li>
 <li><a href="https://docs.aws.amazon.com/zh_cn/AmazonCloudFront/latest/DeveloperGuide/lambda-event-structure.html" target="_blank" rel="noopener">Lambda@Edge 事件结构</a></li>
+<li><a href="https://juejin.cn/post/6844904160807108622" target="_blank" rel="noopener">使用AWS CodePipeline 以及相关服务自动部署个人静态网站</a></li>
 </ul>
 
       
@@ -643,7 +655,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">304</span>
+                  <span class="site-state-item-count">305</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -708,7 +720,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方式"><span class="nav-number">2.</span> <span class="nav-text">解决方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体实操"><span class="nav-number">3.</span> <span class="nav-text">具体实操</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-创建函数"><span class="nav-number">3.1.</span> <span class="nav-text">1. 创建函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-写代码，并保存"><span class="nav-number">3.2.</span> <span class="nav-text">2. 写代码，并保存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-测试一下代码是否正确"><span class="nav-number">3.3.</span> <span class="nav-text">3. 测试一下代码是否正确</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-应用到-cloudfront"><span class="nav-number">3.4.</span> <span class="nav-text">4. 应用到 cloudfront</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-测试有没有部署生效"><span class="nav-number">3.5.</span> <span class="nav-text">5. 测试有没有部署生效</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方式"><span class="nav-number">2.</span> <span class="nav-text">解决方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#具体实操"><span class="nav-number">3.</span> <span class="nav-text">具体实操</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-创建函数"><span class="nav-number">3.1.</span> <span class="nav-text">1. 创建函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-写代码，并保存"><span class="nav-number">3.2.</span> <span class="nav-text">2. 写代码，并保存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-测试一下代码是否正确"><span class="nav-number">3.3.</span> <span class="nav-text">3. 测试一下代码是否正确</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-应用到-cloudfront"><span class="nav-number">3.4.</span> <span class="nav-text">4. 应用到 cloudfront</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-测试有没有部署生效"><span class="nav-number">3.5.</span> <span class="nav-text">5. 测试有没有部署生效</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#直接配置-cloudfront-的源域属性"><span class="nav-number">4.</span> <span class="nav-text">直接配置 cloudfront 的源域属性</span></a></li></ol></div>
             
 
           </div>

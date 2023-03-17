@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前段时间有个 researcher 回报说，他可以通过使用 X-Frame-Bypass 来绕过我们站点的 X-Frame-Options 机制，从而将我们的站点内嵌在他的网页上，从而造成 Clickjacking 对于 Clickjacking 来说，我们一般是使用设置 X-Frame-Options header 来防止站点被第三方内嵌，具体可以看我之前的文章:  web 页面防ifram">
+<meta name="keywords" content="security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="web 安全之 - 使用 proxy 请求页面来绕过 X-Frame-Options 机制">
+<meta property="og:url" content="http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前段时间有个 researcher 回报说，他可以通过使用 X-Frame-Bypass 来绕过我们站点的 X-Frame-Options 机制，从而将我们的站点内嵌在他的网页上，从而造成 Clickjacking 对于 Clickjacking 来说，我们一般是使用设置 X-Frame-Options header 来防止站点被第三方内嵌，具体可以看我之前的文章:  web 页面防ifram">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/1.png">
+<meta property="og:image" content="http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/2.png">
+<meta property="og:image" content="http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/3.png">
+<meta property="og:updated_time" content="2023-03-17T13:13:52.204Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="web 安全之 - 使用 proxy 请求页面来绕过 X-Frame-Options 机制">
+<meta name="twitter:description" content="前言前段时间有个 researcher 回报说，他可以通过使用 X-Frame-Bypass 来绕过我们站点的 X-Frame-Options 机制，从而将我们的站点内嵌在他的网页上，从而造成 Clickjacking 对于 Clickjacking 来说，我们一般是使用设置 X-Frame-Options header 来防止站点被第三方内嵌，具体可以看我之前的文章:  web 页面防ifram">
+<meta name="twitter:image" content="http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/"/>
+
+
+
+
+
+  <title>web 安全之 - 使用 proxy 请求页面来绕过 X-Frame-Options 机制 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">web 安全之 - 使用 proxy 请求页面来绕过 X-Frame-Options 机制</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-02-03T16:43:08+08:00">
+                2023-02-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/02/03/web-bypass-x-frame-options/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/02/03/web-bypass-x-frame-options/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/02/03/web-bypass-x-frame-options/" class="leancloud_visitors" data-flag-title="web 安全之 - 使用 proxy 请求页面来绕过 X-Frame-Options 机制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有个 researcher 回报说，他可以通过使用 <a href="https://github.com/niutech/x-frame-bypass" target="_blank" rel="noopener">X-Frame-Bypass</a> 来绕过我们站点的 <code>X-Frame-Options</code> 机制，从而将我们的站点内嵌在他的网页上，从而造成 Clickjacking</p>
+<p>对于 Clickjacking 来说，我们一般是使用设置 <code>X-Frame-Options</code> header 来防止站点被第三方内嵌，具体可以看我之前的文章:</p>
+<ul>
+<li><a href="/2018/05/05/web-forbidden-iframe-embed/" title="web 页面防iframe嵌入（防止点击劫持Clickjacking）">web 页面防iframe嵌入（防止点击劫持Clickjacking）</a>
+</li>
+</ul>
+<p>通过 <code>X-Frame-Options</code> 我们可以很好的防止我们的站点被第三方内嵌。</p>
+<p>那么 <a href="https://github.com/niutech/x-frame-bypass" target="_blank" rel="noopener">X-Frame-Bypass</a> 是怎么绕过 <code>X-Frame-Options</code> 这个限制的呢?</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>我后面看了一下他的代码，他的方式其实很简单，既然 <code>X-Frame-Options</code> 是在 response 的 header 返回的，那么我只要在请求的时候，先去通过第三方服务将我想要的站点的内容取出来，然后只转发这个 body 体，不转发 header，就可以绕过了。</p>
+<p>举个例子，比如我内嵌别人站点的代码是这样子的:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;iframe src=<span class="string">"https://api.codetabs.com/v1/proxy/?quest=https://test-example.com/my_test.html"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span></span><br></pre></td></tr></table></figure></p>
+<p>这个逻辑很简单，就是这个 第三方 <code>api.codetabs.com</code>, 会去请求 <code>https://test-example.com/my_test.html</code>，并且将源代码返回，其实就是转发<br><a id="more"></a><br>这个请求转发的逻辑很简单, 比如我用 node 自己写了一个页面抓取转发接口:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> http = <span class="built_in">require</span>(<span class="string">'http'</span>)</span><br><span class="line"><span class="keyword">const</span> requestLib = <span class="built_in">require</span>(<span class="string">'request'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> server = http.createServer(<span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'method: '</span>, req.method) <span class="comment">// 打印请求方法，GET</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> url = req.url</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'url: '</span>, url) <span class="comment">// 打印被访问的url</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> queryUrl = url.split(<span class="string">'?request='</span>)[<span class="number">1</span>];</span><br><span class="line">  <span class="keyword">if</span>(queryUrl)&#123;</span><br><span class="line">    <span class="comment">// 接下来请求代理</span></span><br><span class="line">    requestLib(&#123;</span><br><span class="line">      url: queryUrl,</span><br><span class="line">      method: <span class="string">"GET"</span>,</span><br><span class="line">    &#125;,<span class="function"><span class="keyword">function</span> (<span class="params">error, response, body</span>)</span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'body:'</span>, body);</span><br><span class="line">        res.end(body) <span class="comment">// 将参数返回给前端</span></span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    res.end(<span class="string">""</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line">server.listen(<span class="number">8008</span>, () =&gt; &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'http://localhost:8008'</span>)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>可以看到我抓取之后，只转发了 body 体内容，直接忽略了 response 的 header 了，因此用我本地代理，跟上述等价的就是:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;iframe src=<span class="string">"http://192.168.40.51:8008/?request=https://test-example.com/my_test.html"</span>&gt;<span class="xml"><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span></span><br></pre></td></tr></table></figure></p>
+<p>然后最后的效果就是 <code>https://test-example.com/my_test.html</code> 这个页面就被内嵌了</p>
+<p><img src="/2023/02/03/web-bypass-x-frame-options/1.png" alt=""></p>
+<h3 id="X-Frame-Bypass-的做法"><a href="#X-Frame-Bypass-的做法" class="headerlink" title="X-Frame-Bypass 的做法"></a>X-Frame-Bypass 的做法</h3><p>X-Frame-Bypass 的核心本质做法，跟我上述的 demo 类似，也是通过 proxy 代理的方式，去转发原页面的代码。 只不过他做的更全。</p>
+<p>我上面的例子只针对当前的这个页面做处理，万一这个页面里面还有外链，或者有 form 表单提交呢，这些外链的 <code>X-Frame-Options</code> 配置就没办法绕过了。</p>
+<p>而 X-Frame-Bypass 就有处理，他会去劫持当前页面的所有的外链形式，然后点击的时候，也走 proxy 代理劫持，相关代码:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// X-Frame-Bypass navigation event handlers</span></span><br><span class="line"><span class="built_in">document</span>.addEventListener(<span class="string">'click'</span>, e =&gt; &#123;</span><br><span class="line">	<span class="keyword">if</span> (frameElement &amp;&amp; <span class="built_in">document</span>.activeElement &amp;&amp; <span class="built_in">document</span>.activeElement.href) &#123;</span><br><span class="line">		e.preventDefault()</span><br><span class="line">		frameElement.load(<span class="built_in">document</span>.activeElement.href)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br><span class="line"><span class="built_in">document</span>.addEventListener(<span class="string">'submit'</span>, e =&gt; &#123;</span><br><span class="line">	<span class="keyword">if</span> (frameElement &amp;&amp; <span class="built_in">document</span>.activeElement &amp;&amp; <span class="built_in">document</span>.activeElement.form &amp;&amp; <span class="built_in">document</span>.activeElement.form.action) &#123;</span><br><span class="line">		e.preventDefault()</span><br><span class="line">		<span class="keyword">if</span> (<span class="built_in">document</span>.activeElement.form.method === <span class="string">'post'</span>)</span><br><span class="line">			frameElement.load(<span class="built_in">document</span>.activeElement.form.action, &#123;<span class="attr">method</span>: <span class="string">'post'</span>, <span class="attr">body</span>: <span class="keyword">new</span> FormData(<span class="built_in">document</span>.activeElement.form)&#125;)</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			frameElement.load(<span class="built_in">document</span>.activeElement.form.action + <span class="string">'?'</span> + <span class="keyword">new</span> URLSearchParams(<span class="keyword">new</span> FormData(<span class="built_in">document</span>.activeElement.form)))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>这样子就可以让表单提交和 href 外链都可以正常跳转。</p>
+<h2 id="防范"><a href="#防范" class="headerlink" title="防范"></a>防范</h2><h3 id="1-使用-frame-ancestors"><a href="#1-使用-frame-ancestors" class="headerlink" title="1. 使用 frame-ancestors"></a>1. 使用 frame-ancestors</h3><p>researcher 有建议后面用 CSP 的 <code>frame-ancestors</code> 的参数来防范， 但是我试了一下，有配:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">add_header X-Frame-Options <span class="string">"SAMEORIGIN"</span>;</span><br><span class="line">add_header Content-Security-Policy <span class="string">"frame-ancestors 'self'"</span>;</span><br></pre></td></tr></table></figure></p>
+<p>但是发现没有效果</p>
+<p><img src="/2023/02/03/web-bypass-x-frame-options/2.png" alt=""></p>
+<p>因此我怀疑 <code>frame-ancestors</code> 这个配置也是没办法阻止 proxy 代理的，因为他跟 <code>X-Frame-Options</code> 一样，都是跟在原页面的 response 的 header，在 proxy 请求转发 body 体的时候，原 response 会被洗掉， 因为 proxy 只会转发 body 体， header 不会转发， 因此只要是 header 的方式，应该都不能生效。</p>
+<p>除非这个规则本来是写在 html 里面的，但是很遗憾的是 CSP 的很多参数都可以写在 html 页面的 meta 中，但是 frame-ancestors 恰恰不能用在 meta 标签中生效中，只能在 header 中生效。</p>
+<ul>
+<li><a href="/2022/10/09/csp/" title="web 安全之 - 使用CSP(Content Security Policy)来防止 XSS 攻击">web 安全之 - 使用CSP(Content Security Policy)来防止 XSS 攻击</a>
+</li>
+</ul>
+<h3 id="2-使用-js-代码判断"><a href="#2-使用-js-代码判断" class="headerlink" title="2. 使用 js 代码判断"></a>2. 使用 js 代码判断</h3><p>虽然没办法用 header 来防范，但是可以用 js 来防范，比如:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="built_in">window</span>.location != <span class="built_in">window</span>.parent.location) &#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">"oops!!!"</span>);</span><br><span class="line">  <span class="built_in">window</span>.stop ? <span class="built_in">window</span>.stop() : <span class="built_in">document</span>.execCommand(<span class="string">"Stop"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这样子一旦该页面被内嵌的话，就会直接白屏:</p>
+<p><img src="/2023/02/03/web-bypass-x-frame-options/3.png" alt=""></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过 header 是没办法防的， 通过 js 可以防，不过既然都已经被 proxy 代理，意味着 js 也可以被破就是了。</p>
+<p>不过这种危害其实是很低的，他有几个很大的缺陷:</p>
+<ol>
+<li>因为他的外链都被劫持代理了，因此导航栏的 url 是不会变的</li>
+<li>而且因为被代理了，因此 host 肯定变了，因此所有的需要 cors 校验的接口都会校验失败</li>
+<li>一些特殊的验证码机制，比如 google 机器人验证，在被内嵌的页面里面，也是直接报错的</li>
+</ol>
+<p>只能说危害很低</p>
+<h2 id="附录-X-Frame-Bypass-的测试代码"><a href="#附录-X-Frame-Bypass-的测试代码" class="headerlink" title="附录: X-Frame-Bypass 的测试代码:"></a>附录: X-Frame-Bypass 的测试代码:</h2><h3 id="index-html"><a href="#index-html" class="headerlink" title="index.html"></a>index.html</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"UTF-8"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale-1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"description"</span> <span class="attr">content</span>=<span class="string">"X-Frame-Bypass: Web Component extending IFrame to bypass X-Frame-Options: deny/sameorigin"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span>X-Frame-Bypass Web Component Demo<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="undefined">    html, body &#123;</span></span><br><span class="line"><span class="undefined">      margin: 0;</span></span><br><span class="line"><span class="undefined">      padding: 0;</span></span><br><span class="line"><span class="undefined">      height: 100%;</span></span><br><span class="line"><span class="undefined">      overflow: hidden;</span></span><br><span class="line"><span class="undefined">    &#125;</span></span><br><span class="line"><span class="undefined">    iframe &#123;</span></span><br><span class="line"><span class="undefined">      display: block;</span></span><br><span class="line"><span class="undefined">      width: calc(100% - 40px);</span></span><br><span class="line"><span class="undefined">      height: calc(100% - 40px);</span></span><br><span class="line"><span class="undefined">      margin: 20px;</span></span><br><span class="line"><span class="undefined">    &#125;</span></span><br><span class="line"><span class="undefined">    img &#123;</span></span><br><span class="line"><span class="undefined">      position: absolute;</span></span><br><span class="line"><span class="undefined">      top: 0;</span></span><br><span class="line"><span class="undefined">      right: 0;</span></span><br><span class="line"><span class="undefined">    &#125;</span></span><br><span class="line"><span class="undefined">  </span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"https://unpkg.com/@ungap/custom-elements-builtin"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"x-frame-bypass.js"</span> <span class="attr">type</span>=<span class="string">"module"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">is</span>=<span class="string">"x-frame-bypass"</span> <span class="attr">src</span>=<span class="string">"https://test-example.com/my_test.html"</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="2-x-frame-bypass-js"><a href="#2-x-frame-bypass-js" class="headerlink" title="2. x-frame-bypass.js"></a>2. x-frame-bypass.js</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line">customElements.define(<span class="string">'x-frame-bypass'</span>, <span class="class"><span class="keyword">class</span> <span class="keyword">extends</span> <span class="title">HTMLIFrameElement</span> </span>&#123;</span><br><span class="line">	<span class="keyword">static</span> get observedAttributes() &#123;</span><br><span class="line">		<span class="keyword">return</span> [<span class="string">'src'</span>]</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">constructor</span> () &#123;</span><br><span class="line">		<span class="keyword">super</span>()</span><br><span class="line">	&#125;</span><br><span class="line">	attributeChangedCallback () &#123;</span><br><span class="line">		<span class="keyword">this</span>.load(<span class="keyword">this</span>.src)</span><br><span class="line">	&#125;</span><br><span class="line">	connectedCallback () &#123;</span><br><span class="line">		<span class="keyword">this</span>.sandbox = <span class="string">''</span> + <span class="keyword">this</span>.sandbox || <span class="string">'allow-forms allow-modals allow-pointer-lock allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts allow-top-navigation-by-user-activation'</span> <span class="comment">// all except allow-top-navigation</span></span><br><span class="line">	&#125;</span><br><span class="line">	load (url, options) &#123;</span><br><span class="line">		<span class="keyword">if</span> (!url || !url.startsWith(<span class="string">'http'</span>))</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">`X-Frame-Bypass src <span class="subst">$&#123;url&#125;</span> does not start with http(s)://`</span>)</span><br><span class="line">		<span class="built_in">console</span>.log(<span class="string">'X-Frame-Bypass loading:'</span>, url)</span><br><span class="line">		<span class="keyword">this</span>.srcdoc = <span class="string">`&lt;html&gt;</span></span><br><span class="line"><span class="string">&lt;head&gt;</span></span><br><span class="line"><span class="string">	&lt;style&gt;</span></span><br><span class="line"><span class="string">	.loader &#123;</span></span><br><span class="line"><span class="string">		position: absolute;</span></span><br><span class="line"><span class="string">		top: calc(50% - 25px);</span></span><br><span class="line"><span class="string">		left: calc(50% - 25px);</span></span><br><span class="line"><span class="string">		width: 50px;</span></span><br><span class="line"><span class="string">		height: 50px;</span></span><br><span class="line"><span class="string">		background-color: #333;</span></span><br><span class="line"><span class="string">		border-radius: 50%;  </span></span><br><span class="line"><span class="string">		animation: loader 1s infinite ease-in-out;</span></span><br><span class="line"><span class="string">	&#125;</span></span><br><span class="line"><span class="string">	@keyframes loader &#123;</span></span><br><span class="line"><span class="string">		0% &#123;</span></span><br><span class="line"><span class="string">		transform: scale(0);</span></span><br><span class="line"><span class="string">		&#125;</span></span><br><span class="line"><span class="string">		100% &#123;</span></span><br><span class="line"><span class="string">		transform: scale(1);</span></span><br><span class="line"><span class="string">		opacity: 0;</span></span><br><span class="line"><span class="string">		&#125;</span></span><br><span class="line"><span class="string">	&#125;</span></span><br><span class="line"><span class="string">	&lt;/style&gt;</span></span><br><span class="line"><span class="string">&lt;/head&gt;</span></span><br><span class="line"><span class="string">&lt;body&gt;</span></span><br><span class="line"><span class="string">	&lt;div class="loader"&gt;&lt;/div&gt;</span></span><br><span class="line"><span class="string">&lt;/body&gt;</span></span><br><span class="line"><span class="string">&lt;/html&gt;`</span></span><br><span class="line">		<span class="keyword">this</span>.fetchProxy(url, options, <span class="number">0</span>).then(<span class="function"><span class="params">res</span> =&gt;</span> res.text()).then(<span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> (data)</span><br><span class="line">				<span class="keyword">this</span>.srcdoc = data.replace(<span class="regexp">/&lt;head([^&gt;]*)&gt;/i</span>, <span class="string">`&lt;head$1&gt;</span></span><br><span class="line"><span class="string">	&lt;base href="<span class="subst">$&#123;url&#125;</span>"&gt;</span></span><br><span class="line"><span class="string">	&lt;script&gt;</span></span><br><span class="line"><span class="string">	// X-Frame-Bypass navigation event handlers</span></span><br><span class="line"><span class="string">	document.addEventListener('click', e =&gt; &#123;</span></span><br><span class="line"><span class="string">		if (frameElement &amp;&amp; document.activeElement &amp;&amp; document.activeElement.href) &#123;</span></span><br><span class="line"><span class="string">			e.preventDefault()</span></span><br><span class="line"><span class="string">			frameElement.load(document.activeElement.href)</span></span><br><span class="line"><span class="string">		&#125;</span></span><br><span class="line"><span class="string">	&#125;)</span></span><br><span class="line"><span class="string">	document.addEventListener('submit', e =&gt; &#123;</span></span><br><span class="line"><span class="string">		if (frameElement &amp;&amp; document.activeElement &amp;&amp; document.activeElement.form &amp;&amp; document.activeElement.form.action) &#123;</span></span><br><span class="line"><span class="string">			e.preventDefault()</span></span><br><span class="line"><span class="string">			if (document.activeElement.form.method === 'post')</span></span><br><span class="line"><span class="string">				frameElement.load(document.activeElement.form.action, &#123;method: 'post', body: new FormData(document.activeElement.form)&#125;)</span></span><br><span class="line"><span class="string">			else</span></span><br><span class="line"><span class="string">				frameElement.load(document.activeElement.form.action + '?' + new URLSearchParams(new FormData(document.activeElement.form)))</span></span><br><span class="line"><span class="string">		&#125;</span></span><br><span class="line"><span class="string">	&#125;)</span></span><br><span class="line"><span class="string">	&lt;/script&gt;`</span>)</span><br><span class="line">		&#125;).catch(<span class="function"><span class="params">e</span> =&gt;</span> <span class="built_in">console</span>.error(<span class="string">'Cannot load X-Frame-Bypass:'</span>, e))</span><br><span class="line">	&#125;</span><br><span class="line">	fetchProxy (url, options, i) &#123;</span><br><span class="line">		<span class="keyword">const</span> proxies = (options || &#123;&#125;).proxies || [</span><br><span class="line">			<span class="string">'https://cors-anywhere.herokuapp.com/'</span>,</span><br><span class="line">			<span class="string">'https://yacdn.org/proxy/'</span>,</span><br><span class="line">			<span class="string">'https://api.codetabs.com/v1/proxy/?quest='</span></span><br><span class="line">		]</span><br><span class="line">		<span class="keyword">return</span> fetch(proxies[i] + url, options).then(<span class="function"><span class="params">res</span> =&gt;</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> (!res.ok)</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">`<span class="subst">$&#123;res.status&#125;</span> <span class="subst">$&#123;res.statusText&#125;</span>`</span>);</span><br><span class="line">			<span class="keyword">return</span> res</span><br><span class="line">		&#125;).catch(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">			<span class="keyword">if</span> (i === proxies.length - <span class="number">1</span>)</span><br><span class="line">				<span class="keyword">throw</span> error</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>.fetchProxy(url, options, i + <span class="number">1</span>)</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;, &#123;<span class="attr">extends</span>: <span class="string">'iframe'</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/" title="web 安全之 - 使用 proxy 请求页面来绕过 X-Frame-Options 机制">http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/01/18/aws-policy-deny-ip/" rel="next" title="后端开发针对 aws 用户权限进行细分和设置 ip 白名单">
+                <i class="fa fa-chevron-left"></i> 后端开发针对 aws 用户权限进行细分和设置 ip 白名单
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">305</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#X-Frame-Bypass-的做法"><span class="nav-number">2.1.</span> <span class="nav-text">X-Frame-Bypass 的做法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#防范"><span class="nav-number">3.</span> <span class="nav-text">防范</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-使用-frame-ancestors"><span class="nav-number">3.1.</span> <span class="nav-text">1. 使用 frame-ancestors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-使用-js-代码判断"><span class="nav-number">3.2.</span> <span class="nav-text">2. 使用 js 代码判断</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录-X-Frame-Bypass-的测试代码"><span class="nav-number">5.</span> <span class="nav-text">附录: X-Frame-Bypass 的测试代码:</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#index-html"><span class="nav-number">5.1.</span> <span class="nav-text">index.html</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-x-frame-bypass-js"><span class="nav-number">5.2.</span> <span class="nav-text">2. x-frame-bypass.js</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/';
+          this.page.identifier = '2023/02/03/web-bypass-x-frame-options/';
+          this.page.title = 'web 安全之 - 使用 proxy 请求页面来绕过 X-Frame-Options 机制';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

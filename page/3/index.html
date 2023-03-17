@@ -307,6 +307,177 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/12/22/nginx-proxy-sni-tcp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2021/12/22/nginx-proxy-sni-tcp/" itemprop="url">nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-12-22T10:18:43+08:00">
+                2021-12-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/nginx相关/" itemprop="url" rel="index">
+                    <span itemprop="name">nginx相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2021/12/22/nginx-proxy-sni-tcp/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2021/12/22/nginx-proxy-sni-tcp/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2021/12/22/nginx-proxy-sni-tcp/" class="leancloud_visitors" data-flag-title="nginx 转发代理 tls tcp 并且使用 sni 复用 443 端口">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前有处理过 <a href="/2021/10/21/nginx-proxy-wss-https/" title="nginx 转发代理 wss 和 https (目标程序是 ws 和 http)">nginx 转发代理 wss 和 https (目标程序是 ws 和 http)</a>, 后面发现我们的服务还有一些是 tcp 长连接，而且还是支持 tls 的 tcp 长连接。 这个也是非 80 和 443 端口的。 后面也需要用 nginx 转发代理一下。</p>
+<h2 id="nginx-支持-tcp-层的转发"><a href="#nginx-支持-tcp-层的转发" class="headerlink" title="nginx 支持 tcp 层的转发"></a>nginx 支持 tcp 层的转发</h2><p>nginx 1.9 开始支持 tcp 层的转发，通过 stream 实现的，而 socket 也是基于 tcp 通信，跟 ws 和 wss 不一样， 本质上 ws 虽然也是长连接， 但是他是基于 http 的协议上去进行协议升级的，所以可以写在 http 指令串里面。</p>
+<p>但是 tcp 不支持，而且依赖的模块也不一样，他依赖的是 <code>ngx_stream_core_module</code>， 这个模块也是要单独安装的。而且这个 stream 块， 只能放到 <code>nginx.conf</code> 文件中，不能放到 <code>site-avaliable</code> 目录中， 不然就会变成 http 的。</p>
+<h3 id="安装-stream-和-ssl-stream-模块"><a href="#安装-stream-和-ssl-stream-模块" class="headerlink" title="安装 stream 和 ssl_stream 模块"></a>安装 stream 和 ssl_stream 模块</h3><p>安装 nginx，stream 模块默认不安装的， 通过 <code>/usr/local/nginx/sbin/nginx -V</code> 查找<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2021/12/22/nginx-proxy-sni-tcp/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/11/02/golang-mod-replace/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3592,177 +3763,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2021/02/24/window-open-param/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2021/02/24/window-open-param/" itemprop="url">window.open() 打开的子页面往跨域的主页面传参问题</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2021-02-24T15:25:20+08:00">
-                2021-02-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/前端相关/" itemprop="url" rel="index">
-                    <span itemprop="name">前端相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2021/02/24/window-open-param/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2021/02/24/window-open-param/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2021/02/24/window-open-param/" class="leancloud_visitors" data-flag-title="window.open() 打开的子页面往跨域的主页面传参问题">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有遇到比较奇葩的需求，就是正常情况下，我们站点在进行第三方登录的时候，会通过 <code>window.open</code> 的方法，打开一个服务端的接口页面，然后这个服务端的接口去判断当前是否有授权行为，如果有的话，就写入 cookie，然后关闭当前窗体， 如果没有的话，就跳转到第三方的授权页面，然后在授权结束，回调的时候，写入 cookie，然后关闭当前窗体，前端会监听当前的窗体，当发现已经关闭的时候，就会去请求自动登录的接口，这时候，因为 cookie 信息已经让服务端写入了，所以这时候就可以正常登录，这时候前端还会读取服务端的某一个 token cookie， 然后生成当前一次性令牌 token， 以供服务端进行校验。</p>
-<p>正常情况下是没有问题的，但是由于 chrome 浏览器在新版本的时候，cookie的默认设置会有 <code>SameSite=Lax</code>，这时候就会导致前端读取不了服务端的 cookie (<a href="/2021/02/22/cookie-samesite/" title="chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输">chrome 默认 cookie 的 SameSite=Lax，导致 http 模式的站点的第三方 cookie 无法进行跨域传输</a>)， 从而无法生成一次性访问 token 令牌， 这时候再去请求自动登录的接口，就会出现校验失败。</p>
-<p>所以这边的想法是，服务端在生成 cookie 的时候，能不能在窗口关闭之前，往前端传 当前的一次性令牌的 token。这样子前端就可以带上这个 token 去进行自动登录的校验。</p>
-<p>所以这边就会涉及到 <code>window.open()</code> 打开的子页面， 往主页面传参问题。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2021/02/24/window-open-param/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3817,7 +3817,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">304</span>
+                  <span class="site-state-item-count">305</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

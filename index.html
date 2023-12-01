@@ -307,6 +307,1433 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/11/30/sig-auth/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/11/30/sig-auth/" itemprop="url">使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-11-30T11:50:30+08:00">
+                2023-11-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/11/30/sig-auth/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/11/30/sig-auth/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/11/30/sig-auth/" class="leancloud_visitors" data-flag-title="使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>随着内部应用的微服务的增多，一定会涉及到频繁的微服务之间的互相调用，这时候要有一种验证方式来保证两个微服务的调用是合法的(这边只是网关级别的请求校验，该有的业务校验一样要有), 如果你的微服务相互调用是通过 http(s) 的方式，那么采用签名算法来做请求的安全性校验是业务比较常用的方式。</p>
+<blockquote>
+<p>当然还有其他的方式，比如 ip 白名单，但是对于有负载均衡，横向扩展的服务来说，就没那么灵活</p>
+</blockquote>
+<p>签名算法大家其实不陌生，很多第三方的 sdk，权限校验走的就是签名算法的校验方式，原理都大同小异，其中我接触最多的就是 aws 的签名算法: <a href="https://docs.aws.amazon.com/zh_cn/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html#sigv4-auth-header-overview" target="_blank" rel="noopener">AWS Signature Version 4</a></p>
+<h2 id="最基础的原理"><a href="#最基础的原理" class="headerlink" title="最基础的原理"></a>最基础的原理</h2><p>最核心的原理就这几步，对于客户端来说:</p>
+<ol>
+<li>生成一对安全凭证，包括一个 <code>AccessKey</code> 和 <code>SecretKey</code>, 前者可以参与加密也可以不参与，主要是用来匹配对应的 <code>SecretKey</code>， 后者就是用来进行加密生成签名的</li>
+<li>将整个 http 请求对象进行聚合操作，生成一个待签名串 <code>StringToSign</code></li>
+<li>用 <code>SecretKey</code> 加密待签名串 <code>StringToSign</code>，生成最后的签名 <code>Signature</code></li>
+<li>将签名 <code>Signature</code> 和 <code>AccessKey</code> 放在 header 标头，连同整个 http 请求对象发送过去</li>
+</ol>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/11/30/sig-auth/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/11/21/php-opcache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/11/21/php-opcache/" itemprop="url">php 开启 opcache 来降低负载并提高抗并发能力</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-11-21T17:58:34+08:00">
+                2023-11-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/php相关/" itemprop="url" rel="index">
+                    <span itemprop="name">php相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/11/21/php-opcache/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/11/21/php-opcache/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/11/21/php-opcache/" class="leancloud_visitors" data-flag-title="php 开启 opcache 来降低负载并提高抗并发能力">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前通过 <a href="/2023/11/21/php-fpm-opt/" title="记一次 php-fpm 的配置调优">记一次 php-fpm 的配置调优</a> 有针对 php-fpm 的配置进行了调优，有起了一些效果，比如随着处理的进程加大，响应时间会快一点。 但是对于一些并发比较高的场景，还是会有 499 的情况，尤其是负载比较高的情况下，CPU 很容易跑满，php 子进程的响应速度也会越来越慢</p>
+<p>当然最粗暴的就是加大服务器硬件配置，然后增大 <code>pm.max_children</code> 的值，硬抗，不过还有一种更合适的方式，就是开启 opcache 来降低服务器负载并提高抗并发能力。</p>
+<h2 id="OpCode"><a href="#OpCode" class="headerlink" title="OpCode"></a>OpCode</h2><p>opcache 其实就是 OpCode + cache，因此要先了解一下什么是 OpCode。</p>
+<p>php 是一种解释型语言，它的执行可分为以下几个流程:</p>
+<ol>
+<li>Scanning(Lexing) ,将PHP代码转换为语言片段(Tokens)</li>
+<li>Parsing, 将Tokens转换成简单而有意义的表达式</li>
+<li>Compilation, 将表达式编译成字节码 (OpCode)</li>
+<li>Execution, 顺次执行 OpCode，每次一条，从而实现PHP脚本的功能。</li></ol>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/11/21/php-opcache/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/11/21/php-fpm-opt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/11/21/php-fpm-opt/" itemprop="url">记一次 php-fpm 的配置调优</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-11-21T16:02:20+08:00">
+                2023-11-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/php相关/" itemprop="url" rel="index">
+                    <span itemprop="name">php相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/11/21/php-fpm-opt/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/11/21/php-fpm-opt/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/11/21/php-fpm-opt/" class="leancloud_visitors" data-flag-title="记一次 php-fpm 的配置调优">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前段时间有一个很老的 php 服务发生了一个并发情况，产生大量的 499 状态码，刚开始以为是高并发导致的服务器负载不行。结果去 grafana 后台一看，服务器负载是正常的，然后查了一下同台的 golang 服务，他的返回状态码是非常正常的。</p>
+<p>所以怀疑应该是 php 服务有问题，因为我们用的是 nginx + php-fpm 的部署方式， 所以应该是 php-fpm 的配置有问题。</p>
+<p>然后抓了一下这一台的 php-fpm 的配置，果然有问题:<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/11/21/php-fpm-opt/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/10/19/mail-best-practices/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/10/19/mail-best-practices/" itemprop="url">浅谈 - 邮件服务最佳实践</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-10-19T16:26:11+08:00">
+                2023-10-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">aws 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/10/19/mail-best-practices/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/10/19/mail-best-practices/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/10/19/mail-best-practices/" class="leancloud_visitors" data-flag-title="浅谈 - 邮件服务最佳实践">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前前后后使用了 aws 的 ses 服务也用了好几年了，在很多使用上也踩了很多坑，打算从最佳实践角度去聊聊，怎么更好的使用邮件服务。</p>
+<p>主要分为几大块</p>
+<ol>
+<li>邮件质量相关</li>
+<li>邮件安全相关</li>
+<li>邮件统计相关</li>
+<li>减少退信和投诉</li>
+</ol>
+<blockquote>
+<p>以下很多内容虽然是从 aws 的 ses 服务来说明的，但是本质上邮件服务都是大同小异的，完全可以应用到其他的邮件服务上</p>
+</blockquote>
+<h2 id="邮件质量相关"><a href="#邮件质量相关" class="headerlink" title="邮件质量相关"></a>邮件质量相关</h2><h3 id="1-关注邮件质量"><a href="#1-关注邮件质量" class="headerlink" title="1. 关注邮件质量"></a>1. 关注邮件质量</h3><p>电子邮件接收方使用<code>内容筛选器</code>来检测邮件中的特定属性，以识别当前收到的邮件是否合法。这些内容筛选器会自动审核邮件的内容，以识别常见的不受欢迎的邮件特征乃至恶意邮件。</p>
+<p>同时很多邮件服务厂商，比如 Amazon SES 也会使用<code>内容筛选技术</code>，协助在邮件发送之前检测和拦截包含恶意软件的邮件。</p>
+<p>如果电子邮件接收方的内容筛选器认定我们的邮件包含垃圾邮件或恶意电子邮件的特性，邮件很可能被标记出来，并从收件人的收件箱中移出。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/10/19/mail-best-practices/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/09/21/npm-publish/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/09/21/npm-publish/" itemprop="url">npm 私有库开发和发布规范</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-09-21T14:04:34+08:00">
+                2023-09-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/node相关/" itemprop="url" rel="index">
+                    <span itemprop="name">node相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/09/21/npm-publish/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/09/21/npm-publish/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/09/21/npm-publish/" class="leancloud_visitors" data-flag-title="npm 私有库开发和发布规范">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2023/09/19/npm-verdaccio/" title="使用 verdaccio 搭建前端内部私有 npm 仓库">使用 verdaccio 搭建前端内部私有 npm 仓库</a> 已经建立了团队内部的私有 npm，并且也知道怎么去进行私有包的发布。</p>
+<p>那这一节讲一下怎么规范的进行包的开发，以及要发布的一些规范，当然不同的团队有自己的规范，仅供参考。</p>
+<h2 id="开发规范"><a href="#开发规范" class="headerlink" title="开发规范"></a>开发规范</h2><p>主要包含以下几个环节:</p>
+<ol>
+<li>编写 <code>README.md</code> 文件，描述包的使用方法和注意事项</li>
+<li>提供类型声明文件 (<code>.d.ts</code>)</li>
+<li>提供 demo，方便使用者快速上手</li>
+<li>提供单元测试，确保包的正确性</li>
+<li>在导出的模块的函数中添加JSDoc注释</li>
+</ol>
+<h3 id="1-编写-README-md-文件"><a href="#1-编写-README-md-文件" class="headerlink" title="1. 编写 README.md 文件"></a>1. 编写 <code>README.md</code> 文件</h3><p><code>README.md</code> 文件无疑是安装者了解这个包的第一途径，因此是非常重要的。 通常README文件应该至少包含以下内容：</p>
+<ol>
+<li><strong>项目名称和描述</strong>：在文件的开头，应该清楚地标明项目的名称和描述，让读者了解这个项目是做什么的；<strong>注意</strong>: 描述会显示在npm包页面的概览中，所以请确保它是有意义的。</li>
+<li><strong>安装指南</strong>：提供详细的步骤，说明如何安装和设置这个包。这可能包括需要的依赖、环境变量等。</li>
+<li><strong>使用示例</strong>：提供一些基本的代码示例，让用户知道如何在他们的项目中使用你的包。</li>
+<li><strong>API 文档</strong>：如果你的包提供了API，你应该在readme中详细说明每个公开的函数或方法，包括它们的参数、返回值和可能抛出的错误。</li>
+<li><strong>Changelog</strong>: 应该提供版本 change log 记录或者跳转到 CHANGE_LOG.md 文件的外链</li>
+</ol>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/09/21/npm-publish/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/09/19/npm-verdaccio/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/09/19/npm-verdaccio/" itemprop="url">使用 verdaccio 搭建前端内部私有 npm 仓库</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-09-19T18:38:25+08:00">
+                2023-09-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/node相关/" itemprop="url" rel="index">
+                    <span itemprop="name">node相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/09/19/npm-verdaccio/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/09/19/npm-verdaccio/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/09/19/npm-verdaccio/" class="leancloud_visitors" data-flag-title="使用 verdaccio 搭建前端内部私有 npm 仓库">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>随着前端项目越来越多，尤其是内部的 js lib 库越来越多，怎么有效的管理 lib 库的发布，就变成一个很重要的问题了。</p>
+<p>以之前做的 air-ui 来说，其实在进行版本发布的时候，为了保证不污染 gitlab 上的 master 分支，所以就专门写了脚本在版本发布的时候，进行分支切换来处理，具体步骤多又繁琐:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1. 检查当前分支是否是远程的 master 分支，如果不是，返回错误</span><br><span class="line">2. 执行 yarn dist， 生成 lib 目录</span><br><span class="line">3. 将 lib 目录保存到一个 gitignore 的一个目录 lib_tmp</span><br><span class="line">4. commit and push master 分支 （如果 status 有改变的话）</span><br><span class="line">5. 切换到 master-release 分支，将 lib_tmp 的文件覆盖 lib 目录</span><br><span class="line">6. commit and push master-release 分支</span><br><span class="line">7. master-release 打 tag</span><br><span class="line">8. 把临时文件 lib_tmp 删掉</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>具体细节查看 <a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a></p>
+</blockquote>
+<p>这种流程是有一些缺点和问题的:</p>
+<ol>
+<li><strong>发布流程复杂化：</strong> 需要编写专门的脚本来确定哪些构建产物的代码需要发布，同时还需手动删除不必要的代码。</li>
+<li><strong>容易产生混淆：</strong> 使用 <code>git tag</code> 来发布代码可能会引起混淆，因为它通常用于标记版本，而不是发布代码。</li>
+<li><strong>无法利用语义化版本控制的范围（例如：^1.0.0 或 ~1.0.0）来精确指定依赖的版本</strong></li>
+</ol>
+<p>但是如果我们有自己的 npm 库的话，其实对于库的发布就变得非常简单，只需要简单的 3 步:</p>
+<ol>
+<li>更新<code>package.json</code>中的版本号</li>
+<li>代码构建</li>
+<li>最后执行<code>npm publish</code>命令，即发布成功</li>
+</ol>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/09/19/npm-verdaccio/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/08/25/vernemq-ssl-err/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/08/25/vernemq-ssl-err/" itemprop="url">记一次大陆地区 VerneMQ 出现部分证书校验失败的情况</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-08-25T13:45:05+08:00">
+                2023-08-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/webrtc相关/" itemprop="url" rel="index">
+                    <span itemprop="name">webrtc相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/08/25/vernemq-ssl-err/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/08/25/vernemq-ssl-err/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/08/25/vernemq-ssl-err/" class="leancloud_visitors" data-flag-title="记一次大陆地区 VerneMQ 出现部分证书校验失败的情况">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h2><p>前段时间有发生过一个事情，就是 测试人员在他的 windows 或者 mac 中有出现连接 mqtt VerneMQ 失败的情况, 而且比较神奇的地方在于:</p>
+<ol>
+<li>如果搭梯子的话，是可以连接成功的</li>
+<li>不搭梯子，将 chrome 浏览器换成 Firefox， 也是可以连接的</li>
+<li>在一些机器上，通过修改 DNS 解析，比如改成 <code>8.8.8.8</code>, 也可以正常</li>
+</ol>
+<p>经过排查之后，发现确实在连接失败的时候，VerneMQ 服务器会出现部分证书相关的错误提示:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[info] &lt;0.20467.939&gt; TLS server: In state certify received CLIENT ALERT: Fatal - Certificat Unknown</span><br></pre></td></tr></table></figure></p>
+<h2 id="排查"><a href="#排查" class="headerlink" title="排查"></a>排查</h2><p>首先排查证书问题，确定我们的证书是对的，nginx 都可以正常使用。而且我们的 crt 证书文件是有包含整个验证环节的 fullchain 的聚合证书(包含多个证书链内容的合成证书)。</p>
+<p>然后对比一下 chrome 和 Firefox 的证书校验机制，Firefox 带了自己的 CA 证书链， chrome 的 CA 走的是系统的， 因此怀疑是 VerneMQ 证书链对合成证书的验证环节有问题??</p>
+<p>分析浏览器该站点的证书链路发现，我们用的证书有属于二级证书签发，中间有一个 Go Daddy Secure CA 校验节点<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/08/25/vernemq-ssl-err/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/05/31/gpt-use-prompt/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2023/05/31/gpt-use-prompt/" itemprop="url">chatgpt 使用过程中常用的 prompt</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-05-31T17:00:52+08:00">
+                2023-05-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ai-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">ai 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/05/31/gpt-use-prompt/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/05/31/gpt-use-prompt/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/05/31/gpt-use-prompt/" class="leancloud_visitors" data-flag-title="chatgpt 使用过程中常用的 prompt">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>随着 AI 浪潮的兴起，人工智能将席卷一切，基本上所有的行业都要发生变革。 而在使用 AI 提高工作效率的过程中，prompt 变得越来越重要。</p>
+<p>毫不夸张的说，一个好的 prompt 和一个普通的 prompt 对 chatgpt 的内容的准确性，可用性的输出将会产生巨大的差别。如果把 AI 比作 拉力赛的赛车手， 那么 prompt 就相当于坐在副驾驶坐的引导员。 没有 prompt 去指导方向，再牛逼的车，再牛逼的驾驶员都有可能迷失方向。</p>
+<p>所以我针对我日常在 chatgpt 的使用中，一些常用的 prompt 有记录下来，以作备忘</p>
+<blockquote>
+<p>这边的 prompt 并不是指 role 中的 system 的那个 prompt，而是指 role 为 user 提的问题的一部分内容</p>
+</blockquote>
+<h3 id="1-角色扮演"><a href="#1-角色扮演" class="headerlink" title="1. 角色扮演"></a>1. 角色扮演</h3><p>这个是 prompt 最常用的方式，就是让 chatgpt 来扮演一个角色，然后来问答</p>
+<p>比如可以这样子写:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">你是一个呼吸内科的医生，你需要通过向我提出一些问题，并获得我的回答来判断我大概得的是什么类型的感冒，</span><br><span class="line">如果我回答的信息不够，请继续向我询问，直到你得到充分的信息。你在最好还需要对我的病情给出专业的建议</span><br></pre></td></tr></table></figure></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2023/05/31/gpt-use-prompt/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/02/03/web-bypass-x-frame-options/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2403,1409 +3830,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/11/28/prometheus-2-metrics/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/11/28/prometheus-2-metrics/" itemprop="url">基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-28T16:21:49+08:00">
-                2022-11-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
-                    <span itemprop="name">prometheus 相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/11/28/prometheus-2-metrics/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/11/28/prometheus-2-metrics/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/11/28/prometheus-2-metrics/" class="leancloud_visitors" data-flag-title="基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前从 <a href="/2022/11/28/prometheus-1-install/" title="基于 prometheus 打造监控报警后台 (1) - 初试和安装">基于 prometheus 打造监控报警后台 (1) - 初试和安装</a> 我们安装了 prometheus 服务，并且监控了当前的主机。 但是数据是有抓取了，怎么看指标乃至图表呢?</p>
-<h2 id="从后台查询指标"><a href="#从后台查询指标" class="headerlink" title="从后台查询指标"></a>从后台查询指标</h2><p>我们可以从 prometheus ui 后台的 graph 里面来查看， 他有两个 tab 视图展示，一个是 Graph 的图表展示，一个是 Table 的表格展示， 通过输入某一个指标 （Metric），我们就可以查看所有实例中有关于这个指标的所有的数据。 其中有表格形式展示的， 也有图表形式展示，图表形式还可以自己选择时间区间</p>
-<p>然后查询的方式，提供了一种称为 PromQL 的函数式查询语言，可以让用户实时选择和聚合时间序列数据。表达式的结果可以显示为图形，也可以以表格数据的形式查看，或者由外部系统通过HTTP API 使用。</p>
-<blockquote>
-<p>PromQL（Prometheus Query Language）是 Prometheus 自己开发的表达式语言，语言表现力很丰富，内置函数也很多。使用它可以对时序数据进行筛选和聚合。</p>
-</blockquote>
-<p>关于查询的话，官网有提供了几个查询实例可供参考: <a href="https://prometheus.io/docs/prometheus/latest/querying/examples/" target="_blank" rel="noopener">查询示例</a></p>
-<p>其中包括几个常见的，比如:<br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/11/28/prometheus-2-metrics/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/11/28/prometheus-1-install/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/11/28/prometheus-1-install/" itemprop="url">基于 prometheus 打造监控报警后台 (1) - 初试和安装</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-28T14:05:57+08:00">
-                2022-11-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
-                    <span itemprop="name">prometheus 相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/11/28/prometheus-1-install/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/11/28/prometheus-1-install/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/11/28/prometheus-1-install/" class="leancloud_visitors" data-flag-title="基于 prometheus 打造监控报警后台 (1) - 初试和安装">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="prometheus-介绍"><a href="#prometheus-介绍" class="headerlink" title="prometheus 介绍"></a>prometheus 介绍</h2><h3 id="1-诞生背景"><a href="#1-诞生背景" class="headerlink" title="1. 诞生背景"></a>1. 诞生背景</h3><ol>
-<li>IT 环境中，监控系统陈旧，监控指标单一，监控误报等，基于 zabbix 搭建，不能有效针对测试环境中k8s和容器的原生支持</li>
-<li>IT 环境监控类型繁多，有主机监控，也有应用监控。如：物理服务器、VMWare vSphere 虚拟化体系、交换机等网络设备、其他特殊主机、应用类监控，如 nginx 和 mysql 等</li>
-<li>IT 环境监控链路长，并指标复杂</li>
-</ol>
-<h3 id="2-什么是-prometheus"><a href="#2-什么是-prometheus" class="headerlink" title="2. 什么是 prometheus"></a>2. <a href="https://prometheus.io/docs/introduction/overview/" target="_blank" rel="noopener">什么是 prometheus</a></h3><p><a href="https://github.com/prometheus" target="_blank" rel="noopener">Prometheus</a> 是一个开源系统监控和警报工具包，最初由 <a href="https://soundcloud.com" target="_blank" rel="noopener">SoundCloud</a> 构建。自 2012 年启动以来，许多公司和组织都采用了 Prometheus，该项目拥有非常活跃的开发者和用户社区。它现在是一个独立的开源项目，独立于任何公司进行维护。为了强调这一点，并明确项目的治理结构，Prometheus 于 2016 年作为继 <a href="https://kubernetes.io/" target="_blank" rel="noopener">Kubernetes</a> 之后的第二个托管项目加入了<a href="https://cncf.io/" target="_blank" rel="noopener">云原生计算基金会(CNCF)</a>。</p>
-<p>Prometheus 将其指标收集并存储为时间序列数据，即指标信息与记录时的时间戳以及称为标签的可选键值对一起存储。</p>
-<p>说是现在最流行的系统监控后台，一点都不为过<br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/11/28/prometheus-1-install/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/11/01/sentry-4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/11/01/sentry-4/" itemprop="url">bug 追踪系统 Sentry (4) -- 关联 sourceMap</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-01T16:49:22+08:00">
-                2022-11-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/实用工具集/" itemprop="url" rel="index">
-                    <span itemprop="name">实用工具集</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/11/01/sentry-4/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/11/01/sentry-4/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/11/01/sentry-4/" class="leancloud_visitors" data-flag-title="bug 追踪系统 Sentry (4) -- 关联 sourceMap">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2022/10/31/sentry-3/" title="bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug">bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug</a> 我们已经知道怎么在项目中引入 sentry 的 sdk，并且将 error 抛送到线上。 但是线上的代码都是通过构建打包压缩过的，基本上没有可读性。</p>
-<p>如果抛上去查看的话，错误堆栈长这样子，很难分析:</p>
-<p><img src="/2022/11/01/sentry-4/1.png" alt=""></p>
-<p>如果能像开发环境那样子，可以在控制台查看 sourceMap 的话，就可以直接查看对应的源代码就好了。 Sentry 有提供这个功能。</p>
-<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>我们都知道构建生成的 sourceMap 不能上传到 release 的线上环境，因为会有安全问题(源代码泄露)。 所以一般也就在开发环境，才会用 sourceMap 去 debug。</p>
-<p>那么 sentry 可以使用 sourceMap 原理很简单，就是我们将源代码(包含 sourceMap) 上传到 sentry 后台，他会通过 release 版本来关联， 其实就是结合每次的 release 版本号来管理不同版本号的 sourceMap</p>
-<p>因为我们是自建的，所以不用担心代码泄露问题，可以放心的用。</p>
-<p>这一块 sentry 官方是有文档的: <a href="https://docs.sentry.io/platforms/javascript/sourcemaps/" target="_blank" rel="noopener">Sentry - JavaScript - Source Maps</a>, 为此还提供了一个 cli 工具来上传这些 sourceMap: <a href="https://docs.sentry.io/product/cli/" target="_blank" rel="noopener">Command Line Interface</a><br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/11/01/sentry-4/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/10/31/sentry-3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/10/31/sentry-3/" itemprop="url">bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-31T14:29:25+08:00">
-                2022-10-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/实用工具集/" itemprop="url" rel="index">
-                    <span itemprop="name">实用工具集</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/10/31/sentry-3/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/10/31/sentry-3/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/10/31/sentry-3/" class="leancloud_visitors" data-flag-title="bug 追踪系统 Sentry (3) -- 项目引入 sdk 抛送 bug">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前花了两个篇幅，讲了 sentry 的 部署和邮件客户端的配置:</p>
-<ul>
-<li><a href="/2022/10/28/sentry-1/" title="bug 追踪系统 Sentry (1) -- 单机安装">bug 追踪系统 Sentry (1) -- 单机安装</a></li>
-<li><a href="/2022/10/31/sentry-2/" title="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置</a>
-</li>
-</ul>
-<p>本篇我们讲一下，怎么在项目中引入 sdk 并且抛送 bug 统计, 因为 sentry 支持很多语言:</p>
-<p><img src="/2022/10/31/sentry-3/1.png" alt=""></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/10/31/sentry-3/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/10/31/sentry-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/10/31/sentry-2/" itemprop="url">bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-31T12:09:01+08:00">
-                2022-10-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/实用工具集/" itemprop="url" rel="index">
-                    <span itemprop="name">实用工具集</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/10/31/sentry-2/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/10/31/sentry-2/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/10/31/sentry-2/" class="leancloud_visitors" data-flag-title="bug 追踪系统 Sentry (2) -- 账号初始化和邮件发送配置">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前通过 <a href="/2022/10/28/sentry-1/" title="bug 追踪系统 Sentry (1) -- 单机安装">bug 追踪系统 Sentry (1) -- 单机安装</a> 我们成功在单机上部署了 sentry 服务，这一节我们讲进入后台的账号初始化和邮件发送配置。</p>
-<h2 id="账号初始化"><a href="#账号初始化" class="headerlink" title="账号初始化"></a>账号初始化</h2><p>其实在执行 <code>instaill.sh</code> 脚本的时候， 就会有用户初始化账号的引导流程，只不过我之前是通过 <code>--skip-user-prompt</code> 来跳过这个交互。</p>
-<p>所以安装完之后，我们就要通过 <code>docker-compose run --rm web createuser</code> 来创建初始账号，具体执行如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos self-hosted-master]# docker-compose run --rm web createuser</span><br></pre></td></tr></table></figure></p>
-<p>并且在设置的过程中，也可以指定设置为 superuser 权限<br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/10/31/sentry-2/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/10/28/sentry-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/10/28/sentry-1/" itemprop="url">bug 追踪系统 Sentry (1) -- 单机安装</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-28T18:14:16+08:00">
-                2022-10-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/实用工具集/" itemprop="url" rel="index">
-                    <span itemprop="name">实用工具集</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/10/28/sentry-1/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/10/28/sentry-1/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/10/28/sentry-1/" class="leancloud_visitors" data-flag-title="bug 追踪系统 Sentry (1) -- 单机安装">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>现在的前端项目，如果一旦发布上线，代码一般都会进行混淆、压缩甚至加密，如果线上没有bug跟踪系统，客户端一旦报错，前端就无法及时感知，这个时候就需要使用人员上报，一层层上报到技术这边，技术如果要调试或者获得更具体的信息，就没有办法了，大部分情况下只有一张图片，但光靠一张图片，要追查bug产生的原因，有的时候是蛮困难的，等真正查清楚了，黄花菜都凉了。</p>
-<p>所以其实是需要一个可以记录 bug 或者抛送异常数据的一个系统的。 其实这一块业内是有一些解决方案，除了一些系统之外， 各大云服务厂商其实也有类似的产品，比如</p>
-<ol>
-<li><a href="https://www.frontjs.com/pricing" target="_blank" rel="noopener">frontjs</a></li>
-<li><a href="https://www.fundebug.com/" target="_blank" rel="noopener">fundebug</a></li>
-<li><a href="https://trackjs.com/" target="_blank" rel="noopener">trackjs</a></li>
-<li><a href="https://instabug.com/" target="_blank" rel="noopener">instabug</a></li>
-<li><a href="https://rollbar.com/" target="_blank" rel="noopener">rollbar</a></li>
-<li><a href="https://sentry.io" target="_blank" rel="noopener">sentry</a></li>
-</ol>
-<p>但是规模大了，基本上都要商用，都需要钱， 再加上之前也有用过美团开源的 Logan: <a href="/2021/08/19/use-web-logan/" title="使用 Logan 来做前端日志系统">使用 Logan 来做前端日志系统</a>, 基本上体验了一阵子下来，也有一些问题没有解决，比如:</p>
-<ol>
-<li>没有多项目管理</li>
-<li>搜索功能鸡肋</li>
-<li>日子列表缺少筛选功能，希望能加上分类筛选，例如用户信息、设备型号、浏览器环境、或者添加自定义字段进行筛选。</li>
-<li>没有分页，无法查看20条以后的数据</li>
-<li>日志丢失内容</li>
-<li>希望可以自定义日志类型与颜色</li>
-<li>在日志详情页面上看不到环境等信息</li>
-<li>日志条目无法显示颜色，例如时间用其他颜色显示</li>
-<li>日志条目详情希望可以解析json</li>
-</ol>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/10/28/sentry-1/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/10/18/php-encry-io-2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/10/18/php-encry-io-2/" itemprop="url">使用 ionCube 对 PHP 项目进行加密(2) - 加密指令详解</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-18T11:37:13+08:00">
-                2022-10-18
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/php相关/" itemprop="url" rel="index">
-                    <span itemprop="name">php相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/10/18/php-encry-io-2/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/10/18/php-encry-io-2/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/10/18/php-encry-io-2/" class="leancloud_visitors" data-flag-title="使用 ionCube 对 PHP 项目进行加密(2) - 加密指令详解">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前我们已经有使用 ionCube 对 PHP 项目进行加密: <a href="/2022/09/29/php-encry-io/" title="使用 ionCube 对 PHP 项目进行加密">使用 ionCube 对 PHP 项目进行加密</a></p>
-<p>之前拿来做测试的是 免费申请试用版本, 后面就直接买了一个正式版的 Cerberus 的，$399 一个 license 的，永久使用 (除非换机器)</p>
-<p><img src="/2022/10/18/php-encry-io-2/1.png" alt=""></p>
-<h2 id="激活"><a href="#激活" class="headerlink" title="激活"></a>激活</h2><p>本质上这个正式的 release 版本和申请试用的版本在功能上没啥差别 (都是 <code>Cerberus</code> 版本)，除了加密器的有效期 14 天以及加密文件的有效期 36 小时之外。</p>
-<p>不过 release 版本在使用之前是需要先执行激活的，而且一旦激活之外，接下来就只能在这一台机器上才能加密了<br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/10/18/php-encry-io-2/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/10/09/csp/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/10/09/csp/" itemprop="url">web 安全之 - 使用CSP(Content Security Policy)来防止 XSS 攻击</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-10-09T13:32:09+08:00">
-                2022-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/web安全/" itemprop="url" rel="index">
-                    <span itemprop="name">web安全</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/10/09/csp/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/10/09/csp/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/10/09/csp/" class="leancloud_visitors" data-flag-title="web 安全之 - 使用CSP(Content Security Policy)来防止 XSS 攻击">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="XSS"><a href="#XSS" class="headerlink" title="XSS"></a>XSS</h2><p>跨网站脚本(Cross-site scripting，通常简称为XSS或跨站脚本或跨站脚本攻击)是一种网站应用程序的安全漏洞攻击，是代码注入的一种。它允许恶意用户将代码注入到网页上，其他用户在观看网页时就会受到影响。这类攻击通常包含了HTML以及用户端脚本语言。</p>
-<p>即使到了 2022 年， 在 OWASP(Open Web Application Security Project，是一个开放式Web应用程序安全项目组织，旨在帮助计算机和互联网应用程序提供公正、实际、有成本效益的信息。) 的 top10 漏洞中， XSS 依然排名前三 (2021 年的第三名的 注入(Injection)，其中 XSS 就属于这一类)</p>
-<p>正常我们常用的防护手段一般是<strong>对于任何的参数请求以及页面中涉及到的用户信息全部都要进行特殊字符的过滤，进行 html转义，防止触发恶意脚本</strong></p>
-<p>但是如果能够理解 XSS 的实际攻击方式，真的要对用户的利益造成损失的话 (不是单纯的只是弹个 alert 框)， 一般就两种方式:<br>1 注入恶意脚本，执行或者引导用户，从而盗取信息或者执行恶意操作<br>2 直接获取该页面上的用户信息，比如 cookie， 然后抛到攻击者自己的服务器</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/10/09/csp/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3860,7 +3884,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">305</span>
+                  <span class="site-state-item-count">313</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3871,7 +3895,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-count">30</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -3882,7 +3906,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">77</span>
+                  <span class="site-state-item-count">81</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

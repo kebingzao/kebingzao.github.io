@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="aws,ses," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言前前后后使用了 aws 的 ses 服务也用了好几年了，在很多使用上也踩了很多坑，打算从最佳实践角度去聊聊，怎么更好的使用邮件服务。 主要分为几大块  邮件质量相关 邮件安全相关 邮件统计相关 减少退信和投诉   以下很多内容虽然是从 aws 的 ses 服务来说明的，但是本质上邮件服务都是大同小异的，完全可以应用到其他的邮件服务上  邮件质量相关1. 关注邮件质量电子邮件接收方使用内容筛选器">
+<meta name="keywords" content="aws,ses">
+<meta property="og:type" content="article">
+<meta property="og:title" content="浅谈 - 邮件服务最佳实践">
+<meta property="og:url" content="http://kebingzao.com/2023/10/19/mail-best-practices/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言前前后后使用了 aws 的 ses 服务也用了好几年了，在很多使用上也踩了很多坑，打算从最佳实践角度去聊聊，怎么更好的使用邮件服务。 主要分为几大块  邮件质量相关 邮件安全相关 邮件统计相关 减少退信和投诉   以下很多内容虽然是从 aws 的 ses 服务来说明的，但是本质上邮件服务都是大同小异的，完全可以应用到其他的邮件服务上  邮件质量相关1. 关注邮件质量电子邮件接收方使用内容筛选器">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2023/10/19/mail-best-practices/1.png">
+<meta property="og:updated_time" content="2023-12-01T17:07:56.487Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="浅谈 - 邮件服务最佳实践">
+<meta name="twitter:description" content="前言前前后后使用了 aws 的 ses 服务也用了好几年了，在很多使用上也踩了很多坑，打算从最佳实践角度去聊聊，怎么更好的使用邮件服务。 主要分为几大块  邮件质量相关 邮件安全相关 邮件统计相关 减少退信和投诉   以下很多内容虽然是从 aws 的 ses 服务来说明的，但是本质上邮件服务都是大同小异的，完全可以应用到其他的邮件服务上  邮件质量相关1. 关注邮件质量电子邮件接收方使用内容筛选器">
+<meta name="twitter:image" content="http://kebingzao.com/2023/10/19/mail-best-practices/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2023/10/19/mail-best-practices/"/>
+
+
+
+
+
+  <title>浅谈 - 邮件服务最佳实践 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/10/19/mail-best-practices/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">浅谈 - 邮件服务最佳实践</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-10-19T16:26:11+08:00">
+                2023-10-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/aws-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">aws 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/10/19/mail-best-practices/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/10/19/mail-best-practices/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/10/19/mail-best-practices/" class="leancloud_visitors" data-flag-title="浅谈 - 邮件服务最佳实践">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前前后后使用了 aws 的 ses 服务也用了好几年了，在很多使用上也踩了很多坑，打算从最佳实践角度去聊聊，怎么更好的使用邮件服务。</p>
+<p>主要分为几大块</p>
+<ol>
+<li>邮件质量相关</li>
+<li>邮件安全相关</li>
+<li>邮件统计相关</li>
+<li>减少退信和投诉</li>
+</ol>
+<blockquote>
+<p>以下很多内容虽然是从 aws 的 ses 服务来说明的，但是本质上邮件服务都是大同小异的，完全可以应用到其他的邮件服务上</p>
+</blockquote>
+<h2 id="邮件质量相关"><a href="#邮件质量相关" class="headerlink" title="邮件质量相关"></a>邮件质量相关</h2><h3 id="1-关注邮件质量"><a href="#1-关注邮件质量" class="headerlink" title="1. 关注邮件质量"></a>1. 关注邮件质量</h3><p>电子邮件接收方使用<code>内容筛选器</code>来检测邮件中的特定属性，以识别当前收到的邮件是否合法。这些内容筛选器会自动审核邮件的内容，以识别常见的不受欢迎的邮件特征乃至恶意邮件。</p>
+<p>同时很多邮件服务厂商，比如 Amazon SES 也会使用<code>内容筛选技术</code>，协助在邮件发送之前检测和拦截包含恶意软件的邮件。</p>
+<p>如果电子邮件接收方的内容筛选器认定我们的邮件包含垃圾邮件或恶意电子邮件的特性，邮件很可能被标记出来，并从收件人的收件箱中移出。<br><a id="more"></a><br>因此在设计电子邮件时请记住以下几点：</p>
+<ol>
+<li>现代内容筛选器非常智能，且不断调整和更改。它们不依赖于预定义的规则集。诸如 <a href="https://www.validity.com/everest/returnpath/" target="_blank" rel="noopener">ReturnPath</a> 或 <a href="https://www.litmus.com/" target="_blank" rel="noopener">Litmus</a> 等第三方服务可帮助识别电子邮件中可能触发内容筛选器的内容。</li>
+<li>如果电子邮件中包含链接，请检查这些链接的 URL 是否在基于域名系统的黑名单（DNSBL）中，这些黑名单可在像 <a href="https://uribl.com/" target="_blank" rel="noopener">URIBL.com</a> 和 <a href="https://www.surbl.org/" target="_blank" rel="noopener">SURBL.org</a> 这样的网站中找到。</li>
+<li>避免使用短地址。恶意发件人可能使用短地址来隐藏链接的实际目标。当 ISP 发现链接缩短服务（即使是信誉最好的服务）被用于不法目的时，他们会完全拒绝访问这些服务。如果我们的电子邮件中有包含被加入拒绝列表的链接缩短服务链接(哪怕我们用来干正事)，它也不会送达客户的收件箱，邮件的到达率也随之受到影响。</li>
+<li>测试电子邮件中的每个链接，确保其指向预期的页面。</li>
+<li>请确保我们的网站包括隐私策略和使用条款文档，并且这些文档是最新的。最好在发送的每封电子邮件中添加到这些文档的链接。提供指向这些文档的链接表明我们对客户无所隐瞒，有助于建立信任关系。(尤其是支付相关的邮件，比如支付成功等邮件)</li>
+<li>如果计划发送高频率内容 (如“每日交易”邮件)，要确保电子邮件内容每次都有所不同。在发送高频邮件时，必须确保这些消息及时且有意义，而不是重复和令人厌烦。</li>
+<li>邮件内容一定要被约束和规范后的，尽量减少带入一些用户自定义的信息，防止被黑客拿来做骚扰邮件或者钓鱼邮件。同时也要避免发送使用一些容易让ISP产生反感的名字，如<code>恐怖</code> 等等</li>
+</ol>
+<p>说一下之前发生的几个案例:</p>
+<h4 id="1-1-使用短链被牵连"><a href="#1-1-使用短链被牵连" class="headerlink" title="1.1 使用短链被牵连"></a>1.1 使用短链被牵连</h4><p>之前有出现过为了让邮件的链接看起来没有那么长，我们的市场人员用了第三方的短链服务，结果这个短链服务被封了，导致邮件中链接的打开率急速下降。</p>
+<h4 id="1-2-网易-163-邮箱被退回"><a href="#1-2-网易-163-邮箱被退回" class="headerlink" title="1.2 网易 163 邮箱被退回"></a>1.2 网易 163 邮箱被退回</h4><p>之前有发生过我们的一封邮件被网易的 163 邮箱退回的情况，同一个 “From” 发送的其他封的邮件可以正常收到， 但是就是这一封邮件会收不到，后面经过多次确认，发现是因为这封邮件的内容触发了网易 163 邮箱的内容检测，认为潜在不规范，进一步排查发现是邮件中有一个链接中的一个参数有带 mail 参数，因此被 163 邮箱服务判为不规范内容，导致 bounce 退回。 最后是通过将这个 mail 参数的值做一层 base64 处理再 urlencode，这才通过检测，成功发送。</p>
+<h4 id="1-3-显示用户昵称被当作骚扰邮件滥用"><a href="#1-3-显示用户昵称被当作骚扰邮件滥用" class="headerlink" title="1.3 显示用户昵称被当作骚扰邮件滥用"></a>1.3 显示用户昵称被当作骚扰邮件滥用</h4><p>针对一些用户的自定义的输入，如果要在邮件上有所体现，最经常出现的就是用户昵称，用户可以自己填自己的昵称</p>
+<p>而我们很喜欢在给用户发送邮件的话，开头都是 <code>hi,xxx</code> 之类的，如果这时候用户是有邮箱验证过的，那就还好，如果是没有邮箱验证过的，比如这是一封注册邮件，这时候黑客就可以在注册的时候，在昵称一栏输入钓鱼网站或者广告信息，然后批量刷注册接口，让注册服务去帮他发送垃圾邮件，这时候你的邮件服务就很有可能会被大量投诉，乃至被禁用。</p>
+<h3 id="2-域和“发件人”地址注意事项"><a href="#2-域和“发件人”地址注意事项" class="headerlink" title="2. 域和“发件人”地址注意事项"></a>2. 域和“发件人”地址注意事项</h3><ol>
+<li>仔细考虑用于发送电子邮件的地址。“From”地址是收件人看到的第一条信息，因此可能会留下持久的第一印象。此外，一些 ISP 会将我们的声誉与我们设置的“From”地址相联系。</li>
+<li>为不同类型的业务使用不同的子域。假设我们从 <code>example.com</code> 域发送电子邮件，并且打算同时发送营销邮件和支付邮件。不要从 <code>example.com</code> 发送所有邮件，而是从像 <code>marketing.example.com</code> 这样的子域发送营销邮件，从像 <code>orders.example.com</code> 这样的子域发送支付邮件。独有的子域可建立它们自己的声誉。使用子域可降低声誉损坏的风险，例如，当我们的营销邮件落入垃圾邮件陷阱或触发内容筛选器时，这时候哪怕营销邮件被退回了，也不会影响我们发送支付邮件的业务。</li>
+<li>针对不同的业务类型，最好用不同的账号发送，尤其是营销邮件和业务邮件，最好用不同的 ses 账号发送，因为之前有出现过营销邮件整个发送的账号都被封了，这时候就不是分子域可以解决的了，而是账号要分开，这样子哪怕营销邮件的账号废了，大不了后面再申请解封甚至重新注册一个，但是就不会影响到我们的业务邮件。</li>
+<li>如果计划发送大量邮件，不要从 <a href="mailto:sender@hotmail.com" target="_blank" rel="noopener">sender@hotmail.com</a> 这样的基于 ISP 的地址发送这些邮件。如果 ISP 注意到有大量邮件来自 <a href="mailto:sender@hotmail.com" target="_blank" rel="noopener">sender@hotmail.com</a> ，该电子邮件的处理方式将与来自我们自己拥有的出站电子邮件发送域的邮件有所不同，所以最好都走自己的域，也有利于信用度的培养</li>
+<li>与我们的域注册商沟通，确保我们的域的 WHOIS 信息准确无误。维护真实且及时的 WHOIS 记录表明我们重视透明度，并让用户能够快速识别我们的域是否合法。</li>
+<li>避免使用 <code>no-reply</code> 地址，例如 <a href="mailto:no-reply@example.com" target="_blank" rel="noopener">no-reply@example.com</a> ，作为我们的“From”地址或“Reply-to”地址。使用 <code>no-reply@</code> 电子邮件地址会向我们的收件人明确传达一个信息：我们没有为他们提供联系我们的方式，并且对他们的反馈不感兴趣。</li>
+</ol>
+<p>针对第三点，正常我们的业务会至少保持同时有 3 个 ses 账号在使用:</p>
+<ol>
+<li>发送业务邮件用一个，比如支付，忘记密码，邮件验证等主要的，跟用户紧密相关的邮件</li>
+<li>日常定时报告邮件用一个，我们产品有提供定期发送业务报告/汇总的功能，一般用于定期发送</li>
+<li>发送营销邮件用一个，我们有各种营销活动，折扣价活动，都是走这个账号，也是批量发送最多的一个账号，当然被封的概率也最大</li>
+</ol>
+<h3 id="3-构建和维护列表"><a href="#3-构建和维护列表" class="headerlink" title="3. 构建和维护列表"></a>3. 构建和维护列表</h3><ol>
+<li>实施双重确认策略。当用户注册接收您的电子邮件时，向其发送一封包含确认链接的邮件，直到他们单击该链接确认地址之前，不要开始发送其他电子邮件(除非这封邮件从业务上认为已经过期)。双重确认策略有助于降低因拼写错误而导致的硬退信数量。</li>
+<li>在针对 web 表单进行提交的时候，如果内容完全是用户生成的，要做内容的安全性验证和所填邮箱的有效性验证(指向的域具有有效的 MX 记录),确保只发送高质量的电子邮件内容</li>
+<li>增加无效域名过滤机制，针对 hardbounce 率大于一定百分比且邮件 <code>Deliver/Open</code> 为0的邮箱域名，进行前置过滤，降低实际发送任务中的 hardbounce 率</li>
+<li>自建分析和过滤系统, 通过 sns 来获取各种 bounce 通知，从而自建过滤系统，具体可以看: <a href="/2019/06/05/aws-ses-sns/" title="AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件">AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件</a></li>
+<li>标准的别名 (例如 <code>postmaster@</code>、<code>abuse@</code> 或 <code>noc@</code>) 不太可能故意用于注册我们的电子邮件。确保我们仅将邮件发送给确实想要接收它们的真实用户。对于标准别名应特别注意这条规则，因为这些别名习惯上是为电子邮件监控程序保留的。这些别名可能是恶意添加到我们的列表中，以蓄意破坏的形式损害我们的声誉。 因此针对一些特殊的别名，我们也可以直接放到我们的过滤系统中</li>
+</ol>
+<h2 id="邮件安全相关"><a href="#邮件安全相关" class="headerlink" title="邮件安全相关"></a>邮件安全相关</h2><h3 id="1-身份认证"><a href="#1-身份认证" class="headerlink" title="1. 身份认证"></a>1. 身份认证</h3><ol>
+<li>使用 SPF 和 SenderID 对我们的域进行身份验证。这些身份验证方法向我们的电子邮件收件人确认，发送的每封电子邮件都来自实际声明的发件域。</li>
+<li>使用 DKIM 对我们的出站邮件签名。此步骤向收件人确认，在发件人与接收方之间沟通中，内容不曾被更改。</li>
+</ol>
+<p>关于 SPF + DKIM 的配置和验证，可以看: <a href="/2020/03/17/mail-spf-dkim-dmarc/" title="电子邮件欺诈防护之 SPF+DKIM+DMARC">电子邮件欺诈防护之 SPF+DKIM+DMARC</a></p>
+<p>同时使用 DKIM 对我们的出站邮件签名，要遵守 DMARC 最好使用 custom Domain 来做验证，这样大部分 ISP 不会显示发送的邮件是通过AWS SES 进行发送，之前就有发生类似的事情:  <a href="/2022/07/05/mail-instead-of-send/" title="AWS SES 发送邮件出现的代发字样问题">AWS SES 发送邮件出现的代发字样问题</a></p>
+<h3 id="2-合规性"><a href="#2-合规性" class="headerlink" title="2. 合规性"></a>2. 合规性</h3><p>请注意电子邮件收件方所在国家/地区的相关电子邮件营销和反垃圾邮件法律和法规</p>
+<h2 id="邮件统计相关"><a href="#邮件统计相关" class="headerlink" title="邮件统计相关"></a>邮件统计相关</h2><p>我们肯定是希望我们邮件发送出去之后，邮件的到达率，打开率，邮件内链接的打开率等等都可以知道，邮件服务平台都会提供相关图表和接入的 API 设置，以 aws ses 来说，就可以使用 Amazon SES 事件发布监控电子邮件发送，具体实践可以看: <a href="/2022/03/25/aws-ses-monitor/" title="AWS 的邮件发送服务 SES 设置邮件事件监控">AWS 的邮件发送服务 SES 设置邮件事件监控</a></p>
+<p>其实就是 SES + SNS 通知的方式来记录电子邮件的事件类型, 这些是存在表里面的，如果要看更加具体的图表，可以再结合 Prometheus + grafana 的方式，让你的发邮件程序接入 Prometheus 统计，然后在 grafana 中输出图表，比如</p>
+<p><img src="/2023/10/19/mail-best-practices/1.png" alt="1"></p>
+<p>然后就可以在 grafana 中去针对业务的发送情况去设置对应的预警，关于 Prometheus 的使用，可以看: <a href="https://kebingzao.com/categories/prometheus-%E7%9B%B8%E5%85%B3/">基于 prometheus 打造监控报警后台</a></p>
+<h2 id="减少退信和投诉"><a href="#减少退信和投诉" class="headerlink" title="减少退信和投诉"></a>减少退信和投诉</h2><p>毫无疑问，退信和投诉一定是我们查看电子邮件发送情况结果最重要的两个指标，因为一不小心就有可能翻车导致账号被封了。比如之前发生过的几次:</p>
+<ul>
+<li><a href="/2019/05/29/aws-ses-block/" title="记一次AWS SES 邮件服务账号被禁的情况">记一次AWS SES 邮件服务账号被禁的情况</a></li>
+<li><a href="/2019/05/29/aws-ses-block-again/" title="又记一次AWS SES 邮件服务账号被禁的情况">又记一次AWS SES 邮件服务账号被禁的情况</a>
+</li>
+</ul>
+<p>就是因为处理机制的不完善，导致硬退信指标超标了，从而被封了，还是吃了没经验的亏。 还有出现过营销邮件的投诉率超标被封的情况，后者更严重，前者还可以申请解封，后者大概率这账号是废了。</p>
+<h3 id="1-退信-Bounces"><a href="#1-退信-Bounces" class="headerlink" title="1. 退信(Bounces)"></a>1. 退信(Bounces)</h3><p>当电子邮件无法传输给目标收件人时，会出现退信。有两种类型的退信：硬退信(hard bounces)和软退信(soft bounces)</p>
+<blockquote>
+<p>也有叫反弹的，意思是同一个</p>
+</blockquote>
+<ul>
+<li>硬退信 -&gt; 当电子邮件由于邮件地址不存在等持久性问题而无法送达时</li>
+<li>软退信 -&gt; 当有临时问题阻止电子邮件送达时，会出现软退信。出现软退信的情况有，收件人的收件箱已满，或者收件服务器暂时不可用</li>
+</ul>
+<p>正常我们可以通过接入 SES webhook 来得到每一封邮件的退信情况，并且会有退信监控，因为一旦退信率在短时间内很高的话，邮件服务商就有可能将你的邮件发送账号封禁掉。</p>
+<ul>
+<li><a href="/2022/03/25/aws-ses-monitor/" title="AWS 的邮件发送服务 SES 设置邮件事件监控">AWS 的邮件发送服务 SES 设置邮件事件监控</a></li>
+<li><a href="/2019/06/05/aws-ses-sns/" title="AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件">AWS 的邮件发送服务 SES 订阅 SNS 来处理硬反弹邮件</a>
+</li>
+</ul>
+<p>除了上面提到的一些程序上的处理，还有一些原则上的操作可以避免退信和改善发件人的声誉:</p>
+<ol>
+<li>尽量保持硬退信率低于 5%。电子邮件程序中的硬退信越少，ISP 将我们的邮件视为合法和有价值信息的可能性越高。这一比率应被视为合理且可达到的目标，但并不是所有 ISP 的通用规则。</li>
+<li>请勿租用或购买电子邮件列表。这些列表可能包含大量无效的地址，这可能会导致硬退信率显著增加。此外，这些列表可能包含垃圾邮件陷阱 - 专门用于捕获非法发件人的电子邮件地址。如果我们的邮件落入垃圾邮件陷阱，送达率和发件人声誉会不可挽回地受损。</li>
+<li>持续更新我们维护的邮件列表。如果很长一段时间未向我们的收件人发送电子邮件，请尽可能通过一些其他方式 (如网站登录活动或购买历史记录) 来验证客户的状态</li>
+<li>如果没有办法验证客户的状态，请考虑发送<code>赢回(win-back)</code>电子邮件。典型的“赢回”电子邮件会提到很久没有收到客户的消息了，并鼓励客户确认他们仍希望接收我们的电子邮件。在发送“赢回”电子邮件后，从我们的维护列表中清除所有未响应的收件人。</li>
+</ol>
+<p>当收到退信时，通过观察以下规则适当地进行回应至关重要：</p>
+<ol>
+<li>如果某个电子邮件地址硬退信，立即从维护列表中删除该地址。并不再尝试重新发送。反复的硬退信会叠加，并最终损害我们对收件人 ISP 的声誉。</li>
+<li>请确保我们用于接收退信通知的地址能够接收电子邮件，因为邮件服务商会转发退信资讯到我们的接收邮箱</li>
+</ol>
+<h3 id="2-投诉-Complaints"><a href="#2-投诉-Complaints" class="headerlink" title="2. 投诉(Complaints)"></a>2. 投诉(Complaints)</h3><p>当电子邮件收件人在基于网页的电子邮件客户端中单击“标记为垃圾邮件”或等效的按钮时，就会出现投诉。</p>
+<p>如果您累积了大量的此类投诉，ISP 会假定您发送垃圾邮件。这对您的送达率和发件人声誉有负面影响。甚至会出现针对该 From 域名的其他邮件也进行拒收</p>
+<p>以下指导原则有助于避免投诉和改善发件人声誉：</p>
+<ol>
+<li>尽量保持您的投诉率低于 0.1%。电子邮件程序中的投诉越少，ISP 将我们的邮件视为合法和有价值信息的可能性越高。这一比率应被视为合理且可达到的目标，但并不是所有 ISP 的通用规则。</li>
+<li>如果客户投诉营销电子邮件，应立即停止向该客户发送营销电子邮件。但是，如果我们的电子邮件程序还包括其他类型的电子邮件 (如通知或事务性电子邮件)，继续向发出投诉的收件人发送这些类型的邮件也许是可以接受的。</li>
+<li>与硬退信一样，如果很长时间未向某个列表发送电子邮件了，确保我们的收件人了解他们为什么收到您的邮件。通过发送“欢迎”邮件，提醒他们我们的身份以及我们为何联系他们</li>
+</ol>
+<p>针对第二点，我们一般会在营销邮件的 footer 底部会有一个链接，点击表示后续不再接收此类的营销邮件，让用户可以自己选择。</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/dg/success-metrics.html" target="_blank" rel="noopener">电子邮件程序成功指标</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/dg/tips-and-best-practices.html" target="_blank" rel="noopener">提示和最佳实践</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/ses/latest/dg/send-email-concepts-deliverability.html" target="_blank" rel="noopener">了解 Amazon SES 中的电子邮件送达率</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2023/10/19/mail-best-practices/" title="浅谈 - 邮件服务最佳实践">http://kebingzao.com/2023/10/19/mail-best-practices/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/aws/" rel="tag"># aws</a>
+          
+            <a href="/tags/ses/" rel="tag"># ses</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/09/21/npm-publish/" rel="next" title="npm 私有库开发和发布规范">
+                <i class="fa fa-chevron-left"></i> npm 私有库开发和发布规范
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/11/21/php-fpm-opt/" rel="prev" title="记一次 php-fpm 的配置调优">
+                记一次 php-fpm 的配置调优 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">313</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#邮件质量相关"><span class="nav-number">2.</span> <span class="nav-text">邮件质量相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-关注邮件质量"><span class="nav-number">2.1.</span> <span class="nav-text">1. 关注邮件质量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-使用短链被牵连"><span class="nav-number">2.1.1.</span> <span class="nav-text">1.1 使用短链被牵连</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-网易-163-邮箱被退回"><span class="nav-number">2.1.2.</span> <span class="nav-text">1.2 网易 163 邮箱被退回</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-显示用户昵称被当作骚扰邮件滥用"><span class="nav-number">2.1.3.</span> <span class="nav-text">1.3 显示用户昵称被当作骚扰邮件滥用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-域和“发件人”地址注意事项"><span class="nav-number">2.2.</span> <span class="nav-text">2. 域和“发件人”地址注意事项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-构建和维护列表"><span class="nav-number">2.3.</span> <span class="nav-text">3. 构建和维护列表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#邮件安全相关"><span class="nav-number">3.</span> <span class="nav-text">邮件安全相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-身份认证"><span class="nav-number">3.1.</span> <span class="nav-text">1. 身份认证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-合规性"><span class="nav-number">3.2.</span> <span class="nav-text">2. 合规性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#邮件统计相关"><span class="nav-number">4.</span> <span class="nav-text">邮件统计相关</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#减少退信和投诉"><span class="nav-number">5.</span> <span class="nav-text">减少退信和投诉</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-退信-Bounces"><span class="nav-number">5.1.</span> <span class="nav-text">1. 退信(Bounces)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-投诉-Complaints"><span class="nav-number">5.2.</span> <span class="nav-text">2. 投诉(Complaints)</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2023/10/19/mail-best-practices/';
+          this.page.identifier = '2023/10/19/mail-best-practices/';
+          this.page.title = '浅谈 - 邮件服务最佳实践';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

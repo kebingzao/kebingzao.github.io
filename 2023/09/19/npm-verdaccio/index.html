@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="npm,verdaccio," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言随着前端项目越来越多，尤其是内部的 js lib 库越来越多，怎么有效的管理 lib 库的发布，就变成一个很重要的问题了。 以之前做的 air-ui 来说，其实在进行版本发布的时候，为了保证不污染 gitlab 上的 master 分支，所以就专门写了脚本在版本发布的时候，进行分支切换来处理，具体步骤多又繁琐:123456781. 检查当前分支是否是远程的 master 分支，如果不是，返回错">
+<meta name="keywords" content="npm,verdaccio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用 verdaccio 搭建前端内部私有 npm 仓库">
+<meta property="og:url" content="http://kebingzao.com/2023/09/19/npm-verdaccio/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言随着前端项目越来越多，尤其是内部的 js lib 库越来越多，怎么有效的管理 lib 库的发布，就变成一个很重要的问题了。 以之前做的 air-ui 来说，其实在进行版本发布的时候，为了保证不污染 gitlab 上的 master 分支，所以就专门写了脚本在版本发布的时候，进行分支切换来处理，具体步骤多又繁琐:123456781. 检查当前分支是否是远程的 master 分支，如果不是，返回错">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/1.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/2.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/3.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/4.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/5.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/6.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/7.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/8.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/9.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/10.png">
+<meta property="og:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/11.png">
+<meta property="og:updated_time" content="2023-12-01T17:07:56.491Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用 verdaccio 搭建前端内部私有 npm 仓库">
+<meta name="twitter:description" content="前言随着前端项目越来越多，尤其是内部的 js lib 库越来越多，怎么有效的管理 lib 库的发布，就变成一个很重要的问题了。 以之前做的 air-ui 来说，其实在进行版本发布的时候，为了保证不污染 gitlab 上的 master 分支，所以就专门写了脚本在版本发布的时候，进行分支切换来处理，具体步骤多又繁琐:123456781. 检查当前分支是否是远程的 master 分支，如果不是，返回错">
+<meta name="twitter:image" content="http://kebingzao.com/2023/09/19/npm-verdaccio/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2023/09/19/npm-verdaccio/"/>
+
+
+
+
+
+  <title>使用 verdaccio 搭建前端内部私有 npm 仓库 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/09/19/npm-verdaccio/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用 verdaccio 搭建前端内部私有 npm 仓库</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-09-19T18:38:25+08:00">
+                2023-09-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/node相关/" itemprop="url" rel="index">
+                    <span itemprop="name">node相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/09/19/npm-verdaccio/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/09/19/npm-verdaccio/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/09/19/npm-verdaccio/" class="leancloud_visitors" data-flag-title="使用 verdaccio 搭建前端内部私有 npm 仓库">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>随着前端项目越来越多，尤其是内部的 js lib 库越来越多，怎么有效的管理 lib 库的发布，就变成一个很重要的问题了。</p>
+<p>以之前做的 air-ui 来说，其实在进行版本发布的时候，为了保证不污染 gitlab 上的 master 分支，所以就专门写了脚本在版本发布的时候，进行分支切换来处理，具体步骤多又繁琐:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1. 检查当前分支是否是远程的 master 分支，如果不是，返回错误</span><br><span class="line">2. 执行 yarn dist， 生成 lib 目录</span><br><span class="line">3. 将 lib 目录保存到一个 gitignore 的一个目录 lib_tmp</span><br><span class="line">4. commit and push master 分支 （如果 status 有改变的话）</span><br><span class="line">5. 切换到 master-release 分支，将 lib_tmp 的文件覆盖 lib 目录</span><br><span class="line">6. commit and push master-release 分支</span><br><span class="line">7. master-release 打 tag</span><br><span class="line">8. 把临时文件 lib_tmp 删掉</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>具体细节查看 <a href="/2020/01/13/air-ui-16/" title="自建vue组件 air-ui (16) -- 打包构建 pub 任务">自建vue组件 air-ui (16) -- 打包构建 pub 任务</a></p>
+</blockquote>
+<p>这种流程是有一些缺点和问题的:</p>
+<ol>
+<li><strong>发布流程复杂化：</strong> 需要编写专门的脚本来确定哪些构建产物的代码需要发布，同时还需手动删除不必要的代码。</li>
+<li><strong>容易产生混淆：</strong> 使用 <code>git tag</code> 来发布代码可能会引起混淆，因为它通常用于标记版本，而不是发布代码。</li>
+<li><strong>无法利用语义化版本控制的范围（例如：^1.0.0 或 ~1.0.0）来精确指定依赖的版本</strong></li>
+</ol>
+<p>但是如果我们有自己的 npm 库的话，其实对于库的发布就变得非常简单，只需要简单的 3 步:</p>
+<ol>
+<li>更新<code>package.json</code>中的版本号</li>
+<li>代码构建</li>
+<li>最后执行<code>npm publish</code>命令，即发布成功</li>
+</ol>
+<a id="more"></a>
+<p>根本不需要对项目的代码做耦合。 而且随着项目的迭代和新增，内部维护自己的 js 库，不管是组件库，还是工具库，或者是业务库，其实都会变得越来越多。因此是需要搭建自己的内部 npm 库的。它不仅会简化js库发布流程，还可以增强前端各项目通用代码流通。</p>
+<h2 id="verdaccio-简介"><a href="#verdaccio-简介" class="headerlink" title="verdaccio 简介"></a>verdaccio 简介</h2><p>我们使用 verdaccio 部署了npm 私有源, <a href="https://verdaccio.org/docs/next/what-is-verdaccio" target="_blank" rel="noopener">Verdaccio</a> 是一个轻量级的私有 npm 代理注册服务器，它可以帮助你建立自己的私有仓库，对 npm 包进行管理。以下是 Verdaccio 的一些主要功能：</p>
+<ol>
+<li><strong>私有包管理</strong>：你可以使用 Verdaccio 来发布和存储你的私有包，这对于保护你的源代码和内部使用的包非常有用。</li>
+<li><strong>缓存代理</strong>：Verdaccio 可以作为一个 npm 代理，它会缓存所有从 npmjs.com 下载的公共包，这样即使你失去了与 npmjs.com 的连接，你仍然可以安装这些包。</li>
+<li><strong>权限控制</strong>：Verdaccio 支持用户认证和包权限控制，你可以控制谁可以访问和发布你的私有包。</li>
+<li><strong>易于扩展</strong>：Verdaccio 支持插件，你可以使用插件来扩展 Verdaccio 的功能，例如添加新的认证方法，改变存储方式等。</li>
+<li><strong>兼容性</strong>：Verdaccio 完全兼容 npmjs.com，你可以使用 npm 或者 yarn 等工具来与 Verdaccio 交互。</li>
+<li><strong>易于部署</strong>：Verdaccio 可以在多种环境中部署，包括 Docker，Kubernetes，云服务等。</li>
+<li><strong>Web UI</strong>：Verdaccio 提供了一个用户友好的 web 界面，你可以在这个界面上搜索和管理你的包。</li>
+</ol>
+<p>接下来开始进入实操环节</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>Verdaccio 有多种安装，因为是安装在服务端，因此为了不污染服务器全局环境，我这边是使用 docker 来安装: <a href="https://verdaccio.org/docs/next/docker" target="_blank" rel="noopener">Running Verdaccio using Docker</a></p>
+<blockquote>
+<p>我的安装环境是 CentOS 7</p>
+</blockquote>
+<h3 id="安装-docker"><a href="#安装-docker" class="headerlink" title="安装 docker"></a>安装 docker</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-64-9-centos ~]# sudo yum install -y yum-utils</span><br><span class="line">[root@VM-64-9-centos ~]# sudo yum-config-manager \</span><br><span class="line">&gt; --add-repo \</span><br><span class="line">&gt; https://download.docker.com/linux/centos/docker-ce.repo</span><br><span class="line">[root@VM-64-9-centos ~]# sudo yum install docker-ce docker-ce-cli containerd.io</span><br><span class="line">[root@VM-64-9-centos ~]# sudo systemctl start docker</span><br><span class="line">root@VM-1-3-centos ~]# docker -v</span><br><span class="line">Docker version 24.0.6, build ed223bc</span><br></pre></td></tr></table></figure>
+<h3 id="安装镜像"><a href="#安装镜像" class="headerlink" title="安装镜像"></a>安装镜像</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">V_PATH=/etc/verdaccio; docker run -d -it  --name verdaccio   \</span><br><span class="line">  -p 4873:4873   \</span><br><span class="line">  -v $V_PATH/conf:/verdaccio/conf   \</span><br><span class="line">  -v $V_PATH/storage:/verdaccio/storage   \</span><br><span class="line">  -v $V_PATH/plugins:/verdaccio/plugins  \</span><br><span class="line">  verdaccio/verdaccio</span><br></pre></td></tr></table></figure>
+<p>这边是直接用挂载宿主机 <code>/etc/verdaccio</code> 目录的方式来对 verdaccio 的持久化数据进行维护, <code>-d</code> 表示后台运行</p>
+<blockquote>
+<p>不需要先拉取镜像，启动的时候，如果本地找不到镜像，会自己的 pull 线上的镜像</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-1-3-centos conf]# V_PATH=/etc/verdaccio; docker run -d -it  --name verdaccio   -p 4873:4873   -v $V_PATH/conf:/verdaccio/conf   -v $V_PATH/storage:/verdaccio/storage   -v $V_PATH/plugins:/verdaccio/plugins   verdaccio/verdaccio</span><br><span class="line">ddaaa3532dd313cab24302011fe439c36771fbbb794f6869af650d9a13404e4e</span><br><span class="line">[root@VM-1-3-centos conf]# docker ps</span><br><span class="line">CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                                       NAMES</span><br><span class="line">ddaaa3532dd3   verdaccio/verdaccio   &quot;uid_entrypoint /bin…&quot;   5 seconds ago   Up 5 seconds   0.0.0.0:4873-&gt;4873/tcp, :::4873-&gt;4873/tcp   verdaccio</span><br></pre></td></tr></table></figure>
+<p>不过这边要注意一个细节，因为是走挂载的方式，所以启动 docker 时候的配置文件 <code>config.yaml</code>，我们要先创建好，直接拷贝官网 github 上的默认文件即可: <a href="https://github.com/verdaccio/verdaccio/blob/5.x/conf/docker.yaml" target="_blank" rel="noopener">config.yaml</a></p>
+<blockquote>
+<p>记得重命名为 <code>config.yaml</code>, 完整路径是: <code>/etc/verdaccio/conf/config.yaml</code></p>
+</blockquote>
+<p>如果刚开始没有这个配置文件的话，启动 docker 的时候就会报这个错误:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cannot open config file /verdaccio/conf/config.yaml: false</span><br></pre></td></tr></table></figure></p>
+<p>当 docker 启动之后，我们可以通过<code>docker logs -f verdaccio</code> 查看当前这个容器的当前 log 输出。</p>
+<p>同时也因为启动成功，所以我们也可以查看 webui 界面，端口就是上面的 <code>4873</code></p>
+<p><img src="/2023/09/19/npm-verdaccio/1.png" alt="1"></p>
+<h2 id="配置文件分析"><a href="#配置文件分析" class="headerlink" title="配置文件分析"></a>配置文件分析</h2><p>现在服务已经启动了，用的配置文件是默认的配置，我们来看下都有哪些配置，下面只列出 <code>config.yaml</code> 文件中有启用的配置:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"># 存放包的目录</span><br><span class="line">storage: /verdaccio/storage/data</span><br><span class="line"># 存放插件的目录</span><br><span class="line">plugins: /verdaccio/plugins</span><br><span class="line"></span><br><span class="line"># https://verdaccio.org/docs/webui</span><br><span class="line"># webui 界面的配置</span><br><span class="line">web:</span><br><span class="line">  title: Verdaccio</span><br><span class="line"></span><br><span class="line"># https://verdaccio.org/docs/configuration#authentication</span><br><span class="line"># 权限校验，通过 adduser 创建的用户信息，会放在这个文件</span><br><span class="line">auth:</span><br><span class="line">  htpasswd:</span><br><span class="line">    file: /verdaccio/storage/htpasswd</span><br><span class="line"></span><br><span class="line"># https://verdaccio.org/docs/configuration#uplinks</span><br><span class="line"># 其他代理的资源库，在设置 packages 权限的时候，可以通过设置 proxy 来代理下载外部资源包，默认是走 npmjs 官网</span><br><span class="line"># 当然也可以添加多个，比如也可以设置淘宝源，然后可以自己指定不同 scope package 包的时候，如果本私有库找不到，可以通过走不同的 uplink 资源库来进行代理下载</span><br><span class="line">uplinks:</span><br><span class="line">  npmjs:</span><br><span class="line">    url: https://registry.npmjs.org/</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># https://verdaccio.org/docs/protect-your-dependencies/</span><br><span class="line"># https://verdaccio.org/docs/configuration#packages</span><br><span class="line"># 包权限管理，可以根据不同的 scope 来设置不同权限，默认就是访问下载是所有人，但是 publish 和 unpublish 是要有用户登录权限才行</span><br><span class="line"># 然后也可以通过配置 proxy 代理源，在当找不到包的时候，可以去外网下载包</span><br><span class="line">packages:</span><br><span class="line">  &apos;@*/*&apos;:</span><br><span class="line">    access: $all</span><br><span class="line">    publish: $authenticated</span><br><span class="line">    unpublish: $authenticated</span><br><span class="line">    proxy: npmjs</span><br><span class="line"></span><br><span class="line">  &apos;**&apos;:</span><br><span class="line">    access: $all</span><br><span class="line">    publish: $authenticated</span><br><span class="line">    unpublish: $authenticated</span><br><span class="line">    proxy: npmjs</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># https://verdaccio.org/docs/configuration#server</span><br><span class="line"># 用来修改服务器属性</span><br><span class="line">server:</span><br><span class="line">  keepAliveTimeout: 60</span><br><span class="line"></span><br><span class="line"># https://verdaccio.org/docs/configuration/#audit</span><br><span class="line"># 校验中间件</span><br><span class="line">middlewares:</span><br><span class="line">  audit:</span><br><span class="line">    enabled: true</span><br><span class="line"></span><br><span class="line"># https://verdaccio.org/docs/logger</span><br><span class="line"># log 输出设置，也可以设置输出到 file </span><br><span class="line">log: &#123; type: stdout, format: pretty, level: http &#125;</span><br></pre></td></tr></table></figure></p>
+<p>默认配置其实不多，并且官方文档其实说的很清楚了，这边不再赘述， 正常情况下，在有挂载 <code>conf</code> 和 <code>storage</code> 和 <code>plugin</code> 目录的情况下，配置项保持默认其实就够了，后面如果需要调整的话，下面会单独说明</p>
+<h2 id="实际操作"><a href="#实际操作" class="headerlink" title="实际操作"></a>实际操作</h2><p>接下来我们来实际操作整个过程</p>
+<blockquote>
+<p>本次测试的客户端的 node 版本是 <code>16.20.0</code> 版本</p>
+</blockquote>
+<h3 id="1-创建账号"><a href="#1-创建账号" class="headerlink" title="1. 创建账号"></a>1. 创建账号</h3><p>要发布的话，肯定是要有一个账号的。默认情况下，肯定是没有账号的 (使用 <code>npm whoami</code> 查看当前用户，要指定源，不然就会指向默认源):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;npm whoami --registry http://43.139.27.159:4873/</span><br><span class="line">npm ERR! code ENEEDAUTH</span><br><span class="line">npm ERR! need auth This command requires you to be logged in.</span><br><span class="line">npm ERR! need auth You need to authorize this machine using `npm adduser`</span><br></pre></td></tr></table></figure></p>
+<p>通过 <code>adduser</code> 创建一个<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;npm adduser --registry http://43.139.27.159:4873/</span><br><span class="line">npm WARN adduser `adduser` will be split into `login` and `register` in a future version. `adduser` will become an alias of `register`. `login` (currently an alias) will become its own command.</span><br><span class="line">npm notice Log in on http://43.139.27.159:4873/</span><br><span class="line">Username: zachke</span><br><span class="line">Password:</span><br><span class="line">Email: (this IS public) kebingzao@gmail.com</span><br><span class="line">Logged in as zachke on http://43.139.27.159:4873/.</span><br></pre></td></tr></table></figure></p>
+<p>不过这边要注意一个细节，就是如果是用 docker 安装的话，因为用户新增的时候，会写入 htpasswd 文件，由于该文件是在宿主机上，也就是 <code>/etc/verdaccio/storage/htpasswd</code> 这个文件，而 verdaccio 容器中拥有自己的用户名，名字就叫 verdaccio，所以无法写入 root 用户拥有的文件。</p>
+<p>所以这时候在创建的时候，就会报:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm ERR! 500 Internal Server Error - PUT http://43.139.27.159:4873/-/user/org.couchdb.user:zachke - internal server error</span><br></pre></td></tr></table></figure></p>
+<p>解决的方式也很简单，只要将宿主机的这个 storage 目录的 owner 设置为 verdaccio 用户即可。而且 docker 容器中的 uid 和 gid 和宿主机是共享的，只不过没有具体的名称。</p>
+<p>因此我们通过 <code>docker inspect verdaccio</code> 查看 uid, 发现是 <code>10001</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-1-3-centos ~]# docker inspect verdaccio | grep UID</span><br><span class="line">                &quot;VERDACCIO_USER_UID=10001&quot;,</span><br></pre></td></tr></table></figure></p>
+<p>至于 gid，就需要进入到这个容器中，并且打开用户组文件进行查找, 可以看到是 <code>65533</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">~ $ cat /etc/group | grep verdaccio</span><br><span class="line">nogroup:x:65533:verdaccio</span><br></pre></td></tr></table></figure></p>
+<p>所以在宿主机改一下 storage 的权限即可，改成 verdaccio 的 user id，和 group id，也就是 10001 和 65533, <code>-R</code> 表示子目录也同样需要<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-1-3-centos verdaccio]# sudo chown -R 10001:65533 /etc/verdaccio/storage</span><br></pre></td></tr></table></figure></p>
+<p>这样子就可以创建成功了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;npm whoami --registry http://43.139.27.159:4873/</span><br><span class="line">zachke</span><br></pre></td></tr></table></figure></p>
+<p>也可以在 <code>storage/htpasswd</code> 这个查看这个文件， 就可以发现已经有一个用户了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-1-3-centos verdaccio]# cat /etc/verdaccio/storage/htpasswd</span><br><span class="line">zachke:wKTp2Zn.123456:autocreated 2023-09-18T02:25:30.987Z</span><br></pre></td></tr></table></figure></p>
+<p>同时通过这个账号也可以登录 web ui 后台</p>
+<p><img src="/2023/09/19/npm-verdaccio/2.png" alt="1"></p>
+<p>既然有添加用户，那肯定有登录和登出:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">npm login --registry http://43.139.27.159:4873/</span><br><span class="line">npm logout --registry http://43.139.27.159:4873/</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>添加用户就默认登录了,如果要切换同一个源的不同用户，就要先登出，然后再登录</p>
+</blockquote>
+<h3 id="2-创建项目"><a href="#2-创建项目" class="headerlink" title="2. 创建项目"></a>2. 创建项目</h3><p>接下来就可以创建一个新的项目, 使用 <code>npm init</code> 指令可以快速生成一个只包含 <code>package.json</code> 文件的项目:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir testlog</span><br><span class="line">$ cd testlog/</span><br><span class="line">$ npm init</span><br></pre></td></tr></table></figure></p>
+<p>基本上一路默认下去，就可以创建一个项目了。</p>
+<blockquote>
+<p>如果不想一个一个项的配置，直接使用 <code>npm init -y</code> 指令创建，就会生成一份全部走默认值的<code>package.json</code> 文件</p>
+</blockquote>
+<p>这时候这个 testlog 项目就会有一个 <code>package.json</code> 的文件了<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span>: <span class="string">"testlog"</span>,</span><br><span class="line">  <span class="attr">"version"</span>: <span class="string">"1.0.0"</span>,</span><br><span class="line">  <span class="attr">"description"</span>: <span class="string">"is test log"</span>,</span><br><span class="line">  <span class="attr">"main"</span>: <span class="string">"index.js"</span>,</span><br><span class="line">  <span class="attr">"scripts"</span>: &#123;</span><br><span class="line">    <span class="attr">"test"</span>: <span class="string">"echo \"Error: no test specified\" &amp;&amp; exit 1"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"author"</span>: <span class="string">""</span>,</span><br><span class="line">  <span class="attr">"license"</span>: <span class="string">"ISC"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>单独只有这个文件肯定是不行，因为上面的 <code>main</code> 字段已经默认入口文件是 <code>index.js</code>, 所以这时候需要再创建一个 <code>index.js</code> 文件来当作入口文件， 内容如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">function mylog() &#123;</span><br><span class="line">    console.log(&apos;mylog: &apos;, ...arguments);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module.exports = &#123;mylog&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>功能很简单，就是针对 <code>console.log</code> 做了一层封装，加了一个 log 输出前缀</p>
+<h3 id="3-发布项目"><a href="#3-发布项目" class="headerlink" title="3. 发布项目"></a>3. 发布项目</h3><p>接下来我们就发布这个项目，版本就是上面的 <code>version: 1.0.0</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">\testlog&gt; npm publish --registry http://43.139.27.159:4873/</span><br><span class="line">npm notice</span><br><span class="line">npm notice 📦  testlog@1.0.0</span><br><span class="line">npm notice === Tarball Contents ===</span><br><span class="line">npm notice 93B  index.js</span><br><span class="line">npm notice 214B package.json</span><br><span class="line">npm notice === Tarball Details ===</span><br><span class="line">npm notice name:          testlog</span><br><span class="line">npm notice version:       1.0.0</span><br><span class="line">npm notice filename:      testlog-1.0.0.tgz</span><br><span class="line">npm notice package size:  332 B</span><br><span class="line">npm notice unpacked size: 307 B</span><br><span class="line">npm notice shasum:        8e13c7124703cf5a6fe8d73dce54ef541f8edcb4</span><br><span class="line">npm notice integrity:     sha512-vUYCEp6/Lw7cj[...]vYziTPKdNFRBg==</span><br><span class="line">npm notice total files:   2</span><br><span class="line">npm notice</span><br><span class="line">npm notice Publishing to http://43.139.27.159:4873/</span><br><span class="line">+ testlog@1.0.0</span><br></pre></td></tr></table></figure></p>
+<p>这时候就可以再 web 后台看到了:</p>
+<p><img src="/2023/09/19/npm-verdaccio/3.png" alt="1"></p>
+<p>可以看到首页列表中，已经有一个包了，并且他的标题就是包名(package.json 文件的 name 字段), 描述就是 package.json 文件的 description 字段， 版本就是 <code>1.0.0</code>, 因为 author 字段是空，所以作者变成 <code>Unknown</code>.</p>
+<blockquote>
+<p>如果有 README.md 文件的话，描述会优先获取 README.md 文件中主标题下的第一行，如果没有 README.md 文件的话，描述才会获取 package.json 文件的 description 字段</p>
+</blockquote>
+<p>点进去会发现没有详情，也就是没有 README.md， 右边的详情也没有 author</p>
+<p><img src="/2023/09/19/npm-verdaccio/4.png" alt="1"></p>
+<p>所以接下来我们再迭代一个版本，因为是 patch 版本，所以新的版本号是 <code>1.0.1</code>， 然后填写了 author 这一栏，增加了 README 文件。<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span>: <span class="string">"testlog"</span>,</span><br><span class="line">  <span class="attr">"version"</span>: <span class="string">"1.0.1"</span>,</span><br><span class="line">  <span class="attr">"description"</span>: <span class="string">"is test log"</span>,</span><br><span class="line">  <span class="attr">"main"</span>: <span class="string">"index.js"</span>,</span><br><span class="line">  <span class="attr">"scripts"</span>: &#123;</span><br><span class="line">    <span class="attr">"test"</span>: <span class="string">"echo \"Error: no test specified\" &amp;&amp; exit 1"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"author"</span>: <span class="string">"zach"</span>,</span><br><span class="line">  <span class="attr">"license"</span>: <span class="string">"ISC"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>再 publish 一次，可以看到版本号变成 <code>1.0.1</code> 了， author 信息有了， readme 内容也有了</p>
+<p><img src="/2023/09/19/npm-verdaccio/5.png" alt="1"></p>
+<p>每次发布的时候， version 字段都要往上加，不能往下，可以走最后一位修订号(patch)，也可以是第二位的次版本号(minor)，或者第一位的主版本号(major)，反正就是不能往下，不然会报错。</p>
+<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>同时要注意，正常情况下，在 publish 的时候，npm 默认也会排除<a href="https://docs.npmjs.com/cli/v9/using-npm/developers#keeping-files-out-of-your-package" target="_blank" rel="noopener">一些文件</a>，不会将他们发布到包中。 比如过滤掉这些:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">.*.swp</span><br><span class="line">._*</span><br><span class="line">.DS_Store</span><br><span class="line">.git</span><br><span class="line">.gitignore</span><br><span class="line">.hg</span><br><span class="line">.npmignore</span><br><span class="line">.npmrc</span><br><span class="line">.lock-wscript</span><br><span class="line">.svn</span><br><span class="line">.wafpickle-*</span><br><span class="line">config.gypi</span><br><span class="line">CVS</span><br><span class="line">npm-debug.log</span><br></pre></td></tr></table></figure></p>
+<p>其他的剩余文件都会发布上去，如果需要排除其他文件，可以在<code>.npmignore</code>中配置。</p>
+<p>同时如果你的包是需要构建的，只需要发布构建后的文件，<code>src</code> 目录不需要，那么就要在 <code>package.json</code> 指定 <code>files</code> 字段，将构建后的目录或者文件包含在 <code>files</code> 数组里面， 这样子 npm 在 publish 的时候，就会默认只发布 <code>files</code> 数组里面的文件。</p>
+<blockquote>
+<p><code>package.json</code>, <code>README.md</code>, <code>CHANGELOG.md</code>, <code>LICENCE</code> 这几个文件不需要特意指定到 files 数组，也会自动包含, 除非手动强制在 <code>.npmignore</code> 中配置不要</p>
+</blockquote>
+<h3 id="4-撤销已发布的包"><a href="#4-撤销已发布的包" class="headerlink" title="4. 撤销已发布的包"></a>4. 撤销已发布的包</h3><p>撤销已发布的包在 Verdaccio 中是通过使用 npm unpublish 命令来完成的，格式为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm unpublish [@scope/]pkg[@version] --registry http://43.139.27.159:4873</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><code>@scope/</code> 是可选的，仅在你撤销的包在特定作用域下时需要。</li>
+<li><code>pkg</code> 是你要撤销的包的名称。</li>
+<li><code>@version</code> 是你要撤销的包的版本。如果你想撤销所有版本，可以省略这部分。</li>
+</ul>
+<p>对于本例来说，由于在初始化的时候，并没有针对这个包设定作用域，因此不需要填。想撤销刚才发布的 <code>1.0.1</code> 版本, 就可以:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">\testlog&gt; npm unpublish testlog@1.0.1 --registry http://43.139.27.159:4873/</span><br><span class="line">- testlog@1.0.1</span><br></pre></td></tr></table></figure></p>
+<p>这时候 web 后台就只剩下 1.0.0 的版本了。 </p>
+<p>如果想整个包都撤掉，也就是删掉，不带版本号就行了，不过要加 <code>-f</code> 指令，表示强制删除，如果没有的话，会报错<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">\testlog&gt; npm unpublish testlog -f --registry http://43.139.27.159:4873/</span><br><span class="line">npm WARN using --force Recommended protections disabled.</span><br><span class="line">- testlog</span><br></pre></td></tr></table></figure></p>
+<p>这时候整个包都被删掉了，web 后台看不到这个包了</p>
+<p><img src="/2023/09/19/npm-verdaccio/6.png" alt="1"></p>
+<h3 id="5-关于-scope-作用域"><a href="#5-关于-scope-作用域" class="headerlink" title="5. 关于 scope 作用域"></a>5. 关于 scope 作用域</h3><p>首先为啥会有 scope 的需求, 很简单，所有 npm 包都有一个名称。如果你要给自己的包，起一个有「寓意」的名字，会发现绝大多数单词/短语已被占用，即使没有真正的内容，这真是无可奈何的事儿。如何解决这一困境呢？ 你可以发布带作用域/范围（scope）的包，通过 <code>scope + pkg</code> 的全名称来让你的包不会重复，并且便于组织识别。</p>
+<blockquote>
+<p>事实上 npm 上面的 scope 其实代表的就是 org 组织</p>
+</blockquote>
+<p>所以正常我们在使用私有库 lib 的时候，如果是自己自研的，那么会带上 scope, 这个是因为我们的私有库的 lib，一般包含 3 种类型的 lib:</p>
+<ol>
+<li>团队内部自研的，这时候 scope 就会是我们自己定的组织名称, 比如组织名称叫 air， 那么内部自研的库，都应该是以 air 这个 scope 命名。当然如果你内部自研的库很多，还可以再细分，比如如果是 js 功能的库，那么 scope 就可以叫 <code>air-js</code>, 如果是组件库的，那么 scope 就可以叫 <code>air-component</code></li>
+<li>基于线上开源项目再进行二开自己维护的，这时候 scope 就是开源项目的 scope</li>
+<li>之前线上有开源，有地址，但是后面不再维护，或者是很旧的找不到线上包的库，这时候我们就会 fork 一份到私有库，但是不进行二开需求，这时候 scope 就是 fork</li>
+</ol>
+<p>因为刚才的测试项目被 <code>unpublish</code> 删掉了, 所以我们重新再创建一个具有 scope 的项目，通过 <code>npm init --scope xxx</code> 来指定项目初始化的 scope<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir testlog2</span><br><span class="line">$ cd testlog2/</span><br><span class="line">$ npm init --scope zachke -y</span><br><span class="line">Wrote to \testlog2\package.json:</span><br><span class="line">&#123;</span><br><span class="line">  &quot;name&quot;: &quot;@zachke/testlog2&quot;,</span><br><span class="line">  &quot;version&quot;: &quot;1.0.0&quot;,</span><br><span class="line">  &quot;description&quot;: &quot;&quot;,</span><br><span class="line">  &quot;main&quot;: &quot;index.js&quot;,</span><br><span class="line">  &quot;scripts&quot;: &#123;</span><br><span class="line">    &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;keywords&quot;: [],</span><br><span class="line">  &quot;author&quot;: &quot;&quot;,</span><br><span class="line">  &quot;license&quot;: &quot;ISC&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这时候我就建了一个 scope 为 <code>zachke</code> 的包了，包名为 <code>testlog2</code></p>
+<h3 id="6-安装私有包"><a href="#6-安装私有包" class="headerlink" title="6. 安装私有包"></a>6. 安装私有包</h3><p>那么怎么在项目中安装呢? 有几种方式，首先我们先创建一个项目，就一个简单的 node 项目，也不引用什么 vue 框架了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir my-project</span><br><span class="line">$ cd my-project/</span><br><span class="line">$ npm init -y</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-命令行直接指定-registry-安装"><a href="#1-命令行直接指定-registry-安装" class="headerlink" title="1. 命令行直接指定 registry 安装"></a>1. 命令行直接指定 registry 安装</h4><p>接下来直接安装刚才的那个包:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\my-project&gt; npm install @zachke/testlog2 --registry http://43.139.27.159:4873/</span><br></pre></td></tr></table></figure></p>
+<p>这时候就可以再 <code>package.json</code> 看到这个包的依赖了</p>
+<p><img src="/2023/09/19/npm-verdaccio/7.png" alt="1"></p>
+<p>接下来直接引用这个包就可以了。 补上项目的 <code>index.js</code> 入口文件:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">const &#123; mylog &#125; = require(&apos;@zachke/testlog2&apos;);</span><br><span class="line"></span><br><span class="line">mylog(&quot;hello!!&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>并且补上 script 运行指令 <code>node index.js</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;name&quot;: &quot;my-project&quot;,</span><br><span class="line">  &quot;version&quot;: &quot;1.0.0&quot;,</span><br><span class="line">  &quot;description&quot;: &quot;&quot;,</span><br><span class="line">  &quot;main&quot;: &quot;index.js&quot;,</span><br><span class="line">  &quot;scripts&quot;: &#123;</span><br><span class="line">    &quot;start&quot;: &quot;node index.js&quot;,</span><br><span class="line">    &quot;test&quot;: &quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;keywords&quot;: [],</span><br><span class="line">  &quot;author&quot;: &quot;&quot;,</span><br><span class="line">  &quot;license&quot;: &quot;ISC&quot;,</span><br><span class="line">  &quot;dependencies&quot;: &#123;</span><br><span class="line">    &quot;@zachke/testlog2&quot;: &quot;^1.0.0&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>接下来就可以使用 npm 运行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">\my-project&gt; npm run start</span><br><span class="line"></span><br><span class="line">&gt; my-project@1.0.0 start</span><br><span class="line">&gt; node index.js</span><br><span class="line"></span><br><span class="line">mylog:  hello!!</span><br></pre></td></tr></table></figure></p>
+<p>可以看到这个项目已经运行起来了，并且我们的私有包有被成功引用。 不过这种情况的安装有个问题，他是依赖 lock 文件，如果是 npm 安装，那么就是依赖 <code>package-lock.json</code> 这个文件，也就是本地中的</p>
+<p><img src="/2023/09/19/npm-verdaccio/8.png" alt="1"></p>
+<p>如果是 yarn 安装的，那么就是依赖于 yarn.lock 文件。</p>
+<p>这种方式的安装缺点就是一旦这个 lock 文件被删掉，那么就不会从私有源安装。因为外部公共 npmjs 没有这个私有包，就会报错。</p>
+<h4 id="2-私有库设置为全局的源"><a href="#2-私有库设置为全局的源" class="headerlink" title="2. 私有库设置为全局的源"></a>2. 私有库设置为全局的源</h4><p>第二种安装方式，就是将你的私有库的源设置为全局的源<br><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm config set registry http://43.139.27.159:4873</span><br><span class="line"></span><br><span class="line">yarn config set registry http://43.139.27.159:4873</span><br></pre></td></tr></table></figure></p>
+<p>这样就可以使你的项目中的所有包都从私有源安装，Verdaccio 会自动代理 npmjs.org上的包 (可以指定 uplink 的其他代理)，并且会缓存这些包以加快安装速度，但是可靠性未验证，暂时不推荐。</p>
+<p>而且为了安全，其实我是推荐在私有库的配置中，将上游的 npm 的代理配置关闭的，也就是非私有库的包，不应该通过私有库地址去安装, 也就是将 packages 中的各个 scoped 的配置下面的 <code>proxy</code> 配置删掉或者注释掉<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">packages:</span><br><span class="line">  &apos;@*/*&apos;:</span><br><span class="line">    # scoped packages</span><br><span class="line">    access: $all</span><br><span class="line">    publish: $authenticated</span><br><span class="line">    unpublish: $authenticated</span><br><span class="line">    # 既然是私有库了，找不到就需要去公网找，这样子更安全</span><br><span class="line">    # proxy: npmjs</span><br></pre></td></tr></table></figure></p>
+<p>一旦关闭了 proxy 功能，这时候安装包就更不能走将私有库设置为全局源的方式了，不然就会出现该项目安装其他非私有库的时候，就会找不到报错。</p>
+<h4 id="3-项目配置中指定特定的registry为特定的scope提供包-推荐"><a href="#3-项目配置中指定特定的registry为特定的scope提供包-推荐" class="headerlink" title="3. 项目配置中指定特定的registry为特定的scope提供包 (推荐)"></a>3. 项目配置中指定特定的registry为特定的scope提供包 (推荐)</h4><p>本例就是在 my-project 项目下，创建一个 npm 包配置文件 <code>.npmrc</code> ，比如本项目就是 <code>.npmrc</code>, 然后在这个文件中指定特定包的特定源，比如本例就是</p>
+<blockquote>
+<p>如果是 yarn 安装的，那么就是 <code>.yarnrc</code> 文件</p>
+</blockquote>
+<p><img src="/2023/09/19/npm-verdaccio/9.png" alt="1"></p>
+<p>这边配 scope 就可以了，它会将所有这个 scope 中的包，全部换成后面指定的地址来下载，也就是我们的私有库地址。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@zachke:registry=http://43.139.27.159:4873/</span><br></pre></td></tr></table></figure></p>
+<p>scope 如果不写的话，比如这样子<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">registry=http://43.139.27.159:4873/</span><br></pre></td></tr></table></figure></p>
+<p>那其实就是全局配置了，是只针对这个项目的全局配置，本质上跟第二种全局改 registry 的效果一样。也不推荐，所以还是要有 scope</p>
+<p>测试结果如下，先把原先的包删掉，然后再安装<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">\my-project&gt; npm uninstall @zachke/testlog2 --registry http://43.139.27.159:4873/</span><br><span class="line">\my-project&gt; npm install @zachke/testlog2</span><br></pre></td></tr></table></figure></p>
+<p>而这个也是我们项目中最常用的安装私有库包的方式。</p>
+<h2 id="发布操作加钉钉通知"><a href="#发布操作加钉钉通知" class="headerlink" title="发布操作加钉钉通知"></a>发布操作加钉钉通知</h2><p>接下来我们给发布行为的操作，加上钉钉通知，Verdaccio 是支持 hook 触发的，具体看:</p>
+<ul>
+<li><a href="https://verdaccio.org/docs/notifications/" target="_blank" rel="noopener">verdaccio send Notifications</a></li>
+<li><a href="https://open.dingtalk.com/document/robots/custom-robot-access" target="_blank" rel="noopener">自定义机器人接入</a></li>
+</ul>
+<p>然后 config.yaml 文件中的最后配上，要记得重启 docker 容器生效 (<code>docker restart verdaccio</code>)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># notify</span><br><span class="line">notify:</span><br><span class="line">  &apos;dingding&apos;:</span><br><span class="line">    method: POST</span><br><span class="line">    headers: [&#123; &apos;Content-Type&apos;: &apos;application/json&apos; &#125;]</span><br><span class="line">    endpoint: https://oapi.dingtalk.com/robot/send?access_token=0427285b76cebabe510d14c294dba6738dcb5991515368e7293f16f9f0ba47a6</span><br><span class="line">    content: &apos;&#123;&quot;msgtype&quot;:&quot;markdown&quot;,&quot;markdown&quot;:&#123;&quot;title&quot;:&quot;【&#123;&#123; name &#125;&#125;】 版本更新&quot;,&quot;text&quot;:&quot;&gt; 新的包版本更新!!!&lt;br&gt; **包名**: &#123;&#123; name &#125;&#125; &lt;br&gt; **版本**: &#123;&#123;publishedPackage&#125;&#125; &lt;br&gt; **发布者**: &#123;&#123;publisher.name&#125;&#125; &lt;br&gt; **查看详情**: [查看链接](http://43.139.27.159:4873/-/web/detail/&#123;&#123; name &#125;&#125;)&quot;,&quot;at&quot;:&#123;&quot;isAtAll&quot;:false&#125;&#125;&#125;&apos;</span><br></pre></td></tr></table></figure></p>
+<p>然后重新推送一个新的版本，这时候可以看到有 log 了 (可以通过 <code>docker logs -f verdaccio</code> 查看 log):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">info --- auth/allow_action: access granted to: zachke</span><br><span class="line">info --- zachke is allowed publish for @zachke/testlog2</span><br><span class="line">http &lt;-- 200, user: zachke(125.77.202.250), req: &apos;PUT /@zachke%2ftestlog2&apos;, bytes: 1496/0</span><br><span class="line">info --- A notification has been shipped: &#123;&quot;msgtype&quot;:&quot;markdown&quot;,&quot;markdown&quot;:&#123;&quot;title&quot;:&quot;【@zachke/testlog2】 版本更新&quot;,&quot;text&quot;:&quot;&gt; 新的包版本更新!!!&lt;br&gt; **包名**: @zachke/testlog2 &lt;br&gt; **版本**: @zachke/testlog2@1.0.5 &lt;br&gt; **发布者**: zachke &lt;br&gt; **查看详情**: [查看链接](http://43.139.27.159:4873/-/web/detail/@zachke/testlog2)&quot;,&quot;at&quot;:&#123;&quot;isAtAll&quot;:false&#125;&#125;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>效果就是钉钉可以收到机器人通知了:</p>
+<p><img src="/2023/09/19/npm-verdaccio/10.png" alt="1"></p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><h3 id="1-修改-web-ui"><a href="#1-修改-web-ui" class="headerlink" title="1. 修改 web ui"></a>1. 修改 web ui</h3><p>正常情况，我们不太需要修改 web 界面 ui，但是为了更好的定制化，一般我们只需要改几个值，比如 <code>title</code>， <code>logo</code>， <code>primary_color</code> 这三个值就够了</p>
+<p>比如我在配置文件 config.yaml 改成<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">web:</span><br><span class="line">  title: zachNpm</span><br><span class="line">  logo: https://kebingzao.com/images/avatar.png</span><br><span class="line">  primary_color: &apos;#67b7bf&apos;</span><br></pre></td></tr></table></figure></p>
+<p>重启一下 docker 容器，就可以看到生效了</p>
+<p><img src="/2023/09/19/npm-verdaccio/11.png" alt="1"></p>
+<blockquote>
+<p>如果还想再彻底一点的，<code>favicon</code> 还是可以调整的，甚至加载的 js 都可以换，但是一般没啥必要</p>
+</blockquote>
+<h3 id="2-不启用-package-的代理功能"><a href="#2-不启用-package-的代理功能" class="headerlink" title="2. 不启用 package 的代理功能"></a>2. 不启用 package 的代理功能</h3><p>上文其实有说过，其实 Verdaccio 是支持非常灵活的代理下载功能的，比如我可以在 unlinks 指定多个代理源:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">uplinks:</span><br><span class="line">  npmjs:</span><br><span class="line">    url: https://registry.npmjs.org/</span><br><span class="line">  server2:</span><br><span class="line">    url: http://mirror.local.net/</span><br><span class="line">    timeout: 100ms</span><br><span class="line">  server3:</span><br><span class="line">    url: http://mirror2.local.net:9000/</span><br><span class="line">  baduplink:</span><br><span class="line">    url: http://localhost:55666/</span><br></pre></td></tr></table></figure></p>
+<p>然后在 package 配置那边针对不同的 scope 来指定不同的 proxy, 甚至同一个 scope 可以指定多个下载源<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">packages:</span><br><span class="line">    &apos;my-company-*&apos;:</span><br><span class="line">        access: $all</span><br><span class="line">        publish: $authenticated</span><br><span class="line">        unpublish: $authenticated</span><br><span class="line">        proxy: server3 npmjs</span><br><span class="line">    &apos;@my-local-scope/*&apos;:</span><br><span class="line">        access: $all</span><br><span class="line">        publish: $authenticated</span><br><span class="line">        unpublish: $authenticated</span><br><span class="line">        proxy: server2</span><br><span class="line">    &apos;**&apos;:</span><br><span class="line">        access: $all</span><br><span class="line">        publish: $authenticated</span><br><span class="line">        unpublish: $authenticated</span><br><span class="line">        proxy: npmjs</span><br></pre></td></tr></table></figure></p>
+<p>但是为了安全，我是不建议在私有库的资源里面再去代理下载公网的包的，所以应该将 proxy 的配置去掉，私有库就只负责下载私有库里面的私有包就行了。</p>
+<h3 id="3-nginx-代理-https"><a href="#3-nginx-代理-https" class="headerlink" title="3. nginx 代理 https"></a>3. nginx 代理 https</h3><p>Verdaccio 是支持 tls 的 https 配置，但是我们一般还是用 nginx 来代理 https 请求，一方面是便于证书的管理，每年换证书的时候，统一换 nginx 的证书就够了，其他服务的证书不需要额外去换。</p>
+<p>另一方面 nginx 对证书链和支持和校验也是非常成熟的，不用担心会因为证书链的验证问题，导致某些情况会出现 ssl 的链接错误。</p>
+<p>所以应该这样子配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">[root@test-server conf.d]# cat npm.foo.com.conf</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    listen 443 ssl http2;</span><br><span class="line">    server_name npm.foo.com;</span><br><span class="line">    ssl_certificate             ssl/foo.com.crt;</span><br><span class="line">    ssl_certificate_key         ssl/foo.com.key;</span><br><span class="line">    ssl_session_timeout         5m;</span><br><span class="line">    ssl_protocols               TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;</span><br><span class="line">    </span><br><span class="line">    #兼容低版本的TLSv1.0 1.1 版本加密</span><br><span class="line">    ssl_ciphers EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH:ECDHE-RSA-AES128-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA128:DHE-RSA-AES128-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES128-GCM-SHA128:ECDHE-RSA-AES128-SHA384:ECDHE-RSA-AES128-SHA128:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA128:DHE-RSA-AES128-SHA128:DHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA384:AES128-GCM-SHA128:AES128-SHA128:AES128-SHA128:AES128-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4;</span><br><span class="line">    ssl_prefer_server_ciphers   on;</span><br><span class="line"></span><br><span class="line">    access_log /var/log/nginx/npm.foo.com.access.log;</span><br><span class="line">    error_log /var/log/nginx/npm.foo.com.error.log;</span><br><span class="line">    </span><br><span class="line">    location /&#123;</span><br><span class="line">         add_header Access-Control-Allow-Methods &apos;GET, POST, OPTIONS&apos;;</span><br><span class="line">         add_header Access-Control-Allow-Headers &apos;DNT,X-Mx-ReqToken,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization&apos;;</span><br><span class="line">         if ($request_method = &apos;OPTIONS&apos;) &#123;</span><br><span class="line">             return 204;</span><br><span class="line">         &#125;</span><br><span class="line">         proxy_set_header    X-Real-IP $remote_addr;</span><br><span class="line">         proxy_set_header    Host $http_host;</span><br><span class="line">         proxy_set_header    X-Forwarded-Proto $scheme;</span><br><span class="line">         proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">         proxy_pass          http://127.0.0.1:4873/;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>同时这边还要注意一个细节，就是要将 nginx post 的限制调大一点，在 nginx.conf 那边调整，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client_max_body_size 10M;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>调整跟 verdaccio 的默认配置值一样即可: <code>max_body_size: 10mb</code></p>
+</blockquote>
+<p>不然就会出现发布的时候包过大，出现报错 413 的情况。</p>
+<h3 id="4-遵循版本号语义化"><a href="#4-遵循版本号语义化" class="headerlink" title="4. 遵循版本号语义化"></a>4. 遵循版本号语义化</h3><p>在发布版本的时候，版本号一定要遵循语义化的规则，具体看: <a href="https://semver.org/lang/zh-CN/" target="_blank" rel="noopener">语义化版本 2.0.0</a></p>
+<p>版本格式分为三个格式: 版本格式：<code>主版本号.次版本号.修订号</code>(<code>MAJOR.MINOR.PATCH</code>)，版本号递增规则如下：</p>
+<ul>
+<li>主版本号：当你做了不兼容的 API 修改，</li>
+<li>次版本号：当你做了向下兼容的功能性新增，</li>
+<li>修订号：当你做了向下兼容的问题修正。</li>
+</ul>
+<p>先行版本号及版本编译信息可以加到“主版本号.次版本号.修订号”的后面，作为延伸。</p>
+<p>基本上的用法:</p>
+<table>
+<thead>
+<tr>
+<th>包迭代状态</th>
+<th>阶段(Stage)</th>
+<th>版本号更新规则</th>
+<th>范例</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一次发布</td>
+<td>New product</td>
+<td>从 1.0.0 开始</td>
+<td>1.0.0</td>
+<td>第一次发布上传包</td>
+</tr>
+<tr>
+<td>bug 修改并且向下兼容</td>
+<td>Patch release</td>
+<td>增加修订号(patch)</td>
+<td>1.0.1</td>
+<td>bug 小修复</td>
+</tr>
+<tr>
+<td>新功能增加并且向下兼容</td>
+<td>Minor release</td>
+<td>增加次版本号(Minor),并且将修订号重置为 0</td>
+<td>1.1.0</td>
+<td>新的功能出现，并且不影响现有旧版本应用</td>
+</tr>
+<tr>
+<td>可能会有无法向下兼容</td>
+<td>Major release</td>
+<td>增加主版本号(Major)并且后面的次版本号和修订号都重置为 0</td>
+<td>2.0.0</td>
+<td>会有破环性更新，旧版本再不调整代码的情况下，可能无法应用</td>
+</tr>
+</tbody>
+</table>
+<p>除了可以直接在 <code>package.json</code> 直接修改版本号之外，我们可以用 <code>npm version xxx</code> 的方式来更新版本号<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm version [&lt;newversion&gt; | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]</span><br></pre></td></tr></table></figure></p>
+<p>比如: 原來是 <code>1.0.0</code>，用 <code>npm version minor</code> 就会变成 <code>1.1.0</code>， 后面使用包的时候，可以使用 <code>npm upgrade &lt;package&gt;</code> 更新包版本</p>
+<p>然后在安装包的时候，也有一些符号或者表达式来保证，你在更新的时候，不会一下子跨大版本更新，比如</p>
+<ul>
+<li><code>~</code> –&gt; 只允许修订号版本迭代(如果有缺省值，缺省部分任意迭代)，比如 <code>~1.2.3</code> 相当于 <code>&gt;=1.2.3 &lt;1.3.0</code>, <code>~1.2</code> 相当于 <code>&gt;=1.2.0 &lt; 1.3.0</code></li>
+<li><code>^</code> –&gt; 允许次版本号迭代，比如 <code>^1.2.3</code> 相当于 <code>&gt;=1.2.3 &lt;2.0.0</code>, <code>^1.x</code> 相当于<code>&gt;=1.0.0 &lt;2.0.0</code></li>
+<li><code>&lt;、&lt;=、&gt;、&gt;=、=</code> –&gt; 指定版本范围，比如 <code>=1.2.7 &lt;1.3.0</code> 中包括<code>1.2.7</code>、<code>1.2.8</code>、<code>1.2.99</code>等等，但不包括<code>1.2.6</code>、<code>1.3.0</code> 或<code>1.1.0</code>等等</li>
+<li><code>x、X、*</code> –&gt; 可以替代<code>主版本号.次版本号.修订号</code>三段中任意一段，表示该位置版本号没有限制, <code>*</code> 相当于 <code>&gt;=0.0.0</code>，表示任何版本号, <code>1.X</code>或<code>1.x</code> 相当于 <code>&gt;=1.0.0 &lt;2.0.0</code>，匹配到主版本号</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过使用 verdaccio 搭建私有 npm 仓库，可以让前端的内部私有包得到规范的开发和流通，大大提供了前端开发的效率。</p>
+<p>接下来说一下团队协作上的私有包的开发和发布规范: <a href="/2023/09/21/npm-publish/" title="npm 私有库开发和发布规范">npm 私有库开发和发布规范</a></p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://verdaccio.org/docs/what-is-verdaccio" target="_blank" rel="noopener">What is Verdaccio?</a></li>
+<li><a href="https://www.cnblogs.com/skylor/p/9675646.html" target="_blank" rel="noopener">NPM Version Management Specification</a></li>
+<li><a href="https://semver.org/lang/zh-CN/" target="_blank" rel="noopener">语义化版本 2.0.0</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2023/09/19/npm-verdaccio/" title="使用 verdaccio 搭建前端内部私有 npm 仓库">http://kebingzao.com/2023/09/19/npm-verdaccio/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/npm/" rel="tag"># npm</a>
+          
+            <a href="/tags/verdaccio/" rel="tag"># verdaccio</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/08/25/vernemq-ssl-err/" rel="next" title="记一次大陆地区 VerneMQ 出现部分证书校验失败的情况">
+                <i class="fa fa-chevron-left"></i> 记一次大陆地区 VerneMQ 出现部分证书校验失败的情况
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/09/21/npm-publish/" rel="prev" title="npm 私有库开发和发布规范">
+                npm 私有库开发和发布规范 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">313</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#verdaccio-简介"><span class="nav-number">2.</span> <span class="nav-text">verdaccio 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">3.</span> <span class="nav-text">安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-docker"><span class="nav-number">3.1.</span> <span class="nav-text">安装 docker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装镜像"><span class="nav-number">3.2.</span> <span class="nav-text">安装镜像</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置文件分析"><span class="nav-number">4.</span> <span class="nav-text">配置文件分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实际操作"><span class="nav-number">5.</span> <span class="nav-text">实际操作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-创建账号"><span class="nav-number">5.1.</span> <span class="nav-text">1. 创建账号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-创建项目"><span class="nav-number">5.2.</span> <span class="nav-text">2. 创建项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-发布项目"><span class="nav-number">5.3.</span> <span class="nav-text">3. 发布项目</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#注意事项"><span class="nav-number">5.3.1.</span> <span class="nav-text">注意事项</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-撤销已发布的包"><span class="nav-number">5.4.</span> <span class="nav-text">4. 撤销已发布的包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-关于-scope-作用域"><span class="nav-number">5.5.</span> <span class="nav-text">5. 关于 scope 作用域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-安装私有包"><span class="nav-number">5.6.</span> <span class="nav-text">6. 安装私有包</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-命令行直接指定-registry-安装"><span class="nav-number">5.6.1.</span> <span class="nav-text">1. 命令行直接指定 registry 安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-私有库设置为全局的源"><span class="nav-number">5.6.2.</span> <span class="nav-text">2. 私有库设置为全局的源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-项目配置中指定特定的registry为特定的scope提供包-推荐"><span class="nav-number">5.6.3.</span> <span class="nav-text">3. 项目配置中指定特定的registry为特定的scope提供包 (推荐)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#发布操作加钉钉通知"><span class="nav-number">6.</span> <span class="nav-text">发布操作加钉钉通知</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最佳实践"><span class="nav-number">7.</span> <span class="nav-text">最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-修改-web-ui"><span class="nav-number">7.1.</span> <span class="nav-text">1. 修改 web ui</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-不启用-package-的代理功能"><span class="nav-number">7.2.</span> <span class="nav-text">2. 不启用 package 的代理功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-nginx-代理-https"><span class="nav-number">7.3.</span> <span class="nav-text">3. nginx 代理 https</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-遵循版本号语义化"><span class="nav-number">7.4.</span> <span class="nav-text">4. 遵循版本号语义化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2023/09/19/npm-verdaccio/';
+          this.page.identifier = '2023/09/19/npm-verdaccio/';
+          this.page.title = '使用 verdaccio 搭建前端内部私有 npm 仓库';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

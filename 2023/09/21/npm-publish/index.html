@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="npm,verdaccio," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言通过 使用 verdaccio 搭建前端内部私有 npm 仓库 已经建立了团队内部的私有 npm，并且也知道怎么去进行私有包的发布。 那这一节讲一下怎么规范的进行包的开发，以及要发布的一些规范，当然不同的团队有自己的规范，仅供参考。 开发规范主要包含以下几个环节:  编写 README.md 文件，描述包的使用方法和注意事项 提供类型声明文件 (.d.ts) 提供 demo，方便使用者快速上手">
+<meta name="keywords" content="npm,verdaccio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="npm 私有库开发和发布规范">
+<meta property="og:url" content="http://kebingzao.com/2023/09/21/npm-publish/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言通过 使用 verdaccio 搭建前端内部私有 npm 仓库 已经建立了团队内部的私有 npm，并且也知道怎么去进行私有包的发布。 那这一节讲一下怎么规范的进行包的开发，以及要发布的一些规范，当然不同的团队有自己的规范，仅供参考。 开发规范主要包含以下几个环节:  编写 README.md 文件，描述包的使用方法和注意事项 提供类型声明文件 (.d.ts) 提供 demo，方便使用者快速上手">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2023-12-01T17:07:56.490Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="npm 私有库开发和发布规范">
+<meta name="twitter:description" content="前言通过 使用 verdaccio 搭建前端内部私有 npm 仓库 已经建立了团队内部的私有 npm，并且也知道怎么去进行私有包的发布。 那这一节讲一下怎么规范的进行包的开发，以及要发布的一些规范，当然不同的团队有自己的规范，仅供参考。 开发规范主要包含以下几个环节:  编写 README.md 文件，描述包的使用方法和注意事项 提供类型声明文件 (.d.ts) 提供 demo，方便使用者快速上手">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2023/09/21/npm-publish/"/>
+
+
+
+
+
+  <title>npm 私有库开发和发布规范 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/09/21/npm-publish/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">npm 私有库开发和发布规范</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-09-21T14:04:34+08:00">
+                2023-09-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/node相关/" itemprop="url" rel="index">
+                    <span itemprop="name">node相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/09/21/npm-publish/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/09/21/npm-publish/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/09/21/npm-publish/" class="leancloud_visitors" data-flag-title="npm 私有库开发和发布规范">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2023/09/19/npm-verdaccio/" title="使用 verdaccio 搭建前端内部私有 npm 仓库">使用 verdaccio 搭建前端内部私有 npm 仓库</a> 已经建立了团队内部的私有 npm，并且也知道怎么去进行私有包的发布。</p>
+<p>那这一节讲一下怎么规范的进行包的开发，以及要发布的一些规范，当然不同的团队有自己的规范，仅供参考。</p>
+<h2 id="开发规范"><a href="#开发规范" class="headerlink" title="开发规范"></a>开发规范</h2><p>主要包含以下几个环节:</p>
+<ol>
+<li>编写 <code>README.md</code> 文件，描述包的使用方法和注意事项</li>
+<li>提供类型声明文件 (<code>.d.ts</code>)</li>
+<li>提供 demo，方便使用者快速上手</li>
+<li>提供单元测试，确保包的正确性</li>
+<li>在导出的模块的函数中添加JSDoc注释</li>
+</ol>
+<h3 id="1-编写-README-md-文件"><a href="#1-编写-README-md-文件" class="headerlink" title="1. 编写 README.md 文件"></a>1. 编写 <code>README.md</code> 文件</h3><p><code>README.md</code> 文件无疑是安装者了解这个包的第一途径，因此是非常重要的。 通常README文件应该至少包含以下内容：</p>
+<ol>
+<li><strong>项目名称和描述</strong>：在文件的开头，应该清楚地标明项目的名称和描述，让读者了解这个项目是做什么的；<strong>注意</strong>: 描述会显示在npm包页面的概览中，所以请确保它是有意义的。</li>
+<li><strong>安装指南</strong>：提供详细的步骤，说明如何安装和设置这个包。这可能包括需要的依赖、环境变量等。</li>
+<li><strong>使用示例</strong>：提供一些基本的代码示例，让用户知道如何在他们的项目中使用你的包。</li>
+<li><strong>API 文档</strong>：如果你的包提供了API，你应该在readme中详细说明每个公开的函数或方法，包括它们的参数、返回值和可能抛出的错误。</li>
+<li><strong>Changelog</strong>: 应该提供版本 change log 记录或者跳转到 CHANGE_LOG.md 文件的外链</li>
+</ol>
+<a id="more"></a>
+<h3 id="2-提供类型声明文件-d-ts"><a href="#2-提供类型声明文件-d-ts" class="headerlink" title="2. 提供类型声明文件 (.d.ts)"></a>2. 提供类型声明文件 (<code>.d.ts</code>)</h3><p>如果你的包是用 TypeScript 编写的，那么你可以直接使用 TypeScript 编译器生成类型声明文件。如果你的包是用 JavaScript 编写的，那么你需要手动编写类型声明文件。</p>
+<p>确保类型声明文件的完整性和正确性，这样用户在使用你的包时就可以获得更好的开发体验。</p>
+<h3 id="3-提供-demo，方便使用者快速上手"><a href="#3-提供-demo，方便使用者快速上手" class="headerlink" title="3. 提供 demo，方便使用者快速上手"></a>3. 提供 demo，方便使用者快速上手</h3><p>我认为既然需要将一段逻辑抽成一个公共库，说明肯定是具备一定的复杂度的，因此在库开发过程中，一定要有 demo 目录，里面要提供可直接运行的 demo 实例</p>
+<h3 id="4-提供单元测试，确保包的正确性"><a href="#4-提供单元测试，确保包的正确性" class="headerlink" title="4. 提供单元测试，确保包的正确性"></a>4. 提供单元测试，确保包的正确性</h3><p>在发布之前，确保你的包是可以正常工作的。编写适当的测试，并使用测试框架（如<a href="https://jestjs.io/" target="_blank" rel="noopener">Jest</a>或<a href="https://mochajs.org/" target="_blank" rel="noopener">Mocha</a>）来运行它们。</p>
+<p>如果是类似于组件库的，那么可能就会需要编写 e2e 测试，可以使用<a href="https://playwright.dev/" target="_blank" rel="noopener">playwright</a></p>
+<h3 id="5-在导出的模块的函数中添加JSDoc注释"><a href="#5-在导出的模块的函数中添加JSDoc注释" class="headerlink" title="5. 在导出的模块的函数中添加JSDoc注释"></a>5. 在导出的模块的函数中添加<a href="https://www.jsdoc.com.cn/" target="_blank" rel="noopener">JSDoc</a>注释</h3><p>为了减少库的使用成本，在导出的模块的函数中添加<a href="https://www.jsdoc.com.cn/" target="_blank" rel="noopener">JSDoc</a> 注释，给复杂的函数添加 example，这样用户在使用你的包时，就可以获得更好的开发体验。例如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 两个数相加</span></span><br><span class="line"><span class="comment"> * @param &#123;number&#125; a 要相加的第一个数</span></span><br><span class="line"><span class="comment"> * @param &#123;number&#125; b 要相加的第二个数</span></span><br><span class="line"><span class="comment"> * @returns &#123;number&#125; 两个数的和</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * @example</span></span><br><span class="line"><span class="comment"> * // returns 3</span></span><br><span class="line"><span class="comment"> * add(1, 2)</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">add</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，当用户在编辑器中输入<code>add(</code>时，就会显示这个函数的说明、参数和返回值、example。</p>
+<p>所以请尽可能详细的编写JSDoc注释，站在用户的角度，想想他们可能会遇到什么问题，然后在注释中解答这些问题。</p>
+<h2 id="发版规范"><a href="#发版规范" class="headerlink" title="发版规范"></a>发版规范</h2><p>主要包含以下几个环节:</p>
+<ol>
+<li>打版本 tag</li>
+<li><code>package.json</code> 文件的信息要补充完整</li>
+<li>版本号遵循语义化版本规则</li>
+<li>包发布需要在<code>change log</code>中记录版本变更（使用单独的<code>CHANGE_LOG.md</code>或者在<code>README.md</code>中记录）</li>
+</ol>
+<h3 id="1-打版本-tag"><a href="#1-打版本-tag" class="headerlink" title="1. 打版本 tag"></a>1. 打版本 tag</h3><p>每次 release 发布的时候，都是一个稳定的版本，那么它的分支应该是在 master 分支，并且也应该为 master 分支打一个相同 release 版本的 tag。 以便后续可以回溯版本历史。</p>
+<p>因此在发布包之前，你需要确保你的代码已经合并到 master 分支，并且 master 分支已经打上了tag，tag的格式为 <code>v1.0.0</code>，其中<code>1.0.0</code>为发布的版本号。</p>
+<h3 id="2-package-json-文件的信息要补充完整"><a href="#2-package-json-文件的信息要补充完整" class="headerlink" title="2. package.json 文件的信息要补充完整"></a>2. <code>package.json</code> 文件的信息要补充完整</h3><p>发布一个npm包时，你需要在 <code>package.json</code> 文件中填写一些重要的字段。以下是一些必要和建议填写的字段：</p>
+<p><strong>必要的字段</strong>:</p>
+<ol>
+<li><code>name</code>：你的包的名字。这个名字必要且唯一，不能与npm仓库中已有的其他包名冲突。</li>
+<li><code>version</code>：你的包的版本号。遵循<a href="https://semver.org/lang/zh-CN/" target="_blank" rel="noopener">语义化版本</a>规则。</li>
+<li><code>main</code>：指定入口文件的位置，其他人在引用你的包时，会默认引用这个文件。</li>
+</ol>
+<p><strong>建议的字段</strong>:</p>
+<ol>
+<li><code>description</code>：对你的包进行描述，这将在npm网站或命令行工具中显示。</li>
+<li><code>keywords</code>：一组关键词，有助于在npm中搜索到你的包。</li>
+<li><code>author</code>：包的作者信息。</li>
+<li><code>module</code>：指定 ES6 模块的入口文件位置。（使用ESM规范引入文件时，通常会引入module字段指向的文件，main字段通常用于指向CommonJs规范的文件）</li>
+<li><code>files</code>: 一个数组，当你的包被发布或安装时，只有在 files 字段中列出的文件或文件夹才会被包含。</li>
+<li><code>scripts</code>：包含脚本的对象，用于运行测试或构建你的代码等。</li>
+<li><code>repository</code>：项目的仓库地址, url 字段要是 http/https 协议的，不能是 git 协议的，就可以在 verdaccio 详情页面显示出来</li>
+<li><code>bugs</code>：一个URL，用户可以通过这个URL报告你的包的问题。</li>
+<li><code>homepage</code>：你的项目的主页URL。</li>
+<li><code>engines</code>： 用于指定项目运行所需的 node 和 npm 版本。这对确保你的项目在特定的 Node.js 或 npm 环境中运行非常重要。</li>
+<li><code>exports</code>：这个字段允许你更精确地控制模块的公开API，以及提供一种方式来优雅地加载ESM和CommonJS版本的模块，<a href="https://webpack.js.org/guides/package-exports/" target="_blank" rel="noopener">了解更多</a>。</li>
+<li><code>types</code>：指定TypeScript类型定义文件的位置。如果 types 字段没有被指定，TypeScript 会默认查找项目根目录下的 index.d.ts 文件。</li>
+<li><code>publishConfig</code>：一个对象，用于配置发布包时的一些<a href="https://docs.npmjs.com/cli/v10/using-npm/config" target="_blank" rel="noopener">参数</a>，比如发布的仓库地址、发布的tag等。</li>
+</ol>
+<p>这是一个基本的<code>package.json</code>文件示例：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span>: <span class="string">"your-package-name"</span>,</span><br><span class="line">  <span class="attr">"version"</span>: <span class="string">"1.0.0"</span>,</span><br><span class="line">  <span class="attr">"description"</span>: <span class="string">"A brief description of your package"</span>,</span><br><span class="line">  <span class="attr">"main"</span>: <span class="string">"dist/index.js"</span>,</span><br><span class="line">  <span class="attr">"files"</span>: [</span><br><span class="line">    <span class="string">"dist/*.js"</span>,</span><br><span class="line">    <span class="string">"dist/*.css"</span>,</span><br><span class="line">    <span class="string">"types/index.d.ts"</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">"types"</span>: <span class="string">"types/index.d.ts"</span>,</span><br><span class="line">  <span class="attr">"repository"</span>: &#123;</span><br><span class="line">    <span class="attr">"type"</span>: <span class="string">"git"</span>,</span><br><span class="line">    <span class="attr">"url"</span>: <span class="string">"https://github.com/username/repository.git"</span>,</span><br><span class="line">    <span class="attr">"directory"</span>: <span class="string">"plugins/plugin-name"</span> // 如果你的包在仓库的某个子目录下，可以指定这个字段</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"keywords"</span>: [<span class="string">"keyword1"</span>, <span class="string">"keyword2"</span>],</span><br><span class="line">  <span class="attr">"author"</span>: <span class="string">"Your Name &lt;your.email@example.com&gt;"</span>,</span><br><span class="line">  <span class="attr">"bugs"</span>: &#123;</span><br><span class="line">    <span class="attr">"url"</span>: <span class="string">"https://github.com/username/repository/issues"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"engines"</span>: &#123;</span><br><span class="line">    <span class="attr">"node"</span>: <span class="string">"&gt;=14.0.0"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"homepage"</span>: <span class="string">"https://github.com/username/repository#readme"</span>,</span><br><span class="line">  <span class="attr">"license"</span>: <span class="string">"ISC"</span>,</span><br><span class="line">  <span class="attr">"dependencies"</span>: &#123;</span><br><span class="line">    <span class="attr">"dependency1"</span>: <span class="string">"^1.0.0"</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">"devDependencies"</span>: &#123;</span><br><span class="line">    <span class="attr">"devDependency1"</span>: <span class="string">"^1.0.0"</span></span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这只是一个基础的例子，你可以根据你的实际需求调整这些字段。</p>
+<blockquote>
+<p>更多内容请查看官方文档：<a href="https://docs.npmjs.com/cli/v9/configuring-npm/package-json/" target="_blank" rel="noopener">package.json</a></p>
+</blockquote>
+<h3 id="3-版本号遵循语义化版本规则"><a href="#3-版本号遵循语义化版本规则" class="headerlink" title="3. 版本号遵循语义化版本规则"></a>3. 版本号遵循语义化版本规则</h3><p>版本号发布应严格遵循 <a href="https://semver.org/lang/zh-CN/" target="_blank" rel="noopener">语义化版本 2.0.0</a> 规则, 它遵循 <code>MAJOR.MINOR.PATCH</code> 的格式, 所以开发人员要根据你本次发布的内容来合理升级包的版本号。</p>
+<blockquote>
+<p> 版本格式：主版本号.次版本号.修订号，版本号递增规则如下：</p>
+<ol>
+<li>主版本号：当你做了不兼容的 API 修改，</li>
+<li>次版本号：当你做了向下兼容的功能性新增，</li>
+<li><p>修订号：当你做了向下兼容的问题修正。</p>
+<p>先行版本号及版本编译信息可以加到“主版本号.次版本号.修订号”的后面，作为延伸。</p>
+</li>
+</ol>
+</blockquote>
+<p>有时候会有先行版本的情况(也就下文说的预发布版本)，就是开发人员的代码还在自己分支中，但是要测试效果，这时候就可以在自己分支打 alpha 版的包，或者 beta 版的包，比如 <code>1.0.0-alpha.1</code>，<code>1.0.0-beta.1</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  &quot;name&quot;: &quot;your-package&quot;,</span><br><span class="line">  &quot;version&quot;: &quot;1.0.0-alpha.1&quot;,</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后安装就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">npm install your-package@1.0.0-alpha.1</span><br><span class="line">or</span><br><span class="line">npm install your-package@alpha</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>这时候要指定版本号或者 dist-tag 的方式来安装这些预发布的版本，不然默认是不会安装这些预发布版本的包的</p>
+</blockquote>
+<blockquote>
+<p>默认的 dist-tag 是 latest</p>
+</blockquote>
+<p>一直到测试没问题之后，将代码合并到 master 分支，然后打 release 版本，比如上述的 alpha 包如果要打 release 版本，那么版本号就应该是 <code>1.0.1</code> 版本。</p>
+<p>如果是同时有多个开发人员在迭代这个包的情况，也是同样的道理，一个走 alpha tag，一个走 beta tag，然后各自在各自的开发分支 publish 这些预发布包，并进行安装测试，同时安装的时候，要指定具体的版本。 一直到测试没问题之后，将开发分支合并到 master 分支，才能打 release 版本出来</p>
+<p>遇到这种预发布版本的时候，判断优先级的时候，必须把版本依序拆分为主版本号、次版本号、修订号及先行版本号后进行比较。由左到右依次比较每个标识符号，第一个差异值用来决定优先层级（其中字母连接号以ASCII排序进行比较、其他都相同时栏位多的先行版本号优先级较高），比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1.0.0-alpha &lt; 1.0.0-alpha.1 &lt; 1.0.0-alpha.beta &lt; 1.0.0-beta &lt; 1.0.0 &lt; 2.0.0 &lt; 2.1.0 &lt; 2.1.1</span><br></pre></td></tr></table></figure></p>
+<h3 id="4-包发布需要在change-log中记录版本变更（使用单独的CHANGE-LOG-md或者在README-md中记录）"><a href="#4-包发布需要在change-log中记录版本变更（使用单独的CHANGE-LOG-md或者在README-md中记录）" class="headerlink" title="4. 包发布需要在change log中记录版本变更（使用单独的CHANGE_LOG.md或者在README.md中记录）"></a>4. 包发布需要在<code>change log</code>中记录版本变更（使用单独的<code>CHANGE_LOG.md</code>或者在<code>README.md</code>中记录）</h3><p>Change log（变更日志）是一个记录项目版本中所有显著更改的文档。它可以帮助用户和开发者理解项目的新版本中发生了什么更改。</p>
+<blockquote>
+<p>具体可以看 <a href="https://keepachangelog.com/zh-CN/1.0.0/" target="_blank" rel="noopener">如何维护更新日志</a></p>
+</blockquote>
+<h4 id="怎样编写高质量的更新日志？"><a href="#怎样编写高质量的更新日志？" class="headerlink" title="怎样编写高质量的更新日志？"></a>怎样编写高质量的更新日志？</h4><h5 id="1-指导原则"><a href="#1-指导原则" class="headerlink" title="1. 指导原则"></a>1. 指导原则</h5><ul>
+<li>记住日志是写给人而非机器的，所以要保持简洁易读。</li>
+<li>同类改动应该分组放置，例如新特性、bug修复等。</li>
+<li>不同版本应分别设置链接，方便用户查看特定版本的代码更改。</li>
+<li>新版本在前，旧版本在后</li>
+<li>应包括每个版本的发布日期</li>
+</ul>
+<h5 id="2-变动类型"><a href="#2-变动类型" class="headerlink" title="2. 变动类型"></a>2. 变动类型</h5><ol>
+<li><code>Added</code> 新添加的功能。</li>
+<li><code>Changed</code> 对现有功能的变更。</li>
+<li><code>Deprecated</code> 已经不建议使用，即将移除的功能。</li>
+<li><code>Removed</code> 已经移除的功能。</li>
+<li><code>Fixed</code> 对 bug 的修复。</li>
+<li><code>Security</code> 对安全性的改进。</li>
+</ol>
+<h4 id="如何减少维护更新日志的精力？"><a href="#如何减少维护更新日志的精力？" class="headerlink" title="如何减少维护更新日志的精力？"></a>如何减少维护更新日志的精力？</h4><p>在文档最上方提供 <code>Unreleased</code> 区块以记录即将发布的更新内容。</p>
+<p>这样做有两个好处：</p>
+<ul>
+<li>大家可以知道在未来版本中可能会有哪些变更。</li>
+<li>在发布新版本时，直接将 <code>Unreleased</code> 区块中的内容移动至新发布版本的描述区块就可以了。</li>
+</ul>
+<p>以下是一个Change log的样例：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># ChangeLog</span></span><br><span class="line"></span><br><span class="line">All notable changes to this project will be documented in this file.</span><br><span class="line"></span><br><span class="line">The format is based on [<span class="string">Keep a Changelog</span>](<span class="link">https://keepachangelog.com/en/1.0.0/</span>),</span><br><span class="line">and this project adheres to [<span class="string">Semantic Versioning</span>](<span class="link">https://semver.org/spec/v2.0.0.html</span>).</span><br><span class="line"></span><br><span class="line"><span class="section">## [Unreleased]</span></span><br><span class="line"></span><br><span class="line"><span class="section">### Added</span></span><br><span class="line"><span class="bullet">- </span>新增了新的用户界面</span><br><span class="line"><span class="bullet">- </span>在设置中新增了语言选择选项</span><br><span class="line"></span><br><span class="line"><span class="section">### Changed</span></span><br><span class="line"><span class="bullet">- </span>更新了登录页面的设计</span><br><span class="line"><span class="bullet">- </span>优化了搜索算法的性能</span><br><span class="line"></span><br><span class="line"><span class="section">### Deprecated</span></span><br><span class="line"><span class="bullet">- </span>弃用了老版本的用户界面</span><br><span class="line"></span><br><span class="line"><span class="section">### Removed</span></span><br><span class="line"><span class="bullet">- </span>移除了未使用的代码和库</span><br><span class="line"></span><br><span class="line"><span class="section">### Fixed</span></span><br><span class="line"><span class="bullet">- </span>修复了用户登录时的错误提示问题</span><br><span class="line"><span class="bullet">- </span>修复了在某些情况下应用崩溃的问题</span><br><span class="line"></span><br><span class="line"><span class="section">## [1.0.0] - 2022-01-01</span></span><br><span class="line"></span><br><span class="line"><span class="section">### Added</span></span><br><span class="line"><span class="bullet">- </span>初始版本发布，包含了基础的登录和搜索功能</span><br><span class="line"></span><br><span class="line">[<span class="symbol">Unreleased</span>]: <span class="link">https://github.com/yourusername/yourrepository/compare/v1.0.0...HEAD</span></span><br><span class="line">[<span class="symbol">1.0.0</span>]: <span class="link">https://github.com/yourusername/yourrepository/releases/tag/v1.0.0</span></span><br></pre></td></tr></table></figure>
+<p>每一个版本应该包含以下信息：</p>
+<ul>
+<li>版本号</li>
+<li>发布日期</li>
+<li>在这个版本中进行的更改</li>
+</ul>
+<p>这就是一个基本的Change log的结构和样例。一个好的Change log应该是为了让读者更好的理解你的项目，所以请保持清晰和简洁。</p>
+<h2 id="将发布规范流程做成脚手架来检查"><a href="#将发布规范流程做成脚手架来检查" class="headerlink" title="将发布规范流程做成脚手架来检查"></a>将发布规范流程做成脚手架来检查</h2><p>以上就是一个比较标准的团队内部开发 npm 包的一个规范流程，有很多的约束需要检查，光靠人工其实有点浪费。</p>
+<p>比较好的情况是将以上标准流程的检查，做成一个发布脚手架，通过交互式命令发布包。目的是为了简化发布包的流程，减少出错的可能性。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2023/09/21/npm-publish/" title="npm 私有库开发和发布规范">http://kebingzao.com/2023/09/21/npm-publish/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/npm/" rel="tag"># npm</a>
+          
+            <a href="/tags/verdaccio/" rel="tag"># verdaccio</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/09/19/npm-verdaccio/" rel="next" title="使用 verdaccio 搭建前端内部私有 npm 仓库">
+                <i class="fa fa-chevron-left"></i> 使用 verdaccio 搭建前端内部私有 npm 仓库
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/10/19/mail-best-practices/" rel="prev" title="浅谈 - 邮件服务最佳实践">
+                浅谈 - 邮件服务最佳实践 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">313</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开发规范"><span class="nav-number">2.</span> <span class="nav-text">开发规范</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-编写-README-md-文件"><span class="nav-number">2.1.</span> <span class="nav-text">1. 编写 README.md 文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-提供类型声明文件-d-ts"><span class="nav-number">2.2.</span> <span class="nav-text">2. 提供类型声明文件 (.d.ts)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-提供-demo，方便使用者快速上手"><span class="nav-number">2.3.</span> <span class="nav-text">3. 提供 demo，方便使用者快速上手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-提供单元测试，确保包的正确性"><span class="nav-number">2.4.</span> <span class="nav-text">4. 提供单元测试，确保包的正确性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-在导出的模块的函数中添加JSDoc注释"><span class="nav-number">2.5.</span> <span class="nav-text">5. 在导出的模块的函数中添加JSDoc注释</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#发版规范"><span class="nav-number">3.</span> <span class="nav-text">发版规范</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-打版本-tag"><span class="nav-number">3.1.</span> <span class="nav-text">1. 打版本 tag</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-package-json-文件的信息要补充完整"><span class="nav-number">3.2.</span> <span class="nav-text">2. package.json 文件的信息要补充完整</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-版本号遵循语义化版本规则"><span class="nav-number">3.3.</span> <span class="nav-text">3. 版本号遵循语义化版本规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-包发布需要在change-log中记录版本变更（使用单独的CHANGE-LOG-md或者在README-md中记录）"><span class="nav-number">3.4.</span> <span class="nav-text">4. 包发布需要在change log中记录版本变更（使用单独的CHANGE_LOG.md或者在README.md中记录）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#怎样编写高质量的更新日志？"><span class="nav-number">3.4.1.</span> <span class="nav-text">怎样编写高质量的更新日志？</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-指导原则"><span class="nav-number">3.4.1.1.</span> <span class="nav-text">1. 指导原则</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-变动类型"><span class="nav-number">3.4.1.2.</span> <span class="nav-text">2. 变动类型</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#如何减少维护更新日志的精力？"><span class="nav-number">3.4.2.</span> <span class="nav-text">如何减少维护更新日志的精力？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将发布规范流程做成脚手架来检查"><span class="nav-number">4.</span> <span class="nav-text">将发布规范流程做成脚手架来检查</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2023/09/21/npm-publish/';
+          this.page.identifier = '2023/09/21/npm-publish/';
+          this.page.title = 'npm 私有库开发和发布规范';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="php," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前通过 记一次 php-fpm 的配置调优 有针对 php-fpm 的配置进行了调优，有起了一些效果，比如随着处理的进程加大，响应时间会快一点。 但是对于一些并发比较高的场景，还是会有 499 的情况，尤其是负载比较高的情况下，CPU 很容易跑满，php 子进程的响应速度也会越来越慢 当然最粗暴的就是加大服务器硬件配置，然后增大 pm.max_children 的值，硬抗，不过还有一种更合适">
+<meta name="keywords" content="php">
+<meta property="og:type" content="article">
+<meta property="og:title" content="php 开启 opcache 来降低负载并提高抗并发能力">
+<meta property="og:url" content="http://kebingzao.com/2023/11/21/php-opcache/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前通过 记一次 php-fpm 的配置调优 有针对 php-fpm 的配置进行了调优，有起了一些效果，比如随着处理的进程加大，响应时间会快一点。 但是对于一些并发比较高的场景，还是会有 499 的情况，尤其是负载比较高的情况下，CPU 很容易跑满，php 子进程的响应速度也会越来越慢 当然最粗暴的就是加大服务器硬件配置，然后增大 pm.max_children 的值，硬抗，不过还有一种更合适">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/1.png">
+<meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/2.png">
+<meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/3.png">
+<meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/4.png">
+<meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/5.png">
+<meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/6.png">
+<meta property="og:updated_time" content="2023-12-01T17:07:56.496Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="php 开启 opcache 来降低负载并提高抗并发能力">
+<meta name="twitter:description" content="前言之前通过 记一次 php-fpm 的配置调优 有针对 php-fpm 的配置进行了调优，有起了一些效果，比如随着处理的进程加大，响应时间会快一点。 但是对于一些并发比较高的场景，还是会有 499 的情况，尤其是负载比较高的情况下，CPU 很容易跑满，php 子进程的响应速度也会越来越慢 当然最粗暴的就是加大服务器硬件配置，然后增大 pm.max_children 的值，硬抗，不过还有一种更合适">
+<meta name="twitter:image" content="http://kebingzao.com/2023/11/21/php-opcache/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2023/11/21/php-opcache/"/>
+
+
+
+
+
+  <title>php 开启 opcache 来降低负载并提高抗并发能力 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/11/21/php-opcache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">php 开启 opcache 来降低负载并提高抗并发能力</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-11-21T17:58:34+08:00">
+                2023-11-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/php相关/" itemprop="url" rel="index">
+                    <span itemprop="name">php相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/11/21/php-opcache/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/11/21/php-opcache/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/11/21/php-opcache/" class="leancloud_visitors" data-flag-title="php 开启 opcache 来降低负载并提高抗并发能力">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前通过 <a href="/2023/11/21/php-fpm-opt/" title="记一次 php-fpm 的配置调优">记一次 php-fpm 的配置调优</a> 有针对 php-fpm 的配置进行了调优，有起了一些效果，比如随着处理的进程加大，响应时间会快一点。 但是对于一些并发比较高的场景，还是会有 499 的情况，尤其是负载比较高的情况下，CPU 很容易跑满，php 子进程的响应速度也会越来越慢</p>
+<p>当然最粗暴的就是加大服务器硬件配置，然后增大 <code>pm.max_children</code> 的值，硬抗，不过还有一种更合适的方式，就是开启 opcache 来降低服务器负载并提高抗并发能力。</p>
+<h2 id="OpCode"><a href="#OpCode" class="headerlink" title="OpCode"></a>OpCode</h2><p>opcache 其实就是 OpCode + cache，因此要先了解一下什么是 OpCode。</p>
+<p>php 是一种解释型语言，它的执行可分为以下几个流程:</p>
+<ol>
+<li>Scanning(Lexing) ,将PHP代码转换为语言片段(Tokens)</li>
+<li>Parsing, 将Tokens转换成简单而有意义的表达式</li>
+<li>Compilation, 将表达式编译成字节码 (OpCode)</li>
+<li>Execution, 顺次执行 OpCode，每次一条，从而实现PHP脚本的功能。<a id="more"></a>
+</li>
+</ol>
+<p><img src="/2023/11/21/php-opcache/1.png" alt="1"></p>
+<p>这样一来的话，对于同一个文件，反复请求，就要不断解析、编译和执行PHP脚本，消耗过多资源。为了解决这个问题，OpCode 缓存技术应运而生</p>
+<h2 id="OPcache"><a href="#OPcache" class="headerlink" title="OPcache"></a>OPcache</h2><p>当解释器完成对脚本代码的分析后，便将它们生成可以直接运行的中间代码，也称为操作码（Operate Code，opcode）。</p>
+<p>Opcode 缓存就是将编译好的Opcode码缓存在内存中，下次再执行这个脚本时，直接会去找到缓存下的opcode码，直接执行最后一步，而不再需要中间的步骤了，其目地是避免重复编译，减少 CPU 和内存开销。</p>
+<p><img src="/2023/11/21/php-opcache/2.png" alt="1"></p>
+<p>在 PHP 5.5 之前，不少扩展都实现了字节码的缓存，比如 Zend 公司开发的 Zend Optimizer Plus。</p>
+<p>该扩展也随着 PHP 5.5 一起发布，并改名为 OPcache。也就是说，从 5.5 开始，OPcache 成了 PHP 的默认绑定扩展。该扩展通过将 PHP 脚本预编译的字节码存储到共享内存中，省去了每次加载和解析 PHP 脚本的开销。</p>
+<h2 id="OPcache-参数说明"><a href="#OPcache-参数说明" class="headerlink" title="OPcache 参数说明"></a>OPcache 参数说明</h2><p>一样直接看官方文档: <a href="https://www.php.net/manual/zh/opcache.configuration.php" target="_blank" rel="noopener">OPcache 配置</a></p>
+<p>这边挑几个平时配置用的比较多的说明一下:</p>
+<h3 id="1-opcache-enable"><a href="#1-opcache-enable" class="headerlink" title="1. opcache.enable"></a>1. opcache.enable</h3><ul>
+<li><strong>默认值</strong>: 1</li>
+<li><strong>说明</strong>: 启用操作码缓存。如果禁用此选项，则不会优化和缓存代码。 在运行期使用 ini_set() 函数只能禁用 opcache.enable 设置，不可以启用此设置。 如果在脚本中尝试启用此设置项会产生警告。新的 php 版本是默认开启的，但是旧的比如 <code>5.6.x</code> 默认是关闭的</li>
+</ul>
+<h3 id="2-opcache-enable-cli"><a href="#2-opcache-enable-cli" class="headerlink" title="2. opcache.enable_cli"></a>2. opcache.enable_cli</h3><ul>
+<li><strong>默认值</strong>: 0</li>
+<li><strong>说明</strong>: 仅针对 CLI 版本的 PHP 启用操作码缓存。 通常被用来测试和调试</li>
+</ul>
+<h3 id="3-opcache-memory-consumption"><a href="#3-opcache-memory-consumption" class="headerlink" title="3. opcache.memory_consumption"></a>3. opcache.memory_consumption</h3><ul>
+<li><strong>默认值</strong>: 128</li>
+<li><strong>说明</strong>: OPcache 的共享内存大小，以兆字节为单位。最小允许值为 “8”。如果设置的值小于最小值，则强制设置为允许的最小值。</li>
+</ul>
+<h3 id="4-opcache-interned-strings-buffer"><a href="#4-opcache-interned-strings-buffer" class="headerlink" title="4. opcache.interned_strings_buffer"></a>4. opcache.interned_strings_buffer</h3><ul>
+<li><strong>默认值</strong>: 8</li>
+<li><strong>说明</strong>: 存储预留字符串的内存大小。PHP 解释器在背后会找到相同字符串的多个实例，把这个字符串保存在内存中，如果再次使用相同的字符串，PHP 解释器会使用指针。这么做能节省内存。默认情况下，PHP 驻留的字符串会隔离在各个 PHP 进程中。这个设置能让 PHP-FPM 进程池中的所有进程把驻留字符串存储到共享的缓冲区中，以便在 PHP-FPM 进程池中的多个进程之间引用驻留字符串。</li>
+</ul>
+<h3 id="5-opcache-max-accelerated-files"><a href="#5-opcache-max-accelerated-files" class="headerlink" title="5. opcache.max_accelerated_files"></a>5. opcache.max_accelerated_files</h3><ul>
+<li><strong>默认值</strong>: 10000</li>
+<li><strong>说明</strong>: OPcache 哈希表中可存储的脚本文件数量上限。真实的取值是在质数集合{ 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407, 130987, 262237, 524521, 1048793 } 中找到的第一个大于等于设置值的质数。设置值取值范围最小值是 200，最大值是 1000000。超出范围的值将限制为允许的值。</li>
+</ul>
+<h3 id="6-opcache-validate-timestamps"><a href="#6-opcache-validate-timestamps" class="headerlink" title="6. opcache.validate_timestamps"></a>6. opcache.validate_timestamps</h3><ul>
+<li><strong>默认值</strong>: 1</li>
+<li><strong>说明</strong>: 如果启用，那么 OPcache 会每隔 <code>opcache.revalidate_freq</code> 设定的秒数 检查脚本是否更新。 如果禁用此选项，你必须使用 <code>opcache_reset()</code> 或者 <code>opcache_invalidate()</code> 函数来手动重置 OPcache，也可以 通过重启 Web 服务器来使文件系统更改生效。 </li>
+</ul>
+<h3 id="7-opcache-revalidate-freq"><a href="#7-opcache-revalidate-freq" class="headerlink" title="7. opcache.revalidate_freq"></a>7. opcache.revalidate_freq</h3><ul>
+<li><strong>默认值</strong>: 2</li>
+<li><strong>说明</strong>: 检查脚本时间戳是否有更新的周期，以秒为单位。 设置为 0 会导致针对每个请求， OPcache 都会检查脚本更新。如果 <code>opcache.validate_timestamps</code> 配置指令设置为禁用，那么此设置项将会被忽略</li>
+</ul>
+<h3 id="8-opcache-fast-shutdown"><a href="#8-opcache-fast-shutdown" class="headerlink" title="8. opcache.fast_shutdown"></a>8. opcache.fast_shutdown</h3><ul>
+<li><strong>默认值</strong>: 0</li>
+<li><strong>说明</strong>: 如果启用，则会使用快速停止续发事件。 所谓快速停止续发事件是指依赖 Zend 引擎的内存管理模块 一次释放全部请求变量的内存，而不是依次释放每一个已分配的内存块。从 PHP 7.2.0 开始, 默认执行</li>
+</ul>
+<h2 id="OPcache-相关配套函数"><a href="#OPcache-相关配套函数" class="headerlink" title="OPcache 相关配套函数"></a>OPcache 相关配套函数</h2><p>PHP 官方提供了与 OPcache 相关的函数，具体文档: <a href="https://www.php.net/manual/zh/book.opcache.php" target="_blank" rel="noopener">OPcache 函数</a></p>
+<table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://www.php.net/manual/zh/function.opcache-compile-file.php" target="_blank" rel="noopener">opcache_compile_file</a></td>
+<td>该函数可以用于在不用运行某个 PHP 脚本的情况下，编译该 PHP 脚本并将其添加到字节码缓存中去。 该函数可用于在 Web 服务器重启之后初始化缓存，以供后续请求调用。</td>
+</tr>
+<tr>
+<td><a href="https://www.php.net/manual/zh/function.opcache-get-configuration.php" target="_blank" rel="noopener">opcache_get_configuration</a></td>
+<td>该函数将返回缓存实例的配置信息。</td>
+</tr>
+<tr>
+<td><a href="https://www.php.net/manual/zh/function.opcache-get-status.php" target="_blank" rel="noopener">opcache_get_status</a></td>
+<td>该函数将返回内存中缓存实例的状态信息。不会返回有关文件缓存的任何信息。</td>
+</tr>
+<tr>
+<td><a href="https://www.php.net/manual/zh/function.opcache-invalidate.php" target="_blank" rel="noopener">opcache_invalidate</a></td>
+<td>废除脚本缓存</td>
+</tr>
+<tr>
+<td><a href="https://www.php.net/manual/zh/function.opcache-is-script-cached.php" target="_blank" rel="noopener">opcache_is_script_cached</a></td>
+<td>该函数用于检测 PHP 脚本是否已经被缓存</td>
+</tr>
+<tr>
+<td><a href="https://www.php.net/manual/zh/function.opcache-reset.php" target="_blank" rel="noopener">opcache_reset</a></td>
+<td>该函数将重置整个字节码缓存。在调用 opcache_reset() 之后，所有的脚本将会重新载入并且在下次命中的时候重新解析。此函数仅重置内存中的缓存，不会重置文件缓存。</td>
+</tr>
+</tbody>
+</table>
+<p>利用这些函数，我们可以手动清空 OPcache，或者也可以将其封装成脚本，在代码更新后自动执行脚本.</p>
+<p>或者说利用这些函数来创建可视化操作面板, 比如后面会说到的这个项目: <a href="https://github.com/rlerdorf/opcache-status" target="_blank" rel="noopener">Opcache Status</a></p>
+<h2 id="本地开启-OPcache"><a href="#本地开启-OPcache" class="headerlink" title="本地开启 OPcache"></a>本地开启 OPcache</h2><p>因为我的本地环境是 windows 环境，采用了<a href="https://www.xp.cn/" target="_blank" rel="noopener">phpstudy</a> 这个集成环境来安装 php，版本是 <code>5.6.9</code>:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;php -v</span><br><span class="line">PHP 5.6.9 (cli) (built: May 13 2015 19:29:00)</span><br><span class="line">Copyright (c) 1997-2015 The PHP Group</span><br><span class="line">Zend Engine v2.6.0, Copyright (c) 1998-2015 Zend Technologies</span><br></pre></td></tr></table></figure></p>
+<p>查看当前启用的扩展是否有包含 OPcache:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;php -m | grep OPcache</span><br></pre></td></tr></table></figure></p>
+<p>发现并没有安装，但是我们可以在 phpstudy 面板中，针对当前安装的这个 php 版本进行配置，并开启 OPcache，默认是没有开启</p>
+<p><img src="/2023/11/21/php-opcache/3.png" alt="1"></p>
+<p><img src="/2023/11/21/php-opcache/4.png" alt="1"></p>
+<p>这时候就可以看到开启了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;php -m | grep OPcache</span><br><span class="line">Zend OPcache</span><br><span class="line">Zend OPcache</span><br></pre></td></tr></table></figure></p>
+<p>可以在 <code>php.ini</code> 看到这一节配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[opcache]</span><br><span class="line">zend_extension=php_opcache</span><br><span class="line">opcache.enable=1</span><br><span class="line">opcache.enable_cli=1</span><br><span class="line">opcache.memory_consumption=128</span><br><span class="line">opcache.interned_strings_buffer=8</span><br><span class="line">opcache.max_accelerated_files=10000</span><br><span class="line">opcache.max_wasted_percentage=5</span><br><span class="line">opcache.revalidate_freq=60</span><br><span class="line">opcache.use_cwd=1</span><br><span class="line">opcache.validate_timestamps=1</span><br><span class="line">opcache.save_comments=1</span><br><span class="line">opcache.enable_file_override=Off</span><br><span class="line">opcache.fast_shutdown=1</span><br><span class="line">opcache.mmap_base=0x20000000</span><br></pre></td></tr></table></figure></p>
+<p>参数就不再说了， 后面具体开启的时候，会调参数。 这样子其实 OPcache 就开起来了，可以直接执行 php 指令来查看:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ php -r &quot;var_dump(opcache_get_status());&quot;</span><br><span class="line">array(8) &#123;</span><br><span class="line">  [&quot;opcache_enabled&quot;]=&gt;</span><br><span class="line">  bool(true)</span><br><span class="line">  [&quot;cache_full&quot;]=&gt;</span><br><span class="line">  bool(false)</span><br></pre></td></tr></table></figure></p>
+<h2 id="服务器开起来"><a href="#服务器开起来" class="headerlink" title="服务器开起来"></a>服务器开起来</h2><p>线上跟本地差不多，一样查看 php 的版本和是否开启这个模块，如果使用 <code>php -m | grep OPcache</code>, 发现还是没有的话，可以查看是否有编译这个模块:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-9-centos ~]$ php -i | grep configure | grep opcache</span><br><span class="line">Configure Command =&gt;  &apos;./configure&apos;  &apos;--prefix=/usr/local/php-5.6.34&apos; &apos;--with-config-file-path=/usr/local/php-5.6.34/etc&apos; &apos;--with-fpm-user=www&apos; &apos;--with-fpm-group=www&apos; &apos;--disable-debug&apos; &apos;--disable-rpath&apos; &apos;--enable-fpm&apos; &apos;--enable-inline-optimization&apos; &apos;--enable-shared&apos; &apos;--enable-opcache&apos; &apos;--enable-pcntl&apos; &apos;--enable-shmop&apos; &apos;--enable-sysvmsg&apos; &apos;--enable-sysvsem&apos; &apos;--enable-sysvshm&apos; &apos;--enable-mbstring&apos; &apos;--enable-sockets&apos; &apos;--enable-soap&apos; &apos;--enable-zip&apos; &apos;--enable-calendar&apos; &apos;--enable-bcmath&apos; &apos;--enable-exif&apos; &apos;--enable-intl&apos; &apos;--enable-mysqlnd&apos; &apos;--with-libdir=lib64&apos; &apos;--with-mysql=mysqlnd&apos; &apos;--with-mysqli=mysqlnd&apos; &apos;--with-pdo-mysql=mysqlnd&apos; &apos;--with-openssl&apos; &apos;--with-zlib&apos; &apos;--with-bz2&apos; &apos;--with-curl&apos; &apos;--with-gd&apos; &apos;--with-jpeg-dir&apos; &apos;--with-zlib-dir&apos; &apos;--with-png-dir&apos; &apos;--enable-gd-native-ttf&apos; &apos;--with-freetype-dir&apos; &apos;--with-gettext&apos; &apos;--with-iconv&apos; &apos;--with-mcrypt&apos; &apos;--with-mhash&apos; &apos;--with-ldap&apos; &apos;--with-readline&apos;</span><br></pre></td></tr></table></figure></p>
+<p>这种情况，就有编译了。正常情况下，是可以直接找到这个 so 文件的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-9-centos ~]$ locate opcache</span><br><span class="line">...</span><br><span class="line">/usr/local/php-5.6.34/lib/php/extensions/no-debug-non-zts-20131226/opcache.so</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>如果没有安装的话，就得重新安装 php，并且携带参数 <code>--enable-opcache</code></p>
+</blockquote>
+<p>所以接下来一样在 php.ini 中将 OPcache 开起来就行了, 在 <code>[opcache]</code> 这一栏下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[opcache]</span><br><span class="line"></span><br><span class="line">zend_extension=opcache.so</span><br><span class="line">opcache.enable = 1</span><br><span class="line">opcache.memory_consumption=1024</span><br><span class="line">opcache.interned_strings_buffer=32</span><br><span class="line">opcache.max_accelerated_files=80000</span><br><span class="line">opcache.revalidate_freq=30</span><br><span class="line">opcache.fast_shutdown=1</span><br><span class="line">opcache.enable_cli=1</span><br></pre></td></tr></table></figure></p>
+<p>注意，这边有几个参数是有调整的，比如将缓存的内存设置为 1024M，将存储预留字符串的内存大小设置为 32M，将 可存储的脚本文件数量上限设置为 80000，最后将缓存刷新的时间设置为 30s。最后重启一下 php-fpm 即可</p>
+<h2 id="安装状态面板"><a href="#安装状态面板" class="headerlink" title="安装状态面板"></a>安装状态面板</h2><p>既然 opcache 已经开启了，那么接下来我们怎么有效的查看它的使用情况呢，有一个开源的库，可以简单的显示它的面板情况: <a href="https://github.com/rlerdorf/opcache-status" target="_blank" rel="noopener">Opcache Status</a></p>
+<p>我们只需要将其下载到服务器的某一个目录下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /data/wwwroot/</span><br><span class="line">git clone https://github.com/rlerdorf/opcache-status.git --depth=1</span><br><span class="line">cd opcache-status</span><br></pre></td></tr></table></figure></p>
+<p>然后在 nginx 那边增加一个路由，然后转发解析到这个目录下的 <code>opcache.php</code> 就行了，注意最好只能内网才能访问<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">location ^~ /opcache  &#123;</span><br><span class="line">    root    /data/wwwroot/opcache-status/;</span><br><span class="line">    try_files $uri /opcache.php;</span><br><span class="line">    fastcgi_pass 127.0.0.1:9000;</span><br><span class="line">    include    fastcgi.conf;</span><br><span class="line">    allow 127.0.0.1;</span><br><span class="line">    allow xxx;</span><br><span class="line">    allow xxx;</span><br><span class="line">    deny all;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>就可以直接走域名访问了</p>
+<p><img src="/2023/11/21/php-opcache/5.png" alt="1"></p>
+<p>如果是本地测试，就不需要走 nginx 了，直接 php 起端口就行了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">php -S localhost:8003 opcache.php</span><br></pre></td></tr></table></figure></p>
+<p>就可以在浏览器访问 <code>localhost:8003</code> 查看了</p>
+<p>而且线上优化之后，其实对负载的优化是非常明显的，cpu 和 内存都降了一节</p>
+<p><img src="/2023/11/21/php-opcache/6.png" alt="1"></p>
+<h2 id="OPcache-缓存刷新-重置的几种方式"><a href="#OPcache-缓存刷新-重置的几种方式" class="headerlink" title="OPcache 缓存刷新/重置的几种方式"></a>OPcache 缓存刷新/重置的几种方式</h2><ol>
+<li>php 执行 <code>opcache_reset()</code> 方法，重置整个 Opcode 缓存,所有的PHP脚本将会被重新解析再预编译为 Opcode</li>
+<li>php 执行 <code>opcache_invalidate()</code>方法, 清除指定脚本缓存,可以传递两个参数,一个是刷新文件路径,一个是force字段, 如果 force 没有设置或者传入的是 FALSE，那么只有当脚本的修改时间 比对应Opcode的时间更新时，脚本的缓存才会失效</li>
+<li>重启 php-fpm <code>service php-fpm restart</code>，不过这种情况请求会中断， 或者重载 <code>service php-fpm reload</code>，重载相对于重启则平顺很多,不会导致用户请求直接中断,相对来说风险低很多,但是 php-fpm 收到reload信号，便会向所有子进程发送 SIGGUIT 信号，同时注册一个定时器，在规定的时间之内子进程没有退出，接着在发送 SIGTERM 信号，结束子进程。如果在一秒之内子进程还是没结束 直接发送SIGKILL 强制杀死，这时候 nginx 就会返回 502 错误码</li>
+<li>配置 <code>opcache.validate_timestamps=1</code> 和 <code>opcache.revalidate_freq=xx</code>, 以秒为单位,那么 OPcache 会每隔 <code>opcache.revalidate_freq</code> 设定的秒数 检查脚本是否更新, 如果发现内存中的时间晚于文件更新时间，将会更新缓存</li>
+<li>OPcache 达到最大内存消耗，也就是 <code>opcache.memory_consumption</code> 这个配置，Opcache 就会尝试重新启动缓存</li>
+<li>OPcache 达到最大加速文件，也就是 <code>opcache.max_accelerated_files</code> 这个配置，Opcache 就会尝试重新启动缓存</li>
+<li>OPcache 浪费的内存超过了配置的 <code>opcache.max_wasted_percentage</code>，Opcache 就会尝试重新启动缓存, 手动清空 wasted memory 只能重启 PHP-FPM 或使用 PHP 函数 opcache_reset()</li>
+</ol>
+<blockquote>
+<p>需要注意的是，当 PHP 以 PHP-FPM 的方式运行的时候，OPcache 的缓存是无法通过 php 命令进行清除的，只能通过 http 或 cgi 到 php-fpm 进程的方式来清除缓存</p>
+</blockquote>
+<blockquote>
+<p>如果 Opcache 不设置过期时间的话，应尽量避免流量高峰期发布代码，因为这时候清理缓存，可能会导致重复新建缓存。</p>
+</blockquote>
+<h2 id="OPcache-对性能的影响"><a href="#OPcache-对性能的影响" class="headerlink" title="OPcache 对性能的影响"></a>OPcache 对性能的影响</h2><ol>
+<li>如果性能瓶颈不在于CPU和内存，而在于I/O操作，比如数据库查询带来的磁盘I/O开销，那么 OPcache 的性能提升是非常有限的。</li>
+<li>刚启动或缓存被清空时，如果服务器流量大可能会导致 <a href="https://en.wikipedia.org/wiki/Thundering_herd_problem" target="_blank" rel="noopener">thundering herd problem</a> 或缓存猛击，许多请求同时生成相同的缓存条目</li>
+</ol>
+<h2 id="后续再优化"><a href="#后续再优化" class="headerlink" title="后续再优化"></a>后续再优化</h2><p>后续还有几个可以再优化的地方:</p>
+<h3 id="1-生产环境不设置缓存定时刷新时间"><a href="#1-生产环境不设置缓存定时刷新时间" class="headerlink" title="1. 生产环境不设置缓存定时刷新时间"></a>1. 生产环境不设置缓存定时刷新时间</h3><p>将刷缓存的时间(<code>opcache.validate_timestamps</code>)设置为 0, 表示永不刷新，然后在每次 Jenkins 构建 php 程序的时候，调用一个脚本来手动刷新缓存</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">WEBDIR=/var/www/html/</span><br><span class="line">RANDOM_NAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13)</span><br><span class="line">echo &quot;&lt;?php opcache_reset(); ?&gt;&quot; &gt; $&#123;WEBDIR&#125;$&#123;RANDOM_NAME&#125;.php</span><br><span class="line">curl http://localhost/$&#123;RANDOM_NAME&#125;.php</span><br><span class="line">rm $&#123;WEBDIR&#125;$&#123;RANDOM_NAME&#125;.php</span><br></pre></td></tr></table></figure>
+<p>或者直接走 php 的 CLI 指令，不过这种方式如果是在 php-fpm 下是没有效果的，只能用上面那种 http 请求 php 文件的方式。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">php -r &quot;opcache_reset();&quot;</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-增加-hugepage-配置"><a href="#2-增加-hugepage-配置" class="headerlink" title="2. 增加 hugepage 配置"></a>2. 增加 hugepage 配置</h3><p>启用 <code>opcache.huge_code_pages</code> 将 PHP 代码（文本段）拷贝到 HUGE PAGES 中。这应该会提高性能，但是需要适当的 OS 配置。自 PHP 7.0.0 起可在 Linux 上使用，自 PHP 7.4.0 上可在 FreeBSD 上使用。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">opcache.huge_code_pages=1</span><br></pre></td></tr></table></figure></p>
+<p>同时需要在 <code>/etc/sysctl.conf</code> 设置系统分配的大页面（huge pages）的数量，比如下面就分配了512个大页面<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-137-centos ~]$ cat /etc/sysctl.conf | grep huge</span><br><span class="line">vm.nr_hugepages=512</span><br></pre></td></tr></table></figure></p>
+<h3 id="3-配置-preload-用于缓存预热"><a href="#3-配置-preload-用于缓存预热" class="headerlink" title="3. 配置 preload 用于缓存预热"></a>3. <a href="https://www.php.net/manual/zh/opcache.preloading.php" target="_blank" rel="noopener">配置 preload 用于缓存预热</a></h3><p>从 PHP 7.4.0 起，PHP 可以被配置为在引擎启动时将一些脚本预加载进 opcache 中。在那些文件中的任何函数、类、 接口或者 trait （但不包括常量）将在接下来的所有请求中变为全局可用，不再需要显示地包含它们。这牺牲了基准的 内存占用率但换来了方便和性能（因为这些代码将始终可用）。它还需要通过重启 PHP 进程来清除预加载的脚本， 这意味着这个功能仅在生产环境中有实用价值，而非开发环境。</p>
+<p>需要注意的是，性能和内存之间的最佳平衡因应用而异。 “预加载一切” 可能是最简单的策略，但不一定是最好的策略。 此外，只有当不同的请求间有持久化的进程时，预加载才有用。这意味着，虽然在启用了 opcache 的命令行脚本中可以使用预加载， 但这通常是没有意义的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">opcache.preload=preload.php</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意: 如果一台服务器有多个 php 项目时，可能会引起未知错误，开启需谨慎</p>
+</blockquote>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://www.php.net/manual/zh/opcache.configuration.php" target="_blank" rel="noopener">opcache 官方文档</a></li>
+<li><a href="https://www.phpnanshen.com/article/158.html" target="_blank" rel="noopener">opcache的配置与使用</a></li>
+<li><a href="https://learnku.com/php/t/34638" target="_blank" rel="noopener">PHP Opcache 注意事项以及调优</a></li>
+<li><a href="https://www.wuwenjia.com/archives/83" target="_blank" rel="noopener">【PHP】细说Opcache</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2023/11/21/php-opcache/" title="php 开启 opcache 来降低负载并提高抗并发能力">http://kebingzao.com/2023/11/21/php-opcache/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/php/" rel="tag"># php</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/11/21/php-fpm-opt/" rel="next" title="记一次 php-fpm 的配置调优">
+                <i class="fa fa-chevron-left"></i> 记一次 php-fpm 的配置调优
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2023/11/30/sig-auth/" rel="prev" title="使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证">
+                使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">313</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OpCode"><span class="nav-number">2.</span> <span class="nav-text">OpCode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OPcache"><span class="nav-number">3.</span> <span class="nav-text">OPcache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OPcache-参数说明"><span class="nav-number">4.</span> <span class="nav-text">OPcache 参数说明</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-opcache-enable"><span class="nav-number">4.1.</span> <span class="nav-text">1. opcache.enable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-opcache-enable-cli"><span class="nav-number">4.2.</span> <span class="nav-text">2. opcache.enable_cli</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-opcache-memory-consumption"><span class="nav-number">4.3.</span> <span class="nav-text">3. opcache.memory_consumption</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-opcache-interned-strings-buffer"><span class="nav-number">4.4.</span> <span class="nav-text">4. opcache.interned_strings_buffer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-opcache-max-accelerated-files"><span class="nav-number">4.5.</span> <span class="nav-text">5. opcache.max_accelerated_files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-opcache-validate-timestamps"><span class="nav-number">4.6.</span> <span class="nav-text">6. opcache.validate_timestamps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-opcache-revalidate-freq"><span class="nav-number">4.7.</span> <span class="nav-text">7. opcache.revalidate_freq</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-opcache-fast-shutdown"><span class="nav-number">4.8.</span> <span class="nav-text">8. opcache.fast_shutdown</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OPcache-相关配套函数"><span class="nav-number">5.</span> <span class="nav-text">OPcache 相关配套函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#本地开启-OPcache"><span class="nav-number">6.</span> <span class="nav-text">本地开启 OPcache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器开起来"><span class="nav-number">7.</span> <span class="nav-text">服务器开起来</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装状态面板"><span class="nav-number">8.</span> <span class="nav-text">安装状态面板</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OPcache-缓存刷新-重置的几种方式"><span class="nav-number">9.</span> <span class="nav-text">OPcache 缓存刷新/重置的几种方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OPcache-对性能的影响"><span class="nav-number">10.</span> <span class="nav-text">OPcache 对性能的影响</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后续再优化"><span class="nav-number">11.</span> <span class="nav-text">后续再优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-生产环境不设置缓存定时刷新时间"><span class="nav-number">11.1.</span> <span class="nav-text">1. 生产环境不设置缓存定时刷新时间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-增加-hugepage-配置"><span class="nav-number">11.2.</span> <span class="nav-text">2. 增加 hugepage 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-配置-preload-用于缓存预热"><span class="nav-number">11.3.</span> <span class="nav-text">3. 配置 preload 用于缓存预热</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2023/11/21/php-opcache/';
+          this.page.identifier = '2023/11/21/php-opcache/';
+          this.page.title = 'php 开启 opcache 来降低负载并提高抗并发能力';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

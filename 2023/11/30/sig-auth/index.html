@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="security,golang,aws,auth," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言随着内部应用的微服务的增多，一定会涉及到频繁的微服务之间的互相调用，这时候要有一种验证方式来保证两个微服务的调用是合法的(这边只是网关级别的请求校验，该有的业务校验一样要有), 如果你的微服务相互调用是通过 http(s) 的方式，那么采用签名算法来做请求的安全性校验是业务比较常用的方式。  当然还有其他的方式，比如 ip 白名单，但是对于有负载均衡，横向扩展的服务来说，就没那么灵活  签名算">
+<meta name="keywords" content="security,golang,aws,auth">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证">
+<meta property="og:url" content="http://kebingzao.com/2023/11/30/sig-auth/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言随着内部应用的微服务的增多，一定会涉及到频繁的微服务之间的互相调用，这时候要有一种验证方式来保证两个微服务的调用是合法的(这边只是网关级别的请求校验，该有的业务校验一样要有), 如果你的微服务相互调用是通过 http(s) 的方式，那么采用签名算法来做请求的安全性校验是业务比较常用的方式。  当然还有其他的方式，比如 ip 白名单，但是对于有负载均衡，横向扩展的服务来说，就没那么灵活  签名算">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2023/11/30/sig-auth/1.png">
+<meta property="og:image" content="http://kebingzao.com/2023/11/30/sig-auth/2.png">
+<meta property="og:image" content="http://kebingzao.com/2023/11/30/sig-auth/3.png">
+<meta property="og:image" content="http://kebingzao.com/2023/11/30/sig-auth/5.png">
+<meta property="og:image" content="http://kebingzao.com/2023/11/30/sig-auth/4.png">
+<meta property="og:updated_time" content="2023-12-01T17:07:56.503Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证">
+<meta name="twitter:description" content="前言随着内部应用的微服务的增多，一定会涉及到频繁的微服务之间的互相调用，这时候要有一种验证方式来保证两个微服务的调用是合法的(这边只是网关级别的请求校验，该有的业务校验一样要有), 如果你的微服务相互调用是通过 http(s) 的方式，那么采用签名算法来做请求的安全性校验是业务比较常用的方式。  当然还有其他的方式，比如 ip 白名单，但是对于有负载均衡，横向扩展的服务来说，就没那么灵活  签名算">
+<meta name="twitter:image" content="http://kebingzao.com/2023/11/30/sig-auth/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2023/11/30/sig-auth/"/>
+
+
+
+
+
+  <title>使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/11/30/sig-auth/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2023-11-30T11:50:30+08:00">
+                2023-11-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web安全/" itemprop="url" rel="index">
+                    <span itemprop="name">web安全</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/11/30/sig-auth/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2023/11/30/sig-auth/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/11/30/sig-auth/" class="leancloud_visitors" data-flag-title="使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>随着内部应用的微服务的增多，一定会涉及到频繁的微服务之间的互相调用，这时候要有一种验证方式来保证两个微服务的调用是合法的(这边只是网关级别的请求校验，该有的业务校验一样要有), 如果你的微服务相互调用是通过 http(s) 的方式，那么采用签名算法来做请求的安全性校验是业务比较常用的方式。</p>
+<blockquote>
+<p>当然还有其他的方式，比如 ip 白名单，但是对于有负载均衡，横向扩展的服务来说，就没那么灵活</p>
+</blockquote>
+<p>签名算法大家其实不陌生，很多第三方的 sdk，权限校验走的就是签名算法的校验方式，原理都大同小异，其中我接触最多的就是 aws 的签名算法: <a href="https://docs.aws.amazon.com/zh_cn/AmazonS3/latest/API/sigv4-auth-using-authorization-header.html#sigv4-auth-header-overview" target="_blank" rel="noopener">AWS Signature Version 4</a></p>
+<h2 id="最基础的原理"><a href="#最基础的原理" class="headerlink" title="最基础的原理"></a>最基础的原理</h2><p>最核心的原理就这几步，对于客户端来说:</p>
+<ol>
+<li>生成一对安全凭证，包括一个 <code>AccessKey</code> 和 <code>SecretKey</code>, 前者可以参与加密也可以不参与，主要是用来匹配对应的 <code>SecretKey</code>， 后者就是用来进行加密生成签名的</li>
+<li>将整个 http 请求对象进行聚合操作，生成一个待签名串 <code>StringToSign</code></li>
+<li>用 <code>SecretKey</code> 加密待签名串 <code>StringToSign</code>，生成最后的签名 <code>Signature</code></li>
+<li>将签名 <code>Signature</code> 和 <code>AccessKey</code> 放在 header 标头，连同整个 http 请求对象发送过去</li>
+</ol>
+<a id="more"></a>
+<p>对于验证的后端来说就是:</p>
+<ol>
+<li>接收到请求之后，获取标头的签名 <code>Signature</code> 和 <code>AccessKey</code></li>
+<li>通过 <code>AccessKey</code> 匹配找到对应的 <code>SecretKey</code> (服务端也要存这一对安全凭证，因为 <code>SecretKey</code> 不会随着传输的)</li>
+<li>服务端相同的算法将整个 http 请求对象生成待签名串 <code>StringToSign</code></li>
+<li>然后通过 <code>SecretKey</code> 加密待签名串 <code>StringToSign</code>，生成服务端的签名 <code>Signature</code></li>
+<li>对比这两个签名，如果一致，就说明签名算法通过</li>
+</ol>
+<p>基础流程就是这样，然后这个过程可以辅助各种其他安全校验，比如:</p>
+<ol>
+<li>增加时间戳校验，将生成的时间戳也加进去校验，只有规定时间内的请求，才算合法</li>
+<li>加入域名白名单，校验 header host 标头，只有在白名单的才允许通过</li>
+<li>加入 ip 白名单，校验来源 ip，只有在 ip 白名单的才允许通过</li>
+<li>加入各种 ACL 权限的校验，对应的 <code>AccessKey</code> 也要有对应的 ACL 权限，才能通过 (要借助数据库的查询)</li>
+</ol>
+<h2 id="AWS-Signature-Version-4"><a href="#AWS-Signature-Version-4" class="headerlink" title="AWS Signature Version 4"></a>AWS Signature Version 4</h2><p>接下来我们来分析一下 <code>AWS Signature Version 4</code> (以下简称 <code>AWS4</code>) 的整个签名过程，来更好的理解整个签名过程，AWS 的这个版本的签名，十几年过去了，还是依然这么坚挺，说明不管是复杂程度，还是安全程度，都非常的靠谱。</p>
+<p><code>AWS4</code> 的整个签名的信息，是放在 HTTP Authorization 标头的，这也是业内最常用的方式，比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Authorization: AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, SignedHeaders=host;range;x-amz-date, Signature=fe5f80f77d5fa3beca038a248ff027d0445342fe2855ddc963176630326f1024</span><br></pre></td></tr></table></figure></p>
+<p>它是按照空格隔开的，整个标头可以分成 4 部分信息:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">AWS4-HMAC-SHA256</span><br><span class="line">Credential=AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request, </span><br><span class="line">SignedHeaders=host;range;x-amz-date, </span><br><span class="line">Signature=fe5f80f77d5fa3beca038a248ff027d0445342fe2855ddc963176630326f1024</span><br></pre></td></tr></table></figure></p>
+<p>具体是</p>
+<table>
+<thead>
+<tr>
+<th>组成</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AWS4-HMAC-SHA256</code></td>
+<td>这个是一个固定值，用于计算签名的算法。使用 <code>AWS4</code> 进行身份验证时，必须提供此值。指定 AWS 签名版本 4 (<code>AWS4</code>) 和签名算法 (HMAC-SHA256)</td>
+</tr>
+<tr>
+<td><code>Credential</code></td>
+<td>访问密钥 <code>AccessKey</code> 和范围信息，包括用于计算签名的日期、区域和服务, 比如 <br> <code>&lt;AccessKey&gt;/&lt;date&gt;/&lt;aws-region&gt;/&lt;aws-service&gt;/aws4_request</code></td>
+</tr>
+<tr>
+<td><code>SignedHeaders</code></td>
+<td>用于计算 <code>Signature</code> 的请求标头的分号分隔列表。该列表仅包含标头名称，并且标头名称必须为小写。例如：<code>host;range;x-amz-date</code> <br> 不需要所有的标头都要参与签名计算，比较有意义才需要</td>
+</tr>
+<tr>
+<td><code>Signature</code></td>
+<td>256 位签名以 64 个小写十六进制字符表示</td>
+</tr>
+</tbody>
+</table>
+<p>前面三个组成都很好理解，基本上都是明文，不需要计算，直接根据情况给就行了，主要是最后的 <code>Signature</code> 怎么算才是核心</p>
+<h3 id="1-计算签名"><a href="#1-计算签名" class="headerlink" title="1. 计算签名"></a>1. 计算签名</h3><p>要计算签名，首先需要一个待签字符串。然后，使用签名密钥计算待签字符串的 HMAC-SHA256 哈希值。贴一个官方的图</p>
+<p><img src="/2023/11/30/sig-auth/1.png" alt="1"></p>
+<h4 id="1-1-生成待签名串-StringToSign"><a href="#1-1-生成待签名串-StringToSign" class="headerlink" title="1.1. 生成待签名串 StringToSign"></a>1.1. 生成待签名串 StringToSign</h4><p>生成待签名串 StringToSign， 待签名串的生成由两个步骤</p>
+<h5 id="1-1-1-生成规范请求字串-CanonicalRequest"><a href="#1-1-1-生成规范请求字串-CanonicalRequest" class="headerlink" title="1.1.1 生成规范请求字串 CanonicalRequest"></a>1.1.1 生成规范请求字串 CanonicalRequest</h5><p>将请求的内容（主机、操作、标头等）组织为标准规范格式。规范请求是用于创建待签字符串的输入之一，比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;HTTPMethod&gt;\n</span><br><span class="line">&lt;CanonicalURI&gt;\n</span><br><span class="line">&lt;CanonicalQueryString&gt;\n</span><br><span class="line">&lt;CanonicalHeaders&gt;\n</span><br><span class="line">&lt;SignedHeaders&gt;\n</span><br><span class="line">&lt;HashedPayload&gt;</span><br></pre></td></tr></table></figure></p>
+<p>这部分的资讯就是你的 http 请求体的各部分组成，包含</p>
+<table>
+<thead>
+<tr>
+<th>请求体内容</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HTTPMethod</code></td>
+<td>HTTP 方法，例如 GET、PUT、HEAD 和 DELETE</td>
+</tr>
+<tr>
+<td><code>CanonicalUri</code></td>
+<td>绝对路径组件 URI 的 URI 编码版本，以域名后面的“/”开头，直至字符串结尾处，或者如果包含查询字符串参数，则直至问号字符（“?”）。如果绝对路径为空，则使用正斜杠字符（/）。<br> 比如 <code>/examplebucket/myphoto.jpg</code></td>
+</tr>
+<tr>
+<td><code>CanonicalQueryString</code></td>
+<td>URI 编码的查询字符串参数。可以单独对每个名称和值进行 URI 编码。必须按键名称的字母顺序对规范查询字符串中的参数进行排序。编码后进行排序</td>
+</tr>
+<tr>
+<td><code>CanonicalHeaders</code></td>
+<td>请求标头及其值的列表。各个标头名称和值对用换行符（“\n”）分隔,为了防止数据篡改，最好在签名计算中包含所有标头</td>
+</tr>
+<tr>
+<td><code>SignedHeaders</code></td>
+<td>按字母顺序排序、以分号分隔的小写请求标头名称列表。列表中的请求标头与在 CanonicalHeaders 字符串中包含的标头相同。<br> 比如 <code>host;x-amz-content-sha256;x-amz-date</code></td>
+</tr>
+<tr>
+<td><code>HashedPayload</code></td>
+<td>使用 HTTP 请求正文中的 <code>payload</code> 作为哈希函数的输入创建的字符串, 算法是 <code>Hex(SHA256Hash(&lt;payload&gt;)</code>, 如果请求中不包含有效 <code>payload</code>, 那也要按照空字符串去算 <code>Hex(SHA256Hash(&quot;&quot;))</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>细节补充一</strong>: 针对 <code>CanonicalQueryString</code> 中的参数，不管是 key 还是 value 都要在排序之后，进行 <code>UriEncode</code> 编码，比如以下这个:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://s3.amazonaws.com/examplebucket?prefix=somePrefix&amp;marker=someMarker&amp;max-keys=2</span><br></pre></td></tr></table></figure></p>
+<p>如果要组合的话，那么这一行的值就会变成 (应该只有一行的内容，只是为了更直观理解，用了换行):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UriEncode(&quot;marker&quot;)+&quot;=&quot;+UriEncode(&quot;someMarker&quot;)+&quot;&amp;&quot;+</span><br><span class="line">UriEncode(&quot;max-keys&quot;)+&quot;=&quot;+UriEncode(&quot;20&quot;) + &quot;&amp;&quot; +</span><br><span class="line">UriEncode(&quot;prefix&quot;)+&quot;=&quot;+UriEncode(&quot;somePrefix&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>如果只有 key 有值，value 为空，那么就是 <code>UriEncode(key)=&quot;&quot;</code>, 比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://s3.amazonaws.com/examplebucket?acl&amp;marker=someMarker</span><br></pre></td></tr></table></figure></p>
+<p>那么就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">UriEncode(&quot;acl&quot;)+&quot;=&quot;+&quot;&quot;+&quot;&amp;&quot;+</span><br><span class="line">UriEncode(&quot;marker&quot;)+&quot;=&quot;+UriEncode(&quot;someMarker&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>如果 <code>CanonicalQueryString</code> 为空，也就是 path 之后没有带查询参数，那么这一行依然存在，只不过是空。不能省略</p>
+<p><strong>细节补充二</strong>: 针对 <code>CanonicalHeaders</code> ，示例如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Lowercase(&lt;HeaderName1&gt;)+&quot;:&quot;+Trim(&lt;value&gt;)+&quot;\n&quot;</span><br><span class="line">Lowercase(&lt;HeaderName2&gt;)+&quot;:&quot;+Trim(&lt;value&gt;)+&quot;\n&quot;</span><br><span class="line">...</span><br><span class="line">Lowercase(&lt;HeaderNameN&gt;)+&quot;:&quot;+Trim(&lt;value&gt;)+&quot;\n&quot;</span><br></pre></td></tr></table></figure></p>
+<p>CanonicalHeaders 列表必须包含以下内容：</p>
+<ul>
+<li>HTTP <code>host</code> 标头</li>
+<li>如果请求中存在 Content-Type 标头，则必须将其添加到 CanonicalHeaders 列表中</li>
+<li>此外，还必须添加计划在请求中包含的所有 <code>x-amz-*</code> 标头。例如，如果您使用临时安全凭证，则请求中必须包含 <code>x-amz-security-token</code>。您必须将此标头添加到 CanonicalHeaders 列表中</li>
+</ul>
+<p>每个标头名称必须：</p>
+<ul>
+<li>使用小写字符</li>
+<li>按字母顺序显示</li>
+<li>后跟冒号（:）</li>
+</ul>
+<p>对于值必须：</p>
+<ul>
+<li>去除任何前导空格或尾随空格</li>
+<li>将连续空格转换为单个空格</li>
+<li>使用逗号分隔多值标头的值</li>
+<li>签名中必须包含 <code>host</code> 标头（HTTP/1.1）或 <code>:authority</code> 标头（HTTP/2）以及任何 <code>x-amz-*</code> 标头。签名中也可以包含其他标准标头，例如 <code>content-type</code></li>
+</ul>
+<p>举个例子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">host:s3.amazonaws.com</span><br><span class="line">x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span><br><span class="line">x-amz-date:20130708T220855Z</span><br></pre></td></tr></table></figure></p>
+<p><strong>细节补充三</strong>: 针对 <code>HashedPayload</code> 这边的 payload 指的是 body 体，不包含 url 后面 <code>?</code> 的查询字符串(Query String)</p>
+<p>请求负载（Request Payload）是请求主体（Body）的内容，它是在 HTTP 请求中发送给服务器的数据。这些数据通常包含在 POST、PUT 或 PATCH 请求中，而不是 GET 请求中，这些数据可以包含各种格式，比如:</p>
+<ul>
+<li>表单数据（Form data）</li>
+<li>JSON（JavaScript Object Notation）</li>
+<li>XML（eXtensible Markup Language）</li>
+<li>二进制数据：例如上传的文件</li>
+</ul>
+<p>所以在 <code>AWS4</code> 的签名中，如果是 <code>GET</code> 请求的话，那么就是没有 payload，计算空字符串的哈希值。 如果是使用 <code>PUT</code> 请求上传对象时，就必须提供 payload</p>
+<h5 id="1-1-2-生成待签名字符串-StringToSign"><a href="#1-1-2-生成待签名字符串-StringToSign" class="headerlink" title="1.1.2 生成待签名字符串 StringToSign"></a>1.1.2 生成待签名字符串 StringToSign</h5><p>通过第一步我们规范了 http 请求，得到了一个包含多行的规范请求的字符串 CanonicalRequest， 接下来再基于这个字符串再进行拼接，得到最后的待签名字符串 StringToSign, 具体拼接过程如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Algorithm \n</span><br><span class="line">RequestDateTime \n</span><br><span class="line">CredentialScope  \n</span><br><span class="line">HashedCanonicalRequest</span><br></pre></td></tr></table></figure></p>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Algorithm</code></td>
+<td>用于创建规范请求的哈希的算法。<code>AWS4</code> 固定是 <code>AWS4-HMAC-SHA256</code></td>
+</tr>
+<tr>
+<td><code>RequestDateTime</code></td>
+<td>在凭证范围内使用的日期和时间。该值是采用 ISO 8601 格式的当前 UTC 时间（例如 20130524T000000Z）</td>
+</tr>
+<tr>
+<td><code>CredentialScope</code></td>
+<td>凭证范围。这会将生成的签名限制在指定的区域和服务范围内。该字符串采用以下格式：<code>YYYYMMDD/region/service/aws4_request</code></td>
+</tr>
+<tr>
+<td><code>HashedCanonicalRequest</code></td>
+<td>上述规范请求的哈希, 其实是就是 <code>Hex(SHA256Hash(&lt;CanonicalRequest&gt;))</code></td>
+</tr>
+</tbody>
+</table>
+<p>这边的 <code>CredentialScope</code> 内容，应该是跟 <code>Authorization</code> 标头中的第二部分 <code>Credential</code> 中的 <code>AccessKey</code> 后面的部分应该一致:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Authorization Credential = &lt;AccessKey&gt;/&lt;date&gt;/&lt;aws-region&gt;/&lt;aws-service&gt;/aws4_request</span><br><span class="line">CredentialScope = &lt;date&gt;/&lt;aws-region&gt;/&lt;aws-service&gt;/aws4_request</span><br></pre></td></tr></table></figure></p>
+<p>最后拼起来的待签名字串 StringToSign 就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&quot;AWS4-HMAC-SHA256&quot; + &quot;\n&quot; +</span><br><span class="line">timeStampISO8601Format + &quot;\n&quot; +</span><br><span class="line">&lt;Scope&gt; + &quot;\n&quot; +</span><br><span class="line">Hex(SHA256Hash(&lt;CanonicalRequest&gt;))</span><br></pre></td></tr></table></figure></p>
+<h4 id="1-2-生成待签名密钥-SigningKey"><a href="#1-2-生成待签名密钥-SigningKey" class="headerlink" title="1.2. 生成待签名密钥 SigningKey"></a>1.2. 生成待签名密钥 SigningKey</h4><p>本质上待签名密钥 SigningKey 就是通过这一组安全凭证中的 <code>SecretKey</code> 来转变生成的，以 <code>AWS4</code> 为例，要生成 SigningKey 要经过以下步骤, 每一步都会在上一步的结果中进行再计算:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DateKey = HMAC-SHA256(&quot;AWS4&quot;+&quot;&lt;SecretKey&gt;&quot;, &quot;&lt;YYYYMMDD&gt;&quot;)</span><br><span class="line">DateRegionKey = HMAC-SHA256(&lt;DateKey&gt;, &quot;&lt;aws-region&gt;&quot;)</span><br><span class="line">DateRegionServiceKey = HMAC-SHA256(&lt;DateRegionKey&gt;, &quot;&lt;aws-service&gt;&quot;)</span><br><span class="line">SigningKey = HMAC-SHA256(&lt;DateRegionServiceKey&gt;, &quot;aws4_request&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，核心还是以 <code>SecretKey</code> 来加密，然后再配合上述说的 <code>&lt;CredentialScope&gt;</code> 中的 <code>&lt;date&gt;/&lt;aws-region&gt;/&lt;aws-service&gt;/aws4_request</code>, 将其拆开变成 4 步，最后就可以得到待签名密钥 SigningKey</p>
+<h4 id="1-3-根据-SigningKey-和-StringToSign-进行签名计算"><a href="#1-3-根据-SigningKey-和-StringToSign-进行签名计算" class="headerlink" title="1.3. 根据 SigningKey 和 StringToSign 进行签名计算"></a>1.3. 根据 SigningKey 和 StringToSign 进行签名计算</h4><p>这个就很简单了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Signature = HMAC-SHA256(SigningKey, StringToSign)</span><br></pre></td></tr></table></figure></p>
+<p>然后将签名从二进制转换为十六进制表示形式，使用小写字符， 如果是前端代码的话，可以这样子写:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">let hash = CryptoJS.HmacSHA256(stringToSign, SigningKey)</span><br><span class="line">let signature = CryptoJS.enc.Hex.stringify(hash)</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-将签名添加至请求"><a href="#2-将签名添加至请求" class="headerlink" title="2. 将签名添加至请求"></a>2. 将签名添加至请求</h3><p>从上一步操作中，我们已经得到了签名 Signature 了, 接下来只要将其作为一部分添加到 Authorization 标头即可，四个部分的内容用空格隔开，开头说过，不再赘述。</p>
+<p>不过要注意一个细节，算法和 Credential 之间没有逗号。其他三个元素必须使用逗号分隔其他元素，也就是四个元素之间要有一个空格先隔开，然后对于第二个和第三个元素，内容结尾还要再加一个逗号来分隔</p>
+<h3 id="3-demo-实例"><a href="#3-demo-实例" class="headerlink" title="3. demo 实例"></a>3. demo 实例</h3><p>AWS 有非常详尽的 sdk 和 demo 实例:</p>
+<ul>
+<li><a href="https://github.com/aws-samples/sigv4a-signing-examples/tree/main/node-js" target="_blank" rel="noopener">sigv4a signing examples for node js</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/IAM/latest/UserGuide/signature-v4-examples.html#signature-v4-examples-sdk" target="_blank" rel="noopener">请求签名示例</a></li>
+<li><a href="https://github.com/aws/aws-sdk-js/blob/master/lib/signers/v4.js" target="_blank" rel="noopener">javascript sdk v4.js</a></li>
+<li><a href="https://github.com/aws/aws-sdk-go/blob/main/aws/signer/v4/v4.go" target="_blank" rel="noopener">golang sdk v4.go</a></li>
+</ul>
+<h2 id="简易的签名算法-SIG-AUTH"><a href="#简易的签名算法-SIG-AUTH" class="headerlink" title="简易的签名算法 SIG-AUTH"></a>简易的签名算法 SIG-AUTH</h2><p>在理解 <code>AWS4</code> 的基础上，我们如果自己项目内部要做签名算法的话，就比较容易了，基础原理都一样，但是细节上会更简单很多，因为少了很多 ACL Scope 的校验，具体规则如下:</p>
+<h3 id="1-分配一组安全凭证"><a href="#1-分配一组安全凭证" class="headerlink" title="1. 分配一组安全凭证"></a>1. 分配一组安全凭证</h3><p>开始一样会分配一组安全凭证，包含一个 <code>AccessKey</code> 和 <code>SecretKey</code>, 而且 <code>SecretKey</code> 一定要足够复杂，因为作为开放 sdk 的话，签名的具体算法是公开的，因此作为加密的 key <code>SecretKey</code> 组成部分要足够复杂才能有效防止字典暴力破解</p>
+<h3 id="2-将签名信息放在-Authorization-标头"><a href="#2-将签名信息放在-Authorization-标头" class="headerlink" title="2. 将签名信息放在 Authorization 标头"></a>2. 将签名信息放在 Authorization 标头</h3><p>一样将签名的相关信息放在 Authorization 标头，格式为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Authorization: SIG-AUTH Key=&#123;AccessKey&#125;, Sign=&#123;Signature&#125;, Timestamp=&#123;timestamp&#125;, Version=1</span><br></pre></td></tr></table></figure></p>
+<p>花括号内是可变的参数值。除开头的 scheme 部分外，其余各参数由逗号隔开，顺序不做要求，参数名称前的空白字符会被忽略。各参数定义为:</p>
+<ul>
+<li>Authorization scheme 固定为 SIG-AUTH </li>
+<li>Key 是请求者的 <code>AccessKey</code></li>
+<li>Sign 是基于请求内容和 <code>SecretKey</code> 生成的签名 Signature</li>
+<li>Timestamp 是生成签名时的 UNIX 时间戳，单位是秒。</li>
+<li>Version 表示签名算法的版本，当前固定值为 1 。可省略，省略时默认为 1 </li>
+</ul>
+<p>后端服务器将根据签名算法，校验 Sign 的值是否正确，并要求 Timestamp 在允许的误差范围内（默认为 300 秒）</p>
+<h3 id="3-对请求体做规范化，生成待签名串-StringToSign"><a href="#3-对请求体做规范化，生成待签名串-StringToSign" class="headerlink" title="3. 对请求体做规范化，生成待签名串 StringToSign"></a>3. 对请求体做规范化，生成待签名串 StringToSign</h3><p>字符集统一使用 UTF-8 。签名使用 HMAC-SHA256 算法，通过 <code>SecretKey</code> 对待签名串进行哈希计算得到。待签名串根据请求的内容生成，格式为：</p>
+<blockquote>
+<p>一样会针对请求体做规范化，生成待签名串，不过这边对请求体做规范化会比 <code>AWS4</code> 简单非常多</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">TIMESTAMP</span><br><span class="line">METHOD</span><br><span class="line">PATH</span><br><span class="line">QUERY_VALUES</span><br><span class="line">BODY_VALUES (optional)</span><br><span class="line">END  (constant)</span><br></pre></td></tr></table></figure>
+<p>每个部分间用换行符（\n）分割，各部分的值为：</p>
+<ol>
+<li>TIMESTAMP 是生成签名时的 UNIX 时间戳，需和 Authorization 头里的 Timestamp 参数值一样。</li>
+<li>METHOD 是 HTTP 请求的 METHOD ，如 GET/POST/PUT 。</li>
+<li>PATH 请求的路径，没有路径部分时，使用 <code>/</code>。 比如请求地址是 <code>http://temp.org/the/path/</code> 则路径为 <code>/the/path/</code>, 地址是 <code>http://temp.org/</code> 或 <code>http://temp.org</code>, 路径均为 <code>/</code>。</li>
+<li>QUERY_VALUES 是 URL 的 query string 部分拼接后的值。 先按参数名称的 UTF-8 字节顺序升序，将参数排列好，需使用稳定的排序算法，这样若有同名参数，其顺序不会被打乱； 然后排序后的参数的值紧密拼接起来（无分隔符）； 若一个参数没有值，如“?a=&amp;b=2”或“?a&amp;b=2”中的“a”，则用参数名称代替值拼入。 没有 query string 时，整个 QUERY 部分使用一个空字符串。</li>
+<li>BODY_VALUES 若是 application/x-www-form-urlencoded 请求，则处理方式同 QUERY 。 若是 application/json 请求，则为 JSON 原文，和 BODY 上送的一致，不做任何修改。 GET 请求时此部分省略（包含换行符均省略）。 不支持其他类型的请求。</li>
+<li>最后一行固定是“END”三个字符，末尾没有空行。</li>
+</ol>
+<p>注意，这边有几个不同点:</p>
+<ol>
+<li>UTF-8 字节顺序不是字典顺序，字节顺序下，英文大写字母在小写字母前面，比如 X 排序在 a 前面</li>
+<li>在规范化 QUERY_VALUES 和 application/x-www-form-urlencoded 模式的 BODY_VALUES 的时候，不是走 <code>urlencode(key)=urlencode(value)</code>, 而是直接取 value, 只不过当 value 为空的话，用 key 来代替。 然后如果是 application/json 请求，直接将 body 的 json 贴进去即可</li>
+<li>如果在 URL 上使用 ~auth 参数，此参数不参与签名计算。</li>
+</ol>
+<h3 id="4-支持将-auth-信息放在查询字符串"><a href="#4-支持将-auth-信息放在查询字符串" class="headerlink" title="4. 支持将 auth 信息放在查询字符串"></a>4. 支持将 auth 信息放在查询字符串</h3><p>当不方便定制请求头时，也可以将 Authorization 头的值，放在 URL 的 ~auth 参数上（记得 urlEncode ）。 ~auth 参数不参与签名计算。如果同时提供参数和请求头，则只读取请求头。 </p>
+<p>此功能特别适用于 JSONP 请求，因为其不能定制 HTTP 头。</p>
+<h3 id="5-demo-例子"><a href="#5-demo-例子" class="headerlink" title="5. demo 例子"></a>5. demo 例子</h3><p>接下来我们测试几个例子，我有写了一个 SIG-AUTH 的验证的前端交互页面， 具体地址: <a href="https://github.com/kebingzao/go-sigauth" target="_blank" rel="noopener">go-sigauth</a></p>
+<h4 id="5-1-POST-form-的例子"><a href="#5-1-POST-form-的例子" class="headerlink" title="5.1 POST form 的例子"></a>5.1 POST form 的例子</h4><p>待签名的请求为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">POST http://localhost:8012/sigauth/hello?a&amp;c=3&amp;b=2&amp;z=4&amp;X=中文</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Body: p1=11&amp;p3=33&amp;p2=22</span><br></pre></td></tr></table></figure></p>
+<p>请求的 HTTP 报文的内容为:</p>
+<ul>
+<li>请求的 QUERY 部分为 <code>a&amp;c=3&amp;b=2&amp;z=4&amp;X=中文</code></li>
+<li>请求的 BODY 部分是 <code>p1=11&amp;p3=33&amp;p2=22</code></li>
+</ul>
+<p>获取待签名串的步骤如下:</p>
+<ol>
+<li>拼接 TIMESTAMP ，值为 1701415043</li>
+<li>拼接 METHOD ，值为 POST</li>
+<li>拼接 PATH, 即 /sigauth/hello</li>
+<li>计算并追加 QUERY 部分, 得到参数表 <code>[a, c, b, z, X]</code>, 将参数根据名称按 UTF-8 字节顺序升序排列，并且使用稳定排序算法。 排列后为 <code>[X, a, b, c, z]</code>, 按排序后的参数顺序，得到参数的原始值为：<code>[中文, , 2, 3, 4]</code>, 其中有一个空白值为 a，用参数名称代替，最后得到 <code>中文a234</code></li>
+<li>计算并追加 BODY 部分。由于是 <code>application/x-www-form-urlencoded</code> 的请求， BODY 部分的处理和 QUERY 规则一样，结果为： <code>112233</code></li>
+<li>追加最后一行，固定值为 END</li>
+</ol>
+<p>因此最后的签名串是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1701415043</span><br><span class="line">POST</span><br><span class="line">/sigauth/hello</span><br><span class="line">中文a234</span><br><span class="line">112233</span><br><span class="line">END</span><br></pre></td></tr></table></figure></p>
+<p>通过 <code>SecretKey</code> 计算 HMAC-SHA256 值为： c203adfb66187114179529e959777a110ae3372ed7901f0ffe58ecc63288700f</p>
+<p>拼接得到 Authorization 头，追加到请求头，最终请求为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST http://localhost:8012/sigauth/hello?a&amp;c=3&amp;b=2&amp;z=4&amp;X=中文</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line">Authorization: SIG-AUTH Key=testkey1, Sign=c203adfb66187114179529e959777a110ae3372ed7901f0ffe58ecc63288700f, Timestamp=1701415043, Version=1</span><br><span class="line">Body: p1=11&amp;p3=33&amp;p2=22</span><br></pre></td></tr></table></figure></p>
+<p>使用前端校验的截图如下:</p>
+<p><img src="/2023/11/30/sig-auth/2.png" alt="1"></p>
+<h4 id="5-2-POST-json-的例子"><a href="#5-2-POST-json-的例子" class="headerlink" title="5.2 POST json 的例子"></a>5.2 POST json 的例子</h4><p>如果将 Content-Type 改成 application/json，其他都不变，但是 追加 BODY 部分的时候，要直接整个 json 给:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1701415712</span><br><span class="line">POST</span><br><span class="line">/sigauth/hello</span><br><span class="line">中文a234</span><br><span class="line">&#123;&quot;p1&quot;:11,&quot;p3&quot;:33,&quot;p2&quot;:22&#125;</span><br><span class="line">END</span><br></pre></td></tr></table></figure></p>
+<p>最好的计算截图</p>
+<p><img src="/2023/11/30/sig-auth/3.png" alt="1"></p>
+<h4 id="5-3-GET-空白请求"><a href="#5-3-GET-空白请求" class="headerlink" title="5.3 GET 空白请求"></a>5.3 GET 空白请求</h4><p>由于是 GET 请求，待签名串由5部分构成，没有 BODY 部分；同时此请求没有参数，故 QUERY 部分为空字符串:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1701415843</span><br><span class="line">GET</span><br><span class="line">/sigauth/hello</span><br><span class="line"></span><br><span class="line">END</span><br></pre></td></tr></table></figure></p>
+<p>最终是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GET http://localhost:8012/sigauth/hello</span><br><span class="line">Authorization: SIG-AUTH Key=testkey1, Sign=96edf2189c57df77a5e1e0ba8e8a13dc442ce7e310545ae56dab036376ac8f4c, Timestamp=1701415843, Version=1</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2023/11/30/sig-auth/5.png" alt="1"></p>
+<h4 id="5-4-JSONP-请求"><a href="#5-4-JSONP-请求" class="headerlink" title="5.4 JSONP 请求"></a>5.4 JSONP 请求</h4><p>也可以走 JSONP 请求，将 auth 放到 query 中的 <code>~auth</code>, 具体验证如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GET http://localhost:8012/sigauth/hello?a&amp;c=3&amp;b=2&amp;z=4&amp;X=中文&amp;callback=_jsonp1701415988865&amp;~auth=SIG-AUTH%20Key%3Dtestkey1%2C%20Sign%3D193d0df954a203fe95181e6f6ea5848fab19f15a86e773cdc0126d6d31ae4fb5%2C%20Timestamp%3D1701415988%2C%20Version%3D1</span><br><span class="line">Content-Type: application/json</span><br><span class="line">Authorization: SIG-AUTH Key=testkey1, Sign=193d0df954a203fe95181e6f6ea5848fab19f15a86e773cdc0126d6d31ae4fb5, Timestamp=1701415988, Version=1</span><br></pre></td></tr></table></figure></p>
+<p>这边要注意一个细节， jsonp 后面的 callback 参数也要参与计算:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1701415988</span><br><span class="line">GET</span><br><span class="line">/sigauth/hello</span><br><span class="line">中文a23_jsonp17014159888654</span><br><span class="line">END</span><br></pre></td></tr></table></figure></p>
+<p>在我的验证例子里面，jsonp 的 callback 是由当前请求的时间戳生成的，然后附加到 query params 中的:</p>
+<p><img src="/2023/11/30/sig-auth/4.png" alt="1"></p>
+<p>后端验证服务器在处理 jsonp 的时候，返回值是不一样的，这个要记得处理, 以我的 golang demo 为例:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 返回结果值</span><br><span class="line">func retrunRes(w http.ResponseWriter, r *http.Request, res Res) &#123;</span><br><span class="line">	urlValues := r.URL.Query()</span><br><span class="line">	callback := urlValues.Get(&quot;callback&quot;)</span><br><span class="line">	// 如果是 jsonp 格式的话，就返回对应格式</span><br><span class="line">	if callback != &quot;&quot; &#123;</span><br><span class="line">		w.Write([]byte(fmt.Sprintf(&quot;%s(%s)&quot;, callback, res.resJsonString())))</span><br><span class="line">	&#125; else &#123;</span><br><span class="line">		w.Write([]byte(res.resJsonString()))</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结和待优化"><a href="#总结和待优化" class="headerlink" title="总结和待优化"></a>总结和待优化</h2><p>目前的这个签名算法，在 POST 上面只支持这两种 content-type</p>
+<ul>
+<li>一个是表单的 application/x-www-form-urlencoded</li>
+<li>一个是 json 格式的 application/json</li>
+</ul>
+<p>并不支持 multipart/form-data 类型的请求，也就是如果有包含文件上传的话，是不支持，后面其实可以扩展，做的跟 <code>AWS4</code> 一样，可以针对二进制 payload 进行签名校验。</p>
+<p>但是如果是要作为微服务内部通信的话，那肯定是够的，只要将这一组安全凭证，尤其是 <code>SecretKey</code> 弄的复杂一点, 比如位数高一点:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">// 基于 base32 编码，其将输入 n 字节，输出 n*8/5 个字符。</span><br><span class="line">// 避免末尾的 padding 需要 n 可以被5整除。</span><br><span class="line">// 若 n 不能被5整除，末尾的 padding （等号）会被自动去掉。</span><br><span class="line">func randomBase32(n int) string &#123;</span><br><span class="line">	src := make([]byte, n)</span><br><span class="line">	n, err := rand.Read(src)</span><br><span class="line">	if err != nil &#123;</span><br><span class="line">		panic(err)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	dst := make([]byte, base32.StdEncoding.EncodedLen(n))</span><br><span class="line">	base32.StdEncoding.Encode(dst, src)</span><br><span class="line"></span><br><span class="line">	res := string(dst)</span><br><span class="line">	res = strings.TrimRight(res, &quot;=&quot;)</span><br><span class="line">	return res</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 生成一对 key 和 secret</span><br><span class="line">func generateAccessKey(w http.ResponseWriter, r *http.Request) &#123;</span><br><span class="line">	res := NewRes()</span><br><span class="line">	res.Data = struct &#123;</span><br><span class="line">		Key    string</span><br><span class="line">		Secret string</span><br><span class="line">	&#125;&#123;randomBase32(15), randomBase32(35)&#125;</span><br><span class="line">	retrunRes(w, r, res)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>如果要作为跟 <code>AWS4</code> 一样用来做开放 SDK 的话，可以安全性再加强一点，比如增加域名白名单校验，ip 白名单校验， ACL 权限校验等等, 会更加的安全</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://github.com/kebingzao/go-sigauth" target="_blank" rel="noopener">SIG-AUTH demo 和 golang package 地址</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/AWSEC2/latest/WindowsGuide/ebsapis-using-sigv4.html" target="_blank" rel="noopener">AWS 使用签名版本 4 签名</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/IAM/latest/UserGuide/aws-signing-authentication-methods.html" target="_blank" rel="noopener">AWS 身份验证方法</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/IAM/latest/UserGuide/signing-elements.html" target="_blank" rel="noopener">AWS API 请求签名的元素</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/IAM/latest/UserGuide/create-signed-request.html" target="_blank" rel="noopener">AWS 创建已签名的 AWS API 请求</a></li>
+<li><a href="https://docs.aws.amazon.com/zh_cn/IAM/latest/UserGuide/signature-v4-examples.html#signature-v4-examples-sdk" target="_blank" rel="noopener">AWS 请求签名示例</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2023/11/30/sig-auth/" title="使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证">http://kebingzao.com/2023/11/30/sig-auth/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/security/" rel="tag"># security</a>
+          
+            <a href="/tags/golang/" rel="tag"># golang</a>
+          
+            <a href="/tags/aws/" rel="tag"># aws</a>
+          
+            <a href="/tags/auth/" rel="tag"># auth</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/11/21/php-opcache/" rel="next" title="php 开启 opcache 来降低负载并提高抗并发能力">
+                <i class="fa fa-chevron-left"></i> php 开启 opcache 来降低负载并提高抗并发能力
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">313</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最基础的原理"><span class="nav-number">2.</span> <span class="nav-text">最基础的原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Signature-Version-4"><span class="nav-number">3.</span> <span class="nav-text">AWS Signature Version 4</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-计算签名"><span class="nav-number">3.1.</span> <span class="nav-text">1. 计算签名</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-生成待签名串-StringToSign"><span class="nav-number">3.1.1.</span> <span class="nav-text">1.1. 生成待签名串 StringToSign</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-1-生成规范请求字串-CanonicalRequest"><span class="nav-number">3.1.1.1.</span> <span class="nav-text">1.1.1 生成规范请求字串 CanonicalRequest</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-2-生成待签名字符串-StringToSign"><span class="nav-number">3.1.1.2.</span> <span class="nav-text">1.1.2 生成待签名字符串 StringToSign</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-生成待签名密钥-SigningKey"><span class="nav-number">3.1.2.</span> <span class="nav-text">1.2. 生成待签名密钥 SigningKey</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-根据-SigningKey-和-StringToSign-进行签名计算"><span class="nav-number">3.1.3.</span> <span class="nav-text">1.3. 根据 SigningKey 和 StringToSign 进行签名计算</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-将签名添加至请求"><span class="nav-number">3.2.</span> <span class="nav-text">2. 将签名添加至请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-demo-实例"><span class="nav-number">3.3.</span> <span class="nav-text">3. demo 实例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简易的签名算法-SIG-AUTH"><span class="nav-number">4.</span> <span class="nav-text">简易的签名算法 SIG-AUTH</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-分配一组安全凭证"><span class="nav-number">4.1.</span> <span class="nav-text">1. 分配一组安全凭证</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-将签名信息放在-Authorization-标头"><span class="nav-number">4.2.</span> <span class="nav-text">2. 将签名信息放在 Authorization 标头</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-对请求体做规范化，生成待签名串-StringToSign"><span class="nav-number">4.3.</span> <span class="nav-text">3. 对请求体做规范化，生成待签名串 StringToSign</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-支持将-auth-信息放在查询字符串"><span class="nav-number">4.4.</span> <span class="nav-text">4. 支持将 auth 信息放在查询字符串</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-demo-例子"><span class="nav-number">4.5.</span> <span class="nav-text">5. demo 例子</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-POST-form-的例子"><span class="nav-number">4.5.1.</span> <span class="nav-text">5.1 POST form 的例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-POST-json-的例子"><span class="nav-number">4.5.2.</span> <span class="nav-text">5.2 POST json 的例子</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-3-GET-空白请求"><span class="nav-number">4.5.3.</span> <span class="nav-text">5.3 GET 空白请求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-4-JSONP-请求"><span class="nav-number">4.5.4.</span> <span class="nav-text">5.4 JSONP 请求</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结和待优化"><span class="nav-number">5.</span> <span class="nav-text">总结和待优化</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2023/11/30/sig-auth/';
+          this.page.identifier = '2023/11/30/sig-auth/';
+          this.page.title = '使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

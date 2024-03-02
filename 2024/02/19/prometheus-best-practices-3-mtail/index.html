@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="prometheus,grafana,mtail," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言上一节我们已经可以通过采集 nginx 的 access log 来得到程序的流量情况，以及针对异常状态码来设置预警  prometheus + grafana 实战篇(2) - nginx   已经可以解决突发性的故障问题了，但是要达到更好的日志可观测性，还是不够，至少有以下两种场景没办法满足:  程序框架的异常状态码和 nginx 的状态码解耦。 有些程序框架为了保证返回值的友好和错误码的">
+<meta name="keywords" content="prometheus,grafana,mtail">
+<meta property="og:type" content="article">
+<meta property="og:title" content="prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志">
+<meta property="og:url" content="http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言上一节我们已经可以通过采集 nginx 的 access log 来得到程序的流量情况，以及针对异常状态码来设置预警  prometheus + grafana 实战篇(2) - nginx   已经可以解决突发性的故障问题了，但是要达到更好的日志可观测性，还是不够，至少有以下两种场景没办法满足:  程序框架的异常状态码和 nginx 的状态码解耦。 有些程序框架为了保证返回值的友好和错误码的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/1.png">
+<meta property="og:image" content="http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/2.png">
+<meta property="og:image" content="http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/3.png">
+<meta property="og:updated_time" content="2024-03-02T09:57:46.122Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志">
+<meta name="twitter:description" content="前言上一节我们已经可以通过采集 nginx 的 access log 来得到程序的流量情况，以及针对异常状态码来设置预警  prometheus + grafana 实战篇(2) - nginx   已经可以解决突发性的故障问题了，但是要达到更好的日志可观测性，还是不够，至少有以下两种场景没办法满足:  程序框架的异常状态码和 nginx 的状态码解耦。 有些程序框架为了保证返回值的友好和错误码的">
+<meta name="twitter:image" content="http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/"/>
+
+
+
+
+
+  <title>prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志 | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-02-19T15:08:59+08:00">
+                2024-02-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2024/02/19/prometheus-best-practices-3-mtail/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2024/02/19/prometheus-best-practices-3-mtail/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2024/02/19/prometheus-best-practices-3-mtail/" class="leancloud_visitors" data-flag-title="prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>上一节我们已经可以通过采集 nginx 的 access log 来得到程序的流量情况，以及针对异常状态码来设置预警</p>
+<ul>
+<li><a href="/2022/12/30/prometheus-best-practices-2-nginx/" title="prometheus + grafana 实战篇(2) - nginx">prometheus + grafana 实战篇(2) - nginx</a>
+</li>
+</ul>
+<p>已经可以解决突发性的故障问题了，但是要达到更好的日志可观测性，还是不够，至少有以下两种场景没办法满足:</p>
+<ol>
+<li><p><strong>程序框架的异常状态码和 nginx 的状态码解耦。</strong> 有些程序框架为了保证返回值的友好和错误码的统一，是会在框架底层将抛出来的错误 catch 掉的，而不是直接扔到 nginx 上层返回。 举个例子，比如我们的 golang 框架就是这样子的，我们有自己定制了一整套的错误码标准，包含 数组越界，空指针异常 等异常都会在程序底层 catch，并在返回的 json 串填充错误码 code，并返回 200 状态码。 因此在 nginx 层，基本上只能看到 200 的正常码， 是看不到异常的 500 错误码的(nginx 本身的 499, 502, 504 还是有的)。要看程序错误，只能去查程序的输出 log。</p>
+<blockquote>
+<p>大部分的对外提供的 API 接口，也是会将程序的错误码和 http 的异常码解耦掉</p>
+</blockquote>
+</li>
+<li><p><strong>针对某些外接第三方的 webhook 的错误处理也没办法返回异常状态码。</strong> 比如以支付项目为例，我们会接 Google 和 Apple 的 webhook 通知来处理订单状态，这时候有些处理逻辑是本身程序有 bug，你是不能直接针对 webhook 的返回响应返回异常状态码的，比如 500 错误码，不然这些第三方的 webhook 可能就会再重发。因此哪怕是程序异常，也最好是返回 200 正常码。那么对于这种情况，如果要检测的话，也是只能通过采集程序日志来进行发现和预警。</p>
+</li>
+</ol>
+<p>综上所述，我们还是需要一种可以采集程序日志来生成 Prometheus 指标的服务。<br><a id="more"></a></p>
+<h2 id="mtail"><a href="#mtail" class="headerlink" title="mtail"></a>mtail</h2><p>我这边采用的是 Google 出品的 <a href="https://github.com/google/mtail" target="_blank" rel="noopener">mtail</a></p>
+<p>mtail 是一个用于从应用程序日志中提取指标的工具，这些指标可以被导出到时间序列数据库或时间序列计算器中，用于警报和仪表板。它填补了一个监控领域的空白，作为不导出自身内部状态的应用程序（除了通过日志）和现有监控系统之间的粘合剂，这样系统操作员就不需要为这些应用程序打补丁以进行检测，或为每一个这样的应用程序编写自定义的提取代码。</p>
+<p>简单的来说，mtail 就是流式读取日志，通过正则表达式匹配的方式从日志中提取 metrics 指标，这种方式可以利用目标机器的算力，另外一个好处是无侵入性，不需要业务埋点，如果业务程序是第三方供应商提供的，我们改不了其代码，mtail 此时就非常合适了。</p>
+<h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1. 安装"></a>1. 安装</h3><p>安装的话也很简单，mtail 提供了好几种安装方式: <a href="https://google.github.io/mtail/Building.html" target="_blank" rel="noopener">Building mtail</a>, 有 golang 安装，docker 安装， 二进制包安装。</p>
+<p>我们直接采用二进制包的方式来安装: <a href="https://github.com/google/mtail/releases/tag/v3.0.0-rc53" target="_blank" rel="noopener">二进制下载地址</a></p>
+<p>一样使用 centos 来进行测试:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos ~]# wget https://github.com/google/mtail/releases/download/v3.0.0-rc53/mtail_3.0.0-rc53_linux_amd64.tar.gz</span><br><span class="line">[root@VM-16-122-centos ~]# mkdir mtail</span><br><span class="line">[root@VM-16-122-centos ~]# cd mtail/</span><br><span class="line">[root@VM-16-122-centos mtail]# tar -zxvf ../mtail_3.0.0-rc53_linux_amd64.tar.gz</span><br><span class="line">LICENSE</span><br><span class="line">README.md</span><br><span class="line">mtail</span><br><span class="line">[root@VM-16-122-centos mtail]# ll</span><br><span class="line">total 15564</span><br><span class="line">-rw-r--r-- 1 1001 127    11358 Jan  7 13:58 LICENSE</span><br><span class="line">-rwxr-xr-x 1 1001 127 15913197 Jan  7 13:59 mtail</span><br><span class="line">-rw-r--r-- 1 1001 127     4781 Jan  7 13:58 README.md</span><br></pre></td></tr></table></figure></p>
+<p>这样子就安装好了，可以看到其实就一个 mtail 的二进制文件。</p>
+<h3 id="2-启动"><a href="#2-启动" class="headerlink" title="2. 启动"></a>2. 启动</h3><p>可以直接启动:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./mtail --progs /disk/tools/mtail/conf --logs &apos;/disk/tools/mtail/logs/*.log&apos; --logs /var/log/messages --log_dir /disk/tools/mtail/logdir</span><br></pre></td></tr></table></figure></p>
+<p>有几个参数会比较常用:</p>
+<ul>
+<li><code>--progs</code>: 指定一个目录，这个目录里放置一堆的 <code>*.mtail</code>文件，每个 mtail 文件就是描述的正则提取规则</li>
+<li><code>--logs</code> : 监控的日志文件列表，可以使用 <code>,</code> 分隔多个文件，也可以多次使用<code>--logs</code> 参数，也可以指定一个文件目录，支持通配符，使用通配符的时候，在指定文件目录时需要对目录使用单引号。如：<code>--logs a.log,b.log,c.log --logs a.log --logs b.log --logs c.log --logs &#39;/export/logs/*.log&#39;</code></li>
+<li><code>--log_dir</code>: mtail 组件自身日志存放目录</li>
+<li><code>--port</code>: mtail 组件 http 监听端口，默认 3903</li>
+<li><code>--poll_log_interval</code>: 对匹配的日志进行轮询的间隔，默认是 250ms</li>
+</ul>
+<p>更多参数和应用具体可以看官方文档: <a href="https://github.com/google/mtail/blob/main/docs/Deploying.md" target="_blank" rel="noopener">Deploying</a></p>
+<h3 id="3-demo-实践"><a href="#3-demo-实践" class="headerlink" title="3. demo 实践"></a>3. demo 实践</h3><p>接下来具体操作一下，首先将其变成 service 服务:</p>
+<p>在这之前，要先新建一个 mtail 的规则文件，在 <code>/root/mtail/conf</code> 这个目录下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos conf]# cat linecount.mtail</span><br><span class="line"># The most basic of mtail programmes -- count the number of lines read.</span><br><span class="line">counter my_lines_total</span><br><span class="line"></span><br><span class="line">/$/ &#123;</span><br><span class="line">  my_lines_total++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>逻辑很简单，就是统计行数。具体规则文件怎么写，可以看官网的教程文档: <a href="https://google.github.io/mtail/Programming-Guide.html" target="_blank" rel="noopener">mtail Programming Guide</a></p>
+<p>然后接下来就可以走 service 的方式启动了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"># cat /usr/lib/systemd/system/mtail.service</span><br><span class="line">[Unit]</span><br><span class="line">Description=mtail metrics exporter for Prometheus</span><br><span class="line">After=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">ExecStart=/root/mtail/mtail --progs /root/mtail/conf --logs &apos;/var/log/test_log/a.log&apos; --log_dir /root/mtail/logs</span><br><span class="line">Restart=always</span><br><span class="line">ProtectSystem=full</span><br><span class="line">CapabilityBoundingSet=</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"># systemctl daemon-reload</span><br><span class="line"># systemctl enable mtail.service</span><br><span class="line"># systemctl start mtail.service</span><br><span class="line"># systemctl status mtail.service</span><br><span class="line">● mtail.service - mtail metrics exporter for Prometheus</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/mtail.service; enabled; vendor preset: disabled)</span><br><span class="line">   Active: active (running) since Thu 2024-02-01 17:50:37 CST; 10s ago</span><br><span class="line">Main PID: 19993 (mtail)</span><br><span class="line">   CGroup: /system.slice/mtail.service</span><br><span class="line">           └─19993 /root/mtail/mtail --progs /root/mtail/conf --logs /var/log/test_log/a.log --log_dir /root/mtail/logs</span><br><span class="line"></span><br><span class="line">Feb 01 17:50:37 VM-16-122-centos systemd[1]: Started mtail metrics exporter for Prometheus.</span><br></pre></td></tr></table></figure></p>
+<p>启动指令就是这个:</p>
+<blockquote>
+<p>/root/mtail/mtail –progs /root/mtail/conf –logs ‘/var/log/test_log/a.log’ –log_dir /root/mtail/logs</p>
+</blockquote>
+<p>上面对应的目录(<code>/root/mtail/logs</code>) 如果原先没有的话，要先新建</p>
+<p>这时候就有 log 产生了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos log]# tail -f /root/mtail/logs/mtail.INFO</span><br><span class="line">Log file created at: 2024/02/01 17:50:37</span><br><span class="line">Running on machine: VM-16-122-centos</span><br><span class="line">Binary: Built with gc go1.20.12 for linux/amd64</span><br><span class="line">Previous log: &lt;none&gt;</span><br><span class="line">Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg</span><br><span class="line">I0201 17:50:37.896166   19993 main.go:119] mtail version 3.0.0-rc53 git revision 018c81d637bde5c218ce5a9778b4590d2bfd4782 go version go1.20.12 go arch amd64 go os linux</span><br><span class="line">I0201 17:50:37.896305   19993 main.go:120] Commandline: [&quot;/root/mtail/mtail&quot; &quot;--progs&quot; &quot;/root/mtail/conf&quot; &quot;--logs&quot; &quot;/var/log/test_log/a.log&quot; &quot;--log_dir&quot; &quot;/root/mtail/logs&quot;]</span><br><span class="line">I0201 17:50:37.896601   19993 store.go:189] Starting metric store expiry loop every 1h0m0s</span><br><span class="line">I0201 17:50:37.897144   19993 runtime.go:187] Loaded program linecount.mtail</span><br><span class="line">I0201 17:50:37.897171   19993 runtime.go:83] unmarking linecount.mtail</span><br><span class="line">I0201 17:50:37.897205   19993 logstream.go:61] Parsed url as /var/log/test_log/a.log</span><br><span class="line">I0201 17:50:37.897287   19993 tail.go:287] Tailing /var/log/test_log/a.log</span><br><span class="line">I0201 17:50:37.897335   19993 mtail.go:137] Listening on [::]:3903</span><br></pre></td></tr></table></figure></p>
+<p>这时候塞入几条 log 试试:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos test_log]# echo &quot;hello mtail 21&quot; &gt;&gt; a.log</span><br><span class="line">[root@VM-16-122-centos test_log]# echo &quot;hello mtail 22&quot; &gt;&gt; a.log</span><br><span class="line">[root@VM-16-122-centos test_log]# echo &quot;hello mtail 23&quot; &gt;&gt; a.log</span><br><span class="line">[root@VM-16-122-centos test_log]# echo &quot;hello mtail 24&quot; &gt;&gt; a.log</span><br></pre></td></tr></table></figure></p>
+<p>这时候请求 metrics 接口: <code>curl http://127.0.0.1:3903/metrics | grep my_lines_total</code> 就可以看到我们的指令了 (还有一些是默认的 golang 采集指标)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">my_lines_total&#123;prog=&quot;linecount.mtail&quot;&#125; 4</span><br></pre></td></tr></table></figure></p>
+<h2 id="处理多项目的问题"><a href="#处理多项目的问题" class="headerlink" title="处理多项目的问题"></a>处理多项目的问题</h2><p>正常我们的服务器很多时候会同时部署多个程序，这时候如果要通过 mtail 来采集这些程序的 log 的话，有一个情况要注意</p>
+<p>mtail 的设计不允许将特定的规则文件应用于特定的日志文件。在 mtail 中，所有的规则文件都会被应用于所有的日志文件。这是因为 mtail 的主要目标是从多个日志文件中提取和导出指标，而不是对每个日志文件进行单独处理。</p>
+<p>举个例子，比如我有两个程序，一个是 id， 一个是 pay，他们的规则分别是 id.mtail 和 pay.mtail。 同时他们的规则文件都有针对内存超出的信息和错误信息做采集，比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># cat id.mtail</span><br><span class="line">counter project_error_total by project</span><br><span class="line">counter mem_not_allow_total by project</span><br><span class="line"></span><br><span class="line">/Error:/ &#123;</span><br><span class="line">  project_error_total[&quot;id&quot;]++</span><br><span class="line">&#125;</span><br><span class="line">/Allowed memory size of/ &#123;</span><br><span class="line">  mem_not_allow_total[&quot;id&quot;]++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># cat pay.mtail</span><br><span class="line">counter project_error_total by project</span><br><span class="line">counter mem_not_allow_total by project</span><br><span class="line"></span><br><span class="line">/Error:/ &#123;</span><br><span class="line">  project_error_total[&quot;pay&quot;]++</span><br><span class="line">&#125;</span><br><span class="line">/Allowed memory size of/ &#123;</span><br><span class="line">  mem_not_allow_total[&quot;pay&quot;]++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其实就是两个 metrics，</p>
+<ul>
+<li>一个是记录 Error 信息的指标 <code>project_error_total</code>, 这个指标有个 project 标签，如果是抓取 id 项目的，那么 project 标签就是 id，如果是抓取 pay 项目的 log 文件的，那么 project 标签就是 pay，抓取规则就是日志中含有字符串 <code>Error:</code> 就符合</li>
+<li>一个是记录是否内存溢出的指标 <code>mem_not_allow_total</code>，标签规则同 <code>project_error_total</code> 一样，抓取规则就是 日志中含有字符串 <code>Allowed memory size of</code> 就符合</li>
+</ul>
+<blockquote>
+<p>mtail 中的 counter、gauge、histogram 三种类型与prometheus类型中描述的作用一致, 本例用的是 counter 这个类型</p>
+</blockquote>
+<p>他们各自的 log 日志文件地方也不一样:</p>
+<ul>
+<li>id 项目的 log 目录是: <code>/var/log/test_log/id/app.log</code></li>
+<li>pay 项目的 log 目录是: <code>/var/log/test_log/pay/2024-01-01.log</code>, 他是每天都滚一个 log，也就是在 pay 这个目录下，每天都会新增 log</li>
+</ul>
+<p>这时候我们开始启动:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/root/mtail/mtail --progs /root/mtail/conf --logs &apos;/var/log/test_log/id/*.log&apos; --logs &apos;/var/log/test_log/pay/*.log&apos;  --log_dir /root/mtail/logs</span><br></pre></td></tr></table></figure></p>
+<p>从启动 log 日志可以看到，这些 log 都有被监控了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">I0202 15:48:28.898287    9998 tail.go:287] Tailing /var/log/test_log/id/app.log</span><br><span class="line">I0202 15:48:28.898360    9998 tail.go:287] Tailing /var/log/test_log/pay/2024-01-01.log</span><br></pre></td></tr></table></figure></p>
+<p>接下来开始插入新 log, 往 <code>id/app.log</code> 插入一条 Error 日志<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos pay]# echo &quot;[2024-02-02 03:29:07] Error: webHook id: evt_1OfDR9AP4l9&quot; &gt;&gt; /var/log/test_log/id/app.log</span><br><span class="line">[root@VM-16-122-centos pay]# cat /var/log/test_log/id/app.log</span><br><span class="line">start---</span><br><span class="line">[2024-02-02 03:29:07] Error: webHook id: evt_1OfDR9AP4l9</span><br></pre></td></tr></table></figure></p>
+<p>然后直接请求 metrics 接口:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos pay]# curl http://127.0.0.1:3903/metrics | grep project_error_total</span><br><span class="line"># HELP project_error_total defined at id.mtail:1:9-27</span><br><span class="line"># TYPE project_error_total counter</span><br><span class="line">project_error_total&#123;prog=&quot;id.mtail&quot;,project=&quot;id&quot;&#125; 1</span><br><span class="line">project_error_total&#123;prog=&quot;pay.mtail&quot;,project=&quot;pay&quot;&#125; 1</span><br></pre></td></tr></table></figure></p>
+<p>发现这个指标两个都是 1， 也就是两个规则都采集了。 这不是我们想要的。我们只想要 <code>id.mtail</code> 规则采集， <code>pay.mtail</code> 规则不采集。</p>
+<p>这也证明了上面的说法，就是 mtail 采集 log 日志的时候，会应用到所有的 mtail 规则文件。</p>
+<p>如果想要不同的项目分开采集的话，比如 pay 的 log 只应用于 pay.mtail 规则文件， id 的 log 只应用于 id.mtail 的规则文件，那么有两种方法:</p>
+<ol>
+<li>分开两个 mtail 进程来采集, 各采各的，互不干扰</li>
+<li>还是同一个 mtail 进程采集，但是规则文件要对采集的 log 来源进行过滤判断</li>
+</ol>
+<h3 id="1-分成多个-mtail-各自采集"><a href="#1-分成多个-mtail-各自采集" class="headerlink" title="1. 分成多个 mtail 各自采集"></a>1. 分成多个 mtail 各自采集</h3><p>这个就很好理解，无非就是再开一个 mtail 进程，注意监听的端口要分开, 比如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mtail -logs /server/id/logs/app.log -progs /path/to/id.mtail -port 3903 &amp;</span><br><span class="line">mtail -logs /server/pay/logs/*.log -progs /path/to/pay.mtail -port 3904 &amp;</span><br></pre></td></tr></table></figure></p>
+<p>如果采集程序真的很多，要启动很多的 mtail 进程的话，那么建议直接用 docker 来进行部署会更方便，首先<a href="https://docs.docker.com/engine/install/centos/#install-using-the-repository" target="_blank" rel="noopener">安装 docker</a></p>
+<p>因为 mtail 并没有原生的官方 docker 镜像，所以需要自己创建一个 docker 镜像来运行 mtail:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos mtail_docker]# cat Dockerfile</span><br><span class="line"></span><br><span class="line">FROM golang:1.16 as builder</span><br><span class="line"></span><br><span class="line">WORKDIR /go/src/mtail</span><br><span class="line">RUN git clone https://github.com/google/mtail.git /go/src/mtail &amp;&amp; \</span><br><span class="line">    cd /go/src/mtail &amp;&amp; \</span><br><span class="line">    git checkout v3.0.0-rc45 &amp;&amp; \</span><br><span class="line">    make install_deps &amp;&amp; \</span><br><span class="line">    make</span><br><span class="line"></span><br><span class="line">FROM debian:buster-slim</span><br><span class="line">COPY --from=builder /go/src/mtail/mtail /usr/local/bin/mtail</span><br><span class="line">ENTRYPOINT [&quot;mtail&quot;, &quot;--logs&quot;, &quot;/logs/*.log&quot;, &quot;--progs&quot;, &quot;/progs&quot;, &quot;--log_dir&quot;, &quot;/logDir&quot;]</span><br></pre></td></tr></table></figure></p>
+<p>指令是一样，我们后面起 docker 的时候，只需要挂载到 宿主机的目录即可，然后做下端口映射即可。</p>
+<p>接下来编译成镜像:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos mtail_docker]# docker build -t mtail .</span><br><span class="line">[+] Building 0.6s (10/10) FINISHED                                                                                                                                                          docker:default</span><br><span class="line">。。。                                                                                       </span><br><span class="line">=&gt; =&gt; naming to docker.io/library/mtail</span><br></pre></td></tr></table></figure></p>
+<p>然后接下来就可以初始化容器了， 先起  id 的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos mtail_docker]# docker run -d -p 3904:3903 -v /var/log/test_log/id:/logs -v /root/mtail/conf/id:/progs -v /root/mtail/logs/id:/logDir --name mtail_id  mtail</span><br><span class="line">b218cd76f41d8568b056cc74cb8f35675246b2b27e57b8d7f4b14a4fbd17ae08</span><br><span class="line">[root@VM-16-122-centos mtail_docker]# docker ps</span><br><span class="line">CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS        PORTS                                       NAMES</span><br><span class="line">b218cd76f41d   mtail     &quot;mtail --logs /logs/…&quot;   2 seconds ago   Up 1 second   0.0.0.0:3904-&gt;3903/tcp, :::3904-&gt;3903/tcp   mtail_id</span><br></pre></td></tr></table></figure></p>
+<p>这时候，容器就启动了，直接查看 log<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos id]# tail -f /root/mtail/logs/id/mtail.INFO</span><br><span class="line">Log file created at: 2024/02/03 08:44:28</span><br><span class="line">Running on machine: b218cd76f41d</span><br><span class="line">Binary: Built with gc go1.16.15 for linux/amd64</span><br><span class="line">Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg</span><br><span class="line">I0203 08:44:28.930725       1 main.go:113] mtail version v3.0.0-rc45-dirty git revision 5e2fe145030128f030793a6ea65204808ffc834d go version go1.16.15 go arch amd64 go os linux</span><br><span class="line">I0203 08:44:28.930869       1 main.go:114] Commandline: [&quot;mtail&quot; &quot;--logs&quot; &quot;/logs/*.log&quot; &quot;--progs&quot; &quot;/progs&quot; &quot;--log_dir&quot; &quot;/logDir&quot;]</span><br><span class="line">I0203 08:44:28.931091       1 store.go:178] Starting metric store expiry loop every 1h0m0s</span><br><span class="line">I0203 08:44:28.931660       1 loader.go:246] Loaded program id.mtail</span><br><span class="line">I0203 08:44:28.931830       1 tail.go:259] Tailing /logs/app.log</span><br><span class="line">I0203 08:44:28.931875       1 mtail.go:193] Listening on [::]:3903</span><br></pre></td></tr></table></figure></p>
+<p>这边指令显示的是容器中的目录，其实已经全部挂载到宿主机了，跟原先用 service 是一样的目录 (有个细节，原先是 <code>conf/id.mtail</code>, 后面抽了一层目录出来，变成 <code>conf/id/id.mtail</code> )</p>
+<p>这时候一样，写入原先的 id 的 app.log, 这时候写入 log，就可以看到了:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos pay]# echo &quot;[2024-02-03 03:29:12] Error: webHook id: evt_1OfDR9AP4l9233&quot; &gt;&gt; /var/log/test_log/id/app.log</span><br><span class="line">[root@VM-16-122-centos pay]# curl http://127.0.0.1:3904/metrics | grep project_error_total</span><br><span class="line"># HELP project_error_total defined at id.mtail:1:9-27</span><br><span class="line"># TYPE project_error_total counter</span><br><span class="line">project_error_total&#123;prog=&quot;id.mtail&quot;,project=&quot;id&quot;&#125; 1</span><br><span class="line">[root@VM-16-122-centos pay]# echo &quot;[2024-02-03 03:29:13] Error: webHook id: evt_1OfDR9AP4l9233&quot; &gt;&gt; /var/log/test_log/id/app.log</span><br><span class="line">[root@VM-16-122-centos pay]# curl http://127.0.0.1:3904/metrics | grep project_error_total</span><br><span class="line"># HELP project_error_total defined at id.mtail:1:9-27</span><br><span class="line"># TYPE project_error_total counter</span><br><span class="line">project_error_total&#123;prog=&quot;id.mtail&quot;,project=&quot;id&quot;&#125; 2</span><br></pre></td></tr></table></figure></p>
+<p>同时，如果要做 pay 的话，直接再起一个容器即可，然后端口映射成 3905 即可。 挂载对应的目录即可，不需要 build 镜像了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos mtail_docker]# docker run -d -p 3905:3903 -v /var/log/test_log/pay:/logs -v /root/mtail/conf/pay:/progs -v /root/mtail/logs/pay:/logDir --name mtail_pay  mtail</span><br><span class="line">e17db412f959350aebca874c8ff3345714c7935d4fd4d7a7305a217c8ff351d1</span><br><span class="line">[root@VM-16-122-centos mtail_docker]# docker ps</span><br><span class="line">CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS                                       NAMES</span><br><span class="line">e17db412f959   mtail     &quot;mtail --logs /logs/…&quot;   2 seconds ago   Up 1 second    0.0.0.0:3905-&gt;3903/tcp, :::3905-&gt;3903/tcp   mtail_pay</span><br><span class="line">b218cd76f41d   mtail     &quot;mtail --logs /logs/…&quot;   5 minutes ago   Up 5 minutes   0.0.0.0:3904-&gt;3903/tcp, :::3904-&gt;3903/tcp   mtail_id</span><br></pre></td></tr></table></figure></p>
+<p>这时候看 log 就有了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos id]# tail -f /root/mtail/logs/pay/mtail.INFO</span><br><span class="line">Running on machine: e17db412f959</span><br><span class="line">Binary: Built with gc go1.16.15 for linux/amd64</span><br><span class="line">Log line format: [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg</span><br><span class="line">I0203 08:49:51.234788       1 main.go:113] mtail version v3.0.0-rc45-dirty git revision 5e2fe145030128f030793a6ea65204808ffc834d go version go1.16.15 go arch amd64 go os linux</span><br><span class="line">I0203 08:49:51.234940       1 main.go:114] Commandline: [&quot;mtail&quot; &quot;--logs&quot; &quot;/logs/*.log&quot; &quot;--progs&quot; &quot;/progs&quot; &quot;--log_dir&quot; &quot;/logDir&quot;]</span><br><span class="line">I0203 08:49:51.235168       1 store.go:178] Starting metric store expiry loop every 1h0m0s</span><br><span class="line">I0203 08:49:51.235673       1 loader.go:246] Loaded program pay.mtail</span><br><span class="line">I0203 08:49:51.235803       1 tail.go:259] Tailing /logs/2024-01-01.log</span><br><span class="line">I0203 08:49:51.235844       1 tail.go:259] Tailing /logs/2024-01-02.log</span><br><span class="line">I0203 08:49:51.235885       1 mtail.go:193] Listening on [::]:3903</span><br></pre></td></tr></table></figure></p>
+<p>然后加一下 log:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos pay]# echo &quot;[2024-02-03 03:29:13] Error: webHook id: evt_1OfDR9AP4l9233&quot; &gt;&gt; /var/log/test_log/pay/2024-01-02.log</span><br><span class="line">[root@VM-16-122-centos pay]# curl http://127.0.0.1:3905/metrics | grep project_error_total</span><br><span class="line"># HELP project_error_total defined at pay.mtail:1:9-27</span><br><span class="line"># TYPE project_error_total counter</span><br><span class="line">project_error_total&#123;prog=&quot;pay.mtail&quot;,project=&quot;pay&quot;&#125; 1</span><br></pre></td></tr></table></figure></p>
+<p>这样子就可以通过 docker 来进行多个 mtail 的管理了，本质上跟 service 的方式差不多，但是不管是管理还是扩展都会更方便。</p>
+<h3 id="2-同一个-mtail-规则文件要对采集的-log-来源进行过滤判断"><a href="#2-同一个-mtail-规则文件要对采集的-log-来源进行过滤判断" class="headerlink" title="2. 同一个 mtail, 规则文件要对采集的 log 来源进行过滤判断"></a>2. 同一个 mtail, 规则文件要对采集的 log 来源进行过滤判断</h3><p>除了上面的多个 mtail 分别采集之外，还有一种方式可以做到同一个 mtail 采集多个程序的情况，那就是在对应服务的 mtail 规则文件中，过滤判断当前采集的 log 文件。</p>
+<p>比如我将上述的 id.mtail 和 pay.mtail 改成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># cat id.mtail</span><br><span class="line">counter project_error_total by project</span><br><span class="line">counter mem_not_allow_total by project</span><br><span class="line"></span><br><span class="line">getfilename() !~ /id\/app.log/ &#123;</span><br><span class="line">  stop</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/Error:/ &#123;</span><br><span class="line">  project_error_total[&quot;id&quot;]++</span><br><span class="line">&#125;</span><br><span class="line">/Allowed memory size of/ &#123;</span><br><span class="line">  mem_not_allow_total[&quot;id&quot;]++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># cat pay.mtail</span><br><span class="line">counter project_error_total by project</span><br><span class="line">counter mem_not_allow_total by project</span><br><span class="line"></span><br><span class="line">getfilename() !~ /pay\/\d&#123;4&#125;-\d&#123;2&#125;-\d&#123;2&#125;\.log/ &#123;</span><br><span class="line">  stop</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/Error:/ &#123;</span><br><span class="line">  project_error_total[&quot;pay&quot;]++</span><br><span class="line">&#125;</span><br><span class="line">/Allowed memory size of/ &#123;</span><br><span class="line">  mem_not_allow_total[&quot;pay&quot;]++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其他都没有变，就多了一个判断，如果当前采集的 log 文件名不在规则文件的允许范围内的话，就直接跳过。通过这种方式的话，就可以做到某一个规则文件只采集它想要采集的 log 日志</p>
+<p>启动起来:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/root/mtail/mtail --progs /root/mtail/conf --logs &apos;/var/log/test_log/id/*.log&apos; --logs &apos;/var/log/test_log/pay/*.log&apos; --log_dir /root/mtail/logs</span><br></pre></td></tr></table></figure></p>
+<p>然后接下来试一下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@VM-16-122-centos pay]# echo &quot;[2024-02-04 03:29:13] Error: webHook id: evt_1OfDR9AP4l9233&quot; &gt;&gt; /var/log/test_log/pay/2024-01-02.log</span><br><span class="line">[root@VM-16-122-centos pay]# curl http://127.0.0.1:3903/metrics | grep project_error_total</span><br><span class="line"># HELP project_error_total defined at pay.mtail:1:9-27</span><br><span class="line"># TYPE project_error_total counter</span><br><span class="line">project_error_total&#123;prog=&quot;pay.mtail&quot;,project=&quot;pay&quot;&#125; 1</span><br></pre></td></tr></table></figure></p>
+<p>往 pay 加了一行，可以检测到，而且 id 没有，说明过滤是生效的。</p>
+<p>综上所述，通过在 mtail 对当前采集的 log 文件进行判断，是可以实现单个 mtail 采集多个服务程序的效果的。不过一定要注意，就是采集的程序不能太多，因为每一次 mtail 还是要 tailing 和分析所有的 log 的，如果采集的文件很多，并且包含很多程序，假设有 10 个程序被集采， 这个就意味着每当某一个程序生成 log 的时候， mtail 要执行 10 个程序的 mtail 文件进行匹配解析，然后一一过滤，最后只有一个可以得到正常采集。</p>
+<p>这个效率就会很低了，比较影响性能，所以要注意。如果某一台服务器要采集很多个程序的话，最好还是分多个 mtail 程序去采集，用 docker 处理也很方便。但是如果只有两三个程序的话，是可以用这种方式的。</p>
+<h2 id="生产环境使用"><a href="#生产环境使用" class="headerlink" title="生产环境使用"></a>生产环境使用</h2><p>后面如果要在生产环境中使用的话，肯定要规范生成的 metrics 规则。 一般来说，只需要两个 metrics 指标就够了<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">counter logs_stat_info_total  by project, level</span><br><span class="line">counter logs_stat_info_detail by project, level, module, des</span><br></pre></td></tr></table></figure></p>
+<p>其中 logs_stat_info_total 有两个标签，一个是 project 表示项目，一个是 level 表示日志级别，比如 info，debugger，error 等级别</p>
+<p>logs_stat_info_detail 有四个标签，多了两个，一个是错误的模块，一个是错误的详情，比如 mem_oom, 内存溢出，那么 module 就是 os，表示系统，如果是 http timeout，那么 module 就是 http 等等</p>
+<p>然后线上可以这样子写，以 id.mtail 为例:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"># id 的规则匹配文件</span><br><span class="line"></span><br><span class="line">######################################</span><br><span class="line">###########定义一堆的常量</span><br><span class="line">######################################</span><br><span class="line">const ANY /.*/</span><br><span class="line"># yii2 的通用日志错误</span><br><span class="line">const YII_ERROR /\[error\]/</span><br><span class="line"></span><br><span class="line">######################################</span><br><span class="line">###########定义指标</span><br><span class="line">######################################</span><br><span class="line">counter logs_stat_info_total  by project, level</span><br><span class="line">counter logs_stat_info_detail by project, level, module, des</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">######################################</span><br><span class="line">###########判断文件过滤</span><br><span class="line">######################################</span><br><span class="line">getfilename() !~ /id\/api\/runtime\/logs\/app.log/ &#123;</span><br><span class="line">  stop</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">######################################</span><br><span class="line">########### 规则文件</span><br><span class="line">######################################</span><br><span class="line"></span><br><span class="line">YII_ERROR &#123;</span><br><span class="line">  logs_stat_info_total[&quot;id&quot;][&quot;error&quot;]++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">// + YII_ERROR + ANY + /yii\\base\\ErrorException/ &#123;</span><br><span class="line">  logs_stat_info_detail[&quot;id&quot;][&quot;error&quot;][&quot;yii&quot;][&quot;base_exception&quot;]++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// + YII_ERROR + ANY + /yii\\base\\InvalidRouteException/ &#123;</span><br><span class="line">  logs_stat_info_detail[&quot;id&quot;][&quot;error&quot;][&quot;yii&quot;][&quot;route_invalid&quot;]++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// + YII_ERROR + ANY + /Undefined offset:/ &#123;</span><br><span class="line">  logs_stat_info_detail[&quot;id&quot;][&quot;error&quot;][&quot;yii&quot;][&quot;undefined_offset&quot;]++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// + YII_ERROR + ANY + /\[PDOException\]/ &#123;</span><br><span class="line">  logs_stat_info_detail[&quot;id&quot;][&quot;error&quot;][&quot;mysql&quot;][&quot;pdo_exception&quot;]++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// + YII_ERROR + ANY + /SQLSTATE\[/ &#123;</span><br><span class="line">  logs_stat_info_detail[&quot;id&quot;][&quot;error&quot;][&quot;mysql&quot;][&quot;sql_state_fail&quot;]++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// + YII_ERROR + ANY + /\[api\\utils\\BizException\]/ &#123;</span><br><span class="line">  logs_stat_info_detail[&quot;id&quot;][&quot;error&quot;][&quot;biz&quot;][&quot;biz_exception&quot;]++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// + YII_ERROR + ANY + /Allowed memory size of/ &#123;</span><br><span class="line">  logs_stat_info_detail[&quot;id&quot;][&quot;error&quot;][&quot;os&quot;][&quot;mem_exhausted&quot;]++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的规则文件可以根据自己的需求来写，mtail 的规则很灵活也很强大，官方有提供了很多的规则文件的示例: <a href="https://github.com/google/mtail/tree/main/examples" target="_blank" rel="noopener">mtail example</a>, 我们可以在使用过程中去参考。如果后面用的很深的话，可以再开一个篇幅来讲一下 mtail 的规则文件应该怎么写。</p>
+<p>Prometheus 那边就可以配采集了 (这边采用的是 sd 的外挂方式，后面添加新的 mtail 采集 target 的时候，直接添加对应的 yml 文件即可，不需要再重启 Prometheus 服务)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># mtail 日志采集服务</span><br><span class="line">  - job_name: &quot;server-mtail&quot;</span><br><span class="line">    file_sd_configs:</span><br><span class="line">    - files:</span><br><span class="line">      - file_sd/server-mtail/*.yml</span><br></pre></td></tr></table></figure></p>
+<p>然后在对应的目录下，配上各个服务所在的 mtail 采集<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- targets:</span><br><span class="line">  - 172.19.16.9:3904</span><br><span class="line">  labels:</span><br><span class="line">    env: prod</span><br><span class="line">    product_line: personal</span><br><span class="line">    region: hk</span><br><span class="line">    cloud_platform: tx</span><br><span class="line">    server_type: mtail-log</span><br><span class="line">    wan: 43.xx.xxx.123</span><br></pre></td></tr></table></figure></p>
+<p>这边要注意一个细节，最好每次修改 mtail 规则文件之后，要去请求一下对应的端口服务，可以检测规则文件是否有问题</p>
+<p><img src="/2024/02/19/prometheus-best-practices-3-mtail/1.png" alt=""></p>
+<p>如果规则有问题的话，errors 那一栏就会显示编译错误，比如我将<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// + YII_ERROR + ANY + /Allowed memory size of/ &#123;</span><br><span class="line">  logs_stat_info_detail[&quot;id&quot;][&quot;error&quot;][&quot;os&quot;][&quot;mem_exhausted&quot;]++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>改成:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">YII_ERROR + ANY + /Allowed memory size of/ &#123;</span><br><span class="line">  logs_stat_info_detail[&quot;id&quot;][&quot;error&quot;][&quot;os&quot;][&quot;mem_exhausted&quot;]++</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这时候就会报错了</p>
+<p><img src="/2024/02/19/prometheus-best-practices-3-mtail/2.png" alt=""></p>
+<p>然后接下来就可以在 grafana 那边创建对应的 dashboard 了，并设置预警了</p>
+<p><img src="/2024/02/19/prometheus-best-practices-3-mtail/3.png" alt=""></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过 mtail 的采集，我们可以很灵活的采集我们服务程序中的错误，尤其是当我们的服务的 log 非常规范的时候，不仅 level 很规范，错误抛出的 error msg 和 error code 也很规范的时候， 其实 mtail 的规则文件，就会大同小异了。 基本上写一份，后面基本上就是拷贝了。</p>
+<p>mtail 很大的弥补了 nginx 采集没法解决的问题，事实上 mtail 的规则很强大，nginx 的 aceess log 也是日志，也是可以通过 mtail 写规则文件来采集的。就是规则文件会稍微复杂，不像 <code>prometheus-nginxlog-exporter</code> 来得便利</p>
+<hr>
+<p>参考资料:</p>
+<ul>
+<li><a href="https://github.com/google/mtail" target="_blank" rel="noopener">google mtail</a></li>
+<li><a href="https://google.github.io/mtail/Programming-Guide.html" target="_blank" rel="noopener">mtail Programming Guide</a></li>
+<li><a href="https://github.com/google/mtail/tree/main/examples" target="_blank" rel="noopener">mtail examples</a></li>
+<li><a href="https://segmentfault.com/a/1190000040503959" target="_blank" rel="noopener">Google mtail配合Prometheus和Grafana实现自定义日志监控</a></li>
+<li><a href="https://blog.csdn.net/bluuusea/article/details/105508897" target="_blank" rel="noopener">mtail详解</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/671898354" target="_blank" rel="noopener">【云原生•监控】mtail轻量日志监控系统</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/" title="prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志">http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/prometheus/" rel="tag"># prometheus</a>
+          
+            <a href="/tags/grafana/" rel="tag"># grafana</a>
+          
+            <a href="/tags/mtail/" rel="tag"># mtail</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/11/30/sig-auth/" rel="next" title="使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证">
+                <i class="fa fa-chevron-left"></i> 使用签名算法来作为微服务内部调用或者开放 API 的请求权限验证
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/" rel="prev" title="prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway">
+                prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">315</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">82</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mtail"><span class="nav-number">2.</span> <span class="nav-text">mtail</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装"><span class="nav-number">2.1.</span> <span class="nav-text">1. 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-启动"><span class="nav-number">2.2.</span> <span class="nav-text">2. 启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-demo-实践"><span class="nav-number">2.3.</span> <span class="nav-text">3. demo 实践</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理多项目的问题"><span class="nav-number">3.</span> <span class="nav-text">处理多项目的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-分成多个-mtail-各自采集"><span class="nav-number">3.1.</span> <span class="nav-text">1. 分成多个 mtail 各自采集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-同一个-mtail-规则文件要对采集的-log-来源进行过滤判断"><span class="nav-number">3.2.</span> <span class="nav-text">2. 同一个 mtail, 规则文件要对采集的 log 来源进行过滤判断</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#生产环境使用"><span class="nav-number">4.</span> <span class="nav-text">生产环境使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/';
+          this.page.identifier = '2024/02/19/prometheus-best-practices-3-mtail/';
+          this.page.title = 'prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

@@ -307,6 +307,370 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/" itemprop="url">prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-02-22T17:31:08+08:00">
+                2024-02-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2024/02/22/prometheus-best-practices-4-cron-pushgateway/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/" class="leancloud_visitors" data-flag-title="prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前讲过的两种方式:</p>
+<ul>
+<li><a href="/2022/12/30/prometheus-best-practices-2-nginx/" title="prometheus + grafana 实战篇(2) - nginx">prometheus + grafana 实战篇(2) - nginx</a></li>
+<li><a href="/2024/02/19/prometheus-best-practices-3-mtail/" title="prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志">prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志</a>
+</li>
+</ul>
+<p>其实已经可以很好的覆盖了生产环境中产生的临时故障情况，并有助于分析流量和错误情况。 但是仅仅这样子还不够。要做到更全面的预警可观测。除了要第一时间处理生产环境中当前产生的错误信息之外。</p>
+<p>还需要对业务数据的表现情况也要造成可观测，比如常见的:</p>
+<ol>
+<li>登录情况，10 分钟成功率预警， 一小时成功率预警，每天成功率预警</li>
+<li>支付情况，10 分钟支付成功率和数量，每天支付总数</li>
+<li>核心功能的使用情况监控，比如用于短信验证码的成功率，Google验证码的成功率，两步验证的成功率，远程连接的成功率，用户核心模块的使用成功率等等</li>
+</ol>
+<p>这些业务数据，一般服务端都会将使用记录写入数据库，后面再用相关平台来进行预警，比如 cacti，zabbix 等运维平台就是通过写 python 脚本去定时查下数据库对应的数据然后来建立预警值。比如之前常用的在 zabbix 写的预警脚本就是<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2024/02/19/prometheus-best-practices-3-mtail/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2024/02/19/prometheus-best-practices-3-mtail/" itemprop="url">prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-02-19T15:08:59+08:00">
+                2024-02-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2024/02/19/prometheus-best-practices-3-mtail/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2024/02/19/prometheus-best-practices-3-mtail/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2024/02/19/prometheus-best-practices-3-mtail/" class="leancloud_visitors" data-flag-title="prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>上一节我们已经可以通过采集 nginx 的 access log 来得到程序的流量情况，以及针对异常状态码来设置预警</p>
+<ul>
+<li><a href="/2022/12/30/prometheus-best-practices-2-nginx/" title="prometheus + grafana 实战篇(2) - nginx">prometheus + grafana 实战篇(2) - nginx</a>
+</li>
+</ul>
+<p>已经可以解决突发性的故障问题了，但是要达到更好的日志可观测性，还是不够，至少有以下两种场景没办法满足:</p>
+<ol>
+<li><p><strong>程序框架的异常状态码和 nginx 的状态码解耦。</strong> 有些程序框架为了保证返回值的友好和错误码的统一，是会在框架底层将抛出来的错误 catch 掉的，而不是直接扔到 nginx 上层返回。 举个例子，比如我们的 golang 框架就是这样子的，我们有自己定制了一整套的错误码标准，包含 数组越界，空指针异常 等异常都会在程序底层 catch，并在返回的 json 串填充错误码 code，并返回 200 状态码。 因此在 nginx 层，基本上只能看到 200 的正常码， 是看不到异常的 500 错误码的(nginx 本身的 499, 502, 504 还是有的)。要看程序错误，只能去查程序的输出 log。</p>
+<blockquote>
+<p>大部分的对外提供的 API 接口，也是会将程序的错误码和 http 的异常码解耦掉</p>
+</blockquote>
+</li>
+<li><p><strong>针对某些外接第三方的 webhook 的错误处理也没办法返回异常状态码。</strong> 比如以支付项目为例，我们会接 Google 和 Apple 的 webhook 通知来处理订单状态，这时候有些处理逻辑是本身程序有 bug，你是不能直接针对 webhook 的返回响应返回异常状态码的，比如 500 错误码，不然这些第三方的 webhook 可能就会再重发。因此哪怕是程序异常，也最好是返回 200 正常码。那么对于这种情况，如果要检测的话，也是只能通过采集程序日志来进行发现和预警。</p>
+</li>
+</ol>
+<p>综上所述，我们还是需要一种可以采集程序日志来生成 Prometheus 指标的服务。<br></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2024/02/19/prometheus-best-practices-3-mtail/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2023/11/30/sig-auth/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -3482,354 +3846,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/11/29/prometheus-4-alertmanager/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/11/29/prometheus-4-alertmanager/" itemprop="url">基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-29T18:11:11+08:00">
-                2022-11-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
-                    <span itemprop="name">prometheus 相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/11/29/prometheus-4-alertmanager/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/11/29/prometheus-4-alertmanager/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/11/29/prometheus-4-alertmanager/" class="leancloud_visitors" data-flag-title="基于 prometheus 打造监控报警后台 (4) - 使用 alertmanager 发送警报">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2022/11/29/prometheus-3-grafana/" title="基于 prometheus 打造监控报警后台 (3) - 使用 grafana 创建仪表盘">基于 prometheus 打造监控报警后台 (3) - 使用 grafana 创建仪表盘</a> 我们已经能够在 grafana 上面创建漂亮的数据监控仪表盘了。</p>
-<p>本节我们讲一下怎么在 prometheus 上设置预警并且发送警报。 </p>
-<p>简单的架构图如下</p>
-<p><img src="/2022/11/29/prometheus-4-alertmanager/1.png" alt=""></p>
-<p>在 prometheus 监控系统中，采集与警报是分离的，所以是分为两个步骤的:</p>
-<ol>
-<li>在 prometheus 中创建警报规则，并监控警报和触发警报</li>
-<li>触发警报之后(firing)，prometheus 将报警信息转发给独立组件 alertmanager，然后经过 alertmanager 对报警信息处理之后，最后通过接收器发送给指定用户</li>
-</ol>
-<p>同时 alertmanager 支持多种接收器(<code>receiver</code>), 比如 <code>Email</code>, <code>Slack</code> , <code>钉钉</code>, <code>企业微信</code> , <code>Webhook</code><br></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/11/29/prometheus-4-alertmanager/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2022/11/29/prometheus-3-grafana/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Zach Ke">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Zach Ke's Notes">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2022/11/29/prometheus-3-grafana/" itemprop="url">基于 prometheus 打造监控报警后台 (3) - 使用 grafana 创建仪表盘</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-11-29T16:57:42+08:00">
-                2022-11-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
-                    <span itemprop="name">prometheus 相关</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2022/11/29/prometheus-3-grafana/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2022/11/29/prometheus-3-grafana/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2022/11/29/prometheus-3-grafana/" class="leancloud_visitors" data-flag-title="基于 prometheus 打造监控报警后台 (3) - 使用 grafana 创建仪表盘">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数&#58;</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>通过 <a href="/2022/11/28/prometheus-2-metrics/" title="基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型">基于 prometheus 打造监控报警后台 (2) - 指标类型和数据模型</a> 我们可以知道，虽然 prometheus 采集数据很棒， 但是数据渲染这一块，实在是做的不咋的， 而且官方也推荐使用 grafana 来进行数据渲染: <a href="https://prometheus.io/docs/visualization/grafana/" target="_blank" rel="noopener">grafana support for prometheus</a></p>
-<p>所以本节就安装一下 grafana 并创建 dashboard 仪表盘</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>接下来我们直接按照官方文档进行安装: <a href="https://grafana.com/grafana/download" target="_blank" rel="noopener">Download Grafana</a>, 一样采用二进制包的方式来安装</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 下载安装</span><br><span class="line">[root@VM-64-9-centos ~]# cd /usr/local/</span><br><span class="line">[root@VM-64-9-centos local]# wget https://dl.grafana.com/enterprise/release/grafana-enterprise-9.2.5-1.x86_64.rpm</span><br><span class="line">[root@VM-64-9-centos local]# sudo yum install grafana-enterprise-9.2.5-1.x86_64.rpm</span><br><span class="line"></span><br><span class="line"># 加入到 system 并启动 (安装的时候，有创建 grafana-server.service 文件了，这边不再需要手动创建)</span><br><span class="line">[root@VM-64-9-centos local]# systemctl enable grafana-server.service</span><br><span class="line">[root@VM-64-9-centos local]# systemctl start grafana-server.service</span><br><span class="line"></span><br><span class="line"># 查看端口监听， 3000 端口</span><br><span class="line">[root@VM-64-9-centos local]# netstat -anlp  | grep 3000</span><br><span class="line">tcp6       0      0 :::3000                 :::*                    LISTEN      8897/grafana-server</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2022/11/29/prometheus-3-grafana/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -3884,7 +3900,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">313</span>
+                  <span class="site-state-item-count">315</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -3906,7 +3922,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-count">82</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -3953,7 +3969,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

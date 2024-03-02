@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <script src="/live2d-widget/live2d-widget-resource/jquery.min.js"></script>
+  <link rel="stylesheet" href="/live2d-widget/live2d-widget-resource/font-awesome.min.css"/>
+  <script src="/live2d-widget/autoload.js"></script>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="prometheus,grafana,mtail," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前言之前讲过的两种方式:  prometheus + grafana 实战篇(2) - nginx prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志   其实已经可以很好的覆盖了生产环境中产生的临时故障情况，并有助于分析流量和错误情况。 但是仅仅这样子还不够。要做到更全面的预警可观测。除了要第一时间处理生产环境中当前产生的错误信息之外。 还需要对业务数据的">
+<meta name="keywords" content="prometheus,grafana,mtail">
+<meta property="og:type" content="article">
+<meta property="og:title" content="prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway">
+<meta property="og:url" content="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/index.html">
+<meta property="og:site_name" content="Zach Ke&#39;s Notes">
+<meta property="og:description" content="前言之前讲过的两种方式:  prometheus + grafana 实战篇(2) - nginx prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志   其实已经可以很好的覆盖了生产环境中产生的临时故障情况，并有助于分析流量和错误情况。 但是仅仅这样子还不够。要做到更全面的预警可观测。除了要第一时间处理生产环境中当前产生的错误信息之外。 还需要对业务数据的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/1.png">
+<meta property="og:image" content="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/2.png">
+<meta property="og:image" content="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/3.png">
+<meta property="og:image" content="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/4.png">
+<meta property="og:image" content="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/5.png">
+<meta property="og:image" content="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/6.png">
+<meta property="og:updated_time" content="2024-03-02T09:57:46.125Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway">
+<meta name="twitter:description" content="前言之前讲过的两种方式:  prometheus + grafana 实战篇(2) - nginx prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志   其实已经可以很好的覆盖了生产环境中产生的临时故障情况，并有助于分析流量和错误情况。 但是仅仅这样子还不够。要做到更全面的预警可观测。除了要第一时间处理生产环境中当前产生的错误信息之外。 还需要对业务数据的">
+<meta name="twitter:image" content="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'KGVI6VPIBI',
+      apiKey: '41c2ccc830ca183768a6bf1e50a03f44',
+      indexName: 'test_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/"/>
+
+
+
+
+
+  <title>prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway | Zach Ke's Notes</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <a href="https://github.com/kebingzao" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Zach Ke's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Quick notes</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Zach Ke">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zach Ke's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2024-02-22T17:31:08+08:00">
+                2024-02-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/prometheus-相关/" itemprop="url" rel="index">
+                    <span itemprop="name">prometheus 相关</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2024/02/22/prometheus-best-practices-4-cron-pushgateway/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/" class="leancloud_visitors" data-flag-title="prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数&#58;</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>之前讲过的两种方式:</p>
+<ul>
+<li><a href="/2022/12/30/prometheus-best-practices-2-nginx/" title="prometheus + grafana 实战篇(2) - nginx">prometheus + grafana 实战篇(2) - nginx</a></li>
+<li><a href="/2024/02/19/prometheus-best-practices-3-mtail/" title="prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志">prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志</a>
+</li>
+</ul>
+<p>其实已经可以很好的覆盖了生产环境中产生的临时故障情况，并有助于分析流量和错误情况。 但是仅仅这样子还不够。要做到更全面的预警可观测。除了要第一时间处理生产环境中当前产生的错误信息之外。</p>
+<p>还需要对业务数据的表现情况也要造成可观测，比如常见的:</p>
+<ol>
+<li>登录情况，10 分钟成功率预警， 一小时成功率预警，每天成功率预警</li>
+<li>支付情况，10 分钟支付成功率和数量，每天支付总数</li>
+<li>核心功能的使用情况监控，比如用于短信验证码的成功率，Google验证码的成功率，两步验证的成功率，远程连接的成功率，用户核心模块的使用成功率等等</li>
+</ol>
+<p>这些业务数据，一般服务端都会将使用记录写入数据库，后面再用相关平台来进行预警，比如 cacti，zabbix 等运维平台就是通过写 python 脚本去定时查下数据库对应的数据然后来建立预警值。比如之前常用的在 zabbix 写的预警脚本就是<br><a id="more"></a><br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/env python</span></span><br><span class="line"><span class="comment">#-*-coding:utf-8-*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time,sys</span><br><span class="line"><span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">from</span> dateutil.relativedelta <span class="keyword">import</span> relativedelta</span><br><span class="line">sys.path.append(<span class="string">'/data/server/wwwroot/cacti-0.8.8h/scripts/'</span>)</span><br><span class="line"><span class="keyword">from</span> db_help <span class="keyword">import</span> get_conT</span><br><span class="line"><span class="keyword">from</span> config <span class="keyword">import</span> db8_host,db8_host_master,db8</span><br><span class="line"></span><br><span class="line">cur_mon = time.strftime(<span class="string">"%Y%m"</span>,time.localtime())</span><br><span class="line"></span><br><span class="line">last_mon = (datetime.datetime.now() + relativedelta(months=<span class="number">-1</span>)).strftime(<span class="string">"%Y%m"</span>)</span><br><span class="line"></span><br><span class="line">sql1=<span class="string">"""select count(status) num</span></span><br><span class="line"><span class="string">from (</span></span><br><span class="line"><span class="string">         select status</span></span><br><span class="line"><span class="string">         from cast_sts.%s</span></span><br><span class="line"><span class="string">         where create_time&gt;=DATE_SUB(now(),INTERVAL 30 MINUTE) and create_time &lt; now()</span></span><br><span class="line"><span class="string">         order by id desc</span></span><br><span class="line"><span class="string">         limit 1000</span></span><br><span class="line"><span class="string">     ) as a</span></span><br><span class="line"><span class="string">group by status having status = 0"""</span></span><br><span class="line">	</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">itimequery</span><span class="params">(tb)</span>:</span></span><br><span class="line">    sdb = get_conT(db8,db8_host,db8_host_master)</span><br><span class="line"></span><br><span class="line">    dd1=sdb.get(sql1 % (tb))</span><br><span class="line">    sdb.close()</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"%s"</span> % (dd1[<span class="string">'num'</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    itimequery(<span class="string">'cast_login_logs'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>这样子虽然可以做到对业务数据的预警，但是很不方便，而且效率很低，如果我一下子要添加几十个的预警的话，而且不同时段还不一样，设置的预警级别也不一样。</p>
+<p>比如同样是登录成功率，我可能就要 10 分钟，1小时，6小时，每天的成功率的报表和预警，这时候脚本就要写的很复杂，而且很不通用。</p>
+<p>而且现在既然都要将数据的监控和预警都放在 Prometheus 上了，那么肯定就尽可能都用 Prometheus + grafana 这个平台来实现了。</p>
+<h2 id="处理方式"><a href="#处理方式" class="headerlink" title="处理方式"></a>处理方式</h2><p>因为业务数据都是在数据库中，所以要查询的话，要写程序查询，然后抛送到 pushgateway，然后 Prometheus 再到 pushgateway 采集。 所有应该是有 3 个步骤:</p>
+<ol>
+<li>写一个程序跑计划任务去查库，采集数据，然后抛送到 pushgateway 程序</li>
+<li>Prometheus 采集 pushgateway 数据</li>
+<li>grafana 创建 dashboard 和 预警</li>
+</ol>
+<p>关于 pushgateway 的安装和使用，直接看我之前写的:  <a href="/2022/12/14/prometheus-9-push/" title="基于 prometheus 打造监控报警后台 (9) - 借助 pushgateway 主动 push 数据">基于 prometheus 打造监控报警后台 (9) - 借助 pushgateway 主动 push 数据</a>, 这边不再赘述。 </p>
+<p>主要是第一点的计划任务程序，要满足几个要求:</p>
+<ol>
+<li>容易添加和修改，想加几个业务指标，那么可以直接在配置文件里面写 sql 以及计划任务时间，写完直接生效，不需要重启程序</li>
+<li>支持分库分表，尤其是有一些月表，每个月的表名的后缀都不一样，我不需要每个月都要改我的 sql</li>
+</ol>
+<h2 id="实操方式"><a href="#实操方式" class="headerlink" title="实操方式"></a>实操方式</h2><p>这边程序我用的是 golang 来写，也不贴代码，主要讲思路，最多贴一些核心代码</p>
+<h3 id="1-指标配置支持热更新生效"><a href="#1-指标配置支持热更新生效" class="headerlink" title="1. 指标配置支持热更新生效"></a>1. 指标配置支持热更新生效</h3><p>这个程序，有两个配置文件:</p>
+<ul>
+<li><code>conf.toml</code> 这个是冷启动文件，修改之后要重启程序才会生效，比如存放 pushgateway 和 相关的数据库配置:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># pushgateway 后端端点</span><br><span class="line">Pushgateway = &quot;http://43.xx.xx.96:9091/&quot;</span><br><span class="line"></span><br><span class="line">#################################################################################</span><br><span class="line"># 关系数据库配置，连接字符串格式由对应驱动定义。</span><br><span class="line"># mysql的格式为： &lt;user&gt;:&lt;password&gt;@&lt;protocal&gt;(&lt;host&gt;:&lt;port&gt;)/&lt;database&gt;[?&lt;param&gt;]</span><br><span class="line">#################################################################################</span><br><span class="line">[db]</span><br><span class="line">DwTxSts = &quot;kbz:xxx@tcp(xxx:9030)/tx_foo_analysis&quot;</span><br><span class="line">TxSts = &quot;kbz:xxx@tcp(xxx:5022)/foo_sts&quot;</span><br><span class="line">TxMain = &quot;kbz:xxx@tcp(xxx:5017)/foo_main&quot;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>这边是可以配置多个数据库的，因为不同的业务查询会用到不同的数据库，比如生产环境的主业务库，统计库，或者数仓等，就是在这边配置</p>
+<ul>
+<li><code>conf_hot.toml</code> 这个是热更新文件，修改之后直接生效不需要重启，比如添加，修改，删除某一个指标配置<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">##############################################</span><br><span class="line">##### 以下每一个双中括号都代表一组指标配置 ##########</span><br><span class="line">##############################################</span><br><span class="line"></span><br><span class="line">## 业务邮件发送成功数</span><br><span class="line">[[cronTasks]]</span><br><span class="line">interval = &quot;0 */5 * * * *&quot;</span><br><span class="line">source = &quot;TxMail&quot;</span><br><span class="line">sql = &quot;select count(1) as result from queue where created &lt;= now() AND created &gt; DATE_SUB( now(), INTERVAL 5 MINUTE ) and status = 1&quot;</span><br><span class="line">splitTable = &quot;&quot;</span><br><span class="line">prometheusName = &quot;air_mail_send_success_num&quot;</span><br><span class="line">prometheusDes = &quot;业务邮件发送成功数(5分钟内)&quot;</span><br><span class="line">prometheusLabel = &quot;mail&quot;</span><br><span class="line"></span><br><span class="line">## 业务邮件堆积情况</span><br><span class="line">[[cronTasks]]</span><br><span class="line">interval = &quot;0 */5 * * * *&quot;</span><br><span class="line">source = &quot;TxMail&quot;</span><br><span class="line">sql = &quot;select count(1) as result from queue where created &lt;= now() AND created &gt; DATE_SUB( now(), INTERVAL 5  MINUTE) and status = 0&quot;</span><br><span class="line">splitTable = &quot;&quot;</span><br><span class="line">prometheusName = &quot;air_mail_wait_num&quot;</span><br><span class="line">prometheusDes = &quot;业务邮件堆积情况(5分钟内)&quot;</span><br><span class="line">prometheusLabel = &quot;mail-wait-num&quot;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>对于热更新的文件，会有代码去监听，每次修改到热更新的配置文件的时候，其实就是添加或者修改 metrics 配置组，就会发送一个 channel 对象，然后重新刷新定时任务<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">LoadSiteHotConf(hotConfPath) <span class="comment">// 加载站点热配置</span></span><br><span class="line"><span class="keyword">var</span> err error</span><br><span class="line">fileWatcher, err = conf.NewFileWatcher(context.Background(), <span class="function"><span class="keyword">func</span><span class="params">(err error)</span></span> &#123;</span><br><span class="line">	<span class="built_in">panic</span>(fmt.Sprintf(<span class="string">"[FileWatcher]conf error, FileWatcher occured an error, %v"</span>, err))</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">	<span class="built_in">panic</span>(err)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">fileWatcher.AddWatch(hotConfPath, <span class="function"><span class="keyword">func</span><span class="params">(<span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	LoadSiteHotConf(hotConfPath)</span><br><span class="line">	Logs.Root.Infof(<span class="string">"[FileWatcher]%s changed, reload SiteHotConf successfully"</span>, hotConfPath)</span><br><span class="line">	EventChannel &lt;- <span class="string">"refresh"</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-一个指标就是一组配置"><a href="#2-一个指标就是一组配置" class="headerlink" title="2.一个指标就是一组配置"></a>2.一个指标就是一组配置</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 单个计划任务的配置</span><br><span class="line">type CronTask struct &#123;</span><br><span class="line">	Source          string // 数据源</span><br><span class="line">	Sql             string // 执行 sql</span><br><span class="line">	Interval        string // 任务执行间隔</span><br><span class="line">	SplitTable      string // 如果分表的话，原始表的值</span><br><span class="line">	PrometheusName  string // Prometheus 的 metric</span><br><span class="line">	PrometheusDes   string // metric 对应的 help 注释</span><br><span class="line">	PrometheusLabel string // 附加到 metric 的 label</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来说明一下配置项:</p>
+<ul>
+<li><code>Source</code>: 很容易理解，就是在 <code>conf.toml</code> 配置的数据源</li>
+<li><p><code>Sql</code>: 查询的 sql， 查询的 sql 有要求的，就是查询的值只能有一个，并且要统一赋值为 result，比如以下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 当前堆积未发送的邮件</span><br><span class="line">select count(1) as result from queue where created &lt;= now() AND created &gt; DATE_SUB( now(), INTERVAL 5  MINUTE) and status = 0</span><br><span class="line"># 登录成功率</span><br><span class="line">select success / total * 100 AS result FROM (SELECT sum(IF( `id` &gt; 0, 1, 0 )) AS total,sum(IF( `status` = 1, 1, 0 )) AS success FROM login_logs WHERE create_date &gt; DATE_SUB( now(), INTERVAL 5 MINUTE ) AND type = 1) a</span><br></pre></td></tr></table></figure>
+<p>也就是不管 sql 多么复杂，他最后一定是输出一个值，并且都叫做 result，这个是因为在程序中，这个 result 的值，就是 metrics 指标的值。</p>
+</li>
+<li><code>Interval</code>: 执行计划任务执行频率，最好跟 Prometheus 的采集频率一样，最好不要太频繁的查询，因此一般都是设置为 5 分钟</li>
+<li><code>SplitTable</code>: 如果有涉及到月份分表的话，那么这个值就是原始表的值，如果没有分表，那么就是为空</li>
+<li><code>PrometheusName</code>: 生成的指标 metrics 的名称</li>
+<li><code>PrometheusDes</code>: metric 对应的 help 注释</li>
+<li><code>PrometheusLabel</code>: 附加到 metric 的 label</li>
+</ul>
+<h3 id="3-代码执行步骤"><a href="#3-代码执行步骤" class="headerlink" title="3. 代码执行步骤"></a>3. 代码执行步骤</h3><h4 id="1-首先初始化的时候，初始化配置文件，并且初始化热更新文件，将其配置的一个个指标拿出来"><a href="#1-首先初始化的时候，初始化配置文件，并且初始化热更新文件，将其配置的一个个指标拿出来" class="headerlink" title="1. 首先初始化的时候，初始化配置文件，并且初始化热更新文件，将其配置的一个个指标拿出来:"></a>1. 首先初始化的时候，初始化配置文件，并且初始化热更新文件，将其配置的一个个指标拿出来:</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 热配置文件</span></span><br><span class="line"><span class="keyword">type</span> siteHotConf <span class="keyword">struct</span> &#123;</span><br><span class="line">	CronTasks []CronTask <span class="comment">// 每一条任务</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// LoadSiteHotConf 用于重新加载站点的热配置。</span></span><br><span class="line"><span class="comment">// 内部用 atomic 是为了能刷新内存杉栏。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">LoadSiteHotConf</span><span class="params">(hotConfPath <span class="keyword">string</span>)</span></span> &#123;</span><br><span class="line">	newHotConf := <span class="built_in">new</span>(siteHotConf)</span><br><span class="line">	ux.TomlUtil.MustDecodeFromFile(hotConfPath, &amp;newHotConf)</span><br><span class="line">	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&amp;SiteHotConf)), unsafe.Pointer(newHotConf))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-初始化定时器"><a href="#2-初始化定时器" class="headerlink" title="2. 初始化定时器"></a>2. 初始化定时器</h4><p>初始化定时器，并且监听热更新更新的 channel 信号，每次更新的时候，刷新定时器任务<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">	<span class="comment">// 开启定时任务。</span></span><br><span class="line">	startJobs()</span><br><span class="line">	<span class="keyword">for</span> event := <span class="keyword">range</span> resx.EventChannel &#123;</span><br><span class="line">		resx.Logs.Root.Info(<span class="string">"Received event: "</span> + event)</span><br><span class="line">		<span class="comment">// 执行相应的操作</span></span><br><span class="line">		startJobs()</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// startJobs 用于启动站点内的 Job。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">startJobs</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(resx.SiteHotConf.CronTasks) == <span class="number">0</span> &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 重置的时候，要先停止掉</span></span><br><span class="line">	<span class="keyword">if</span> jobsche != <span class="literal">nil</span> &#123;</span><br><span class="line">		resx.Logs.Root.Info(<span class="string">"reset job"</span>)</span><br><span class="line">		jobsche.Stop()</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// 初始化 Cron jobs。</span></span><br><span class="line">	jobsche = jobscheduler.NewJobScheduler(resx.Logs.Job)</span><br><span class="line">	<span class="keyword">for</span> _, task := <span class="keyword">range</span> resx.SiteHotConf.CronTasks &#123;</span><br><span class="line">		jobsche.Add(task.Interval, &amp;job.PrometheusTask&#123;</span><br><span class="line">			Setting: task,</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">	jobsche.Start()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-定时器执行任务触发-sql-查询"><a href="#3-定时器执行任务触发-sql-查询" class="headerlink" title="3. 定时器执行任务触发 sql 查询"></a>3. 定时器执行任务触发 sql 查询</h4><p>定时器触发就会执行这个方法，使用 <code>x.getDB()</code> 获取对应的数据源，使用 <code>x.getSql()</code> 获取 sql，同时将 sql 里面的原始表替换为有月份的月表，比如将 <code>client_login_log</code> 变成 <code>client_login_log202401</code>, 并且将查询的结果都赋给 <code>resp.Result</code> 这个值<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果分表的话，要替换 sql 里面的原表</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(x *PrometheusTask)</span> <span class="title">getSql</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> x.Setting.SplitTable != <span class="string">""</span> &#123;</span><br><span class="line">		newTable := x.Setting.SplitTable + ux.TimeUtil.GetPreMonth(<span class="number">0</span>)</span><br><span class="line">		<span class="comment">// 然后替换</span></span><br><span class="line">		<span class="keyword">return</span> strings.Replace(x.Setting.Sql, x.Setting.SplitTable, newTable, <span class="number">-1</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> x.Setting.Sql</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(x *PrometheusTask)</span> <span class="title">Run</span><span class="params">()</span> <span class="title">error</span></span> &#123;</span><br><span class="line">	dbClicent := x.getDB()</span><br><span class="line">	resp := &amp;<span class="keyword">struct</span> &#123;</span><br><span class="line">		Result <span class="keyword">float64</span></span><br><span class="line">	&#125;&#123;&#125;</span><br><span class="line">	ok := dbClicent.MustGetStruct(resp, x.getSql())</span><br><span class="line">	<span class="keyword">if</span> ok &#123;</span><br><span class="line">		resx.Logs.Job.Debug(fmt.Sprintf(<span class="string">"%s:%v"</span>, x.Setting.PrometheusDes, resp.Result))</span><br><span class="line">		<span class="comment">// 抛送统计</span></span><br><span class="line">		x.pushToPrometheus(resp.Result)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 返回当前月往前几个月的数据格式 &#123;yyyyMM&#125;</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(x timeUtil)</span> <span class="title">GetPreMonth</span><span class="params">(preNum <span class="keyword">int</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	<span class="keyword">return</span> time.Now().AddDate(<span class="number">0</span>, <span class="number">-1</span>*preNum, <span class="number">0</span>).Format(<span class="string">"200601"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="4-将查询的-result-抛送到-pushgateway-中"><a href="#4-将查询的-result-抛送到-pushgateway-中" class="headerlink" title="4. 将查询的 result 抛送到 pushgateway 中"></a>4. 将查询的 result 抛送到 pushgateway 中</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 抛送到 Prometheus</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(x *PrometheusTask)</span> <span class="title">pushToPrometheus</span><span class="params">(resp <span class="keyword">float64</span>)</span></span> &#123;</span><br><span class="line">	completionTime := prometheus.NewGauge(prometheus.GaugeOpts&#123;</span><br><span class="line">		Name: x.Setting.PrometheusName,</span><br><span class="line">		Help: x.Setting.PrometheusDes,</span><br><span class="line">	&#125;)</span><br><span class="line">	completionTime.Set(resp)</span><br><span class="line">	<span class="comment">// 设置标签</span></span><br><span class="line">	<span class="keyword">if</span> err := push.New(resx.SiteConf.Pushgateway, PushGatewayJob).Collector(completionTime).Grouping(PushGatewayJobGroup, x.Setting.PrometheusLabel).Push(); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		resx.Logs.Job.Errorf(<span class="string">"Could not push completion time to Pushgateway: %v, err:%v"</span>, x.Setting.PrometheusDes, err.Error())</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这边就只抛送一个指标，而且是瞬时类型的 Gauge。</p>
+<p>这时候就可以在 pushgateway 上看到了，</p>
+<p><img src="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/1.png" alt=""></p>
+<p>然后在 Prometheus 上配置抓取，就可以送到 Prometheus 上了:<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">- job_name: <span class="string">"pushgateway"</span></span><br><span class="line">  honor_labels: <span class="literal">true</span></span><br><span class="line">  scrape_interval: <span class="number">5</span>m</span><br><span class="line">  static_configs:</span><br><span class="line">    - targets: [<span class="string">"localhost:9091"</span>]</span><br></pre></td></tr></table></figure></p>
+<p>这样子就完成了整个业务指标自动采集自动抛送的流程了</p>
+<h2 id="几个注意事项"><a href="#几个注意事项" class="headerlink" title="几个注意事项"></a>几个注意事项</h2><h3 id="1-计划任务执行周期和采集周期要基本上保持一致，要在一个时间周期之内"><a href="#1-计划任务执行周期和采集周期要基本上保持一致，要在一个时间周期之内" class="headerlink" title="1. 计划任务执行周期和采集周期要基本上保持一致，要在一个时间周期之内"></a>1. 计划任务执行周期和采集周期要基本上保持一致，要在一个时间周期之内</h3><p>首先这个程序计划任务的执行，要跟 Prometheus 的采集周期保持在一个采集周期之内，不一定要一模一样，但是要保证在一分钟的误差之内。</p>
+<p>这个是因为 pushgateway 上面的指标的值如果没有被新的值覆盖刷新，那么 Prometheus 下次采集到的值就会跟前一个值一样，而不是为 0。</p>
+<p>举个列子，比如我计划任务执行了一次，上抛上去的指标的值是 100，然后程序退出了，后面就不再上抛了，这时候 Prometheus 过来采集的时候，就会一直取到这个 100 的值。</p>
+<p>而且周期为啥要保持一致，就是因为要让 Prometheus 过来采集的值，刚好是 计划任务 新跑出来的值。，比如我设置了 3 个计划任务指标，分别的执行周期是:<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">interval = <span class="string">"0 */5 * * * *"</span></span><br><span class="line">interval = <span class="string">"10 */5 * * * *"</span></span><br><span class="line">interval = <span class="string">"20 */5 * * * *"</span></span><br></pre></td></tr></table></figure></p>
+<p>一个是每 5 分钟开始就执行，一个是每 5 分钟的 10 秒才执行， 一个是每 5 分钟的 20 秒才执行。但是这 3 个对于采集周期为 5 分钟的 Prometheus 程序来说，都是一样，都是可以采集到继上一轮之后新查询的值。</p>
+<p>但是如果我改成每 2 分钟执行一次:<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">interval = <span class="string">"0 */2 * * * *"</span></span><br><span class="line">interval = <span class="string">"10 */2 * * * *"</span></span><br><span class="line">interval = <span class="string">"20 */2 * * * *"</span></span><br></pre></td></tr></table></figure></p>
+<p>这样子的话，对于采集周期为 5 分钟的 Prometheus 来说，它只采集最后一次的新值，也就是 4 分跑出来的那个值，而 2 分跑出来的值被 4 分的覆盖，而又没有被 Prometheus 采集到，就浪费了。</p>
+<p>所以如果自定义的指标很多的话，为了防止查询并发，我们一般都会在这个计划任务周期保持分钟级别不变的话，将查询分摊到秒级别中，比如有些是每 5 分钟 10 秒才查询，有些是每 5 分钟的 15 秒才查询，这样子不仅可以保证查询可以被 Prometheus 采集到，还可以分摊查询压力</p>
+<blockquote>
+<p>查询的时候，选择的数据源尽可能是以从库的方式去连接，因为只会用到 select 操作</p>
+</blockquote>
+<p>反之如果计划任务周期比采集周期太长，也是有问题的，比如计划任务是 30 分钟采集一次，然后采集周期是 5 分钟采集一次，那么 Prometheus 就会在 30 分钟之内采集了 6 次，而且 6 次结果都是一样的。 在进行一些计算的时候，就会有问题，比如统计 1 个小时的数据<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum_over_time(air_payment_success_num[1h])</span><br></pre></td></tr></table></figure></p>
+<p>这时候其实加的点不是原计划的 2 个点，而是 12 个点，除非你再除以 6，比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum_over_time(air_payment_success_num[1h]) / 6</span><br></pre></td></tr></table></figure></p>
+<p>这样子虽然也可以得到对的值，但是会很麻烦，而且因为采集周期的延后问题，再某些情况下会有边界的问题，导致不准确。</p>
+<h3 id="2-Prometheus-采集的数据会比计划任务的数据慢一个周期"><a href="#2-Prometheus-采集的数据会比计划任务的数据慢一个周期" class="headerlink" title="2. Prometheus 采集的数据会比计划任务的数据慢一个周期"></a>2. Prometheus 采集的数据会比计划任务的数据慢一个周期</h3><p>举个例子，比如我有一个指标是 <code>interval = &quot;0 */5 * * * *&quot;</code> 5 分钟查询一次，查询的数据是数据库上 5 分钟的数据，也就是 <code>7:00 - 7:05</code> 这个时间段的数据。</p>
+<p>假设查询查了 2s， 这时候当我抛送到 pushgateway 的时候，这时候 pushgateway 这个指标的最后采集时间就会变成 <code>7:05:02</code>, 这时候同样是 5 分钟采集周期的 Prometheus 其实已经采集完 <code>7:05</code> 这个时间节点的数据了，要等到 <code>7:10</code> 的时候， Prometheus 才会采集到刚才 <code>7:05:02</code> 的数据。</p>
+<p>所以在 grafana 上面就可以看到 <code>7:10</code> 的实际数据的原始表的发生时间就是 <code>7:00 - 7:05</code>， 会延后一个采集周期。</p>
+<p>但是这个不要紧，因为这个对于我们的时间周期来算的话，影响很少，比如要看某一天的支付数据，比如在 grafana 查看每天的支付成功次数的话，那么 promql 就是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sum_over_time(air_payment_success_num[1d])</span><br></pre></td></tr></table></figure></p>
+<p>并且因为在 grafana 的图表的时间间隔设置为 1 天，所以其实当天对应的采集周期其实是 <code>前一天的 23:55</code> 到 当天的 <code>23:55</code>。 并不是完整从数据库查的当天的 <code>00:00-24:00</code>, 但是这一个 5 分钟的采集误差其实对我们的观测结果没有影响，预警也不会有影响</p>
+<p><img src="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/2.png" alt=""></p>
+<h3 id="3-采集周期不宜太长，也不宜太短，5-分钟刚刚好"><a href="#3-采集周期不宜太长，也不宜太短，5-分钟刚刚好" class="headerlink" title="3. 采集周期不宜太长，也不宜太短，5 分钟刚刚好"></a>3. 采集周期不宜太长，也不宜太短，5 分钟刚刚好</h3><p>这个理由上面说了， 采集周期太短， 会对查询性能有影响。 采集周期如果太长，一些比较及时的预警没办法做，比如 5 分钟的登录成功率，5 分钟的邮件发送等预警。</p>
+<p>所以 5 分钟是一个比较合理的计划任务周期和采集周期，然后如果采集指标比较多的话，可以在 crontab 的方式将其摊到秒里面，比如 5分钟2秒执行，5分钟8秒执行等等</p>
+<h3 id="4-pushgateway-指标删除"><a href="#4-pushgateway-指标删除" class="headerlink" title="4. pushgateway 指标删除"></a>4. pushgateway 指标删除</h3><p>一旦抛送指标到 pushgateway 中，这个指标就会一直存在，哪怕这个实例后面不再抛送指标给 Pushgateway，但是 prometheus 依然会保留这个实例的指标。</p>
+<p>因此如果你这个指标确定不再使用了，应该直接到 pushgateway 后台进行删除，或者调用 pushgateway api 删除也行</p>
+<p><img src="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/3.png" alt=""></p>
+<p>点击右边的 <code>Delete Group</code> 按钮即可</p>
+<h2 id="最佳实践"><a href="#最佳实践" class="headerlink" title="最佳实践"></a>最佳实践</h2><h3 id="1-可以用配置中心来对这个热更新文件进行频繁的修改"><a href="#1-可以用配置中心来对这个热更新文件进行频繁的修改" class="headerlink" title="1. 可以用配置中心来对这个热更新文件进行频繁的修改"></a>1. 可以用配置中心来对这个热更新文件进行频繁的修改</h3><p>因为每次添加新的指标，都要在热更新配置文件来新增一栏配置，如果比较频繁的修改的话，可以用配置中心，比如我们自建的配置中心就可以这样子做</p>
+<p><img src="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/4.png" alt=""></p>
+<h3 id="2-如果涉及到成功率的，一律采集总数和成功数，然后再用-promql-算，不要直接用-sql-查询得到"><a href="#2-如果涉及到成功率的，一律采集总数和成功数，然后再用-promql-算，不要直接用-sql-查询得到" class="headerlink" title="2. 如果涉及到成功率的，一律采集总数和成功数，然后再用 promql 算，不要直接用 sql 查询得到"></a>2. 如果涉及到成功率的，一律采集总数和成功数，然后再用 promql 算，不要直接用 sql 查询得到</h3><p>正常情况下，我可以将某一个成功率直接查询当作指标得到，比如我要得到 pc 端的 5 分钟的登录成功率，可以这样子写<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">## PC 端的登录成功率(按次数)</span><br><span class="line">[[cronTasks]]</span><br><span class="line">interval = &quot;0 */5 * * * *&quot;</span><br><span class="line">source = &quot;TxAirSts&quot;</span><br><span class="line">sql = &quot;SELECT success / total * 100 AS result FROM (SELECT sum(IF( `id` &gt; 0, 1, 0 )) AS total,sum(IF( `status` = 1, 1, 0 )) AS success FROM pc_login_logs WHERE create_date &gt; DATE_SUB( now(), INTERVAL 5 MINUTE ) ) a&quot;</span><br><span class="line">splitTable = &quot;pc_login_logs&quot;</span><br><span class="line">prometheusName = &quot;pc_login_success_rate&quot;</span><br><span class="line">prometheusDes = &quot;PC 端的登录成功率(按次数)(5分钟内)&quot;</span><br><span class="line">prometheusLabel = &quot;login&quot;</span><br></pre></td></tr></table></figure></p>
+<p>但是这样子的结果就是我只能知道近 5 分钟的成功率，不知道 30 分钟的成功率，不知道 1 小时的成功率，甚至 1 天的成功率。因为正常来说，同一个业务是需要设置不同的预警条件的，比如同样是登录成功率，我可以设置 3 个预警:</p>
+<ol>
+<li>5 分钟的成功率低于 60% -&gt; warning 预警级别 (因为用户波峰波谷波动大，可以设置低一点，免得经常报警，一般就是观察，不处理，因为很容易恢复)</li>
+<li>2 小时的成功率低于 70% -&gt; warning 预警级别 (波动不大，有问题可以相对及时的跟进并观察)</li>
+<li>24 小时的成功率低于 80% -&gt; critical 预警级别 (波动小，有问题一般就是程序或者哪里环境有问题，要及时跟进)</li>
+</ol>
+<p>但是上述的只抛送 5 分钟成功率的做法就没办法实现了，因为成功率是不能加起来，也不能平均的，误差太大。所以要算成功率的话，一般就是分两个指标，一个是总数，一个是成功数，比如我们的短信验证码发送就是这样子的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">## 短信发送(服务端自统计) -- 发送总数</span><br><span class="line">[[cronTasks]]</span><br><span class="line">interval = &quot;6 */5 * * * *&quot;</span><br><span class="line">source = &quot;TxAirSts&quot;</span><br><span class="line">sql = &quot;select count(1) as result from phone_auth_code where create_date &lt;= now() AND create_date &gt; DATE_SUB( now(), INTERVAL 5 MINUTE )&quot;</span><br><span class="line">splitTable = &quot;&quot;</span><br><span class="line">prometheusName = &quot;air_sms_send_all&quot;</span><br><span class="line">prometheusDes = &quot;短信发送总数(5分钟内)&quot;</span><br><span class="line">prometheusLabel = &quot;sms-send-all&quot;</span><br><span class="line"></span><br><span class="line">## 短信发送(服务端自统计) -- 发送成功</span><br><span class="line">[[cronTasks]]</span><br><span class="line">interval = &quot;6 */5 * * * *&quot;</span><br><span class="line">source = &quot;TxAirSts&quot;</span><br><span class="line">sql = &quot;select count(1) as result from phone_auth_code where create_date &lt;= now() AND create_date &gt; DATE_SUB( now(), INTERVAL 5 MINUTE ) and state_code = 1&quot;</span><br><span class="line">splitTable = &quot;&quot;</span><br><span class="line">prometheusName = &quot;air_sms_send_success&quot;</span><br><span class="line">prometheusDes = &quot;短信发送成功(5分钟内)&quot;</span><br><span class="line">prometheusLabel = &quot;sms-send-success&quot;</span><br></pre></td></tr></table></figure></p>
+<p>然后就可以在 grafana 创建各个维度的报表，比如:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 5 分钟的成功率</span><br><span class="line">sum(air_sms_send_success) / sum(air_sms_send_all)</span><br><span class="line"># 一小时的成功率</span><br><span class="line">sum(sum_over_time(air_sms_send_success[60m])) / sum(sum_over_time(air_sms_send_all[60m]))</span><br><span class="line"># 一天的成功率</span><br><span class="line">sum(sum_over_time(air_sms_send_success[1d])) / sum(sum_over_time(air_sms_send_all[1d]))</span><br></pre></td></tr></table></figure></p>
+<p><img src="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/5.png" alt=""></p>
+<h3 id="3-设置报警的时候，可以多个指标一起设置"><a href="#3-设置报警的时候，可以多个指标一起设置" class="headerlink" title="3. 设置报警的时候，可以多个指标一起设置"></a>3. 设置报警的时候，可以多个指标一起设置</h3><p>比如我们有个场景是监控企业版用户两步验证的失败个数和失败用户达到一定频率，要报警，为啥还要加失败用户呢，因为单纯只有失败次数的话，有些用户自己忘记了密码，会频繁重试，导致以一人之力造成了报警。</p>
+<p>因此要两个指标结合起来报警，才会比较准，比如在设置预警的时候，可以这样子</p>
+<p><img src="/2024/02/22/prometheus-best-practices-4-cron-pushgateway/6.png" alt=""></p>
+<p>这时候要预警的话，要两个指标都要满足才行，比如预警的钉钉是这样子的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[监控报警]: [FIRING:1] 企业版两步验证失败次数过多 业务批处理 (critical) </span><br><span class="line">--------Firing---------</span><br><span class="line">【value】: [ var=&apos;C0&apos; metric=&apos;失败数&apos; labels=&#123;&#125; value=4 ], [ var=&apos;C1&apos; metric=&apos;sum(sum_over_time(air_biz_2fa_fail_user_num[30m]))&apos; labels=&#123;&#125; value=2 ]</span><br><span class="line">【标签组】:</span><br><span class="line"></span><br><span class="line">alertname = 企业版两步验证失败次数过多</span><br><span class="line">grafana_folder = 业务批处理</span><br><span class="line">operator = critical</span><br><span class="line"></span><br><span class="line">【备注】:</span><br><span class="line"></span><br><span class="line">description = 企业版两步验证失败次数过多, 30 分钟内有超过 2 次失败，并且超过一个用户出现问题，请开发及时查看</span><br><span class="line"></span><br><span class="line"> 所属面板: https://g.foo.cn/d/8W1cGKdSz?orgId=1&amp;viewPanel=14</span><br><span class="line">发生时间: 2024-02-23 23:35:00 +0800 CST</span><br></pre></td></tr></table></figure></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过这个计划任务批处理来定时上抛业务数据到 pushgateway 服务，并通过在 grafana 设置对应的 dashboard 和 预警，我们可以实现在业务数据上面的数据可观测性。 然后在结合之前的 nginx 请求可观测行， mtail 的运行日志可观测性，基本上就可以覆盖大部分的业务场景的预警可观测了， 不会再出现那种业务出异常了，服务端还不知道，只能等客户反馈的囧境了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Zach Ke
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/" title="prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway">http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/prometheus/" rel="tag"># prometheus</a>
+          
+            <a href="/tags/grafana/" rel="tag"># grafana</a>
+          
+            <a href="/tags/mtail/" rel="tag"># mtail</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2024/02/19/prometheus-best-practices-3-mtail/" rel="next" title="prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志">
+                <i class="fa fa-chevron-left"></i> prometheus + grafana 实战篇(3) - 使用 mtail 采集程序日志
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Zach Ke" />
+            
+              <p class="site-author-name" itemprop="name">Zach Ke</p>
+              <p class="site-description motion-element" itemprop="description">做最咸的那一条</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">315</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">82</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/kebingzao" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理方式"><span class="nav-number">2.</span> <span class="nav-text">处理方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实操方式"><span class="nav-number">3.</span> <span class="nav-text">实操方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-指标配置支持热更新生效"><span class="nav-number">3.1.</span> <span class="nav-text">1. 指标配置支持热更新生效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-一个指标就是一组配置"><span class="nav-number">3.2.</span> <span class="nav-text">2.一个指标就是一组配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-代码执行步骤"><span class="nav-number">3.3.</span> <span class="nav-text">3. 代码执行步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-首先初始化的时候，初始化配置文件，并且初始化热更新文件，将其配置的一个个指标拿出来"><span class="nav-number">3.3.1.</span> <span class="nav-text">1. 首先初始化的时候，初始化配置文件，并且初始化热更新文件，将其配置的一个个指标拿出来:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-初始化定时器"><span class="nav-number">3.3.2.</span> <span class="nav-text">2. 初始化定时器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-定时器执行任务触发-sql-查询"><span class="nav-number">3.3.3.</span> <span class="nav-text">3. 定时器执行任务触发 sql 查询</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-将查询的-result-抛送到-pushgateway-中"><span class="nav-number">3.3.4.</span> <span class="nav-text">4. 将查询的 result 抛送到 pushgateway 中</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#几个注意事项"><span class="nav-number">4.</span> <span class="nav-text">几个注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-计划任务执行周期和采集周期要基本上保持一致，要在一个时间周期之内"><span class="nav-number">4.1.</span> <span class="nav-text">1. 计划任务执行周期和采集周期要基本上保持一致，要在一个时间周期之内</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Prometheus-采集的数据会比计划任务的数据慢一个周期"><span class="nav-number">4.2.</span> <span class="nav-text">2. Prometheus 采集的数据会比计划任务的数据慢一个周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-采集周期不宜太长，也不宜太短，5-分钟刚刚好"><span class="nav-number">4.3.</span> <span class="nav-text">3. 采集周期不宜太长，也不宜太短，5 分钟刚刚好</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-pushgateway-指标删除"><span class="nav-number">4.4.</span> <span class="nav-text">4. pushgateway 指标删除</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最佳实践"><span class="nav-number">5.</span> <span class="nav-text">最佳实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-可以用配置中心来对这个热更新文件进行频繁的修改"><span class="nav-number">5.1.</span> <span class="nav-text">1. 可以用配置中心来对这个热更新文件进行频繁的修改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-如果涉及到成功率的，一律采集总数和成功数，然后再用-promql-算，不要直接用-sql-查询得到"><span class="nav-number">5.2.</span> <span class="nav-text">2. 如果涉及到成功率的，一律采集总数和成功数，然后再用 promql 算，不要直接用 sql 查询得到</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-设置报警的时候，可以多个指标一起设置"><span class="nav-number">5.3.</span> <span class="nav-text">3. 设置报警的时候，可以多个指标一起设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zach Ke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://zach-2.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://kebingzao.com/2024/02/22/prometheus-best-practices-4-cron-pushgateway/';
+          this.page.identifier = '2024/02/22/prometheus-best-practices-4-cron-pushgateway/';
+          this.page.title = 'prometheus + grafana 实战篇(4) - 使用计划任务主动抛送到 pushgateway';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://zach-2.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.4"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("HIV4XRdKJXB0eaFgtSjiVNaK-gzGzoHsz", "zN3v8grxW0Q8eXwNlEgXxWrF");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+
+</body>
+</html>

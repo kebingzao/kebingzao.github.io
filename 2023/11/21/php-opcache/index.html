@@ -98,7 +98,8 @@
 <meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/4.png">
 <meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/5.png">
 <meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/6.png">
-<meta property="og:updated_time" content="2023-12-01T17:07:56.496Z">
+<meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/7.png">
+<meta property="og:updated_time" content="2024-03-02T09:57:46.117Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="php 开启 opcache 来降低负载并提高抗并发能力">
 <meta name="twitter:description" content="前言之前通过 记一次 php-fpm 的配置调优 有针对 php-fpm 的配置进行了调优，有起了一些效果，比如随着处理的进程加大，响应时间会快一点。 但是对于一些并发比较高的场景，还是会有 499 的情况，尤其是负载比较高的情况下，CPU 很容易跑满，php 子进程的响应速度也会越来越慢 当然最粗暴的就是加大服务器硬件配置，然后增大 pm.max_children 的值，硬抗，不过还有一种更合适">
@@ -561,7 +562,13 @@
 <h2 id="后续再优化"><a href="#后续再优化" class="headerlink" title="后续再优化"></a>后续再优化</h2><p>后续还有几个可以再优化的地方:</p>
 <h3 id="1-生产环境不设置缓存定时刷新时间"><a href="#1-生产环境不设置缓存定时刷新时间" class="headerlink" title="1. 生产环境不设置缓存定时刷新时间"></a>1. 生产环境不设置缓存定时刷新时间</h3><p>将刷缓存的时间(<code>opcache.validate_timestamps</code>)设置为 0, 表示永不刷新，然后在每次 Jenkins 构建 php 程序的时候，调用一个脚本来手动刷新缓存</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">WEBDIR=/var/www/html/</span><br><span class="line">RANDOM_NAME=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13)</span><br><span class="line">echo &quot;&lt;?php opcache_reset(); ?&gt;&quot; &gt; $&#123;WEBDIR&#125;$&#123;RANDOM_NAME&#125;.php</span><br><span class="line">curl http://localhost/$&#123;RANDOM_NAME&#125;.php</span><br><span class="line">rm $&#123;WEBDIR&#125;$&#123;RANDOM_NAME&#125;.php</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>上面的脚本意思就是，先生成一个随机的字符串 <code>RANDOM_NAME</code>,长度为13，包含大写字母、小写字母和数字,接下来创建一个新的PHP文件，文件名为 <code>${RANDOM_NAME}.php</code>，并且这个文件在 <code>${WEBDIR}</code> 目录下。这个PHP文件的内容是<code>&lt;?php opcache_reset(); ?&gt;</code>, 接下来使用 curl 命令访问这个新创建的PHP文件。由于这个文件的内容是 <code>opcache_reset()</code>，所以这会导致服务器上的<code>OPcache</code>被重置, 最后，删除这个临时创建的PHP文件</p>
+</blockquote>
+<p>总的来说，这个脚本的目的是在Web服务器上重置 OPcache ，而不需要在服务器的PHP代码中硬编码这个功能, 很适合在 Jenkins 构建结束的时候直接执行这个脚本来刷新 OPcache，因为如果不刷新的话，就有可能会在 Jenkins 构建更新程序 php 文件的时候，出现新旧 php 缓存不一致，导致当前请求报 500 的情况。</p>
 <p>或者直接走 php 的 CLI 指令，不过这种方式如果是在 php-fpm 下是没有效果的，只能用上面那种 http 请求 php 文件的方式。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line">php -r &quot;opcache_reset();&quot;</span><br></pre></td></tr></table></figure></p>
+<p>如果要确定执行刷新是否有效果的话，可以查看状态面板的 <code>last_restart_time</code>, 如果刷新成功的话，<code>last_restart_time</code> 就是刷新时间, 然后 <code>manual_restarts</code> 表示手动刷新的次数，本次这种脚本执行就是手动刷新行为，所以每次执行完脚本，就会累加一</p>
+<p><img src="/2023/11/21/php-opcache/7.png" alt="1"></p>
 <h3 id="2-增加-hugepage-配置"><a href="#2-增加-hugepage-配置" class="headerlink" title="2. 增加 hugepage 配置"></a>2. 增加 hugepage 配置</h3><p>启用 <code>opcache.huge_code_pages</code> 将 PHP 代码（文本段）拷贝到 HUGE PAGES 中。这应该会提高性能，但是需要适当的 OS 配置。自 PHP 7.0.0 起可在 Linux 上使用，自 PHP 7.4.0 上可在 FreeBSD 上使用。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">opcache.huge_code_pages=1</span><br></pre></td></tr></table></figure></p>
 <p>同时需要在 <code>/etc/sysctl.conf</code> 设置系统分配的大页面（huge pages）的数量，比如下面就分配了512个大页面<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[kbz@VM-16-137-centos ~]$ cat /etc/sysctl.conf | grep huge</span><br><span class="line">vm.nr_hugepages=512</span><br></pre></td></tr></table></figure></p>
 <h3 id="3-配置-preload-用于缓存预热"><a href="#3-配置-preload-用于缓存预热" class="headerlink" title="3. 配置 preload 用于缓存预热"></a>3. <a href="https://www.php.net/manual/zh/opcache.preloading.php" target="_blank" rel="noopener">配置 preload 用于缓存预热</a></h3><p>从 PHP 7.4.0 起，PHP 可以被配置为在引擎启动时将一些脚本预加载进 opcache 中。在那些文件中的任何函数、类、 接口或者 trait （但不包括常量）将在接下来的所有请求中变为全局可用，不再需要显示地包含它们。这牺牲了基准的 内存占用率但换来了方便和性能（因为这些代码将始终可用）。它还需要通过重启 PHP 进程来清除预加载的脚本， 这意味着这个功能仅在生产环境中有实用价值，而非开发环境。</p>
@@ -729,7 +736,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">313</span>
+                  <span class="site-state-item-count">315</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -751,7 +758,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">81</span>
+                  <span class="site-state-item-count">82</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -814,7 +821,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2023</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2024</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

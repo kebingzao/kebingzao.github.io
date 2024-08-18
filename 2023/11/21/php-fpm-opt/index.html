@@ -92,7 +92,7 @@
 <meta property="og:site_name" content="Zach Ke&#39;s Notes">
 <meta property="og:description" content="前言前段时间有一个很老的 php 服务发生了一个并发情况，产生大量的 499 状态码，刚开始以为是高并发导致的服务器负载不行。结果去 grafana 后台一看，服务器负载是正常的，然后查了一下同台的 golang 服务，他的返回状态码是非常正常的。 所以怀疑应该是 php 服务有问题，因为我们用的是 nginx + php-fpm 的部署方式， 所以应该是 php-fpm 的配置有问题。 然后抓了">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2023-12-01T17:07:56.496Z">
+<meta property="og:updated_time" content="2024-08-18T12:12:56.916Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记一次 php-fpm 的配置调优">
 <meta name="twitter:description" content="前言前段时间有一个很老的 php 服务发生了一个并发情况，产生大量的 499 状态码，刚开始以为是高并发导致的服务器负载不行。结果去 grafana 后台一看，服务器负载是正常的，然后查了一下同台的 golang 服务，他的返回状态码是非常正常的。 所以怀疑应该是 php 服务有问题，因为我们用的是 nginx + php-fpm 的部署方式， 所以应该是 php-fpm 的配置有问题。 然后抓了">
@@ -510,6 +510,91 @@
 <ol>
 <li>由于 PHP-FPM 是短连接，所以每次请求都会先建立连接，建立连接的过程会耗费系统之源，当流量很大时，频繁的创建销毁进程开销很大，不适合大流量环境部署</li>
 </ol>
+<h2 id="开启-php-fpm-的状态接口"><a href="#开启-php-fpm-的状态接口" class="headerlink" title="开启 php-fpm 的状态接口"></a>开启 php-fpm 的状态接口</h2><p>我们可以开启当前 php-fpm 的当前状态查询接口，也是在这边 <code>php-fpm.conf</code> 这边配置:</p>
+<blockquote>
+<p>如果是 php 7 以上的，就会在 <code>php-fpm.d/www.conf</code> 这个里面</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pm.status_path = <span class="regexp">/status</span></span><br></pre></td></tr></table></figure>
+<p><code>service php-fpm reload</code> 重新加载配置文件, 然后访问这个路由就行了，如果是 nginx 反代的，还需要在 nginx 那边针对这个路由进行转发配置:<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">location ~ <span class="regexp">/status$ &#123;</span></span><br><span class="line"><span class="regexp">    fastcgi_pass   127.0.0.1:9000;</span></span><br><span class="line"><span class="regexp">    include        fastcgi.conf;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure></p>
+<p>就可以直接请求了，比如本机请求<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">curl localhost/status</span><br><span class="line"></span><br><span class="line">pool:                 www</span><br><span class="line">process manager:      <span class="keyword">static</span></span><br><span class="line">start time:           <span class="number">08</span>/Aug/<span class="number">2024</span>:<span class="number">03</span>:<span class="number">48</span>:<span class="number">16</span> +<span class="number">0000</span></span><br><span class="line">start since:          <span class="number">83230</span></span><br><span class="line">accepted conn:        <span class="number">10722713</span></span><br><span class="line">listen queue:         <span class="number">0</span></span><br><span class="line">max listen queue:     <span class="number">129</span></span><br><span class="line">listen queue len:     <span class="number">128</span></span><br><span class="line">idle processes:       <span class="number">90</span></span><br><span class="line">active processes:     <span class="number">10</span></span><br><span class="line">total processes:      <span class="number">100</span></span><br><span class="line">max active processes: <span class="number">100</span></span><br><span class="line">max children reached: <span class="number">0</span></span><br><span class="line">slow requests:        <span class="number">17</span></span><br></pre></td></tr></table></figure></p>
+<p>各字段含义</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pool</td>
+<td>php-fpm pool的名称，大多数情况下为www</td>
+</tr>
+<tr>
+<td>process</td>
+<td>manager    进程管理方式</td>
+</tr>
+<tr>
+<td>start time</td>
+<td>php-fpm上次启动的时间</td>
+</tr>
+<tr>
+<td>start since</td>
+<td>php-fpm已运行了多少秒</td>
+</tr>
+<tr>
+<td>accepted conn</td>
+<td>pool接收到的请求数</td>
+</tr>
+<tr>
+<td>listen queue</td>
+<td>处于等待状态中的连接数，如果不为0，需要增加php-fpm进程数</td>
+</tr>
+<tr>
+<td>max listen queue</td>
+<td>从php-fpm启动到现在处于等待连接的最大数量</td>
+</tr>
+<tr>
+<td>listen queue len</td>
+<td>处于等待连接队列的套接字大小</td>
+</tr>
+<tr>
+<td>idle processes</td>
+<td>处于空闲状态的进程数</td>
+</tr>
+<tr>
+<td>active processes</td>
+<td>处于活动状态的进程数</td>
+</tr>
+<tr>
+<td>total processess</td>
+<td>进程总数</td>
+</tr>
+<tr>
+<td>max active process</td>
+<td>从php-fpm启动到现在最多有几个进程处于活动状态</td>
+</tr>
+<tr>
+<td>max children reached</td>
+<td>当pm试图启动更多的children进程时，却达到了进程数的限制，达到一次记录一次，如果不为0，需要增加php-fpm pool进程的最大数</td>
+</tr>
+<tr>
+<td>slow requests</td>
+<td>当启用了php-fpm slow-log功能时，如果出现php-fpm慢请求这个计数器会增加，一般不当的Mysql查询会触发这个值</td>
+</tr>
+</tbody>
+</table>
+<p>这时候有几个参数可以判断你当前的 php-fpm 的进程数是否足够:</p>
+<ul>
+<li><code>listen queue</code>：这个就是此时此刻我们的 php-fpm 作为服务端，处于 accept 队列 的数量。</li>
+<li><code>max listen queue</code>： 从 php-fpm 进程启动到现在处于等待连接的最大数量（说白了，就是我们上面说的 listen queue 的最大值持久化）</li>
+<li><code>listen queue len</code> ： 有过 socket 网络编程经验的同学都知道。<code>int listen(int sockfd, int backlog);</code> 是可以设置该参数，但是他和系统设置有关系。</li>
+</ul>
+<p>当 php-fpm 进程处理不过来的时候，请求就会放在 accept 队列，也就是 <code>listen queue</code> 会不为 0。</p>
+<p>以上述的请求来说，我们设置的是静态模式，常驻的进程有 100 个，但是在最高峰的时候， 100 进程是不够用的，因为 <code>max listen queue</code> 已经是 129 了，也就是在某一个时间点的时候，100 个常驻的 php 进程都已经在使用的情况下，依然有超过 129 个请求无人接收</p>
+<blockquote>
+<p>这边之所以是 129，但是并不是说只有 129 个请求， 而是它受到另一个参数 <code>listen queue len</code> 系统设置的最大上限 128 的限制，所以才是至少有 129 个请求处于等待中， 这时候一旦超过 nginx 的 upstream 的等待时间，就有可能 nginx 会返回 502 或者 504 的错误码</p>
+</blockquote>
 <h2 id="最后调整"><a href="#最后调整" class="headerlink" title="最后调整"></a>最后调整</h2><p>从上面的三种模式来看， 对于生产环境，尤其是有比较大并发的业务线，静态模式肯定是最合适的， 动态模式和按需模式 每次都要频繁的启动停止进程，开销太大了，响应根本来不及。</p>
 <p>事实上我有试过在高并发的时候，用动态模式，结果就是直接被打崩了，直接 502 了。</p>
 <p>虽然是静态模式，但是配置也要非常合理，上述的那个 4核8G ，然后只给 32 个最大进程，明显就很不合理，正常以一个进程 30M 来算， 8G 的内存至少可以支持 250+ 以上的进程数。</p>
@@ -525,6 +610,10 @@
 <li><a href="https://www.php.net/manual/zh/install.fpm.configuration.php" target="_blank" rel="noopener">php-fpm.conf 全局配置段</a></li>
 <li><a href="https://juejin.cn/post/7018583928978014245" target="_blank" rel="noopener">PHP-FPM 进程管理的三种模式</a></li>
 <li><a href="https://learnku.com/articles/68365" target="_blank" rel="noopener">对线面试官：php-fpm优化总结</a></li>
+<li><a href="https://www.cnblogs.com/tinywan/p/6848269.html" target="_blank" rel="noopener">php-fpm的status可以查看汇总信息和详细信息</a></li>
+<li><a href="https://learnku.com/articles/63432" target="_blank" rel="noopener">感觉PHP-FPM进程数不够？</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/66684473" target="_blank" rel="noopener">记一次PHP并发性能调优实战 – 性能提升104%</a></li>
+<li><a href="https://www.cnblogs.com/leonardchen/p/9635407.html" target="_blank" rel="noopener">linux中net.core.somaxconn 的作用</a></li>
 </ul>
 
       
@@ -677,7 +766,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">315</span>
+                  <span class="site-state-item-count">316</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -688,7 +777,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -699,7 +788,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">82</span>
+                  <span class="site-state-item-count">83</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -742,7 +831,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#php-fpm-的三种进程管理方式"><span class="nav-number">2.</span> <span class="nav-text">php-fpm 的三种进程管理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-几个相关的重要配置"><span class="nav-number">2.1.</span> <span class="nav-text">1. 几个相关的重要配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-静态模式-static"><span class="nav-number">2.2.</span> <span class="nav-text">1. 静态模式 static</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-动态模式-dynamic"><span class="nav-number">2.3.</span> <span class="nav-text">2. 动态模式 dynamic</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-按需模式-ondemand"><span class="nav-number">2.4.</span> <span class="nav-text">3. 按需模式 ondemand</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后调整"><span class="nav-number">3.</span> <span class="nav-text">最后调整</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#php-fpm-的三种进程管理方式"><span class="nav-number">2.</span> <span class="nav-text">php-fpm 的三种进程管理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-几个相关的重要配置"><span class="nav-number">2.1.</span> <span class="nav-text">1. 几个相关的重要配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-静态模式-static"><span class="nav-number">2.2.</span> <span class="nav-text">1. 静态模式 static</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-动态模式-dynamic"><span class="nav-number">2.3.</span> <span class="nav-text">2. 动态模式 dynamic</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-按需模式-ondemand"><span class="nav-number">2.4.</span> <span class="nav-text">3. 按需模式 ondemand</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开启-php-fpm-的状态接口"><span class="nav-number">3.</span> <span class="nav-text">开启 php-fpm 的状态接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后调整"><span class="nav-number">4.</span> <span class="nav-text">最后调整</span></a></li></ol></div>
             
 
           </div>

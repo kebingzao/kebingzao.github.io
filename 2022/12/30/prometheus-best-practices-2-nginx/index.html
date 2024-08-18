@@ -111,7 +111,9 @@
 <meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/17.png">
 <meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/18.png">
 <meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/19.png">
-<meta property="og:updated_time" content="2024-03-02T09:57:46.118Z">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/21.png">
+<meta property="og:image" content="http://kebingzao.com/2022/12/30/prometheus-best-practices-2-nginx/20.png">
+<meta property="og:updated_time" content="2024-08-18T12:12:56.918Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="prometheus + grafana 实战篇(2) - nginx">
 <meta name="twitter:description" content="前言经过上一节我们初步定义了一些标签的规范: prometheus + grafana 实战篇(1) - 定义标签组和规范, 本节我们来讲一下怎么监控 nginx nginxnginx 作为最受欢迎的 web server 之一，我的不少文章都有涉及到 nginx， 这边不再赘述。 我们假设在使用 prometheus 采集 nginx 之前，我们线上环境已经有 nginx 服务来跑了。  关于">
@@ -572,6 +574,18 @@
 <p><img src="/2022/12/30/prometheus-best-practices-2-nginx/18.png" alt=""></p>
 <p>然后预警触发的时候，可以设置通知手段，比如邮件或者 钉钉通知之类的，比如这个就是我们触发 499 后，发送的钉钉通知</p>
 <p><img src="/2022/12/30/prometheus-best-practices-2-nginx/19.png" alt=""></p>
+<h3 id="8-内存消耗过多的情况"><a href="#8-内存消耗过多的情况" class="headerlink" title="8. 内存消耗过多的情况"></a>8. 内存消耗过多的情况</h3><p>在实践过程中，有发现当出现 nginx 的 access log 特别大的时候，会出现这个 exporter 占用内存过多的情况。</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/21.png" alt=""></p>
+<p>正常 nginx 的 access log 的日志归档是一天一次归档，但是发现在一些请求量特别大的项目，一天的 nginx 的 access log 就可以达到超过 6G 以上。</p>
+<p>这时候这个 exporter 在统计的时候，因为需要将整个 access log 读取到内存中，然后进行统计，就会出现以下两个问题:</p>
+<ol>
+<li>exporter 占用的内存过大，甚至比业务程序所占用的内存大很多，这个是因为 access log 太大，导致统计读取到内存的时候，过多的占用服务器内存，从而可能会影响到业务</li>
+<li>抓取统计的速度会越来越慢，甚至高峰期 Prometheus 来抓取的时候会超时，这也是因为要计算的数据太多了。</li>
+</ol>
+<p>所以如果你的程序也有类似的情况的话，那 nginx 的 access log 就要按小时来归档，同时每一次脚本在归档的时候，也要重启这个 exporter，让它释放之前的内存，从而读取归档后的文件。</p>
+<p>不过这样子也会有一个小小的问题，就是因为 exporter 每小时重启一次，释放内存，这时候因为有些数据是 counter 类型的，就会出现数据断掉，就会出现在整点那个时间抓取的数据，跟前面的数据关联不上</p>
+<p>比如 QPM 和 QPS 这种 <code>irate</code> 计算方式，在整点 01 分的那个统计节点就会不准确。其他时间就会正常。</p>
+<p><img src="/2022/12/30/prometheus-best-practices-2-nginx/20.png" alt=""></p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过 <code>nginx-vts-export</code> 和 <code>prometheus-nginxlog-exporter</code> 这两个导出器，我们基本上可以抓取 nginx 上的服务的情况，包括流量，请求等等。</p>
 <p>当然掌握数据只是第一步，接下来就是要在实践中，慢慢摸索出适合你们项目的图表以及对应的预警处理。</p>
 <hr>
@@ -741,7 +755,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">315</span>
+                  <span class="site-state-item-count">316</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -752,7 +766,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -763,7 +777,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">82</span>
+                  <span class="site-state-item-count">83</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -806,7 +820,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx"><span class="nav-number">2.</span> <span class="nav-text">nginx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx-vts-export"><span class="nav-number">3.</span> <span class="nav-text">nginx-vts-export</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-nginx-重新编译安装-nginx-module-vts-模块"><span class="nav-number">3.1.</span> <span class="nav-text">1. nginx 重新编译安装 nginx-module-vts 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-安装-nginx-vts-export-导出器"><span class="nav-number">3.2.</span> <span class="nav-text">2. 安装 nginx-vts-export 导出器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-接入-prometheus-并接入-grafana-模板"><span class="nav-number">3.3.</span> <span class="nav-text">3. 接入 prometheus 并接入 grafana 模板</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#prometheus-nginxlog-exporter"><span class="nav-number">4.</span> <span class="nav-text">prometheus-nginxlog-exporter</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装"><span class="nav-number">4.1.</span> <span class="nav-text">1. 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-添加到-prometheus-监控-instance"><span class="nav-number">4.2.</span> <span class="nav-text">2. 添加到 prometheus 监控 instance</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-添加-request-uri-标签"><span class="nav-number">4.3.</span> <span class="nav-text">3. 添加 request_uri 标签</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-再优化-–-兼容-grafana-的参数模板"><span class="nav-number">4.4.</span> <span class="nav-text">4. 再优化 – 兼容 grafana 的参数模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-grafana-设置-dashboard"><span class="nav-number">4.5.</span> <span class="nav-text">5. grafana 设置 dashboard</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#遇到了一个-grafana-topk-的坑"><span class="nav-number">4.5.1.</span> <span class="nav-text">遇到了一个 grafana topk 的坑</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-跟真实的-nginx-access-log-的延迟差距"><span class="nav-number">4.6.</span> <span class="nav-text">6. 跟真实的 nginx-access.log 的延迟差距</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-跟进异常状态码并设置预警"><span class="nav-number">4.7.</span> <span class="nav-text">7. 跟进异常状态码并设置预警</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx"><span class="nav-number">2.</span> <span class="nav-text">nginx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#nginx-vts-export"><span class="nav-number">3.</span> <span class="nav-text">nginx-vts-export</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-nginx-重新编译安装-nginx-module-vts-模块"><span class="nav-number">3.1.</span> <span class="nav-text">1. nginx 重新编译安装 nginx-module-vts 模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-安装-nginx-vts-export-导出器"><span class="nav-number">3.2.</span> <span class="nav-text">2. 安装 nginx-vts-export 导出器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-接入-prometheus-并接入-grafana-模板"><span class="nav-number">3.3.</span> <span class="nav-text">3. 接入 prometheus 并接入 grafana 模板</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#prometheus-nginxlog-exporter"><span class="nav-number">4.</span> <span class="nav-text">prometheus-nginxlog-exporter</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-安装"><span class="nav-number">4.1.</span> <span class="nav-text">1. 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-添加到-prometheus-监控-instance"><span class="nav-number">4.2.</span> <span class="nav-text">2. 添加到 prometheus 监控 instance</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-添加-request-uri-标签"><span class="nav-number">4.3.</span> <span class="nav-text">3. 添加 request_uri 标签</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-再优化-–-兼容-grafana-的参数模板"><span class="nav-number">4.4.</span> <span class="nav-text">4. 再优化 – 兼容 grafana 的参数模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-grafana-设置-dashboard"><span class="nav-number">4.5.</span> <span class="nav-text">5. grafana 设置 dashboard</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#遇到了一个-grafana-topk-的坑"><span class="nav-number">4.5.1.</span> <span class="nav-text">遇到了一个 grafana topk 的坑</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-跟真实的-nginx-access-log-的延迟差距"><span class="nav-number">4.6.</span> <span class="nav-text">6. 跟真实的 nginx-access.log 的延迟差距</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-跟进异常状态码并设置预警"><span class="nav-number">4.7.</span> <span class="nav-text">7. 跟进异常状态码并设置预警</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-内存消耗过多的情况"><span class="nav-number">4.8.</span> <span class="nav-text">8. 内存消耗过多的情况</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>

@@ -99,7 +99,7 @@
 <meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/5.png">
 <meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/6.png">
 <meta property="og:image" content="http://kebingzao.com/2023/11/21/php-opcache/7.png">
-<meta property="og:updated_time" content="2024-03-02T09:57:46.117Z">
+<meta property="og:updated_time" content="2024-08-18T12:12:56.917Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="php 开启 opcache 来降低负载并提高抗并发能力">
 <meta name="twitter:description" content="前言之前通过 记一次 php-fpm 的配置调优 有针对 php-fpm 的配置进行了调优，有起了一些效果，比如随着处理的进程加大，响应时间会快一点。 但是对于一些并发比较高的场景，还是会有 499 的情况，尤其是负载比较高的情况下，CPU 很容易跑满，php 子进程的响应速度也会越来越慢 当然最粗暴的就是加大服务器硬件配置，然后增大 pm.max_children 的值，硬抗，不过还有一种更合适">
@@ -558,6 +558,7 @@
 <h2 id="OPcache-对性能的影响"><a href="#OPcache-对性能的影响" class="headerlink" title="OPcache 对性能的影响"></a>OPcache 对性能的影响</h2><ol>
 <li>如果性能瓶颈不在于CPU和内存，而在于I/O操作，比如数据库查询带来的磁盘I/O开销，那么 OPcache 的性能提升是非常有限的。</li>
 <li>刚启动或缓存被清空时，如果服务器流量大可能会导致 <a href="https://en.wikipedia.org/wiki/Thundering_herd_problem" target="_blank" rel="noopener">thundering herd problem</a> 或缓存猛击，许多请求同时生成相同的缓存条目</li>
+<li>如果是服务器流量大的生产环境场景，应该将 <code>revalidate_freq</code> 调长，因为如果短的话，每隔一段时间，php 就会去检查缓存的脚本是否需要更新，正常一个比较大的项目可能都是会缓存上千个文件，无形中就增加了很多 CPU 和 磁盘的 I/O 消耗。所以生产环境，应该尽可能要调大，以减少文件检查带来的性能开销。但是一定要注意每次更新代码的时候，就有可能会出现第二种情况的 <code>缓存猛击</code> 的情况，就有可能会出现更新代码后，马上刷新 opcache 后的一小段时间内疯狂建立缓存导致的 CPU 会飙高</li>
 </ol>
 <h2 id="后续再优化"><a href="#后续再优化" class="headerlink" title="后续再优化"></a>后续再优化</h2><p>后续还有几个可以再优化的地方:</p>
 <h3 id="1-生产环境不设置缓存定时刷新时间"><a href="#1-生产环境不设置缓存定时刷新时间" class="headerlink" title="1. 生产环境不设置缓存定时刷新时间"></a>1. 生产环境不设置缓存定时刷新时间</h3><p>将刷缓存的时间(<code>opcache.validate_timestamps</code>)设置为 0, 表示永不刷新，然后在每次 Jenkins 构建 php 程序的时候，调用一个脚本来手动刷新缓存</p>
@@ -736,7 +737,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">315</span>
+                  <span class="site-state-item-count">316</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -747,7 +748,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -758,7 +759,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">82</span>
+                  <span class="site-state-item-count">83</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
